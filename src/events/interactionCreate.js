@@ -60,7 +60,7 @@ export default {
 
         if (interaction.isChatInputCommand()) {
           try {
-            logger.info(`Command executed: /${interaction.commandName} by ${interaction.user.tag}`, {
+            logger.info(`Befehl ausgeführt: /${interaction.commandName} von ${interaction.user.tag}`, {
               event: 'interaction.command.received',
               traceId: interactionTraceContext.traceId,
               guildId: interaction.guildId,
@@ -77,16 +77,16 @@ export default {
 
             if (!command) {
               throw createError(
-                `No command matching ${interaction.commandName} was found.`,
+                `Kein Befehl passend zu ${interaction.commandName} gefunden.`,
                 ErrorTypes.CONFIGURATION,
-                'Sorry, that command does not exist.',
+                'Entschuldige, dieser Befehl existiert nicht.',
                 withTraceContext({ commandName: interaction.commandName }, interactionTraceContext)
               );
             }
 
             if (isMaintenanceMode() && !isBotOwner(interaction.user.id)) {
               throw createError(
-                'Bot is in maintenance mode',
+                'Bot befindet sich im Wartungsmodus',
                 ErrorTypes.CONFIGURATION,
                 getBotMessage('maintenanceMode'),
                 withTraceContext({ commandName: interaction.commandName }, interactionTraceContext)
@@ -95,7 +95,7 @@ export default {
 
             if (!isCommandCategoryEnabled(command.category)) {
               throw createError(
-                `Feature disabled for category ${command.category}`,
+                `Funktion für Kategorie ${command.category} deaktiviert`,
                 ErrorTypes.CONFIGURATION,
                 getBotMessage('commandDisabled'),
                 withTraceContext({ commandName: interaction.commandName, category: command.category }, interactionTraceContext)
@@ -110,7 +110,7 @@ export default {
               if (expiresAt && Date.now() < expiresAt) {
                 const remainingSec = Math.ceil((expiresAt - Date.now()) / 1000);
                 throw createError(
-                  `Default command cooldown active for ${interaction.commandName}`,
+                  `Standard-Befehls-Cooldown aktiv für ${interaction.commandName}`,
                   ErrorTypes.RATE_LIMIT,
                   getBotMessage('cooldownActive', { time: `${remainingSec}s` }),
                   withTraceContext({ commandName: interaction.commandName, remainingSec }, interactionTraceContext)
@@ -124,9 +124,9 @@ export default {
             if (!abuseProtection.allowed) {
               const formattedCooldown = formatCooldownDuration(abuseProtection.remainingMs);
               throw createError(
-                `Risky command cooldown active for ${interaction.commandName}`,
+                `Cooldown für riskanten Befehl aktiv: ${interaction.commandName}`,
                 ErrorTypes.RATE_LIMIT,
-                `This command is on cooldown. Please wait ${formattedCooldown} before trying again.`,
+                `Dieser Befehl hat aktuell eine Abklingzeit. Bitte warte ${formattedCooldown}, bevor du es erneut versuchst.`,
                 withTraceContext({
                   commandName: interaction.commandName,
                   subtype: 'command_cooldown',
@@ -144,9 +144,9 @@ export default {
               const accessKey = resolveSlashAccessKey(interaction);
               if (!(await isCommandEnabled(client, interaction.guild.id, accessKey, command.category))) {
                 throw createError(
-                  `Command ${accessKey} is disabled in this guild`,
+                  `Befehl ${accessKey} ist in dieser Guild deaktiviert`,
                   ErrorTypes.CONFIGURATION,
-                  'This command has been disabled for this server.',
+                  'Dieser Befehl wurde für diesen Server deaktiviert.',
                   withTraceContext({ commandName: accessKey, guildId: interaction.guild.id }, interactionTraceContext)
                 );
               }
@@ -174,7 +174,7 @@ export default {
             try {
               await autocompleteCommand.autocomplete(interaction, client);
             } catch (error) {
-              logger.error('Error handling command autocomplete:', {
+              logger.error('Fehler beim Verarbeiten des Befehls-Autocomplete:', {
                 error: error.message,
                 guildId: interaction.guildId,
                 commandName: interaction.commandName,
@@ -199,12 +199,12 @@ export default {
               
               await interaction.respond(
                 filtered.slice(0, 25).map(role => ({
-                  name: `${role.name}${role.enabled === false ? ' (disabled)' : ''}`,
+                  name: `${role.name}${role.enabled === false ? ' (deaktiviert)' : ''}`,
                   value: role.name
                 }))
               );
             } catch (error) {
-              logger.error('Error handling autocomplete:', {
+              logger.error('Fehler beim Verarbeiten von Autocomplete:', {
                 error: error.message,
                 guildId: interaction.guildId,
                 commandName: interaction.commandName
@@ -223,67 +223,32 @@ export default {
               
               await interaction.respond(
                 filtered.slice(0, 25).map(role => ({
-                  name: `${role.name}${role.enabled === false ? ' (disabled)' : ''}`,
+                  name: `${role.name}${role.enabled === false ? ' (deaktiviert)' : ''}`,
                   value: role.name
                 }))
               );
             } catch (error) {
-              logger.error('Error handling app-admin autocomplete:', {
+              logger.error('Fehler beim Verarbeiten von app-admin Autocomplete:', {
                 error: error.message,
                 guildId: interaction.guildId,
                 commandName: interaction.commandName
               });
               await interaction.respond([]);
             }
-          } else if (interaction.commandName === 'reactroles' && focusedOption.name === 'panel') {
+          } else if (interaction.commandName === 'reactroles' && focusedOption.name === 'message_id') {
             try {
-              const { getAllReactionRoleMessages, deleteReactionRoleMessage } = await import('../services/reactionRoleService.js');
-              const guildId = interaction.guildId;
-              const guild = interaction.guild;
-              
-              let panels = await getAllReactionRoleMessages(client, guildId);
-              
-              if (!panels || panels.length === 0) {
-                await interaction.respond([]);
-                return;
-              }
+              const { getReactionRolePanels } = await import('../utils/database.js');
+              const panels = await getReactionRolePanels(client, interaction.guildId);
+              const channel = interaction.channel;
 
-              const validPanels = [];
-              for (const panel of panels) {
-                if (!panel.messageId || !panel.channelId) {
-                  continue;
-                }
-                
-                const channel = guild.channels.cache.get(panel.channelId);
-                if (!channel) {
-                  await deleteReactionRoleMessage(client, guildId, panel.messageId).catch(() => {});
-                  continue;
-                }
-                
-                const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
-                if (!msg) {
-                  await deleteReactionRoleMessage(client, guildId, panel.messageId).catch(() => {});
-                  continue;
-                }
-                validPanels.push(panel);
-              }
-              
-              if (validPanels.length === 0) {
-                await interaction.respond([]);
-                return;
-              }
-              
               const choices = await Promise.all(
-                validPanels.slice(0, 25).map(async panel => {
+                panels.slice(0, 25).map(async (panel) => {
                   try {
-                    const channel = guild.channels.cache.get(panel.channelId);
-                    if (!channel) return null;
-                    
                     const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
                     if (!msg) return null;
                     
-                    const title = msg?.embeds?.[0]?.title ?? 'Untitled Panel';
-                    const channelName = channel?.name ?? 'unknown';
+                    const title = msg?.embeds?.[0]?.title ?? 'Unbenanntes Panel';
+                    const channelName = channel?.name ?? 'unbekannt';
                     
                     return {
                       name: `${title} (${channelName})`.substring(0, 100),
@@ -298,7 +263,7 @@ export default {
               const validChoices = choices.filter(c => c !== null);
               await interaction.respond(validChoices);
             } catch (error) {
-              logger.error('Error handling reactroles autocomplete:', {
+              logger.error('Fehler beim Verarbeiten von reactroles-Autocomplete:', {
                 error: error.message,
                 guildId: interaction.guildId,
                 commandName: interaction.commandName
@@ -325,9 +290,9 @@ export default {
               }
             } else {
               throw createError(
-                `No button handler found for ${buttonType}`,
+                `Kein Button-Handler für ${buttonType} gefunden`,
                 ErrorTypes.CONFIGURATION,
-                'This button is not available.',
+                'Dieser Button ist nicht verfügbar.',
                 withTraceContext({ buttonType }, interactionTraceContext)
               );
             }
@@ -343,9 +308,9 @@ export default {
             }
 
             throw createError(
-              `No button handler found for ${customId}`,
+              `Kein Button-Handler für ${customId} gefunden`,
               ErrorTypes.CONFIGURATION,
-              'This button is not available.',
+              'Dieser Button ist nicht verfügbar.',
               withTraceContext({ customId }, interactionTraceContext)
             );
           }
@@ -369,9 +334,9 @@ export default {
             }
 
             throw createError(
-              `No select menu handler found for ${customId}`,
+              `Kein Select-Menu-Handler für ${customId} gefunden`,
               ErrorTypes.CONFIGURATION,
-              'This select menu is not available.',
+              'Dieses Auswahlmenü ist nicht verfügbar.',
               withTraceContext({ customId }, interactionTraceContext)
             );
           }
@@ -405,7 +370,7 @@ export default {
             || interaction.customId.startsWith('log_dash_channel_modal:')
             || interaction.customId.startsWith('log_dash_filter_modal:')
           ) {
-            logger.debug(`Skipping modal handler lookup for inline-awaited modal: ${interaction.customId}`, {
+            logger.debug(`Suche nach Modal-Handler wird für inline-erwartetes Modal übersprungen: ${interaction.customId}`, {
               event: 'interaction.modal.inline_skipped',
               traceId: interactionTraceContext.traceId
             });
@@ -422,9 +387,9 @@ export default {
             }
 
             throw createError(
-              `No modal handler found for ${customId}`,
+              `Kein Modal-Handler für ${customId} gefunden`,
               ErrorTypes.CONFIGURATION,
-              'This form is not available.',
+              'Dieses Formular ist nicht verfügbar.',
               withTraceContext({ customId }, interactionTraceContext)
             );
           }
@@ -440,7 +405,7 @@ export default {
           }
         }
       } catch (error) {
-        logger.error('Unhandled error in interactionCreate:', {
+        logger.error('Unbehandelter Fehler in interactionCreate:', {
           event: 'interaction.unhandled_error',
           errorCode: ErrorCodes.INTERACTION_UNHANDLED,
           error,
@@ -458,7 +423,7 @@ export default {
             source: 'interactionCreate.unhandled'
           }, interactionTraceContext));
         } catch (replyError) {
-          logger.error('Failed to send fallback error response:', {
+          logger.error('Fallback-Fehlerantwort konnte nicht gesendet werden:', {
             event: 'interaction.error_response_failed',
             errorCode: ErrorCodes.INTERACTION_RESPONSE_FAILED,
             error: replyError,
