@@ -7,12 +7,12 @@ const SUPPORT_SERVER_URL = "https://discord.gg/QnWNz2dKCE";
 export default {
     data: new SlashCommandBuilder()
     .setName("support")
-    .setDescription("Get link to the support server"),
+    .setDescription("Zeigt den Link zum Support-Server an"),
 
   async execute(interaction) {
     try {
       const supportButton = new ButtonBuilder()
-        .setLabel("Join Support Server")
+        .setLabel("Support-Server beitreten")
         .setStyle(ButtonStyle.Link)
         .setURL(SUPPORT_SERVER_URL);
 
@@ -20,21 +20,21 @@ export default {
 
       await InteractionHelper.safeReply(interaction, {
         embeds: [
-          createEmbed({ title: "Need Help?", description: "Join our official support server for assistance, report bugs, or suggest features. If you are customizing this bot, remember to change the link in the code!" }),
+          createEmbed({ title: "Brauchst du Hilfe?", description: "Tritt unserem offiziellen Support-Server bei, um Hilfe zu bekommen, Bugs zu melden oder Funktionen vorzuschlagen. Wenn du diesen Bot anpasst, denke daran, den Link im Code zu ändern!" }),
         ],
         components: [actionRow],
         flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
-      logger.error('Support command error:', error);
+      logger.error('Fehler beim Support-Befehl:', error);
       
       try {
         return await InteractionHelper.safeReply(interaction, {
-          embeds: [createEmbed({ title: 'System Error', description: 'Could not display support information.', color: 'error' })],
+          embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Support-Informationen konnten nicht angezeigt werden.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
       } catch (replyError) {
-        logger.error('Failed to send error reply:', replyError);
+        logger.error('Fehler beim Senden der Fehlermeldung:', replyError);
       }
     }
   },
