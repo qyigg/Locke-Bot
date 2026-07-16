@@ -146,7 +146,7 @@ time: 60000
         collector.on('end', async (collected, reason) => {
             if (reason === 'time') {
                 const disabledRow = new ActionRowBuilder().addComponents(
-                    selectMenu.setDisabled(true)
+                    selectMenu.setDeaktiviert(true)
                 );
                 
                 await InteractionHelper.safeEditReply(interaction, {
@@ -526,12 +526,12 @@ async function handleViewSettings(interaction, triggerChannel, currentConfig, cl
             },
             {
                 name: 'Category',
-                value: currentConfig.categoryId ? `<#${currentConfig.categoryId}>` : 'Not set',
+                value: currentConfig.categoryId ? `<#${currentConfig.categoryId}>` : 'Nicht gesetzt',
                 inline: true
             },
             {
-                name: 'System Status',
-                value: currentConfig.enabled ? '✅ Enabled' : '❌ Disabled',
+                name: 'Systemstatus',
+                value: currentConfig.enabled ? '✅ Aktiviert' : '❌ Deaktiviert',
                 inline: true
             },
             {

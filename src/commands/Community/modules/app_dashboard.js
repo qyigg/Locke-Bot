@@ -40,7 +40,7 @@ import { setLogChannel, resolveApplicationLogChannel, resolveLogChannel } from '
 async function buildDashboardEmbed(settings, roles, guild, client) {
     const guildConfig = await getGuildConfig(client, guild.id);
     const applicationsChannel = resolveLogChannel(guildConfig, 'applications') || settings.logChannelId;
-    const logChannel = applicationsChannel ? `<#${applicationsChannel}>` : '`Not set`';
+    const logChannel = applicationsChannel ? `<#${applicationsChannel}>` : '`Nicht gesetzt`';
     const managerRoleList =
         settings.managerRoles?.length > 0
             ? settings.managerRoles.map(id => `<@&${id}>`).join(',')
@@ -53,14 +53,14 @@ async function buildDashboardEmbed(settings, roles, guild, client) {
     const firstQ =
         settings.questions?.[0]
             ? `\`${settings.questions[0].length > 55 ? settings.questions[0].substring(0, 55) + '…' : settings.questions[0]}\``
-            : '`Not set`';
+            : '`Nicht gesetzt`';
 
     return new EmbedBuilder()
         .setTitle('Applications Dashboard')
         .setDescription(`Manage application settings for **${guild.name}**.\nSelect an option below to modify a setting.`)
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Application Status', value: settings.enabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Application Status', value: settings.enabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Log Channel', value: logChannel, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
             { name: 'Manager Roles', value: managerRoleList, inline: false },
@@ -79,7 +79,7 @@ async function buildDashboardEmbed(settings, roles, guild, client) {
 function buildSelectMenu(guildId) {
     return new StringSelectMenuBuilder()
         .setCustomId(`app_cfg_${guildId}`)
-        .setPlaceholder('Select a setting to configure...')
+        .setPlaceholder('Wähle eine Einstellung zum Konfigurieren aus...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Log Channel')
@@ -121,7 +121,7 @@ function buildButtonRow(settings, guildId, disabled = false) {
             .setCustomId(`app_cfg_toggle_${guildId}`)
             .setLabel('Applications')
             .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
-            .setDisabled(disabled),
+            .setDeaktiviert(disabled),
     );
 }
 
@@ -270,7 +270,7 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
     const appSettings = await getApplicationRoleSettings(client, guildId, selectedRole.roleId);
     const questions = appSettings.questions || settings.questions || [];
     const appLogChannelId = resolveApplicationLogChannel(guildConfig, appSettings, settings);
-    const isEnabled = selectedRole.enabled !== false; 
+    const isAktiviert = selectedRole.enabled !== false; 
 
     const logChannelDisplay = appLogChannelId 
         ? `<#${appLogChannelId}>` 
@@ -287,7 +287,7 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
     const embed = new EmbedBuilder()
         .setTitle('📋 Application Dashboard')
         .setDescription(`Configuration for **${selectedRole.name}**`)
-        .setColor(isEnabled ? getColor('success') : getColor('error'))
+        .setColor(isAktiviert ? getColor('success') : getColor('error'))
         .addFields(
             { 
                 name: 'Role', 
@@ -296,7 +296,7 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
             },
             { 
                 name: 'Application Status', 
-                value: isEnabled ? '✅ **Enabled**' : '❌ **Disabled**', 
+                value: isAktiviert ? '✅ **Aktiviert**' : '❌ **Deaktiviert**', 
                 inline: true 
             },
             { name: '\u200B', value: '\u200B', inline: true },
@@ -321,7 +321,7 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
                 inline: false 
             },
         )
-        .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
+        .setFooter({ text: 'Dashboard schließt nach 10 Minuten Inaktivität' })
         .setTimestamp();
 
     const configMenu = buildApplicationSelectMenu(guildId, selectedRole.roleId);
@@ -329,8 +329,8 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
     const controlButtons = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`app_toggle_${selectedRole.roleId}`)
-            .setLabel(isEnabled ? 'Disable Application' : 'Enable Application')
-            .setStyle(isEnabled ? ButtonStyle.Danger : ButtonStyle.Success),
+            .setLabel(isAktiviert ? 'Disable Application' : 'Enable Application')
+            .setStyle(isAktiviert ? ButtonStyle.Danger : ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(`app_delete_${selectedRole.roleId}`)
             .setLabel('Delete Application')
@@ -414,8 +414,8 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
     collector.on('end', async (collected, reason) => {
         if (reason === 'time') {
             const timeoutEmbed = new EmbedBuilder()
-                .setTitle('\u23f0 Dashboard Timed Out')
-                .setDescription('This dashboard has been closed due to inactivity. Please run the command again to continue.')
+                .setTitle('\u23f0 Dashboard-Zeitüberschreitung')
+                .setDescription('Dieses Dashboard wurde aufgrund von Inaktivität geschlossen. Bitte führe den Befehl erneut aus, um fortzufahren.')
                 .setColor(getColor('error'));
                 
             await InteractionHelper.safeEditReply(interaction, {
@@ -439,8 +439,8 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
             if (!deferred) return;
             
             try {
-                const wasEnabled = settings.enabled === true;
-                settings.enabled = !wasEnabled;
+                const wasAktiviert = settings.enabled === true;
+                settings.enabled = !wasAktiviert;
 
                 await saveApplicationSettings(interaction.client, guildId, settings);
 
@@ -450,9 +450,9 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
 
                 await toggleInteraction.followUp({
                     embeds: [successEmbed(
-                        wasEnabled ? '🔴 Applications Disabled' : '🟢 Applications Enabled',
-                        `The applications system is now **${wasEnabled ? 'disabled' : 'enabled'}**.\n\n${
-                            wasEnabled 
+                        wasAktiviert ? '🔴 Applications Deaktiviert' : '🟢 Applications Aktiviert',
+                        `The applications system is now **${wasAktiviert ? 'disabled' : 'enabled'}**.\n\n${
+                            wasAktiviert 
                                 ? 'Members will no longer be able to apply for roles.' 
                                 : 'Members can now start applying for roles.'
                         }`,
@@ -599,8 +599,8 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                     return;
                 }
 
-                const wasEnabled = roles[roleIndex].enabled !== false;
-                roles[roleIndex].enabled = !wasEnabled;
+                const wasAktiviert = roles[roleIndex].enabled !== false;
+                roles[roleIndex].enabled = !wasAktiviert;
 
                 await saveApplicationRoles(interaction.client, guildId, roles);
 
@@ -610,9 +610,9 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
 
                 await toggleInteraction.followUp({
                     embeds: [successEmbed(
-                        wasEnabled ? '🔴 Application Disabled' : '🟢 Application Enabled',
-                        `The **${updatedRole.name}** application is now **${wasEnabled ? 'disabled' : 'enabled'}**.\n\n${
-                            wasEnabled 
+                        wasAktiviert ? '🔴 Application Deaktiviert' : '🟢 Application Aktiviert',
+                        `The **${updatedRole.name}** application is now **${wasAktiviert ? 'disabled' : 'enabled'}**.\n\n${
+                            wasAktiviert 
                                 ? 'This application will no longer appear in `/apply submit` options.' 
                                 : 'This application will now appear in `/apply submit` options.'
                         }`,
@@ -648,7 +648,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
 function buildApplicationSelectMenu(guildId, roleId) {
     return new StringSelectMenuBuilder()
         .setCustomId(`app_cfg_${roleId}`)
-        .setPlaceholder('Select a setting to configure...')
+        .setPlaceholder('Wähle eine Einstellung zum Konfigurieren aus...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Log Channel')
@@ -686,7 +686,7 @@ async function handleLogChannel(selectInteraction, rootInteraction, settings, ro
 
     const channelSelect = new ChannelSelectMenuBuilder()
         .setCustomId('log_channel')
-        .setPlaceholder('Select a text channel...')
+        .setPlaceholder('Wähle einen Textkanal aus...')
         .setMinValues(1)
         .setMaxValues(1)
         .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
@@ -721,7 +721,7 @@ async function handleLogChannel(selectInteraction, rootInteraction, settings, ro
         }
 
         await modalSubmission.reply({
-            embeds: [successEmbed('Log Channel Updated', `Application logs will now be sent to ${channel ?? `<#${channelId}>`}.\nYou can also manage this from \`/logging dashboard\`.`)],
+            embeds: [successEmbed('Log Kanal aktualisiert', `Application logs will now be sent to ${channel ?? `<#${channelId}>`}.\nYou can also manage this from \`/logging dashboard\`.`)],
             flags: MessageFlags.Ephemeral,
         });
 

@@ -86,7 +86,7 @@ if (channel.type !== 2 && channel.type !== 4) {
                 
                 try {
                     await client.db.set(`guild:${guildId}:jointocreate`, config);
-                    logger.info(`Disabled Join to Create for guild ${guildId} due to category deletion`);
+                    logger.info(`Deaktiviert Join to Create for guild ${guildId} due to category deletion`);
                 } catch (error) {
                     logger.error(`Failed to disable Join to Create for guild ${guildId}:`, error);
                 }

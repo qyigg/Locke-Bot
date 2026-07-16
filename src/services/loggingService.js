@@ -162,7 +162,7 @@ export function getIgnoreList(config) {
   return config?.logging?.ignore ?? config?.logIgnore ?? { users: [], channels: [] };
 }
 
-export function isEventEnabled(config, eventType) {
+export function isEventAktiviert(config, eventType) {
   if (!config?.logging?.enabled) {
     return false;
   }
@@ -223,7 +223,7 @@ export async function logEvent({
       return null;
     }
 
-    if (!isEventEnabled(config, eventType)) {
+    if (!isEventAktiviert(config, eventType)) {
       return null;
     }
 
@@ -421,7 +421,7 @@ export async function setLoggingChannel(client, guildId, channelId) {
   return setLogChannel(client, guildId, 'audit', channelId);
 }
 
-export async function setLoggingEnabled(client, guildId, enabled) {
+export async function setLoggingAktiviert(client, guildId, enabled) {
   try {
     const config = await getGuildConfig(client, guildId);
     const logging = { ...config.logging, enabled };

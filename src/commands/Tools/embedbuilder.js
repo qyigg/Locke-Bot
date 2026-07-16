@@ -101,14 +101,14 @@ function buildDashboardEmbed(state) {
         str.length > n ? str.substring(0, n) + '…' : str;
 
     const lines = [
-        `**Title** › ${state.title ?`\`${trunc(state.title, 40)}\`` : '`Not set`'}`,
-        `**Description** › ${state.description ?`${state.description.length} character(s)`: '`Not set`'}`,
+        `**Title** › ${state.title ?`\`${trunc(state.title, 40)}\`` : '`Nicht gesetzt`'}`,
+        `**Description** › ${state.description ?`${state.description.length} character(s)`: '`Nicht gesetzt`'}`,
         `**Color** › ${state.color ?`\`${state.color}\`` : '`Default`'}`,
-        `**Author** › ${state.author?.name ?`\`${trunc(state.author.name, 30)}\`` : '`Not set`'}`,
-        `**Footer** › ${state.footer?.text ?`\`${trunc(state.footer.text, 30)}\`` : '`Not set`'}`,
-        `**Thumbnail** › ${state.thumbnail ? '✅ Set' : '`Not set`'}`,
-        `**Image** › ${state.image ? '✅ Set' : '`Not set`'}`,
-        `**Timestamp** › ${state.timestamp ? '✅ Enabled' : '`Disabled`'}`,
+        `**Author** › ${state.author?.name ?`\`${trunc(state.author.name, 30)}\`` : '`Nicht gesetzt`'}`,
+        `**Footer** › ${state.footer?.text ?`\`${trunc(state.footer.text, 30)}\`` : '`Nicht gesetzt`'}`,
+        `**Thumbnail** › ${state.thumbnail ? '✅ Set' : '`Nicht gesetzt`'}`,
+        `**Image** › ${state.image ? '✅ Set' : '`Nicht gesetzt`'}`,
+        `**Timestamp** › ${state.timestamp ? '✅ Aktiviert' : '`Deaktiviert`'}`,
         `**Fields** › ${state.fields.length} / ${MAX_FIELDS}`,
     ];
 
@@ -517,8 +517,8 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
                 .setTitle('Set Images')
                 .setDescription('Choose which image to set or remove.')
                 .addFields(
-                    { name: 'Thumbnail',    value: state.thumbnail ? `[View](${state.thumbnail})` : '`Not set`', inline: true },
-                    { name: 'Large Image',  value: state.image     ? `[View](${state.image})`     : '`Not set`', inline: true },
+                    { name: 'Thumbnail',    value: state.thumbnail ? `[View](${state.thumbnail})` : '`Nicht gesetzt`', inline: true },
+                    { name: 'Large Image',  value: state.image     ? `[View](${state.image})`     : '`Nicht gesetzt`', inline: true },
                 )
                 .setColor(getColor('info')),
         ],
@@ -881,14 +881,14 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
             .setLabel('Move Up')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('⬆️')
-            .setDisabled(sourceIdx === 0);
+            .setDeaktiviert(sourceIdx === 0);
 
         const downBtn = new ButtonBuilder()
             .setCustomId('eb_reorder_down')
             .setLabel('Move Down')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('⬇️')
-            .setDisabled(sourceIdx === state.fields.length - 1);
+            .setDeaktiviert(sourceIdx === state.fields.length - 1);
 
         const cancelBtn = new ButtonBuilder()
             .setCustomId('eb_reorder_cancel')
@@ -954,7 +954,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
 
     const chanSelect = new ChannelSelectMenuBuilder()
         .setCustomId('eb_post_channel')
-        .setPlaceholder('Select a channel...')
+        .setPlaceholder('Wähle einen Kanal aus...')
         .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement);
 
     await selectInteraction.followUp({

@@ -4,7 +4,7 @@ import { getGuildConfig } from '../services/config/guildConfig.js';
 import {
   getBotMessage,
   isBotOwner,
-  isCommandCategoryEnabled,
+  isCommandCategoryAktiviert,
   isMaintenanceMode,
 } from '../config/bot.js';
 import botConfig from '../config/bot.js';
@@ -14,7 +14,7 @@ import { InteractionHelper } from '../utils/interactionHelper.js';
 import { createInteractionTraceContext, runWithTraceContext } from '../utils/logger.js';
 import { validateChatInputPayloadOrThrow } from '../utils/commandInputValidation.js';
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
-import { isCommandEnabled } from '../services/commandAccessService.js';
+import { isCommandAktiviert } from '../services/commandAccessService.js';
 import { resolveSlashAccessKey } from '../utils/messageAdapter.js';
 import { isCollectorManagedComponent } from '../utils/collectorComponents.js';
 import { ResponseCoordinator } from '../utils/responseCoordinator.js';
@@ -93,11 +93,11 @@ export default {
               );
             }
 
-            if (!isCommandCategoryEnabled(command.category)) {
+            if (!isCommandCategoryAktiviert(command.category)) {
               throw createError(
                 `Funktion für Kategorie ${command.category} deaktiviert`,
                 ErrorTypes.CONFIGURATION,
-                getBotMessage('commandDisabled'),
+                getBotMessage('commandDeaktiviert'),
                 withTraceContext({ commandName: interaction.commandName, category: command.category }, interactionTraceContext)
               );
             }
@@ -142,7 +142,7 @@ export default {
             if (interaction.guild) {
               guildConfig = await getGuildConfig(client, interaction.guild.id, interactionTraceContext);
               const accessKey = resolveSlashAccessKey(interaction);
-              if (!(await isCommandEnabled(client, interaction.guild.id, accessKey, command.category))) {
+              if (!(await isCommandAktiviert(client, interaction.guild.id, accessKey, command.category))) {
                 throw createError(
                   `Befehl ${accessKey} ist in dieser Guild deaktiviert`,
                   ErrorTypes.CONFIGURATION,

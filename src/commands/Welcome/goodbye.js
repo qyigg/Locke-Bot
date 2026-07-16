@@ -80,7 +80,7 @@ export default {
 
             try {
                 await updateWelcomeConfig(client, guild.id, {
-                    goodbyeEnabled: true,
+                    goodbyeAktiviert: true,
                     goodbyeChannelId: channel.id,
                     leaveMessage: message,
                     goodbyePing: ping,

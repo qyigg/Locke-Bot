@@ -161,17 +161,17 @@ async function handleSetup(interaction, guild, client) {
 
     const guildConfig = await getGuildConfig(client, guild.id);
     const welcomeConfig = await getWelcomeConfig(client, guild.id);
-    const hasAutoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+    const hasAutoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
     const hasAutoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
-    if (hasAutoVerifyEnabled || hasAutoRoleConfigured) {
+    if (hasAutoVerifyAktiviert || hasAutoRoleConfigured) {
         throw createError(
             'Verification setup blocked by conflicting onboarding system',
             ErrorTypes.CONFIGURATION,
             'Du kannst das Verifizierungssystem nicht aktivieren, solange **AutoVerify** oder **AutoRole** eingerichtet ist. Deaktiviere diese zuerst.',
             {
                 guildId: guild.id,
-                hasAutoVerifyEnabled,
+                hasAutoVerifyAktiviert,
                 hasAutoRoleConfigured,
                 expected: true,
                 suppressErrorLog: true

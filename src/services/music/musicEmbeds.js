@@ -114,13 +114,13 @@ export function buildPlayerButtonRows(player, guildData) {
             .setLabel('Pause')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('⏸️')
-            .setDisabled(Boolean(paused)),
+            .setDeaktiviert(Boolean(paused)),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.RESUME)
             .setLabel('Resume')
             .setStyle(ButtonStyle.Success)
             .setEmoji('▶️')
-            .setDisabled(!paused),
+            .setDeaktiviert(!paused),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.SKIP)
             .setLabel('Skip')

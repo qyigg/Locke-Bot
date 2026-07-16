@@ -3,7 +3,7 @@ import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.
 import { createEmbed, errorEmbed, successEmbed, infoEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../../utils/errorHandler.js';
-import { validateAutoVerifyCriteria } from '../../../services/verificationService.js';
+import { validateAutoVerifyKriterien } from '../../../services/verificationService.js';
 import { logger } from '../../../utils/logger.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
@@ -88,17 +88,17 @@ async function handleSetup(interaction, guild, client) {
     try {
         const guildConfig = await getGuildConfig(client, guild.id);
         const welcomeConfig = await getWelcomeConfig(client, guild.id);
-        const verificationEnabled = Boolean(guildConfig.verification?.enabled);
+        const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
         const hasAutoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
-        if (verificationEnabled || hasAutoRoleConfigured) {
+        if (verificationAktiviert || hasAutoRoleConfigured) {
             throw createError(
                 'Auto-verify enable blocked by conflicting onboarding system',
                 ErrorTypes.CONFIGURATION,
                 'Du kannst **AutoVerify** nicht aktivieren, solange das Verifizierungssystem oder AutoRole eingerichtet ist. Deaktiviere diese zuerst.',
                 {
                     guildId: guild.id,
-                    verificationEnabled,
+                    verificationAktiviert,
                     hasAutoRoleConfigured,
                     expected: true,
                     suppressErrorLog: true
@@ -143,7 +143,7 @@ async function handleSetup(interaction, guild, client) {
             );
         }
 
-        validateAutoVerifyCriteria(criteria, criteria === 'account_age' ? accountAgeDays : 1);
+        validateAutoVerifyKriterien(criteria, criteria === 'account_age' ? accountAgeDays : 1);
         
         if (!guildConfig.verification) {
             guildConfig.verification = {};

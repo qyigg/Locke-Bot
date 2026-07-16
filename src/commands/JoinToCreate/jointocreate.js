@@ -340,10 +340,10 @@ async function handleConfigSubcommand(interaction, client) {
 
         collector.on('end', () => {
             const disabledRow = new ActionRowBuilder().addComponents(
-                nameButton.setDisabled(true),
-                limitButton.setDisabled(true),
-                bitrateButton.setDisabled(true),
-                deleteButton.setDisabled(true)
+                nameButton.setDeaktiviert(true),
+                limitButton.setDeaktiviert(true),
+                bitrateButton.setDeaktiviert(true),
+                deleteButton.setDeaktiviert(true)
             );
 
             message.edit({

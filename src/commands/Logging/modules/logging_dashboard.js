@@ -14,8 +14,8 @@ import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { logger } from '../../../utils/logger.js';
 
 import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
-export function getCategoryStatus(enabledEvents, category, auditEnabled) {
-  if (!auditEnabled) return false;
+export function getCategoryStatus(enabledEvents, category, auditAktiviert) {
+  if (!auditAktiviert) return false;
   const events = enabledEvents || {};
   if (events[`${category}.*`] === false) return false;
   const categoryEvents = EVENT_TYPES_BY_CATEGORY[category] || [];
@@ -24,14 +24,14 @@ export function getCategoryStatus(enabledEvents, category, auditEnabled) {
 }
 
 async function formatChannelMention(guild, id) {
-  if (!id) return '`Not configured`';
+  if (!id) return '`Nicht konfiguriert`';
   const channel = guild.channels.cache.get(id) ?? await guild.channels.fetch(id).catch(() => null);
   return channel ? channel.toString() : `⚠️ Missing (${id})`;
 }
 
-function countEnabledCategories(enabledEvents, auditEnabled) {
+function countAktiviertCategories(enabledEvents, auditAktiviert) {
   const enabled = DASHBOARD_CATEGORIES.filter((key) =>
-    getCategoryStatus(enabledEvents, key, auditEnabled),
+    getCategoryStatus(enabledEvents, key, auditAktiviert),
   ).length;
   return { enabled, total: DASHBOARD_CATEGORIES.length };
 }
@@ -40,7 +40,7 @@ export async function buildLoggingDashboardView(interaction, client) {
   const guildConfig = await getGuildConfig(client, interaction.guildId);
   const loggingStatus = await getLoggingStatus(client, interaction.guildId);
 
-  const auditEnabled = Boolean(loggingStatus.enabled);
+  const auditAktiviert = Boolean(loggingStatus.enabled);
   const channels = loggingStatus.channels || {};
 
   const auditChannel = await formatChannelMention(interaction.guild, channels.audit);
@@ -50,21 +50,21 @@ export async function buildLoggingDashboardView(interaction, client) {
   const transcriptChannel = await formatChannelMention(interaction.guild, guildConfig.ticketTranscriptChannelId);
 
   const ignore = loggingStatus.ignore || { users: [], channels: [] };
-  const { enabled: enabledCount, total } = countEnabledCategories(loggingStatus.enabledEvents, auditEnabled);
+  const { enabled: enabledCount, total } = countAktiviertCategories(loggingStatus.enabledEvents, auditAktiviert);
 
   const embed = new EmbedBuilder()
     .setTitle('📝 Logging Dashboard')
     .setDescription(`Manage server logging for **${interaction.guild.name}**. Use the menu below to configure channels, categories, and filters.`)
-    .setColor(auditEnabled ? getColor('success') : getColor('warning'))
+    .setColor(auditAktiviert ? getColor('success') : getColor('warning'))
     .addFields(
       {
         name: 'Logging Status',
-        value: auditEnabled ? '✅ Enabled' : '❌ Disabled',
+        value: auditAktiviert ? '✅ Aktiviert' : '❌ Deaktiviert',
         inline: true,
       },
       {
         name: 'Event Categories',
-        value: auditEnabled ? `${enabledCount}/${total} enabled` : '`Logging disabled`',
+        value: auditAktiviert ? `${enabledCount}/${total} enabled` : '`Logging disabled`',
         inline: true,
       },
       {
@@ -93,16 +93,16 @@ export async function buildLoggingDashboardView(interaction, client) {
     .setFooter({ text: 'Ticket channels: configure via /ticket dashboard' })
     .setTimestamp();
 
-  const components = createLoggingDashboardComponents(loggingStatus.enabledEvents, auditEnabled);
+  const components = createLoggingDashboardComponents(loggingStatus.enabledEvents, auditAktiviert);
   return { embed, components };
 }
 
 export async function buildLoggingCategoriesView(interaction, client) {
   const loggingStatus = await getLoggingStatus(client, interaction.guildId);
-  const auditEnabled = Boolean(loggingStatus.enabled);
+  const auditAktiviert = Boolean(loggingStatus.enabled);
 
   const categoryLines = DASHBOARD_CATEGORIES.map((key) => {
-    const on = getCategoryStatus(loggingStatus.enabledEvents, key, auditEnabled);
+    const on = getCategoryStatus(loggingStatus.enabledEvents, key, auditAktiviert);
     const label = DASHBOARD_CATEGORY_LABELS[key] || key;
     return `${on ? '✅' : '❌'} ${label}`;
   }).join('\n');
@@ -110,7 +110,7 @@ export async function buildLoggingCategoriesView(interaction, client) {
   const embed = new EmbedBuilder()
     .setTitle('📋 Event Categories')
     .setDescription(
-      auditEnabled
+      auditAktiviert
         ? 'Toggle which types of events are logged to your audit channel.'
         : '⚠️ Logging is disabled. Enable it from the main dashboard to send logs.',
     )
@@ -119,7 +119,7 @@ export async function buildLoggingCategoriesView(interaction, client) {
     .setFooter({ text: 'Green = logging on · Red = logging off' })
     .setTimestamp();
 
-  const components = createLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditEnabled);
+  const components = createLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditAktiviert);
   return { embed, components };
 }
 

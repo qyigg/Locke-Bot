@@ -313,12 +313,12 @@ export const botConfig = {
       // - "none"        = everyone is auto-verified immediately
       // - "account_age" = account must be older than set days
       // - "server_size" = auto-verify everyone only in smaller servers
-      defaultCriteria: "none",
+      defaultKriterien: "none",
 
-      // Days used when `defaultCriteria` is `account_age`.
+      // Days used when `defaultKriterien` is `account_age`.
       defaultAccountAgeDays: 7,
 
-      // Member count threshold used when `defaultCriteria` is `server_size`.
+      // Member count threshold used when `defaultKriterien` is `server_size`.
       // Example: 1000 means auto-verify if server has fewer than 1000 members.
       serverSizeThreshold: 1000,
 
@@ -439,7 +439,7 @@ export const botConfig = {
     errorOccurred: "Beim ausführen des Commands ist ein Fehler aufgetreten.",
     missingPermissions:
       "Ich habe nicht genug Rechte um dies zu tun.",
-    commandDisabled: "Dieser Command wurde deaktiviert.",
+    commandDeaktiviert: "Dieser Command wurde deaktiviert.",
     maintenanceMode: "Der Bot ist aktuell in Wartung.",
   },
 
@@ -586,7 +586,7 @@ export function getBotMessage(key, replacements = {}) {
   return message;
 }
 
-export function isFeatureEnabled(featureKey) {
+export function isFeatureAktiviert(featureKey) {
   if (!featureKey) {
     return true;
   }
@@ -594,7 +594,7 @@ export function isFeatureEnabled(featureKey) {
   return botConfig.features?.[featureKey] !== false;
 }
 
-export function isCommandCategoryEnabled(category) {
+export function isCommandCategoryAktiviert(category) {
   const normalized = normalizeCategoryKey(category);
 
   if (!normalized || normalized === "core") {
@@ -606,7 +606,7 @@ export function isCommandCategoryEnabled(category) {
     return true;
   }
 
-  return isFeatureEnabled(featureKey);
+  return isFeatureAktiviert(featureKey);
 }
 
 export function getApplicationStatusColor(status) {

@@ -108,7 +108,7 @@ export function isProtectedCommand(commandName) {
   return PROTECTED_COMMANDS.has(String(commandName || '').toLowerCase());
 }
 
-export function isCommandEnabledInConfig(config, commandName, category) {
+export function isCommandAktiviertInConfig(config, commandName, category) {
   const normalizedName = String(commandName || '').toLowerCase();
 
   // Check if it's a subcommand (contains space)
@@ -141,7 +141,7 @@ export function isCommandEnabledInConfig(config, commandName, category) {
   return true;
 }
 
-export async function isCommandEnabled(client, guildId, commandName, category = null) {
+export async function isCommandAktiviert(client, guildId, commandName, category = null) {
   const config = await getGuildConfig(client, guildId);
   let resolvedCategory = category;
 
@@ -150,7 +150,7 @@ export async function isCommandEnabled(client, guildId, commandName, category = 
     resolvedCategory = command?.category || 'Core';
   }
 
-  return isCommandEnabledInConfig(config, commandName, resolvedCategory);
+  return isCommandAktiviertInConfig(config, commandName, resolvedCategory);
 }
 
 export function getCommandAccessSnapshot(client, config) {
@@ -161,12 +161,12 @@ export function getCommandAccessSnapshot(client, config) {
   const categories = [];
 
   for (const category of registry.values()) {
-    const categoryDisabled = Boolean(disabledCategories[category.key]);
+    const categoryDeaktiviert = Boolean(disabledCategories[category.key]);
     const enabledCommands = [];
     const disabledCommandNames = [];
 
     for (const command of category.commands) {
-      const enabled = isCommandEnabledInConfig(config, command.name, category.folder);
+      const enabled = isCommandAktiviertInConfig(config, command.name, category.folder);
       if (enabled) {
         enabledCommands.push(command.name);
       } else {
@@ -176,7 +176,7 @@ export function getCommandAccessSnapshot(client, config) {
 
     categories.push({
       ...category,
-      categoryDisabled,
+      categoryDeaktiviert,
       enabledCount: enabledCommands.length,
       disabledCount: disabledCommandNames.length,
       totalCount: category.commands.length,

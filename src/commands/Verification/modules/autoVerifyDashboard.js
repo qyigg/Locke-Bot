@@ -19,7 +19,7 @@ import { logger } from '../../../utils/logger.js';
 import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
-import { validateAutoVerifyCriteria } from '../../../services/verificationService.js';
+import { validateAutoVerifyKriterien } from '../../../services/verificationService.js';
 import { botHasPermission } from '../../../utils/permissionGuard.js';
 
 const autoVerifyDefaults = botConfig.verification?.autoVerify || {};
@@ -91,13 +91,13 @@ function buildButtonRow(cfg, guildId, disabled = false) {
             .setLabel('Kriterien ändern')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('🎯')
-            .setDisabled(disabled),
+            .setDeaktiviert(disabled),
         new ButtonBuilder()
             .setCustomId(`autoverify_cfg_toggle_${guildId}`)
             .setLabel('Auto-Verifizierung')
             .setStyle(autoVerifyOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('🤖')
-            .setDisabled(disabled),
+            .setDeaktiviert(disabled),
     );
 }
 
@@ -108,11 +108,11 @@ async function refreshDashboard(rootInteraction, cfg, guildId, client) {
         let conflictSummary = '';
         try {
             const welcomeConfig = await getWelcomeConfig(client, guildId);
-            const verificationEnabled = Boolean(cfg.verification?.enabled);
+            const verificationAktiviert = Boolean(cfg.verification?.enabled);
             const autoRoleConfigured = Boolean(cfg.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
             
             const conflicts = [
-                verificationEnabled ? 'Verifizierungssystem ist aktiviert' : null,
+                verificationAktiviert ? 'Verifizierungssystem ist aktiviert' : null,
                 autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
             ].filter(Boolean);
             
@@ -146,11 +146,11 @@ export default {
             if (!guildConfig.verification?.autoVerify?.enabled) {
                 
                 const welcomeConfig = await getWelcomeConfig(client, guildId);
-                const verificationEnabled = Boolean(guildConfig.verification?.enabled);
+                const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
                 const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
                 
                 const blockingMessage = [];
-                if (verificationEnabled) blockingMessage.push('Verifizierungssystem ist aktiviert');
+                if (verificationAktiviert) blockingMessage.push('Verifizierungssystem ist aktiviert');
                 if (autoRoleConfigured) blockingMessage.push('AutoRole ist konfiguriert');
 
                 const blockingText = blockingMessage.length > 0 
@@ -177,11 +177,11 @@ export default {
             let conflictSummary = '';
             try {
                 const welcomeConfig = await getWelcomeConfig(client, guildId);
-                const verificationEnabled = Boolean(guildConfig.verification?.enabled);
+                const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
                 const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
                 
                 const conflicts = [
-                    verificationEnabled ? 'Verifizierungssystem ist aktiviert' : null,
+                    verificationAktiviert ? 'Verifizierungssystem ist aktiviert' : null,
                     autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
                 ].filter(Boolean);
                 
@@ -253,7 +253,7 @@ export default {
             btnCollector.on('collect', async btnInteraction => {
                 try {
                     if (btnInteraction.customId === `autoverify_cfg_criteria_${guildId}`) {
-                        await handleCriteria(btnInteraction, interaction, guildConfig, guildId, client);
+                        await handleKriterien(btnInteraction, interaction, guildConfig, guildId, client);
                     } else if (btnInteraction.customId === `autoverify_cfg_toggle_${guildId}`) {
                         await btnInteraction.deferUpdate().catch(() => null);
                         guildConfig.verification.autoVerify.enabled = !guildConfig.verification.autoVerify.enabled;
@@ -306,7 +306,7 @@ export default {
     },
 };
 
-async function handleCriteria(selectInteraction, rootInteraction, guildConfig, guildId, client) {
+async function handleKriterien(selectInteraction, rootInteraction, guildConfig, guildId, client) {
     
     if (!selectInteraction.deferred) {
         await selectInteraction.deferUpdate().catch(() => null);
@@ -347,11 +347,11 @@ async function handleCriteria(selectInteraction, rootInteraction, guildConfig, g
 
     criteriaCollector.on('collect', async criteriaInteraction => {
         await criteriaInteraction.deferUpdate();
-        const newCriteria = criteriaInteraction.values[0];
+        const newKriterien = criteriaInteraction.values[0];
 
-        guildConfig.verification.autoVerify.criteria = newCriteria;
+        guildConfig.verification.autoVerify.criteria = newKriterien;
 
-        if (newCriteria !== 'account_age') {
+        if (newKriterien !== 'account_age') {
             guildConfig.verification.autoVerify.accountAgeDays = null;
         } else if (!guildConfig.verification.autoVerify.accountAgeDays) {
             guildConfig.verification.autoVerify.accountAgeDays = defaultAccountAgeDays;
@@ -360,7 +360,7 @@ async function handleCriteria(selectInteraction, rootInteraction, guildConfig, g
         await setGuildConfig(client, guildId, guildConfig);
 
         let criteriaDisplay = '';
-        switch (newCriteria) {
+        switch (newKriterien) {
             case 'account_age':
                 criteriaDisplay = `Kontoalter (${guildConfig.verification.autoVerify.accountAgeDays} Tage)`;
                 break;

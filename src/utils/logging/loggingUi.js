@@ -64,21 +64,21 @@ function createBackButton() {
     .setStyle(ButtonStyle.Secondary);
 }
 
-function createCategoryToggleButtons(enabledEvents = {}, loggingEnabled = false) {
+function createCategoryToggleButtons(enabledEvents = {}, loggingAktiviert = false) {
   const buttons = DASHBOARD_CATEGORIES.map((category) => {
-    const wildcardDisabled = enabledEvents[`${category}.*`] === false;
+    const wildcardDeaktiviert = enabledEvents[`${category}.*`] === false;
     const categoryEvents = EVENT_TYPES_BY_CATEGORY[category] || [];
-    const allEnabled = categoryEvents.length === 0
+    const allAktiviert = categoryEvents.length === 0
       ? true
       : categoryEvents.every((t) => enabledEvents[t] !== false);
-    const isEnabled = loggingEnabled && !wildcardDisabled && allEnabled;
+    const isAktiviert = loggingAktiviert && !wildcardDeaktiviert && allAktiviert;
     const emoji = DASHBOARD_CATEGORY_EMOJIS[category] || '📌';
     const label = DASHBOARD_CATEGORY_LABELS[category] || category;
 
     return new ButtonBuilder()
       .setCustomId(`log_dash_toggle:${category}.*`)
       .setLabel(`${emoji} ${label}`)
-      .setStyle(isEnabled ? ButtonStyle.Success : ButtonStyle.Danger);
+      .setStyle(isAktiviert ? ButtonStyle.Success : ButtonStyle.Danger);
   });
 
   const rows = [];
@@ -135,12 +135,12 @@ export function createLoggingMainMenuSelect() {
   );
 }
 
-export function createLoggingMainActionRow(loggingEnabled = false) {
+export function createLoggingMainActionRow(loggingAktiviert = false) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('log_dash_toggle:audit_enabled')
       .setLabel('Audit Logging')
-      .setStyle(loggingEnabled ? ButtonStyle.Success : ButtonStyle.Danger),
+      .setStyle(loggingAktiviert ? ButtonStyle.Success : ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('log_dash_refresh')
       .setLabel('Refresh')
@@ -148,15 +148,15 @@ export function createLoggingMainActionRow(loggingEnabled = false) {
   );
 }
 
-export function createLoggingDashboardComponents(_enabledEvents, loggingEnabled = false) {
+export function createLoggingDashboardComponents(_enabledEvents, loggingAktiviert = false) {
   return [
     createLoggingMainMenuSelect(),
-    createLoggingMainActionRow(loggingEnabled),
+    createLoggingMainActionRow(loggingAktiviert),
   ];
 }
 
-export function createLoggingCategoryViewComponents(enabledEvents, loggingEnabled = false) {
-  const categoryRows = createCategoryToggleButtons(enabledEvents, loggingEnabled);
+export function createLoggingCategoryViewComponents(enabledEvents, loggingAktiviert = false) {
+  const categoryRows = createCategoryToggleButtons(enabledEvents, loggingAktiviert);
 
   const actionRow = new ActionRowBuilder().addComponents(
     createBackButton(),

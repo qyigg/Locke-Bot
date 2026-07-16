@@ -48,7 +48,7 @@ export default {
 
       return InteractionHelper.safeEditReply(interaction, {
         embeds: [successEmbed(
-          'Channel Updated',
+          'Kanal aktualisiert',
           `**${DESTINATION_LABELS[destination]}** logs will be sent to ${channel}.\nUse \`/logging dashboard\` to toggle event categories.`,
         )],
       });

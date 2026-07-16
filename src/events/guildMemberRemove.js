@@ -20,7 +20,7 @@ export default {
         
         const goodbyeChannelId = welcomeConfig?.goodbyeChannelId;
 
-        if (welcomeConfig?.goodbyeEnabled && goodbyeChannelId) {
+        if (welcomeConfig?.goodbyeAktiviert && goodbyeChannelId) {
             const channel = guild.channels.cache.get(goodbyeChannelId);
             if (channel?.isTextBased?.()) {
                 const me = guild.members.me;

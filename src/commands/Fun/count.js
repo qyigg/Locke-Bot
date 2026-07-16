@@ -92,7 +92,7 @@ export default {
         return await InteractionHelper.safeEditReply(interaction, {
           embeds: [
             successEmbed(
-              'Counting Game Enabled',
+              'Counting Game Aktiviert',
               `The counting game is now active in ${channel} using the **${getCountingSystemLabel(system)}** system. Players must count up from **1** and may not post two numbers in a row.`,
             ),
           ],
@@ -102,20 +102,20 @@ export default {
       if (subcommand === 'disable') {
         if (!config.enabled) {
           return await InteractionHelper.safeEditReply(interaction, {
-            embeds: [infoEmbed('Counting Game Disabled', 'The counting game is already disabled for this server.')],
+            embeds: [infoEmbed('Counting Game Deaktiviert', 'The counting game is already disabled for this server.')],
           });
         }
 
         await disableCountingGame(interaction.client, guildId);
         return await InteractionHelper.safeEditReply(interaction, {
-          embeds: [successEmbed('Counting Game Disabled', 'The counting game has been disabled.')],
+          embeds: [successEmbed('Counting Game Deaktiviert', 'The counting game has been disabled.')],
         });
       }
 
       if (subcommand === 'status') {
         const fields = [
-          { name: 'Enabled', value: config.enabled ? 'Yes' : 'No', inline: true },
-          { name: 'Channel', value: config.channelId ? `<#${config.channelId}>` : 'Not configured', inline: true },
+          { name: 'Aktiviert', value: config.enabled ? 'Yes' : 'No', inline: true },
+          { name: 'Channel', value: config.channelId ? `<#${config.channelId}>` : 'Nicht konfiguriert', inline: true },
           { name: 'System', value: getCountingSystemLabel(config.system), inline: true },
           { name: 'Next count', value: getExpectedCountValue(config), inline: true },
           { name: 'Current streak', value: `${config.currentStreak}`, inline: true },

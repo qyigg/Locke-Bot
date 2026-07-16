@@ -128,12 +128,12 @@ export function formatCooldownDuration(ms) {
 }
 
 export function isRiskyCommand(command, commandName) {
-  const protectionEnabled = command?.abuseProtection?.enabled;
-  if (protectionEnabled === false) {
+  const protectionAktiviert = command?.abuseProtection?.enabled;
+  if (protectionAktiviert === false) {
     return false;
   }
 
-  if (protectionEnabled === true) {
+  if (protectionAktiviert === true) {
     return true;
   }
 

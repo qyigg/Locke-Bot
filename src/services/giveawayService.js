@@ -182,12 +182,12 @@ export function createGiveawayButtons(ended = false) {
                     .setCustomId('giveaway_reroll')
                     .setLabel('🎲 Reroll')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(false),
+                    .setDeaktiviert(false),
                 new ButtonBuilder()
                     .setCustomId('giveaway_view')
                     .setLabel('👁️ View Winners')
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(false)
+                    .setDeaktiviert(false)
             );
         } else {
             row.addComponents(
@@ -195,12 +195,12 @@ export function createGiveawayButtons(ended = false) {
                     .setCustomId('giveaway_join')
                     .setLabel('🎉 Join')
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(false),
+                    .setDeaktiviert(false),
                 new ButtonBuilder()
                     .setCustomId('giveaway_end')
                     .setLabel('🛑 End')
                     .setStyle(ButtonStyle.Danger)
-                    .setDisabled(false)
+                    .setDeaktiviert(false)
             );
         }
 

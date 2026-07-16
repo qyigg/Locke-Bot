@@ -184,7 +184,7 @@ export default {
 
         collector.on('end', () => {
             const disabledRow = ActionRowBuilder.from(row).setComponents(
-                ButtonBuilder.from(row.components[0]).setDisabled(true)
+                ButtonBuilder.from(row.components[0]).setDeaktiviert(true)
             );
 
             interaction.editReply({ components: [disabledRow] }).catch(console.error);

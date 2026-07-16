@@ -61,10 +61,10 @@ export default {
             const role = options.getRole('role');
 
             const guildConfig = await getGuildConfig(client, guild.id);
-            const verificationEnabled = Boolean(guildConfig.verification?.enabled);
-            const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+            const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
+            const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
 
-            if (verificationEnabled || autoVerifyEnabled) {
+            if (verificationAktiviert || autoVerifyAktiviert) {
                 return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst AutoRole nicht hinzufügen, solange das Verifizierungssystem oder AutoVerify aktiviert ist. Deaktiviere diese zuerst.' });
             }
             
@@ -134,11 +134,11 @@ export default {
         else if (subcommand === 'list') {
             try {
                 const guildConfig = await getGuildConfig(client, guild.id);
-                const verificationEnabled = Boolean(guildConfig.verification?.enabled);
-                const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+                const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
+                const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
                 const conflictSummary = [
-                    verificationEnabled ? 'Verifizierungssystem ist aktiviert' : null,
-                    autoVerifyEnabled ? 'AutoVerify ist aktiviert' : null
+                    verificationAktiviert ? 'Verifizierungssystem ist aktiviert' : null,
+                    autoVerifyAktiviert ? 'AutoVerify ist aktiviert' : null
                 ].filter(Boolean).join('\n');
 
                 const config = await getWelcomeConfig(client, guild.id);

@@ -13,7 +13,7 @@ import {
   toggleEventLogging,
   getLoggingStatus,
   EVENT_TYPES,
-  setLoggingEnabled,
+  setLoggingAktiviert,
   setLogChannel,
   updateIgnoreList,
   getIgnoreList,
@@ -116,7 +116,7 @@ async function handleToggle(interaction) {
   const onCategoriesView = isCategoriesView(interaction);
 
   if (eventType === 'audit_enabled') {
-    await setLoggingEnabled(interaction.client, interaction.guildId, !Boolean(status.enabled));
+    await setLoggingAktiviert(interaction.client, interaction.guildId, !Boolean(status.enabled));
   } else if (eventType === 'all') {
     const newState = !Object.values(status.enabledEvents).every((v) => v !== false);
     const allTypes = Object.values(EVENT_TYPES);
@@ -356,7 +356,7 @@ async function showChannelModal(interaction, destination) {
     await setLogChannel(interaction.client, interaction.guildId, destination, channel.id);
 
     await modalSubmission.reply({
-      embeds: [successEmbed('Channel Updated', `**${label}** logs will be sent to ${channel}.`)],
+      embeds: [successEmbed('Kanal aktualisiert', `**${label}** logs will be sent to ${channel}.`)],
       flags: MessageFlags.Ephemeral,
     });
 

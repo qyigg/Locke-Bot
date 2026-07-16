@@ -31,7 +31,7 @@ import {
 import { startDashboardSession } from '../../../utils/dashboardSession.js';
 
 function buildButtonRow(guildConfig, guildId, disabled = false, panelStatus = null) {
-    const dmEnabled = guildConfig.dmOnClose !== false;
+    const dmAktiviert = guildConfig.dmOnClose !== false;
     const showRepost = panelStatus?.exists === false && panelStatus?.reason === 'panel_deleted';
 
     const buttons = [];
@@ -43,7 +43,7 @@ function buildButtonRow(guildConfig, guildId, disabled = false, panelStatus = nu
                 .setLabel('Panel erneut posten')
                 .setStyle(ButtonStyle.Primary)
                 .setEmoji('📌')
-                .setDisabled(disabled),
+                .setDeaktiviert(disabled),
         );
     }
 
@@ -51,21 +51,21 @@ function buildButtonRow(guildConfig, guildId, disabled = false, panelStatus = nu
         new ButtonBuilder()
             .setCustomId(`ticket_cfg_dm_toggle_${guildId}`)
             .setLabel('DM beim Schließen')
-            .setStyle(dmEnabled ? ButtonStyle.Success : ButtonStyle.Danger)
-            .setEmoji(dmEnabled ? '📬' : '📭')
-            .setDisabled(disabled),
+            .setStyle(dmAktiviert ? ButtonStyle.Success : ButtonStyle.Danger)
+            .setEmoji(dmAktiviert ? '📬' : '📭')
+            .setDeaktiviert(disabled),
         new ButtonBuilder()
             .setCustomId(`ticket_cfg_staff_role_btn_${guildId}`)
             .setLabel('Staff-Rolle')
             .setStyle(ButtonStyle.Secondary)
             .setEmoji('🛡️')
-            .setDisabled(disabled),
+            .setDeaktiviert(disabled),
         new ButtonBuilder()
             .setCustomId(`ticket_cfg_delete_${guildId}`)
             .setLabel('System löschen')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🗑️')
-            .setDisabled(disabled),
+            .setDeaktiviert(disabled),
     );
 
     return new ActionRowBuilder().addComponents(buttons);

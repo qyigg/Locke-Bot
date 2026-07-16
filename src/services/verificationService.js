@@ -199,7 +199,7 @@ export async function autoVerifyOnJoin(client, guild, member, verificationConfig
 
         await validateVerificationSetup(guild, effectiveVerificationConfig);
 
-        const shouldVerify = evaluateAutoVerifyCriteria(
+        const shouldVerify = evaluateAutoVerifyKriterien(
             member,
             verificationConfig.autoVerify
         );
@@ -488,7 +488,7 @@ export async function validateBotCanAssignRole(guild, roleId) {
     return true;
 }
 
-function evaluateAutoVerifyCriteria(member, autoVerifyConfig) {
+function evaluateAutoVerifyKriterien(member, autoVerifyConfig) {
     const { criteria, accountAgeDays } = autoVerifyConfig;
 
     switch (criteria) {
@@ -648,15 +648,15 @@ function sanitizeAuditMetadata(metadata = {}) {
     }
 }
 
-export function validateAutoVerifyCriteria(criteria, accountAgeDays) {
-    const validCriteria = ['account_age', 'server_size', 'none'];
+export function validateAutoVerifyKriterien(criteria, accountAgeDays) {
+    const validKriterien = ['account_age', 'server_size', 'none'];
     
-    if (!validCriteria.includes(criteria)) {
+    if (!validKriterien.includes(criteria)) {
         throw createError(
             `Invalid auto-verify criteria: ${criteria}`,
             ErrorTypes.VALIDATION,
             "Please select a valid criteria option.",
-            { criteria, validCriteria }
+            { criteria, validKriterien }
         );
     }
     
@@ -682,5 +682,5 @@ export default {
     validateBotCanAssignRole,
     checkVerificationCooldown,
     trackVerificationAttempt,
-    validateAutoVerifyCriteria
+    validateAutoVerifyKriterien
 };

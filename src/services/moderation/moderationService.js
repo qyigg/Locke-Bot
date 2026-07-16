@@ -352,7 +352,7 @@ export class ModerationService {
         );
       }
 
-      if (!member.isCommunicationDisabled()) {
+      if (!member.isCommunicationDeaktiviert()) {
         throw new TitanBotError(
           'User not timed out',
           ErrorTypes.VALIDATION,

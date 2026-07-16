@@ -38,12 +38,12 @@ export default {
                             .setCustomId('shop_prev')
                             .setLabel('⬅️ Previous')
                             .setStyle(ButtonStyle.Secondary)
-                            .setDisabled(page === 1),
+                            .setDeaktiviert(page === 1),
                         new ButtonBuilder()
                             .setCustomId('shop_next')
                             .setLabel('Next ➡️')
                             .setStyle(ButtonStyle.Secondary)
-                            .setDisabled(page === totalPages),
+                            .setDeaktiviert(page === totalPages),
                     ),
                 ];
             };
@@ -79,7 +79,7 @@ export default {
             collector.on('end', async () => {
                 try {
                     const disabledComponents = createShopComponents(currentPage);
-                    disabledComponents.forEach(row => row.components.forEach(btn => btn.setDisabled(true)));
+                    disabledComponents.forEach(row => row.components.forEach(btn => btn.setDeaktiviert(true)));
                     await message.edit({ components: disabledComponents });
                 } catch (error) {
                     logger.debug('shop_browse: could not disable components on collector end', {

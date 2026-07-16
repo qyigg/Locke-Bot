@@ -104,19 +104,19 @@ export default {
                     .setCustomId('prev_page')
                     .setLabel('⬅️ Previous')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(page === 1);
+                    .setDeaktiviert(page === 1);
 
                 const pageInfoButton = new ButtonBuilder()
                     .setCustomId('page_info')
                     .setLabel(`Page ${page}/${totalPages}`)
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true);
+                    .setDeaktiviert(true);
 
                 const nextButton = new ButtonBuilder()
                     .setCustomId('next_page')
                     .setLabel('Next ➡️')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(page === totalPages);
+                    .setDeaktiviert(page === totalPages);
 
                 row.addComponents(prevButton, pageInfoButton, nextButton);
                 return row;
@@ -159,7 +159,7 @@ time: 120000
 
             collector.on('end', async () => {
                 const disabledRow = createNavigationRow(currentPage);
-                disabledRow.components.forEach(button => button.setDisabled(true));
+                disabledRow.components.forEach(button => button.setDeaktiviert(true));
                 
                 try {
                     await message.edit({

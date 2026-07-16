@@ -8,10 +8,10 @@ import { supportsPrefixExecution, executePrefixCommand, resolvePrefixAccessKey }
 import { resolveCommandAlias, resolveSubcommandAlias } from '../config/commands/commandAliases.js';
 import { getPrefixRestriction } from '../config/commands/prefixRestrictions.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
-import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryEnabled, isMaintenanceMode } from '../config/bot.js';
+import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryAktiviert, isMaintenanceMode } from '../config/bot.js';
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
 import { createEmbed } from '../utils/embeds.js';
-import { isCommandEnabled } from '../services/commandAccessService.js';
+import { isCommandAktiviert } from '../services/commandAccessService.js';
 import {
   getCountingGameConfig,
   saveCountingGameConfig,
@@ -84,11 +84,11 @@ async function handlePrefixCommand(message, client) {
       return;
     }
 
-    if (!isCommandCategoryEnabled(command.category)) {
+    if (!isCommandCategoryAktiviert(command.category)) {
       await message.channel.send({
         embeds: [createEmbed({
           title: 'Funktion deaktiviert',
-          description: getBotMessage('commandDisabled'),
+          description: getBotMessage('commandDeaktiviert'),
           color: 'error',
         })],
       }).catch(() => {});
@@ -108,7 +108,7 @@ async function handlePrefixCommand(message, client) {
       return;
     }
 
-    if (!(await isCommandEnabled(client, message.guild.id, resolvePrefixAccessKey(command.data, args), command.category))) {
+    if (!(await isCommandAktiviert(client, message.guild.id, resolvePrefixAccessKey(command.data, args), command.category))) {
       const embed = createEmbed({
         title: 'Befehl deaktiviert',
         description: 'Dieser Befehl wurde für diesen Server deaktiviert.',

@@ -36,7 +36,7 @@ function customId(base, guildId, suffix = '') {
 }
 
 function getCategoryStatus(category) {
-  if (category.categoryDisabled) {
+  if (category.categoryDeaktiviert) {
     return STATUS.disabled;
   }
   if (category.disabledCount === 0) {
@@ -74,9 +74,9 @@ function chunkLines(lines, maxLength = 980) {
 }
 
 export function buildOverviewEmbed(snapshot, guild) {
-  const fullyEnabled = snapshot.categories.filter((c) => !c.categoryDisabled && c.disabledCount === 0).length;
-  const partial = snapshot.categories.filter((c) => !c.categoryDisabled && c.disabledCount > 0).length;
-  const disabled = snapshot.categories.filter((c) => c.categoryDisabled).length;
+  const fullyAktiviert = snapshot.categories.filter((c) => !c.categoryDeaktiviert && c.disabledCount === 0).length;
+  const partial = snapshot.categories.filter((c) => !c.categoryDeaktiviert && c.disabledCount > 0).length;
+  const disabled = snapshot.categories.filter((c) => c.categoryDeaktiviert).length;
 
   const categoryLines = snapshot.categories.map((category) => {
     const icon = getCategoryStatus(category);
@@ -89,7 +89,7 @@ export function buildOverviewEmbed(snapshot, guild) {
       name: '📊 Übersicht',
       value: [
         `**${snapshot.enabledTotal}/${snapshot.totalCommands}** Einträge aktiviert`,
-        `${STATUS.enabled} ${fullyEnabled} vollständig an · ${STATUS.partial} ${partial} teilweise · ${STATUS.disabled} ${disabled} aus`,
+        `${STATUS.enabled} ${fullyAktiviert} vollständig an · ${STATUS.partial} ${partial} teilweise · ${STATUS.disabled} ${disabled} aus`,
       ].join('\n'),
       inline: false,
     },
@@ -129,7 +129,7 @@ export function buildOverviewEmbed(snapshot, guild) {
 
 export function buildCategoryEmbed(category, guild) {
   const statusIcon = getCategoryStatus(category);
-  const statusText = category.categoryDisabled
+  const statusText = category.categoryDeaktiviert
     ? 'Kategorie deaktiviert'
     : category.disabledCount === 0
       ? 'Alle Einträge aktiviert'
@@ -176,7 +176,7 @@ export function buildCategoryEmbed(category, guild) {
   return createEmbed({
     title: `${category.icon} ${category.displayName}`,
     description: `Befehlszugriff für **${guild.name}**.`,
-    color: category.categoryDisabled ? 'error' : category.disabledCount > 0 ? 'warning' : 'success',
+    color: category.categoryDeaktiviert ? 'error' : category.disabledCount > 0 ? 'warning' : 'success',
     fields,
     footer: '🔒 Geschützte Einträge können nicht deaktiviert werden',
   });
@@ -232,9 +232,9 @@ export function buildCategoryComponents(guildId, category) {
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(customId(DASHBOARD_TOGGLE_CATEGORY, guildId, category.key))
-        .setLabel(category.categoryDisabled ? 'Kategorie aktivieren' : 'Kategorie deaktivieren')
-        .setEmoji(category.categoryDisabled ? '🟢' : '🔴')
-        .setStyle(category.categoryDisabled ? ButtonStyle.Success : ButtonStyle.Danger),
+        .setLabel(category.categoryDeaktiviert ? 'Kategorie aktivieren' : 'Kategorie deaktivieren')
+        .setEmoji(category.categoryDeaktiviert ? '🟢' : '🔴')
+        .setStyle(category.categoryDeaktiviert ? ButtonStyle.Success : ButtonStyle.Danger),
       new ButtonBuilder()
         .setCustomId(customId(DASHBOARD_ENABLE_ALL, guildId, category.key))
         .setLabel('Alle aktivieren')
@@ -312,9 +312,9 @@ export async function handleDashboardComponent(interaction, client) {
     const config = await getGuildConfig(client, guildId);
     const snapshot = getCommandAccessSnapshot(client, config);
     const category = snapshot.categories.find((entry) => entry.key === categoryKey);
-    const isEnabled = category?.enabledCommands.includes(commandName);
+    const isAktiviert = category?.enabledCommands.includes(commandName);
 
-    if (isEnabled) {
+    if (isAktiviert) {
       await disableCommand(client, guildId, categoryKey, commandName);
     } else {
       await enableCommand(client, guildId, categoryKey, commandName);
@@ -343,7 +343,7 @@ export async function handleDashboardComponent(interaction, client) {
     const snapshot = getCommandAccessSnapshot(client, config);
     const category = snapshot.categories.find((entry) => entry.key === categoryKey);
 
-    if (category?.categoryDisabled) {
+    if (category?.categoryDeaktiviert) {
       await enableCategory(client, guildId, categoryKey);
     } else {
       await disableCategory(client, guildId, categoryKey);

@@ -69,7 +69,7 @@ function buildDashboardEmbed(cfg, guild) {
             { name: 'Welcome-Status', value: cfg.enabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Welcome-Ping', value: cfg.welcomePing ? 'An' : 'Aus', inline: true },
             { name: 'Goodbye-Kanal', value: goodbyeChannel, inline: true },
-            { name: 'Goodbye-Status', value: cfg.goodbyeEnabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
+            { name: 'Goodbye-Status', value: cfg.goodbyeAktiviert ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Goodbye-Ping', value: cfg.goodbyePing ? 'An' : 'Aus', inline: true },
             { name: 'Welcome-Nachricht', value: welcomePreview, inline: false },
             { name: 'Goodbye-Nachricht', value: goodbyePreview, inline: false },
@@ -118,7 +118,7 @@ function buildSelectMenu(guildId) {
 
 function buildButtonRow(cfg, guildId, disabled = false) {
     const welcomeOn = cfg.enabled === true;
-    const goodbyeOn = cfg.goodbyeEnabled === true;
+    const goodbyeOn = cfg.goodbyeAktiviert === true;
     const welcomePingOn = cfg.welcomePing === true;
     const goodbyePingOn = cfg.goodbyePing === true;
     
@@ -129,13 +129,13 @@ function buildButtonRow(cfg, guildId, disabled = false) {
                 .setLabel('Welcome')
                 .setStyle(welcomeOn ? ButtonStyle.Success : ButtonStyle.Danger)
                 .setEmoji('🟢')
-                .setDisabled(disabled),
+                .setDeaktiviert(disabled),
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_toggle_goodbye_${guildId}`)
                 .setLabel('Goodbye')
                 .setStyle(goodbyeOn ? ButtonStyle.Success : ButtonStyle.Danger)
                 .setEmoji('🔴')
-                .setDisabled(disabled),
+                .setDeaktiviert(disabled),
         ),
         new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -143,13 +143,13 @@ function buildButtonRow(cfg, guildId, disabled = false) {
                 .setLabel('Welcome pingen')
                 .setStyle(welcomePingOn ? ButtonStyle.Primary : ButtonStyle.Secondary)
                 .setEmoji('🔔')
-                .setDisabled(disabled),
+                .setDeaktiviert(disabled),
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_ping_goodbye_${guildId}`)
                 .setLabel('Goodbye pingen')
                 .setStyle(goodbyePingOn ? ButtonStyle.Primary : ButtonStyle.Secondary)
                 .setEmoji('🔔')
-                .setDisabled(disabled),
+                .setDeaktiviert(disabled),
         ),
     ];
 }
@@ -283,13 +283,13 @@ export default {
                             ],
                         });
                     } else if (customId === `greet_cfg_toggle_goodbye_${guildId}`) {
-                        cfg.goodbyeEnabled = !cfg.goodbyeEnabled;
+                        cfg.goodbyeAktiviert = !cfg.goodbyeAktiviert;
                         await saveWelcomeConfig(client, guildId, cfg);
                         await sendEphemeralFollowUp(btnInteraction, {
                             embeds: [
                                 successEmbed(
                                     '✅ Goodbye aktualisiert',
-                                    `Goodbye-Nachrichten sind jetzt **${cfg.goodbyeEnabled ? 'aktiviert' : 'deaktiviert'}**.`,
+                                    `Goodbye-Nachrichten sind jetzt **${cfg.goodbyeAktiviert ? 'aktiviert' : 'deaktiviert'}**.`,
                                 ),
                             ],
                         });

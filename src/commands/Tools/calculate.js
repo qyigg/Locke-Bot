@@ -279,7 +279,7 @@ export default {
                                 )
                                 .setLabel("Calculator Expired")
                                 .setStyle(ButtonStyle.Secondary)
-                                .setDisabled(true),
+                                .setDeaktiviert(true),
                         );
 
                     interaction
@@ -294,7 +294,7 @@ export default {
                         row,
                     ).setComponents(
                         row.components.map((component) =>
-                            ButtonBuilder.from(component).setDisabled(true),
+                            ButtonBuilder.from(component).setDeaktiviert(true),
                         ),
                     );
 

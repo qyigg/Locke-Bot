@@ -129,7 +129,7 @@ function buildButtonRow(cfg, guildId, disabled = false, panelStatus = null) {
                 .setLabel('Panel erneut posten')
                 .setStyle(ButtonStyle.Primary)
                 .setEmoji('📌')
-                .setDisabled(disabled),
+                .setDeaktiviert(disabled),
         );
     }
 
@@ -139,7 +139,7 @@ function buildButtonRow(cfg, guildId, disabled = false, panelStatus = null) {
             .setLabel('Verifizierung')
             .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('🔒')
-            .setDisabled(disabled),
+            .setDeaktiviert(disabled),
     );
 
     return new ActionRowBuilder().addComponents(buttons);
@@ -197,11 +197,11 @@ async function refreshDashboard(rootInteraction, cfg, guildId, client) {
             
             const guildConfig = await getGuildConfig(client, guildId);
             const welcomeConfig = await getWelcomeConfig(client, guildId);
-            const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+            const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
             const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
             
             const conflicts = [
-                autoVerifyEnabled ? 'AutoVerify ist aktiviert' : null,
+                autoVerifyAktiviert ? 'AutoVerify ist aktiviert' : null,
                 autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
             ].filter(Boolean);
             
@@ -266,11 +266,11 @@ export default {
                 }
 
                 const welcomeConfig = await getWelcomeConfig(client, guildId);
-                const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+                const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
                 const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
                 const conflicts = [
-                    autoVerifyEnabled ? 'AutoVerify ist aktiviert' : null,
+                    autoVerifyAktiviert ? 'AutoVerify ist aktiviert' : null,
                     autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
                 ].filter(Boolean);
 
@@ -334,10 +334,10 @@ export default {
 
                     await btnInteraction.deferUpdate().catch(() => null);
 
-                    const wasEnabled = cfg.enabled !== false;
-                    const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+                    const wasAktiviert = cfg.enabled !== false;
+                    const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
 
-                    if (!wasEnabled && autoVerifyEnabled) {
+                    if (!wasAktiviert && autoVerifyAktiviert) {
                         await replyUserError(btnInteraction, {
                             type: ErrorTypes.CONFIGURATION,
                             message: 'AutoVerify ist derzeit aktiviert. Bitte deaktiviere zuerst AutoVerify, bevor du das manuelle Verifizierungssystem aktivierst.\n\nFühre `/autoverify` aus, um das AutoVerify-Dashboard zu öffnen.',
@@ -345,7 +345,7 @@ export default {
                         return;
                     }
 
-                    cfg.enabled = !wasEnabled;
+                    cfg.enabled = !wasAktiviert;
 
                     if (!cfg.enabled && cfg.channelId && cfg.messageId) {
                         const channel = interaction.guild.channels.cache.get(cfg.channelId);
