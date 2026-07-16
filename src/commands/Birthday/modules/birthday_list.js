@@ -15,8 +15,8 @@ export default {
         if (sortedBirthdays.length === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthdays')
-                .setDescription('No birthdays have been set in this server yet.');
+                .setTitle('Keine Geburtstage')
+                .setDescription('Auf diesem Server wurden noch keine Geburtstage gesetzt.');
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -47,25 +47,25 @@ export default {
         if (displayIndex === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthdays')
-                .setDescription('No birthdays have been set by current server members.');
+                .setTitle('Keine Geburtstage')
+                .setDescription('Kein aktuelles Servermitglied hat einen Geburtstag gesetzt.');
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
         }
 
-        birthdayList = `**${displayIndex} birthday${displayIndex !== 1 ? 's' : ''} in ${interaction.guild.name}**\n\n` + birthdayList;
+        birthdayList = `**${displayIndex} Geburtstag${displayIndex !== 1 ? 'e' : ''} auf ${interaction.guild.name}**\n\n` + birthdayList;
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Server Birthdays')
-            .setDescription(`${birthdayList}\n\nTotal: ${displayIndex} birthday${displayIndex !== 1 ? 's' : ''}`);
+            .setTitle('Server-Geburtstage')
+            .setDescription(`${birthdayList}\n\nGesamt: ${displayIndex} Geburtstag${displayIndex !== 1 ? 'e' : ''}`);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
         });
 
-        logger.info('Birthday list retrieved successfully', {
+        logger.info('Geburtstagsliste erfolgreich abgerufen', {
             userId: interaction.user.id,
             guildId,
             birthdayCount: displayIndex,
