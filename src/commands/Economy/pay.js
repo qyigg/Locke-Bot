@@ -76,7 +76,7 @@ export default {
                 throw createFehler(
                     "Failed to load sender economy data",
                     FehlerTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Failed to load your economy data. Bitte versuche es später erneut.",
                     { userId: senderId, guildId }
                 );
             }
@@ -85,7 +85,7 @@ export default {
                 throw createFehler(
                     "Failed to load receiver economy data",
                     FehlerTypes.DATABASE,
-                    "Failed to load the receiver's economy data. Please try again later.",
+                    "Failed to load the receiver's economy data. Bitte versuche es später erneut.",
                     { userId: receiver.id, guildId }
                 );
             }

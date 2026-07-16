@@ -260,7 +260,7 @@ async function handleList(interaction) {
         throw createFehler(
             'Failed to load applications',
             FehlerTypes.DATABASE,
-            'Failed to load applications. Please try again later.',
+            'Failed to load applications. Bitte versuche es später erneut.',
             { guildId: interaction.guild.id }
         );
     }

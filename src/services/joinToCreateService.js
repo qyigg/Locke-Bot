@@ -276,7 +276,7 @@ export async function updateChannelConfig(client, guildId, channelId, updates) {
             throw new TitanBotFehler(
                 'Database service not available',
                 FehlerTypes.DATABASE,
-                'Database service is currently unavailable. Please try again later.'
+                'Database service is currently unavailable. Bitte versuche es später erneut.'
             );
         }
 
@@ -336,7 +336,7 @@ export async function removeTriggerChannel(client, guildId, channelId) {
             throw new TitanBotFehler(
                 'Database service not available',
                 FehlerTypes.DATABASE,
-                'Database service is currently unavailable. Please try again later.'
+                'Database service is currently unavailable. Bitte versuche es später erneut.'
             );
         }
 
@@ -390,7 +390,7 @@ export async function getConfiguration(client, guildId) {
             throw new TitanBotFehler(
                 'Database service not available',
                 FehlerTypes.DATABASE,
-                'Database service is currently unavailable. Please try again later.'
+                'Database service is currently unavailable. Bitte versuche es später erneut.'
             );
         }
 

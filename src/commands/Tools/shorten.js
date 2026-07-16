@@ -75,7 +75,7 @@ export default {
         } catch (networkFehler) {
             const message = networkFehler?.name === 'AbortFehler'
                 ? 'The URL shortener timed out. Please try again in a moment.'
-                : 'Unable to reach the URL shortener service right now. Please try again later.';
+                : 'Unable to reach the URL shortener service right now. Bitte versuche es später erneut.';
             return replyUserFehler(interaction, {
                 type: FehlerTypes.NETWORK,
                 message,
@@ -87,7 +87,7 @@ export default {
         if (!response.ok) {
             return replyUserFehler(interaction, {
                 type: FehlerTypes.UNKNOWN,
-                message: `Shortener service returned HTTP ${response.status}. Please try again later.`,
+                message: `Shortener service returned HTTP ${response.status}. Bitte versuche es später erneut.`,
             });
         }
 

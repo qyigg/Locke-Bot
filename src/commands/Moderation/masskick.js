@@ -175,7 +175,7 @@ export default {
 
         } catch (error) {
             logger.error("Fehler in masskick command:", error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing the mass kick. Please try again later.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing the mass kick. Bitte versuche es später erneut.' });
         }
     }
 };

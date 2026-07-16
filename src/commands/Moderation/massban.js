@@ -183,7 +183,7 @@ export default {
 
         } catch (error) {
             logger.error("Fehler in massban command:", error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing the mass ban. Please try again later.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing the mass ban. Bitte versuche es später erneut.' });
         }
     }
 };

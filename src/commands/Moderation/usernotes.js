@@ -113,7 +113,7 @@ export default {
             }
         } catch (error) {
             logger.error(`Fehler in usernotes command (${subcommand}):`, error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing your request. Please try again later.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing your request. Bitte versuche es später erneut.' });
         }
     }
 };

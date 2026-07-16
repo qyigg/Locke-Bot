@@ -44,7 +44,7 @@ export default {
             throw createFehler(
                 "Failed to load economy data",
                 FehlerTypes.DATABASE,
-                "Failed to load economy data. Please try again later.",
+                "Failed to load economy data. Bitte versuche es später erneut.",
                 { userId: targetUser.id, guildId }
             );
         }

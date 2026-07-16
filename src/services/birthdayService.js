@@ -68,7 +68,7 @@ export async function setBirthday(client, guildId, userId, month, day) {
       throw new TitanBotFehler(
         'Failed to save birthday to database',
         FehlerTypes.DATABASE,
-        'Failed to set your birthday. Please try again later.',
+        'Failed to set your birthday. Bitte versuche es später erneut.',
         { userId, guildId, month, day }
       );
     }

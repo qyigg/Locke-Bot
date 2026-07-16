@@ -171,7 +171,7 @@ time: 120000
 
         } catch (error) {
             logger.error('Fehler in cases command:', error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Please try again later.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Bitte versuche es später erneut.' });
         }
     }
 };
