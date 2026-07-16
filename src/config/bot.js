@@ -368,15 +368,15 @@ export const botConfig = {
   // =========================
   // WELCOME / GOODBYE MESSAGES
   // =========================
-  welcome: {
+  willkommen: {
     // Welcome template posted when a user joins.
     // Placeholders: {user}, {server}, {memberCount}
     defaultWelcomeMessage:
-      "Welcome {user} to {server}! We now have {memberCount} members!",
+      "Willkommen {user} auf dem {server}! Wir haben jetzt {memberCount} Member!",
     // Goodbye template posted when a user leaves.
     // Placeholders: {user}, {memberCount}
     defaultGoodbyeMessage:
-      "{user} has left the server. We now have {memberCount} members.",
+      "{user} hat den Server verlassen. Wir haben jetzt {memberCount} Member.",
     // Channel ID for welcome messages.
     defaultWelcomeChannel: null,
     // Channel ID for goodbye messages.
@@ -434,13 +434,13 @@ export const botConfig = {
   // GENERIC BOT MESSAGES
   // =========================
   messages: {
-    noPermission: "You do not have permission to use this command.",
-    cooldownActive: "Please wait {time} before using this command again.",
-    errorOccurred: "An error occurred while executing this command.",
+    noPermission: "Du hast keine Rechte für diesen Command.",
+    cooldownActive: "Bitte warte {time} bevor du diesen Command noch einmal verwendest.",
+    errorOccurred: "Beim ausführen des Commands ist ein Fehler aufgetreten.",
     missingPermissions:
-      "I am missing required permissions to perform this action.",
-    commandDisabled: "This command has been disabled.",
-    maintenanceMode: "The bot is currently in maintenance mode.",
+      "Ich habe nicht genug Rechte um dies zu tun.",
+    commandDisabled: "Dieser Command wurde deaktiviert.",
+    maintenanceMode: "Der Bot ist aktuell in Wartung.",
   },
 
   // =========================
