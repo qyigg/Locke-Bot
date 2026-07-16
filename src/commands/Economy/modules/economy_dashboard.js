@@ -17,7 +17,7 @@ import { getColor, BotConfig } from '../../../config/bot.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
 import { getEconomyPrefix } from '../../../utils/database.js';
 import { getEconomyData, addMoney, removeMoney, getMaxBankCapacity } from '../../../utils/economy.js';
 import fs from 'fs/promises';
@@ -52,7 +52,7 @@ async function buildDashboardEmbed(guild, client) {
             }
         }
     } catch (error) {
-        logger.error('Fehler calculating economy stats:', error);
+        logger.error('Error calculating economy stats:', error);
     }
 
     const avgBalance = userCount > 0 ? Math.floor(totalInCirculation / userCount) : 0;
@@ -68,7 +68,7 @@ async function buildDashboardEmbed(guild, client) {
             { name: '💱 Currency Symbol', value: `\`${currencySymbol}\``, inline: true },
             { name: '📝 Currency Name', value: `\`${currencyName}\``, inline: true },
         )
-        .setFooter({ text: 'Dashboard schließt nach 10 Minuten Inaktivität' })
+        .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
         .setTimestamp();
 }
 
@@ -134,13 +134,13 @@ async function updateConfigFile(currencySymbol, currencyName) {
         logger.info('Config file updated successfully');
         return true;
     } catch (error) {
-        logger.error('Fehler updating config file:', error);
+        logger.error('Error updating config file:', error);
         return false;
     }
 }
 
 export default {
-    prefixAnly: false,
+    prefixOnly: false,
     async execute(interaction, config, client) {
         try {
             const guild = interaction.guild;
@@ -177,14 +177,14 @@ export default {
                             break;
                     }
                 } catch (error) {
-                    if (error instanceof TitanBotFehler) {
+                    if (error instanceof TitanBotError) {
                         logger.debug(`Economy dashboard validation error: ${error.message}`);
                     } else {
                         logger.error('Unexpected economy dashboard error:', error);
                     }
 
                     const errorMessage =
-                        error instanceof TitanBotFehler
+                        error instanceof TitanBotError
                             ? error.userMessage || 'An error occurred while processing your selection.'
                             : 'An unexpected error occurred while processing your request.';
 
@@ -192,8 +192,8 @@ export default {
                         await selectInteraction.deferUpdate().catch(() => {});
                     }
 
-                    await replyUserFehler(selectInteraction, {
-                        type: FehlerTypes.UNKNOWN,
+                    await replyUserError(selectInteraction, {
+                        type: ErrorTypes.UNKNOWN,
                         message: errorMessage,
                     }).catch(() => {});
                 }
@@ -202,8 +202,8 @@ export default {
             collector.on('end', async (collected, reason) => {
                 if (reason === 'time') {
                     const timeoutEmbed = new EmbedBuilder()
-                        .setTitle('Dashboard-Zeitüberschreitung')
-                        .setDescription('Dieses Dashboard wurde aufgrund von Inaktivität geschlossen. Bitte führe den Befehl erneut aus, um fortzufahren.')
+                        .setTitle('Dashboard Timed Out')
+                        .setDescription('This dashboard has been closed due to inactivity. Please run the command again to continue.')
                         .setColor(getColor('error'));
                     
                     await InteractionHelper.safeEditReply(interaction, {
@@ -213,11 +213,11 @@ export default {
                 }
             });
         } catch (error) {
-            if (error instanceof TitanBotFehler) throw error;
+            if (error instanceof TitanBotError) throw error;
             logger.error('Unexpected error in economy_dashboard:', error);
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 `Economy dashboard failed: ${error.message}`,
-                FehlerTypes.UNKNOWN,
+                ErrorTypes.UNKNOWN,
                 'Failed to open the economy dashboard.',
             );
         }
@@ -234,7 +234,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
         .setPlaceholder('Select a user...')
         .setMinValues(1)
         .setMaxValues(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const userLabel = new LabelBuilder()
         .setLabel('Target User')
@@ -248,7 +248,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
         .setPlaceholder('100')
         .setMinLength(1)
         .setMaxLength(10)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const typeInput = new TextInputBuilder()
         .setCustomId('type')
@@ -257,7 +257,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
         .setPlaceholder('wallet')
         .setMinLength(1)
         .setMaxLength(5)
-        .setErforderlich(true);
+        .setRequired(true);
 
     modal.addLabelComponents(userLabel);
     modal.addComponents(
@@ -268,7 +268,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `economy_add_currency_${guild.id}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -281,23 +281,23 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
     const type = submitted.fields.getTextInputValue('type').trim().toLowerCase();
 
     if (isNaN(amount) || amount <= 0) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Amount must be a positive number.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Amount must be a positive number.' });
         return;
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
         return;
     }
 
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) {
-        await replyUserFehler(submitted, { type: FehlerTypes.USER_INPUT, message: 'The specified user is not in this server.' });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in this server.' });
         return;
     }
 
     if (member.user.bot) {
-        await replyUserFehler(submitted, { type: FehlerTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
+        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
         return;
     }
 
@@ -306,7 +306,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
     const currencySymbol = BotConfig.economy.currency.symbol;
 
     await submitted.reply({
-        embeds: [successEmbed('Currency Added', `Erfolgfully added ${currencySymbol}${amount.toLocaleString()} to ${member.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
+        embeds: [successEmbed('Currency Added', `Successfully added ${currencySymbol}${amount.toLocaleString()} to ${member.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -331,7 +331,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
         .setPlaceholder('Select a user...')
         .setMinValues(1)
         .setMaxValues(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const userLabel = new LabelBuilder()
         .setLabel('Target User')
@@ -345,7 +345,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
         .setPlaceholder('100')
         .setMinLength(1)
         .setMaxLength(10)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const typeInput = new TextInputBuilder()
         .setCustomId('type')
@@ -354,7 +354,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
         .setPlaceholder('wallet')
         .setMinLength(1)
         .setMaxLength(5)
-        .setErforderlich(true);
+        .setRequired(true);
 
     modal.addLabelComponents(userLabel);
     modal.addComponents(
@@ -365,7 +365,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `economy_remove_currency_${guild.id}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -378,23 +378,23 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
     const type = submitted.fields.getTextInputValue('type').trim().toLowerCase();
 
     if (isNaN(amount) || amount <= 0) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Amount must be a positive number.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Amount must be a positive number.' });
         return;
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
         return;
     }
 
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) {
-        await replyUserFehler(submitted, { type: FehlerTypes.USER_INPUT, message: 'The specified user is not in this server.' });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in this server.' });
         return;
     }
 
     if (member.user.bot) {
-        await replyUserFehler(submitted, { type: FehlerTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
+        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
         return;
     }
 
@@ -403,7 +403,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
     const currencySymbol = BotConfig.economy.currency.symbol;
 
     await submitted.reply({
-        embeds: [successEmbed('Currency Removed', `Erfolgfully removed ${currencySymbol}${amount.toLocaleString()} from ${member.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
+        embeds: [successEmbed('Currency Removed', `Successfully removed ${currencySymbol}${amount.toLocaleString()} from ${member.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -431,14 +431,14 @@ async function handleChangeCurrency(selectInteraction, rootInteraction, guild) {
         .setPlaceholder('$')
         .setMinLength(1)
         .setMaxLength(3)
-        .setErforderlich(true);
+        .setRequired(true);
 
     modal.addComponents(new ActionRowBuilder().addComponents(symbolInput));
 
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `economy_change_currency_${guild.id}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -449,14 +449,14 @@ async function handleChangeCurrency(selectInteraction, rootInteraction, guild) {
     const newSymbol = submitted.fields.getTextInputValue('currency_symbol').trim();
 
     if (newSymbol.length === 0 || newSymbol.length > 3) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Currency symbol must be 1-3 characters long.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Currency symbol must be 1-3 characters long.' });
         return;
     }
 
     const success = await updateConfigFile(newSymbol, BotConfig.economy.currency.name);
 
     if (!success) {
-        await replyUserFehler(submitted, { type: FehlerTypes.UNKNOWN, message: 'Could not update the config file. Please check the logs.' });
+        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Could not update the config file. Please check the logs.' });
         return;
     }
 
@@ -485,14 +485,14 @@ async function handleChangeName(selectInteraction, rootInteraction, guild) {
         .setPlaceholder('coins')
         .setMinLength(1)
         .setMaxLength(20)
-        .setErforderlich(true);
+        .setRequired(true);
 
     modal.addComponents(new ActionRowBuilder().addComponents(nameInput));
 
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `economy_change_name_${guild.id}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -503,14 +503,14 @@ async function handleChangeName(selectInteraction, rootInteraction, guild) {
     const newName = submitted.fields.getTextInputValue('currency_name').trim();
 
     if (newName.length === 0 || newName.length > 20) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Currency name must be 1-20 characters long.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Currency name must be 1-20 characters long.' });
         return;
     }
 
     const success = await updateConfigFile(BotConfig.economy.currency.symbol, newName);
 
     if (!success) {
-        await replyUserFehler(submitted, { type: FehlerTypes.UNKNOWN, message: 'Could not update the config file. Please check the logs.' });
+        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Could not update the config file. Please check the logs.' });
         return;
     }
 

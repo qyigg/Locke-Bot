@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const BASE_WIN_CHANCE = 0.4;
@@ -18,11 +18,11 @@ export default {
             option
                 .setName('amount')
                 .setDescription('Amount of cash to gamble')
-                .setErforderlich(true)
+                .setRequired(true)
                 .setMinValue(1)
         ),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -41,18 +41,18 @@ export default {
                 const minutes = Math.floor(remaining / (1000 * 60));
                 const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
-                throw createFehler(
+                throw createError(
                     "Gamble cooldown active",
-                    FehlerTypes.RATE_LIMIT,
+                    ErrorTypes.RATE_LIMIT,
                     `You need to cool down before gambling again. Wait **${minutes}m ${seconds}s**.`,
                     { remaining, cooldownType: 'gamble' }
                 );
             }
 
             if (userData.wallet < betAmount) {
-                throw createFehler(
+                throw createError(
                     "Insufficient cash for gamble",
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     `You only have $${userData.wallet.toLocaleString()} cash, but you are trying to bet $${betAmount.toLocaleString()}.`,
                     { required: betAmount, current: userData.wallet }
                 );
@@ -122,7 +122,7 @@ userData.lastGamble = now;
                 });
             } else {
                 resultEmbed.setFooter({
-                    text: `Weiter gamble available in 5 minutes. Base win chance: ${Math.round(BASE_WIN_CHANCE * 100)}%.`,
+                    text: `Next gamble available in 5 minutes. Base win chance: ${Math.round(BASE_WIN_CHANCE * 100)}%.`,
                 });
             }
 

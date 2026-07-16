@@ -25,7 +25,7 @@ export async function checkRateLimit(key, maxAttempts = 5, windowMs = 60000) {
     logger.debug(`Rate limit exceeded for ${key}`);
     return false;
   } catch (error) {
-    logger.error('Fehler checking rate limit:', error);
+    logger.error('Error checking rate limit:', error);
     return true; 
   }
 }

@@ -2,18 +2,18 @@ import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelT
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { getColor, getApplicationStatusColor } from '../../config/bot.js';
 import { logger } from '../../utils/logger.js';
-import { withFehlerHandling, createFehler, FehlerTypes, replyUserFehler } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
 import ApplicationService from '../../services/applicationService.js';
 import { 
-    getApplicationEinstellungen, 
-    saveApplicationEinstellungen, 
+    getApplicationSettings, 
+    saveApplicationSettings, 
     getApplication, 
     getApplications, 
     updateApplication,
     getApplicationRoles,
     saveApplicationRoles,
-    getApplicationRoleEinstellungen,
-    saveApplicationRoleEinstellungen,
+    getApplicationRoleSettings,
+    saveApplicationRoleSettings,
     deleteApplication
 } from '../../utils/database.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -53,7 +53,7 @@ export default {
                 option
                     .setName("id")
                     .setDescription("The application ID")
-                    .setErforderlich(true),
+                    .setRequired(true),
             ),
     )
     .addSubcommand((subcommand) =>
@@ -94,16 +94,16 @@ export default {
                 option
                     .setName("application")
                     .setDescription("Select an application to configure")
-                    .setErforderlich(false)
+                    .setRequired(false)
                     .setAutocomplete(true),
             ),
     ),
 
     category: "Community",
 
-    execute: withFehlerHandling(async (interaction) => {
+    execute: withErrorHandling(async (interaction) => {
         if (!interaction.inGuild()) {
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This command can only be used in a server.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This command can only be used in a server.' });
         }
 
         const { options, guild, member } = interaction;
@@ -137,7 +137,7 @@ export default {
 async function handleSetup(interaction) {
     
     if (interaction.deferred || interaction.replied) {
-        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This interaction has already been processed. Please try the command again.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This interaction has already been processed. Please try the command again.' });
     }
 
     const modal = new ModalBuilder()
@@ -147,7 +147,7 @@ async function handleSetup(interaction) {
     const roleSelect = new RoleSelectMenuBuilder()
         .setCustomId('role_id')
         .setPlaceholder('Select the role users will apply for')
-        .setErforderlich(true);
+        .setRequired(true);
 
     const roleLabel = new LabelBuilder()
         .setLabel('Application Role')
@@ -160,7 +160,7 @@ async function handleSetup(interaction) {
         .setPlaceholder('e.g., Moderator, Helper, Developer')
         .setMaxLength(50)
         .setMinLength(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const appNameLabel = new LabelBuilder()
         .setLabel('Application Name')
@@ -172,7 +172,7 @@ async function handleSetup(interaction) {
         .setPlaceholder('Why do you want this role?')
         .setMaxLength(100)
         .setMinLength(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const q1Label = new LabelBuilder()
         .setLabel('Question 1 (required)')
@@ -183,7 +183,7 @@ async function handleSetup(interaction) {
         .setStyle(TextInputStyle.Short)
         .setPlaceholder('What experience do you have?')
         .setMaxLength(100)
-        .setErforderlich(false);
+        .setRequired(false);
 
     const q2Label = new LabelBuilder()
         .setLabel('Question 2 (optional)')
@@ -193,7 +193,7 @@ async function handleSetup(interaction) {
         .setCustomId('app_question_3')
         .setStyle(TextInputStyle.Short)
         .setMaxLength(100)
-        .setErforderlich(false);
+        .setRequired(false);
 
     const q3Label = new LabelBuilder()
         .setLabel('Question 3 (optional)')
@@ -203,7 +203,7 @@ async function handleSetup(interaction) {
 
     await interaction.showModal(modal);
 
-    const submitted = await interaction.awaitModalAbsenden({
+    const submitted = await interaction.awaitModalSubmit({
         time: 15 * 60 * 1000, 
         filter: (i) =>
             i.customId === 'app_setup_modal' &&
@@ -220,7 +220,7 @@ async function handleSetup(interaction) {
     const roleId = selectedRoles.first()?.id;
 
     if (!roleId) {
-        await replyUserFehler(submitted, { type: FehlerTypes.USER_INPUT, message: 'You must select a role for the application.' });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'You must select a role for the application.' });
         return;
     }
 
@@ -232,13 +232,13 @@ async function handleSetup(interaction) {
 
     const role = await interaction.guild.roles.fetch(roleId).catch(() => null);
     if (!role) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'The selected role could not be found.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'The selected role could not be found.' });
         return;
     }
 
     const existingRoles = await getApplicationRoles(interaction.client, interaction.guild.id);
     if (existingRoles.some(r => r.roleId === roleId)) {
-        await replyUserFehler(submitted, { type: FehlerTypes.CONFIGURATION, message: `The role ${role} is already configured as an application.` });
+        await replyUserError(submitted, { type: ErrorTypes.CONFIGURATION, message: `The role ${role} is already configured as an application.` });
         return;
     }
 
@@ -250,12 +250,12 @@ async function handleSetup(interaction) {
 
     await saveApplicationRoles(interaction.client, interaction.guild.id, existingRoles);
 
-    const settings = await getApplicationEinstellungen(interaction.client, interaction.guild.id);
+    const settings = await getApplicationSettings(interaction.client, interaction.guild.id);
     if (!settings.enabled) {
-        await ApplicationService.updateEinstellungen(interaction.client, interaction.guild.id, { enabled: true });
+        await ApplicationService.updateSettings(interaction.client, interaction.guild.id, { enabled: true });
     }
 
-    await saveApplicationRoleEinstellungen(interaction.client, interaction.guild.id, roleId, { questions });
+    await saveApplicationRoleSettings(interaction.client, interaction.guild.id, roleId, { questions });
 
     await submitted.reply({
         embeds: [successEmbed(
@@ -279,11 +279,11 @@ async function handleReview(interaction) {
         appId,
     );
     if (!application) {
-        return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'Application not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Application not found.' });
     }
 
     if (application.status !== "pending") {
-        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This application has already been processed.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This application has already been processed.' });
     }
 
     const appEmbed = createEmbed({
@@ -306,7 +306,7 @@ async function handleReview(interaction) {
         new ButtonBuilder()
             .setCustomId(`app_review_approve_${appId}`)
             .setLabel('Approve')
-            .setStyle(ButtonStyle.Erfolg),
+            .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(`app_review_deny_${appId}`)
             .setLabel('Deny')
@@ -344,39 +344,39 @@ async function handleReview(interaction) {
                     .setStyle(TextInputStyle.Paragraph)
                     .setPlaceholder('Provide a reason for this decision...')
                     .setMaxLength(500)
-                    .setErforderlich(false),
+                    .setRequired(false),
             ),
         );
 
         await buttonInteraction.showModal(reasonModal);
 
         try {
-            const reasonAbsenden = await buttonInteraction.awaitModalAbsenden({
+            const reasonSubmit = await buttonInteraction.awaitModalSubmit({
                 time: 5 * 60 * 1000, 
                 filter: i =>
                     i.customId === `app_review_reason_${appId}_${isApprove ? 'approve' : 'deny'}` &&
                     i.user.id === buttonInteraction.user.id,
             }).catch(() => null);
 
-            if (!reasonAbsenden) return;
+            if (!reasonSubmit) return;
 
-            const reason = reasonAbsenden.fields.getTextInputValue('review_reason').trim() || "No reason provided.";
+            const reason = reasonSubmit.fields.getTextInputValue('review_reason').trim() || "No reason provided.";
             const action = isApprove ? 'approve' : 'deny';
             const status = isApprove ? 'approved' : 'denied';
 
             const updatedApplication = await ApplicationService.reviewApplication(
-                reasonAbsenden.client,
+                reasonSubmit.client,
                 interaction.guild.id,
                 appId,
                 {
                     action,
                     reason,
-                    reviewerId: reasonAbsenden.user.id
+                    reviewerId: reasonSubmit.user.id
                 }
             );
 
             try {
-                const user = await reasonAbsenden.client.users.fetch(application.userId);
+                const user = await reasonSubmit.client.users.fetch(application.userId);
                 const statusColor = getApplicationStatusColor(status);
                 const reviewStatus = getApplicationStatusPresentation(status);
                 const dmEmbed = createEmbed({
@@ -448,7 +448,7 @@ async function handleReview(interaction) {
                 }
             }
 
-            await reasonAbsenden.reply({
+            await reasonSubmit.reply({
                 embeds: [
                     successEmbed(
                         `Application ${status}`,
@@ -459,8 +459,8 @@ async function handleReview(interaction) {
             });
 
         } catch (error) {
-            logger.error('Fehler reviewing application:', error);
-            await replyUserFehler(buttonInteraction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while reviewing the application.' });
+            logger.error('Error reviewing application:', error);
+            await replyUserError(buttonInteraction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while reviewing the application.' });
         }
     });
 
@@ -542,8 +542,8 @@ async function handleList(interaction) {
 
             return InteractionHelper.safeEditReply(interaction, { embeds: [embed], flags: ["Ephemeral"] });
         } else {
-            return await replyUserFehler(interaction, {
-                type: FehlerTypes.CONFIGURATION,
+            return await replyUserError(interaction, {
+                type: ErrorTypes.CONFIGURATION,
                 message: 'No applications found and no application roles configured.\n' +
                     'Use `/app-admin roles add` to configure application roles first.'
             });
@@ -554,7 +554,7 @@ async function handleList(interaction) {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, limit);
 
-    const embed = createEmbed({ title: "Absendented Applications", description: `Showing ${applications.length} applications.`, });
+    const embed = createEmbed({ title: "Submitted Applications", description: `Showing ${applications.length} applications.`, });
 
     applications.forEach((app) => {
         const statusView = getApplicationStatusPresentation(app?.status);

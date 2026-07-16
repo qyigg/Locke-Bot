@@ -93,7 +93,7 @@ export function mapArgumentsToOptions(args, commandData) {
       getBoolean: (name) => args[0] === 'true',
       getSubcommand: () => null,
       getSubcommandGroup: () => null,
-      validateErforderlich: () => ({ valid: true, missing: [] })
+      validateRequired: () => ({ valid: true, missing: [] })
     };
   }
 
@@ -203,7 +203,7 @@ export function mapArgumentsToOptions(args, commandData) {
     getBoolean: (name) => options[name] === 'true',
     getSubcommand: () => subcommandName,
     getSubcommandGroup: () => subcommandGroupName,
-    validateErforderlich: () => ({
+    validateRequired: () => ({
       valid: missing.length === 0,
       missing,
       subcommandName,

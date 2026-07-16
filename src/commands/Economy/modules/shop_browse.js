@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuild
 import { shopItems } from '../../../config/shop/items.js';
 import { getColor } from '../../../config/bot.js';
 import { logger } from '../../../utils/logger.js';
-import { handleInteractionFehler } from '../../../utils/errorHandler.js';
+import { handleInteractionError } from '../../../utils/errorHandler.js';
 
 export default {
     async execute(interaction, config, client) {
@@ -38,12 +38,12 @@ export default {
                             .setCustomId('shop_prev')
                             .setLabel('⬅️ Previous')
                             .setStyle(ButtonStyle.Secondary)
-                            .setDeaktiviert(page === 1),
+                            .setDisabled(page === 1),
                         new ButtonBuilder()
                             .setCustomId('shop_next')
-                            .setLabel('Weiter ➡️')
+                            .setLabel('Next ➡️')
                             .setStyle(ButtonStyle.Secondary)
-                            .setDeaktiviert(page === totalPages),
+                            .setDisabled(page === totalPages),
                     ),
                 ];
             };
@@ -79,7 +79,7 @@ export default {
             collector.on('end', async () => {
                 try {
                     const disabledComponents = createShopComponents(currentPage);
-                    disabledComponents.forEach(row => row.components.forEach(btn => btn.setDeaktiviert(true)));
+                    disabledComponents.forEach(row => row.components.forEach(btn => btn.setDisabled(true)));
                     await message.edit({ components: disabledComponents });
                 } catch (error) {
                     logger.debug('shop_browse: could not disable components on collector end', {
@@ -88,7 +88,7 @@ export default {
                 }
             });
         } catch (error) {
-            await handleInteractionFehler(interaction, error, { command: 'shop_browse' });
+            await handleInteractionError(interaction, error, { command: 'shop_browse' });
         }
     },
 };

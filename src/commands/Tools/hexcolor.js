@@ -4,7 +4,7 @@ import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('hexcolor')
@@ -12,7 +12,7 @@ export default {
         .addStringOption(option =>
             option.setName('color')
                 .setDescription('Specific hex color (e.g., #FF5733 or FF5733)')
-                .setErforderlich(false)),
+                .setRequired(false)),
 
     async execute(interaction) {
         await InteractionHelper.safeExecute(
@@ -27,7 +27,7 @@ export default {
                 } else {
                     hexColor = hexColor.replace('#', '');
                     if (!/^[0-9A-Fa-f]{3,6}$/.test(hexColor)) {
-                        return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please provide a valid hex code.\n\n**Valid formats:**\n• `#FF5733` (with hash)\n• `FF5733` (without hash)\n• `F57` (3-digit shorthand)\n\n**Invalid:** `#GG5733` (G is not a hex digit)' });
+                        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid hex code.\n\n**Valid formats:**\n• `#FF5733` (with hash)\n• `FF5733` (without hash)\n• `F57` (3-digit shorthand)\n\n**Invalid:** `#GG5733` (G is not a hex digit)' });
                     }
 
                     if (hexColor.length === 3) {
@@ -136,5 +136,5 @@ function getColorName(hex) {
         }
     }
     
-    return minDistance < 1000000 ? `Schließen to ${closestColor}` : null;
+    return minDistance < 1000000 ? `Close to ${closestColor}` : null;
 }

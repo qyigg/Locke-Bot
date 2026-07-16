@@ -3,7 +3,7 @@ import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { getModerationCases } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('cases')
@@ -18,7 +18,7 @@ export default {
                     { name: 'Bans', value: 'Member Banned' },
                     { name: 'Kicks', value: 'Member Kicked' },
                     { name: 'Timeouts', value: 'Member Timed Out' },
-                    { name: 'Warnungs', value: 'User Warned' }
+                    { name: 'Warnings', value: 'User Warned' }
                 )
         )
         .addUserOption(option =>
@@ -35,8 +35,8 @@ export default {
     category: 'moderation',
 
     async execute(interaction, config, client) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction);
-        if (!deferErfolg) {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
             logger.warn(`Cases interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -59,7 +59,7 @@ export default {
             const cases = await getModerationCases(interaction.guild.id, filters);
 
             if (cases.length === 0) {
-                throw new Fehler(targetUser 
+                throw new Error(targetUser 
                     ? `No moderation cases found for ${targetUser.tag}`
                     : `No ${filterType === 'all' ? '' : filterType} cases found in this server.`
                 );
@@ -104,19 +104,19 @@ export default {
                     .setCustomId('prev_page')
                     .setLabel('⬅️ Previous')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDeaktiviert(page === 1);
+                    .setDisabled(page === 1);
 
                 const pageInfoButton = new ButtonBuilder()
                     .setCustomId('page_info')
                     .setLabel(`Page ${page}/${totalPages}`)
                     .setStyle(ButtonStyle.Primary)
-                    .setDeaktiviert(true);
+                    .setDisabled(true);
 
                 const nextButton = new ButtonBuilder()
                     .setCustomId('next_page')
-                    .setLabel('Weiter ➡️')
+                    .setLabel('Next ➡️')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDeaktiviert(page === totalPages);
+                    .setDisabled(page === totalPages);
 
                 row.addComponents(prevButton, pageInfoButton, nextButton);
                 return row;
@@ -159,7 +159,7 @@ time: 120000
 
             collector.on('end', async () => {
                 const disabledRow = createNavigationRow(currentPage);
-                disabledRow.components.forEach(button => button.setDeaktiviert(true));
+                disabledRow.components.forEach(button => button.setDisabled(true));
                 
                 try {
                     await message.edit({
@@ -170,8 +170,8 @@ time: 120000
             });
 
         } catch (error) {
-            logger.error('Fehler in cases command:', error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Bitte versuche es später erneut.' });
+            logger.error('Error in cases command:', error);
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Please try again later.' });
         }
     }
 };

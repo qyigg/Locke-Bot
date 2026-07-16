@@ -1,7 +1,9 @@
-const FehlerCodes = Object.freeze({
+// errorRegistry.js
+
+const ErrorCodes = Object.freeze({
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
-  KONFIGURATIONSFEHLER: 'KONFIGURATIONSFEHLER',
+  CONFIGURATION_ERROR: 'CONFIGURATION_ERROR',
   DATABASE_ERROR: 'DATABASE_ERROR',
   NETWORK_ERROR: 'NETWORK_ERROR',
   DISCORD_API_ERROR: 'DISCORD_API_ERROR',
@@ -16,97 +18,97 @@ const FehlerCodes = Object.freeze({
   UNKNOWN_ERROR: 'UNKNOWN_ERROR'
 });
 
-const FehlerCodeRegistry = Object.freeze({
-  [FehlerCodes.VALIDATION_FAILED]: {
+const ErrorCodeRegistry = Object.freeze({
+  [ErrorCodes.VALIDATION_FAILED]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Prüfe die Befehls-Eingaben vor der Verarbeitung und gib feldspezifische Hinweise zurück.'
+    remediation: 'Validate command inputs before processing and return field-specific guidance.'
   },
-  [FehlerCodes.PERMISSION_DENIED]: {
+  [ErrorCodes.PERMISSION_DENIED]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Überprüfe die Rollen- und Berechtigungen von Bot und Benutzer sowie die benötigten Discord-Berechtigungen für diesen Befehl.'
+    remediation: 'Review bot/user role permissions and required Discord permissions for this command.'
   },
-  [FehlerCodes.KONFIGURATIONSFEHLER]: {
+  [ErrorCodes.CONFIGURATION_ERROR]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Prüfe die erforderlichen Umgebungsvariablen und die Guild-Funktionskonfiguration.'
+    remediation: 'Check required environment variables and guild feature configuration.'
   },
-  [FehlerCodes.DATABASE_ERROR]: {
+  [ErrorCodes.DATABASE_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Prüfe die Postgres-Verbindung, Pool-Auslastung, Statement-Timeouts und kürzliche Migrationen.'
+    remediation: 'Check Postgres connectivity, pool saturation, statement timeouts, and recent migrations.'
   },
-  [FehlerCodes.NETWORK_ERROR]: {
+  [ErrorCodes.NETWORK_ERROR]: {
     severity: 'medium',
     retryable: true,
-    remediation: 'Prüfe die Netzwerkerreichbarkeit, den Status des Upstream-Dienstes und das Retry-/Zurückoff-Verhalten.'
+    remediation: 'Check network reachability, upstream service status, and retry/backoff behavior.'
   },
-  [FehlerCodes.DISCORD_API_ERROR]: {
+  [ErrorCodes.DISCORD_API_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Prüfe den Status der Discord-API, Rate-Limit-Antworten und die Gültigkeit des Bot-Tokens.'
+    remediation: 'Check Discord API status, rate-limit response patterns, and bot token validity.'
   },
-  [FehlerCodes.USER_INPUT_ERROR]: {
+  [ErrorCodes.USER_INPUT_ERROR]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Prüfe vom Nutzer eingegebene IDs/Mentions und gib klarere Eingabe-Beispiele zurück.'
+    remediation: 'Validate user-provided IDs/mentions and return clearer input examples.'
   },
-  [FehlerCodes.RATE_LIMITED]: {
+  [ErrorCodes.RATE_LIMITED]: {
     severity: 'low',
     retryable: true,
-    remediation: 'Nutze cooldown-bewusste Retries und reduziere burstartige Befehlsausführung.'
+    remediation: 'Apply cooldown-aware retries and reduce bursty command execution.'
   },
-  [FehlerCodes.INTERACTION_INVALID]: {
+  [ErrorCodes.INTERACTION_INVALID]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Stelle sicher, dass das Interaction-Objekt vor dem Antworten verfügbar und gültig ist.'
+    remediation: 'Ensure interaction object is available and valid before replying.'
   },
-  [FehlerCodes.INTERACTION_EXPIRED]: {
+  [ErrorCodes.INTERACTION_EXPIRED]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Defer oder antworte auf Interactions früher, um das 15-Minuten-Ablauf-Fenster zu vermeiden.'
+    remediation: 'Defer or reply to interactions earlier to avoid 15-minute expiry windows.'
   },
-  [FehlerCodes.INTERACTION_RESPONSE_FAILED]: {
+  [ErrorCodes.INTERACTION_RESPONSE_FAILED]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Prüfe den Acknowledgement-Status der Interaction und die Discord-Antwortfehlercodes.'
+    remediation: 'Check interaction acknowledgement state and Discord response error codes.'
   },
-  [FehlerCodes.INTERACTION_UNHANDLED]: {
+  [ErrorCodes.INTERACTION_UNHANDLED]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Füge einen Handler für diesen Interaction-Typ hinzu oder registriere den fehlenden Button-/Modal-/Select-Handler.'
+    remediation: 'Add a handler for this interaction type or register the missing button/modal/select handler.'
   },
-  [FehlerCodes.TASK_ERROR]: {
+  [ErrorCodes.TASK_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Untersuche den benannten Hintergrundtask auf geworfene Fehler oder nicht wartete Promises.'
+    remediation: 'Inspect the named background task for thrown errors or unawaited promises.'
   },
-  [FehlerCodes.UNHANDLED_REJECTION]: {
+  [ErrorCodes.UNHANDLED_REJECTION]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Finde das Promise, das ohne Catch-Handler abgelehnt wurde, und leite es über runSafeTask oder einen expliziten Catch weiter.'
+    remediation: 'Find the promise that rejected without a catch handler and route it through runSafeTask or an explicit catch.'
   },
-  [FehlerCodes.UNKNOWN_ERROR]: {
+  [ErrorCodes.UNKNOWN_ERROR]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Erfasse Trace-Kontext und Stack und ordne diesen Fehler einem konkreten Fehlercode zu.'
+    remediation: 'Capture trace context and stack, then classify this failure under a specific error code.'
   }
 });
 
-const TypeToFehlerCode = Object.freeze({
-  validation: FehlerCodes.VALIDATION_FAILED,
-  permission: FehlerCodes.PERMISSION_DENIED,
-  configuration: FehlerCodes.KONFIGURATIONSFEHLER,
-  database: FehlerCodes.DATABASE_ERROR,
-  network: FehlerCodes.NETWORK_ERROR,
-  discord_api: FehlerCodes.DISCORD_API_ERROR,
-  user_input: FehlerCodes.USER_INPUT_ERROR,
-  rate_limit: FehlerCodes.RATE_LIMITED,
-  unknown: FehlerCodes.UNKNOWN_ERROR
+const TypeToErrorCode = Object.freeze({
+  validation: ErrorCodes.VALIDATION_FAILED,
+  permission: ErrorCodes.PERMISSION_DENIED,
+  configuration: ErrorCodes.CONFIGURATION_ERROR,
+  database: ErrorCodes.DATABASE_ERROR,
+  network: ErrorCodes.NETWORK_ERROR,
+  discord_api: ErrorCodes.DISCORD_API_ERROR,
+  user_input: ErrorCodes.USER_INPUT_ERROR,
+  rate_limit: ErrorCodes.RATE_LIMITED,
+  unknown: ErrorCodes.UNKNOWN_ERROR
 });
 
-function normalizeFehlerCode(errorCode) {
+function normalizeErrorCode(errorCode) {
   if (errorCode === null || errorCode === undefined) {
     return null;
   }
@@ -114,36 +116,36 @@ function normalizeFehlerCode(errorCode) {
   return String(errorCode).trim().toUpperCase();
 }
 
-export function getFehlerMetadata(errorCode) {
-  const normalized = normalizeFehlerCode(errorCode);
+export function getErrorMetadata(errorCode) {
+  const normalized = normalizeErrorCode(errorCode);
   if (!normalized) {
-    return FehlerCodeRegistry[FehlerCodes.UNKNOWN_ERROR];
+    return ErrorCodeRegistry[ErrorCodes.UNKNOWN_ERROR];
   }
 
-  return FehlerCodeRegistry[normalized] || FehlerCodeRegistry[FehlerCodes.UNKNOWN_ERROR];
+  return ErrorCodeRegistry[normalized] || ErrorCodeRegistry[ErrorCodes.UNKNOWN_ERROR];
 }
 
-export function getDefaultFehlerCodeByType(errorType = 'unknown') {
-  return TypeToFehlerCode[errorType] || FehlerCodes.UNKNOWN_ERROR;
+export function getDefaultErrorCodeByType(errorType = 'unknown') {
+  return TypeToErrorCode[errorType] || ErrorCodes.UNKNOWN_ERROR;
 }
 
-export function resolveFehlerCode({ error, errorType = 'unknown', context = {} } = {}) {
-  const contextCode = normalizeFehlerCode(context?.errorCode);
+export function resolveErrorCode({ error, errorType = 'unknown', context = {} } = {}) {
+  const contextCode = normalizeErrorCode(context?.errorCode);
   if (contextCode) {
     return contextCode;
   }
 
-  const nestedContextCode = normalizeFehlerCode(error?.context?.errorCode);
+  const nestedContextCode = normalizeErrorCode(error?.context?.errorCode);
   if (nestedContextCode) {
     return nestedContextCode;
   }
 
-  const code = normalizeFehlerCode(error?.code);
+  const code = normalizeErrorCode(error?.code);
   if (code) {
     return code;
   }
 
-  return getDefaultFehlerCodeByType(errorType);
+  return getDefaultErrorCodeByType(errorType);
 }
 
-export { FehlerCodes, FehlerCodeRegistry, TypeToFehlerCode };
+export { ErrorCodes, ErrorCodeRegistry, TypeToErrorCode };

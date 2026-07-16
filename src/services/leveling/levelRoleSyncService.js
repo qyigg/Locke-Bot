@@ -91,11 +91,11 @@ export async function reconcileLevelRoles(client, guildId = null) {
                     try {
                         const awarded = await tryAwardRole(member, roleId, requiredLevel);
                         if (awarded) summary.rolesReAwarded += 1;
-                    } catch (awardFehler) {
+                    } catch (awardError) {
                         summary.errors += 1;
                         logger.warn(
                             `Could not re-award level ${requiredLevel} role to ${userId} in guild ${guild.id}:`,
-                            awardFehler.message,
+                            awardError.message,
                         );
                     }
                 }

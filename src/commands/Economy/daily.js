@@ -3,7 +3,7 @@ import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { formatDuration } from '../../utils/embeds.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { botConfig } from '../../config/bot.js';
@@ -17,7 +17,7 @@ export default {
         .setName('daily')
         .setDescription('Claim your daily cash reward'),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -30,10 +30,10 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createFehler(
+                throw createError(
                     "Failed to load economy data for daily",
-                    FehlerTypes.DATABASE,
-                    "Failed to load your economy data. Bitte versuche es später erneut.",
+                    ErrorTypes.DATABASE,
+                    "Failed to load your economy data. Please try again later.",
                     { userId, guildId }
                 );
             }
@@ -42,9 +42,9 @@ export default {
 
             if (now < lastDaily + DAILY_COOLDOWN) {
                 const timeRemaining = lastDaily + DAILY_COOLDOWN - now;
-                throw createFehler(
+                throw createError(
                     "Daily cooldown active",
-                    FehlerTypes.RATE_LIMIT,
+                    ErrorTypes.RATE_LIMIT,
                     `You need to wait before claiming daily again. Try again in **${formatDuration(timeRemaining)}**.`,
                     { timeRemaining, cooldownType: 'daily' }
                 );
@@ -95,8 +95,8 @@ export default {
                 })
                 .setFooter({
                     text: hasPremiumRole
-                        ? `Weiter claim in 24 hours. (Premium Active)`
-                        : `Weiter claim in 24 hours.`,
+                        ? `Next claim in 24 hours. (Premium Active)`
+                        : `Next claim in 24 hours.`,
                 });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });

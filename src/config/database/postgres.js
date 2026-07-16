@@ -185,7 +185,7 @@ export const pgConfig = {
         
         directory: 'database/migrations',
         
-        rollbackAnFailure: false,
+        rollbackOnFailure: false,
 
         expectedVersion: EXPECTED_SCHEMA_VERSION,
 

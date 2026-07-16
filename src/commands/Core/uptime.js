@@ -6,7 +6,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("uptime")
-    .setDescription("Prüft, wie lange der Bot schon online ist"),
+    .setDescription("Check how long the bot has been online"),
 
   async execute(interaction) {
     try {
@@ -24,20 +24,20 @@ export default {
 
       await InteractionHelper.safeEditReply(interaction, {
         embeds: [createEmbed({ 
-          title: "System-Uptime", 
+          title: "System Uptime", 
           description: `\`\`\`${uptimeStr}\`\`\`` 
         })],
       });
     } catch (error) {
-      logger.error('Fehler beim Uptime-Befehl:', error);
+      logger.error('Uptime command error:', error);
       
       try {
         return await InteractionHelper.safeEditReply(interaction, {
-          embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Uptime konnte nicht berechnet werden.', color: 'error' })],
+          embeds: [createEmbed({ title: 'System Error', description: 'Could not compute uptime.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
-      } catch (replyFehler) {
-        logger.error('Fehler beim Senden der Fehlermeldung:', replyFehler);
+      } catch (replyError) {
+        logger.error('Failed to send error reply:', replyError);
       }
     }
   },

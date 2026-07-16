@@ -65,7 +65,7 @@ const feedbackHandler = {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('❌ Not Allowed')
-                        .setDescription('Anly the ticket creator can submit feedback for this ticket.')
+                        .setDescription('Only the ticket creator can submit feedback for this ticket.')
                         .setColor(getColor('error')),
                 ],
                 components: [],
@@ -77,7 +77,7 @@ const feedbackHandler = {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('✅ Already Absendented')
+                        .setTitle('✅ Already Submitted')
                         .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for your feedback!`)
                         .setColor(getColor('success')),
                 ],
@@ -161,7 +161,7 @@ const commentHandler = {
             .setLabel('Your feedback')
             .setStyle(TextInputStyle.Paragraph)
             .setPlaceholder('Share what went well or how we can improve...')
-            .setErforderlich(true)
+            .setRequired(true)
             .setMaxLength(1000);
 
         modal.addComponents(new ActionRowBuilder().addComponents(commentInput));

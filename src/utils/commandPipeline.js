@@ -6,8 +6,8 @@
  *     data: new SlashCommandBuilder()...,
  *     category: 'economy',
  *     async execute(interaction, config, client) {
- *       // throw TitanBotFehler / createFehler on failure
- *       // use replyUserFehler for early validation returns
+ *       // throw TitanBotError / createError on failure
+ *       // use replyUserError for early validation returns
  *       // do NOT wrap in try/catch — interactionCreate handles errors
  *     },
  *   });
@@ -15,7 +15,7 @@
 
 export function defineSlashCommand(command) {
     if (!command?.data || typeof command.execute !== 'function') {
-        throw new Fehler('defineSlashCommand requires { data, execute }');
+        throw new Error('defineSlashCommand requires { data, execute }');
     }
     return command;
 }

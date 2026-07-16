@@ -14,7 +14,7 @@ export class GuildMusicData {
         this.updateInterval = null;
         this.idleTimeout = null;
         this.autoPaused = false;
-        this.stopBestätigenPending = null;
+        this.stopConfirmPending = null;
     }
 }
 

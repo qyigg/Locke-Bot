@@ -16,88 +16,88 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
-import { validateAutoVerifizierenKriterien } from '../../../services/verificationService.js';
+import { validateAutoVerifyCriteria } from '../../../services/verificationService.js';
 import { botHasPermission } from '../../../utils/permissionGuard.js';
 
-const autoVerifizierenDefaults = botConfig.verification?.autoVerifizieren || {};
-const minAccountAgeDays = autoVerifizierenDefaults.minAccountAge ?? 1;
-const maxAccountAgeDays = autoVerifizierenDefaults.maxAccountAge ?? 365;
-const defaultAccountAgeDays = autoVerifizierenDefaults.defaultAccountAgeDays ?? 7;
+const autoVerifyDefaults = botConfig.verification?.autoVerify || {};
+const minAccountAgeDays = autoVerifyDefaults.minAccountAge ?? 1;
+const maxAccountAgeDays = autoVerifyDefaults.maxAccountAge ?? 365;
+const defaultAccountAgeDays = autoVerifyDefaults.defaultAccountAgeDays ?? 7;
 
 function buildDashboardEmbed(cfg, guild, conflictSummary = '') {
-    const autoVerifizieren = cfg.verification?.autoVerifizieren;
-    const autoVerifizierenRole = autoVerifizieren?.roleId ? guild.roles.cache.get(autoVerifizieren.roleId) : null;
+    const autoVerify = cfg.verification?.autoVerify;
+    const autoVerifyRole = autoVerify?.roleId ? guild.roles.cache.get(autoVerify.roleId) : null;
     
-    let criteriaDescription = "`Nicht konfiguriert`";
-    if (autoVerifizieren?.criteria) {
-        switch (autoVerifizieren.criteria) {
+    let criteriaDescription = "`Not configured`";
+    if (autoVerify?.criteria) {
+        switch (autoVerify.criteria) {
             case "account_age":
-                criteriaDescription = `\`Kontoalter\` - \`${autoVerifizieren.accountAgeDays} Tage\``;
+                criteriaDescription = `\`Account Age\` - \`${autoVerify.accountAgeDays} days\``;
                 break;
             case "none":
-                criteriaDescription = `\`Keine Kriterien\``;
+                criteriaDescription = `\`No Criteria\``;
                 break;
         }
     }
 
     const embed = new EmbedBuilder()
-        .setTitle('🤖 Auto-Verifizierungs-Dashboard')
-        .setDescription(`Verwalte die Auto-Verifizierungs-Einstellungen für **${guild.name}**.\nWähle unten eine Option aus, um eine Einstellung zu ändern.`)
+        .setTitle('🤖 Auto-Verification Dashboard')
+        .setDescription(`Manage auto-verification settings for **${guild.name}**.\nSelect an option below to modify a setting.`)
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Systemstatus', value: autoVerifizieren?.enabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
-            { name: 'Zielrolle', value: autoVerifizierenRole ? autoVerifizierenRole.toString() : '`Nicht gesetzt`', inline: true },
-            { name: 'Kriterien', value: criteriaDescription, inline: true },
-            { name: 'Kontoalter', value: autoVerifizieren?.accountAgeDays ? `\`${autoVerifizieren.accountAgeDays}\` Tage` : '`N/V`', inline: true },
+            { name: 'System Status', value: autoVerify?.enabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Target Role', value: autoVerifyRole ? autoVerifyRole.toString() : '`Not set`', inline: true },
+            { name: 'Criteria', value: criteriaDescription, inline: true },
+            { name: 'Account Age', value: autoVerify?.accountAgeDays ? `\`${autoVerify.accountAgeDays}\` days` : '`N/A`', inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
         );
 
     if (conflictSummary) {
-        embed.addFields({ name: 'Setupskonflikte', value: conflictSummary, inline: false });
+        embed.addFields({ name: 'Setup Conflicts', value: conflictSummary, inline: false });
     }
 
     return embed
-        .setFooter({ text: 'Dashboard schließt nach 10 Minuten Inaktivität' })
+        .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
         .setTimestamp();
 }
 
 function buildSelectMenu(guildId) {
     return new StringSelectMenuBuilder()
         .setCustomId(`autoverify_cfg_${guildId}`)
-        .setPlaceholder('Wähle eine Einstellung zum Konfigurieren aus...')
+        .setPlaceholder('Select a setting to configure...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel('Rolle ändern')
-                .setDescription('Wähle die Rolle aus, die automatisch vergeben wird')
+                .setLabel('Change Role')
+                .setDescription('Select the role to assign automatically')
                 .setValue('role')
                 .setEmoji('🏷️'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Tage für Kontoalter bearbeiten')
-                .setDescription('Lege das Mindest-Kontoalter in Tagen fest')
+                .setLabel('Edit Account Age Days')
+                .setDescription('Set minimum account age in days')
                 .setValue('account_age')
                 .setEmoji('📅'),
         );
 }
 
 function buildButtonRow(cfg, guildId, disabled = false) {
-    const autoVerifizierenAn = cfg.verification?.autoVerifizieren?.enabled === true;
+    const autoVerifyOn = cfg.verification?.autoVerify?.enabled === true;
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`autoverify_cfg_criteria_${guildId}`)
-            .setLabel('Kriterien ändern')
+            .setLabel('Change Criteria')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('🎯')
-            .setDeaktiviert(disabled),
+            .setDisabled(disabled),
         new ButtonBuilder()
             .setCustomId(`autoverify_cfg_toggle_${guildId}`)
-            .setLabel('Auto-Verifizierung')
-            .setStyle(autoVerifizierenAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setLabel('Auto-Verification')
+            .setStyle(autoVerifyOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('🤖')
-            .setDeaktiviert(disabled),
+            .setDisabled(disabled),
     );
 }
 
@@ -108,19 +108,19 @@ async function refreshDashboard(rootInteraction, cfg, guildId, client) {
         let conflictSummary = '';
         try {
             const welcomeConfig = await getWelcomeConfig(client, guildId);
-            const verificationAktiviert = Boolean(cfg.verification?.enabled);
+            const verificationEnabled = Boolean(cfg.verification?.enabled);
             const autoRoleConfigured = Boolean(cfg.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
             
             const conflicts = [
-                verificationAktiviert ? 'Verifizierungssystem ist aktiviert' : null,
-                autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
+                verificationEnabled ? 'Verification system is enabled' : null,
+                autoRoleConfigured ? 'AutoRole is configured' : null
             ].filter(Boolean);
             
             if (conflicts.length > 0) {
                 conflictSummary = conflicts.join('\n');
             }
         } catch (error) {
-            logger.warn('Konflikte für das AutoVerifizieren-Dashboard konnten nicht abgerufen werden:', error.message);
+            logger.warn('Could not fetch autoverify dashboard conflicts:', error.message);
         }
         
         await InteractionHelper.safeEditReply(rootInteraction, {
@@ -132,38 +132,38 @@ async function refreshDashboard(rootInteraction, cfg, guildId, client) {
             flags: MessageFlags.Ephemeral,
         });
     } catch (error) {
-        logger.debug('AutoVerifizieren-Dashboard konnte nicht aktualisiert werden (Interaction ist möglicherweise abgelaufen):', error.message);
+        logger.debug('Could not refresh autoverify dashboard (interaction may have expired):', error.message);
     }
 }
 
 export default {
-    prefixAnly: false,
+    prefixOnly: false,
     async execute(interaction, config, client) {
         try {
             const guildId = interaction.guild.id;
             const guildConfig = await getGuildConfig(client, guildId);
 
-            if (!guildConfig.verification?.autoVerifizieren?.enabled) {
+            if (!guildConfig.verification?.autoVerify?.enabled) {
                 
                 const welcomeConfig = await getWelcomeConfig(client, guildId);
-                const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
+                const verificationEnabled = Boolean(guildConfig.verification?.enabled);
                 const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
                 
                 const blockingMessage = [];
-                if (verificationAktiviert) blockingMessage.push('Verifizierungssystem ist aktiviert');
-                if (autoRoleConfigured) blockingMessage.push('AutoRole ist konfiguriert');
+                if (verificationEnabled) blockingMessage.push('Verification system is enabled');
+                if (autoRoleConfigured) blockingMessage.push('AutoRole is configured');
 
                 const blockingText = blockingMessage.length > 0 
-                    ? `\n\n⚠️ **Um AutoVerifizieren zu aktivieren, musst du zuerst Folgendes deaktivieren:**\n${blockingMessage.map(msg =>`• ${msg}`).join('\n')}`
+                    ? `\n\n⚠️ **To enable AutoVerify, you must first disable:**\n${blockingMessage.map(msg =>`• ${msg}`).join('\n')}`
                     : '';
 
                 return await InteractionHelper.safeReply(interaction, {
                     embeds: [
                         new EmbedBuilder()
-                            .setTitle('🤖 Auto-Verifizierungs-Dashboard')
-                            .setDescription(`Auto-Verifizierung ist noch nicht konfiguriert.${blockingText}\n\nVerwende \`/autoverify setup\`, um sie einzurichten.`)
+                            .setTitle('🤖 Auto-Verification Dashboard')
+                            .setDescription(`Auto-verification is not yet configured.${blockingText}\n\nUse \`/autoverify setup\` to configure it.`)
                             .setColor(getColor('warning'))
-                            .setFooter({ text: 'Dashboard schließt nach 10 Minuten Inaktivität' })
+                            .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
                             .setTimestamp()
                     ],
                     flags: MessageFlags.Ephemeral
@@ -177,19 +177,19 @@ export default {
             let conflictSummary = '';
             try {
                 const welcomeConfig = await getWelcomeConfig(client, guildId);
-                const verificationAktiviert = Boolean(guildConfig.verification?.enabled);
+                const verificationEnabled = Boolean(guildConfig.verification?.enabled);
                 const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
                 
                 const conflicts = [
-                    verificationAktiviert ? 'Verifizierungssystem ist aktiviert' : null,
-                    autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
+                    verificationEnabled ? 'Verification system is enabled' : null,
+                    autoRoleConfigured ? 'AutoRole is configured' : null
                 ].filter(Boolean);
                 
                 if (conflicts.length > 0) {
                     conflictSummary = conflicts.join('\n');
                 }
             } catch (error) {
-                logger.warn('Konflikte für das AutoVerifizieren-Dashboard konnten nicht abgerufen werden:', error.message);
+                logger.warn('Could not fetch autoverify dashboard conflicts:', error.message);
             }
 
             await InteractionHelper.safeEditReply(interaction, {
@@ -220,23 +220,23 @@ export default {
                             break;
                     }
                 } catch (error) {
-                    if (error instanceof TitanBotFehler) {
-                        logger.debug(`Autoverify-Konfigurations-Validierungsfehler: ${error.message}`);
+                    if (error instanceof TitanBotError) {
+                        logger.debug(`Autoverify config validation error: ${error.message}`);
                     } else {
-                        logger.error('Unerwarteter AutoVerifizieren-Dashboard-Fehler:', error);
+                        logger.error('Unexpected autoverify dashboard error:', error);
                     }
 
                     const errorMessage =
-                        error instanceof TitanBotFehler
-                            ? error.userMessage || 'Beim Verarbeiten deiner Auswahl ist ein Fehler aufgetreten.'
-                            : 'Beim Aktualisieren der Konfiguration ist ein unerwarteter Fehler aufgetreten.';
+                        error instanceof TitanBotError
+                            ? error.userMessage || 'An error occurred while processing your selection.'
+                            : 'An unexpected error occurred while updating the configuration.';
 
                     if (!selectInteraction.replied && !selectInteraction.deferred) {
                         await selectInteraction.deferUpdate().catch(() => {});
                     }
 
-                    await replyUserFehler(selectInteraction, {
-                        type: FehlerTypes.CONFIGURATION,
+                    await replyUserError(selectInteraction, {
+                        type: ErrorTypes.CONFIGURATION,
                         message: errorMessage,
                     }).catch(() => {});
                 }
@@ -253,17 +253,17 @@ export default {
             btnCollector.on('collect', async btnInteraction => {
                 try {
                     if (btnInteraction.customId === `autoverify_cfg_criteria_${guildId}`) {
-                        await handleKriterien(btnInteraction, interaction, guildConfig, guildId, client);
+                        await handleCriteria(btnInteraction, interaction, guildConfig, guildId, client);
                     } else if (btnInteraction.customId === `autoverify_cfg_toggle_${guildId}`) {
                         await btnInteraction.deferUpdate().catch(() => null);
-                        guildConfig.verification.autoVerifizieren.enabled = !guildConfig.verification.autoVerifizieren.enabled;
+                        guildConfig.verification.autoVerify.enabled = !guildConfig.verification.autoVerify.enabled;
                         await setGuildConfig(client, guildId, guildConfig);
                         
                         await btnInteraction.followUp({
                             embeds: [
                                 successEmbed(
-                                    '✅ Status aktualisiert',
-                                    `Auto-Verifizierung ist jetzt **${guildConfig.verification.autoVerifizieren.enabled ? 'aktiviert' : 'deaktiviert'}**.`,
+                                    '✅ Status Updated',
+                                    `Auto-verification is now **${guildConfig.verification.autoVerify.enabled ? 'enabled' : 'disabled'}**.`,
                                 ),
                             ],
                             flags: MessageFlags.Ephemeral,
@@ -272,7 +272,7 @@ export default {
                         await refreshDashboard(interaction, guildConfig, guildId, client);
                     }
                 } catch (err) {
-                    logger.debug('Fehler bei der Button-Interaktion:', err.message);
+                    logger.debug('Button interaction error:', err.message);
                 }
             });
 
@@ -281,8 +281,8 @@ export default {
                     btnCollector.stop();
                     try {
                         const timeoutEmbed = new EmbedBuilder()
-                            .setTitle('Dashboard-Zeitüberschreitung')
-                            .setDescription('Dieses Dashboard wurde aufgrund von Inaktivität geschlossen. Bitte führe den Befehl erneut aus, um fortzufahren.')
+                            .setTitle('Dashboard Timed Out')
+                            .setDescription('This dashboard has been closed due to inactivity. Please run the command again to continue.')
                             .setColor(getColor('error'));
                         await InteractionHelper.safeEditReply(interaction, {
                             embeds: [timeoutEmbed],
@@ -290,44 +290,44 @@ export default {
                             flags: MessageFlags.Ephemeral,
                         });
                     } catch (error) {
-                        logger.debug('Dashboard konnte bei Zeitüberschreitung nicht aktualisiert werden:', error.message);
+                        logger.debug('Could not update dashboard on timeout:', error.message);
                     }
                 }
             });
         } catch (error) {
-            if (error instanceof TitanBotFehler) throw error;
-            logger.error('Unerwarteter Fehler in autoverify_dashboard:', error);
-            throw new TitanBotFehler(
-                `Auto-Verifizierungs-Dashboard fehlgeschlagen: ${error.message}`,
-                FehlerTypes.UNKNOWN,
-                'Das Auto-Verifizierungs-Dashboard konnte nicht geöffnet werden.',
+            if (error instanceof TitanBotError) throw error;
+            logger.error('Unexpected error in autoverify_dashboard:', error);
+            throw new TitanBotError(
+                `Auto-verification dashboard failed: ${error.message}`,
+                ErrorTypes.UNKNOWN,
+                'Failed to open the auto-verification dashboard.',
             );
         }
     },
 };
 
-async function handleKriterien(selectInteraction, rootInteraction, guildConfig, guildId, client) {
+async function handleCriteria(selectInteraction, rootInteraction, guildConfig, guildId, client) {
     
     if (!selectInteraction.deferred) {
         await selectInteraction.deferUpdate().catch(() => null);
     }
     
     const criteriaEmbed = new EmbedBuilder()
-        .setTitle('Verifizierungskriterien auswählen')
-        .setDescription('Wähle die Kriterien für die automatische Verifizierung')
+        .setTitle('Select Verification Criteria')
+        .setDescription('Choose the criteria for automatic verification')
         .setColor(getColor('info'));
 
     const criteriaMenu = new StringSelectMenuBuilder()
         .setCustomId('autoverify_criteria_select')
-        .setPlaceholder('Kriterien auswählen...')
+        .setPlaceholder('Select criteria...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel(`Kontoalter (älter als ${defaultAccountAgeDays} Tage)`)
-                .setDescription('Benutzer mit älteren Konten werden automatisch verifiziert')
+                .setLabel(`Account Age (older than ${defaultAccountAgeDays} days)`)
+                .setDescription('Users with older accounts will be auto-verified')
                 .setValue('account_age'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Keine Kriterien (alle verifizieren)')
-                .setDescription('Alle Benutzer erhalten die Rolle sofort')
+                .setLabel('No Criteria (verify everyone)')
+                .setDescription('All users gain the role immediately')
                 .setValue('none'),
         );
 
@@ -347,30 +347,30 @@ async function handleKriterien(selectInteraction, rootInteraction, guildConfig, 
 
     criteriaCollector.on('collect', async criteriaInteraction => {
         await criteriaInteraction.deferUpdate();
-        const newKriterien = criteriaInteraction.values[0];
+        const newCriteria = criteriaInteraction.values[0];
 
-        guildConfig.verification.autoVerifizieren.criteria = newKriterien;
+        guildConfig.verification.autoVerify.criteria = newCriteria;
 
-        if (newKriterien !== 'account_age') {
-            guildConfig.verification.autoVerifizieren.accountAgeDays = null;
-        } else if (!guildConfig.verification.autoVerifizieren.accountAgeDays) {
-            guildConfig.verification.autoVerifizieren.accountAgeDays = defaultAccountAgeDays;
+        if (newCriteria !== 'account_age') {
+            guildConfig.verification.autoVerify.accountAgeDays = null;
+        } else if (!guildConfig.verification.autoVerify.accountAgeDays) {
+            guildConfig.verification.autoVerify.accountAgeDays = defaultAccountAgeDays;
         }
 
         await setGuildConfig(client, guildId, guildConfig);
 
         let criteriaDisplay = '';
-        switch (newKriterien) {
+        switch (newCriteria) {
             case 'account_age':
-                criteriaDisplay = `Kontoalter (${guildConfig.verification.autoVerifizieren.accountAgeDays} Tage)`;
+                criteriaDisplay = `Account Age (${guildConfig.verification.autoVerify.accountAgeDays} days)`;
                 break;
             case 'none':
-                criteriaDisplay = 'Keine Kriterien';
+                criteriaDisplay = 'No Criteria';
                 break;
         }
 
         await criteriaInteraction.followUp({
-            embeds: [successEmbed('Kriterien aktualisiert', `Die Auto-Verifizierungs-Kriterien wurden zu **${criteriaDisplay}** geändert.`)],
+            embeds: [successEmbed('Criteria Updated', `Auto-verification criteria changed to **${criteriaDisplay}**.`)],
             flags: MessageFlags.Ephemeral,
         });
 
@@ -379,9 +379,9 @@ async function handleKriterien(selectInteraction, rootInteraction, guildConfig, 
 
     criteriaCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserFehler(selectInteraction, {
-                type: FehlerTypes.RATE_LIMIT,
-                message: 'Es wurden keine Kriterien ausgewählt. Die Einstellung wurde nicht geändert.',
+            replyUserError(selectInteraction, {
+                type: ErrorTypes.RATE_LIMIT,
+                message: 'No criteria selected. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -392,14 +392,14 @@ async function handleRole(selectInteraction, rootInteraction, guildConfig, guild
 
     const roleSelect = new RoleSelectMenuBuilder()
         .setCustomId('autoverify_role_select')
-        .setPlaceholder('Wähle eine Rolle aus...')
+        .setPlaceholder('Select a role...')
         .setMaxValues(1);
 
     await selectInteraction.followUp({
         embeds: [
             new EmbedBuilder()
-                .setTitle('Auto-Verifizierungsrolle')
-                .setDescription('Wähle die Rolle aus, die automatisch verifizierten Benutzern zugewiesen wird.')
+                .setTitle('Auto-Verification Role')
+                .setDescription('Select the role to assign to auto-verified users.')
                 .setColor(getColor('info')),
         ],
         components: [new ActionRowBuilder().addComponents(roleSelect)],
@@ -418,28 +418,28 @@ async function handleRole(selectInteraction, rootInteraction, guildConfig, guild
         await roleInteraction.deferUpdate();
         const role = roleInteraction.roles.first();
 
-        if (Rolle zu bekommen.id === rootInteraction.guild.id || Rolle zu bekommen.managed) {
-            await replyUserFehler(roleInteraction, {
-                type: FehlerTypes.VALIDATION,
-                message: 'Bitte wähle eine normale zuweisbare Rolle aus (nicht @everyone und keine vom Bot verwaltete Rolle).',
+        if (role.id === rootInteraction.guild.id || role.managed) {
+            await replyUserError(roleInteraction, {
+                type: ErrorTypes.VALIDATION,
+                message: 'Please choose a normal assignable role (not @everyone or a bot-managed role).',
             });
             return;
         }
 
         const botMember = rootInteraction.guild.members.me;
-        if (Rolle zu bekommen.position >= botMember.roles.highest.position) {
-            await replyUserFehler(roleInteraction, {
-                type: FehlerTypes.PERMISSION,
-                message: 'Die ausgewählte Rolle muss in der Server-Rollenhierarchie unter meiner höchsten Rolle liegen.',
+        if (role.position >= botMember.roles.highest.position) {
+            await replyUserError(roleInteraction, {
+                type: ErrorTypes.PERMISSION,
+                message: 'The selected role must be below my highest role in the server role hierarchy.',
             });
             return;
         }
 
-        guildConfig.verification.autoVerifizieren.roleId = Rolle zu bekommen.id;
+        guildConfig.verification.autoVerify.roleId = role.id;
         await setGuildConfig(client, guildId, guildConfig);
 
         await roleInteraction.followUp({
-            embeds: [successEmbed('Rolle aktualisiert', `Auto-Verifizierungsrolle wurde auf ${role} gesetzt.`)],
+            embeds: [successEmbed('Role Updated', `Auto-verification role set to ${role}.`)],
             flags: MessageFlags.Ephemeral,
         });
 
@@ -448,9 +448,9 @@ async function handleRole(selectInteraction, rootInteraction, guildConfig, guild
 
     roleCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserFehler(selectInteraction, {
-                type: FehlerTypes.RATE_LIMIT,
-                message: 'Es wurde keine Rolle ausgewählt. Die Einstellung wurde nicht geändert.',
+            replyUserError(selectInteraction, {
+                type: ErrorTypes.RATE_LIMIT,
+                message: 'No role was selected. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -459,23 +459,23 @@ async function handleRole(selectInteraction, rootInteraction, guildConfig, guild
 async function handleAccountAge(selectInteraction, rootInteraction, guildConfig, guildId, client) {
     const modal = new ModalBuilder()
         .setCustomId('autoverify_account_age_modal')
-        .setTitle('Anforderung für Kontoalter festlegen')
+        .setTitle('Set Account Age Requirement')
         .addComponents(
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
                     .setCustomId('age_input')
-                    .setLabel('Minimales Kontoalter (Tage)')
+                    .setLabel('Minimum Account Age (days)')
                     .setStyle(TextInputStyle.Short)
-                    .setPlaceholder(`Zwischen ${minAccountAgeDays} und ${maxAccountAgeDays}`)
-                    .setValue((guildConfig.verification.autoVerifizieren.accountAgeDays || defaultAccountAgeDays).toString())
-                    .setErforderlich(true),
+                    .setPlaceholder(`Between ${minAccountAgeDays} and ${maxAccountAgeDays}`)
+                    .setValue((guildConfig.verification.autoVerify.accountAgeDays || defaultAccountAgeDays).toString())
+                    .setRequired(true),
             ),
         );
 
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'autoverify_account_age_modal' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -488,15 +488,15 @@ async function handleAccountAge(selectInteraction, rootInteraction, guildConfig,
     const days = parseInt(inputValue, 10);
 
     if (isNaN(days) || days < minAccountAgeDays || days > maxAccountAgeDays) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: `Bitte gib eine Zahl zwischen ${minAccountAgeDays} und ${maxAccountAgeDays} ein.` });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: `Please enter a number between ${minAccountAgeDays} and ${maxAccountAgeDays}.` });
         return;
     }
 
-    guildConfig.verification.autoVerifizieren.accountAgeDays = days;
+    guildConfig.verification.autoVerify.accountAgeDays = days;
     await setGuildConfig(client, guildId, guildConfig);
 
     await submitted.reply({
-        embeds: [successEmbed('Kontoalter aktualisiert', `Die Mindestanforderung für das Kontoalter wurde auf **${days} Tage** gesetzt.`)],
+        embeds: [successEmbed('Account Age Updated', `Minimum account age requirement set to **${days} days**.`)],
         flags: MessageFlags.Ephemeral,
     });
 

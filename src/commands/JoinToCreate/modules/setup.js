@@ -1,7 +1,7 @@
 import { ChannelType, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { successEmbed, errorEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../../../utils/errorHandler.js';
 import { addJoinToCreateTrigger, getJoinToCreateConfig } from '../../../utils/database.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -38,7 +38,7 @@ export default {
             const embed = successEmbed(
                 '✅ Join to Create Setup Complete',
                 `Created trigger channel: ${triggerChannel}\n\n` +
-                `**Einstellungen:**\n` +
+                `**Settings:**\n` +
                 `• Temporary Channel Name Template: \`${nameTemplate}\`\n` +
                 `• User Limit: ${userLimit === 0 ? 'No limit' : userLimit + ' users'}\n` +
                 `• Bitrate: ${bitrate} kbps\n` +
@@ -52,8 +52,8 @@ export default {
                 } else {
                     await InteractionHelper.safeReply(interaction, { embeds: [embed], flags: MessageFlags.Ephemeral });
                 }
-            } catch (responseFehler) {
-                logger.error('Fehler responding to interaction:', responseFehler);
+            } catch (responseError) {
+                logger.error('Error responding to interaction:', responseError);
                 
                 try {
                     if (!interaction.replied) {
@@ -64,13 +64,13 @@ export default {
                 }
             }
         } catch (error) {
-            if (error instanceof TitanBotFehler) {
+            if (error instanceof TitanBotError) {
                 throw error;
             }
-            logger.error('Fehler in JoinToCreate setup:', error);
-            throw new TitanBotFehler(
+            logger.error('Error in JoinToCreate setup:', error);
+            throw new TitanBotError(
                 `Setup failed: ${error.message}`,
-                FehlerTypes.DISCORD_API,
+                ErrorTypes.DISCORD_API,
                 'Failed to set up Join to Create system.'
             );
         }

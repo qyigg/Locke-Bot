@@ -1,12 +1,12 @@
-import { warningLöschenModalHandler, warningClearBestätigenModalHandler } from '../../../handlers/warningHandlers.js';
+import { warningDeleteModalHandler, warningClearConfirmModalHandler } from '../../../handlers/warningHandlers.js';
 
-const deleteExecute = typeof warningLöschenModalHandler === 'function'
-  ? warningLöschenModalHandler
-  : warningLöschenModalHandler.execute;
+const deleteExecute = typeof warningDeleteModalHandler === 'function'
+  ? warningDeleteModalHandler
+  : warningDeleteModalHandler.execute;
 
-const clearExecute = typeof warningClearBestätigenModalHandler === 'function'
-  ? warningClearBestätigenModalHandler
-  : warningClearBestätigenModalHandler.execute;
+const clearExecute = typeof warningClearConfirmModalHandler === 'function'
+  ? warningClearConfirmModalHandler
+  : warningClearConfirmModalHandler.execute;
 
 export default [
   {

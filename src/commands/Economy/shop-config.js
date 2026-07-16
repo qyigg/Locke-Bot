@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
-import shopConfigSetrole from './modules/shop_config_setRolle zu bekommen.js';
+import shopConfigSetrole from './modules/shop_config_setrole.js';
 
 export default {
-    slashAnly: true,
+    slashOnly: true,
     data: new SlashCommandBuilder()
         .setName('shop-config')
         .setDescription('Configure shop settings. (Manage Server required)')
@@ -14,7 +14,7 @@ export default {
                     option
                         .setName('role')
                         .setDescription('The role to grant for Premium Role purchases.')
-                        .setErforderlich(true),
+                        .setRequired(true),
                 ),
         ),
 
@@ -22,7 +22,7 @@ export default {
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === 'setrole') {
-            return shopConfigSetRolle zu bekommen.execute(interaction, config, client);
+            return shopConfigSetrole.execute(interaction, config, client);
         }
     },
 };

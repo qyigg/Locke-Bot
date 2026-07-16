@@ -4,18 +4,18 @@ import { PermissionFlagsBits } from 'discord.js';
 import { botConfig } from '../config/bot.js';
 import { logger } from '../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from './config/guildConfig.js';
-import { createFehler, FehlerTypes } from '../utils/errorHandler.js';
+import { createError, ErrorTypes } from '../utils/errorHandler.js';
 import { insertVerificationAudit } from '../utils/database.js';
-import { ensureTypedServiceFehler } from '../utils/serviceFehlerBoundary.js';
+import { ensureTypedServiceError } from '../utils/serviceErrorBoundary.js';
 
 const verificationCooldowns = new Map();
 const attemptTracker = new Map();
 
 const verificationDefaults = botConfig?.verification || {};
-const autoVerifizierenDefaults = verificationDefaults.autoVerifizieren || {};
-const minAutoVerifizierenAccountAgeDays = autoVerifizierenDefaults.minAccountAge ?? 1;
-const maxAutoVerifizierenAccountAgeDays = autoVerifizierenDefaults.maxAccountAge ?? 365;
-const serverSizeThreshold = autoVerifizierenDefaults.serverSizeThreshold ?? 1000;
+const autoVerifyDefaults = verificationDefaults.autoVerify || {};
+const minAutoVerifyAccountAgeDays = autoVerifyDefaults.minAccountAge ?? 1;
+const maxAutoVerifyAccountAgeDays = autoVerifyDefaults.maxAccountAge ?? 365;
+const serverSizeThreshold = autoVerifyDefaults.serverSizeThreshold ?? 1000;
 const defaultCooldownMs = verificationDefaults.verificationCooldown ?? 5000;
 const defaultMaxAttempts = verificationDefaults.maxVerificationAttempts ?? 3;
 const defaultAttemptWindowMs = verificationDefaults.attemptWindow ?? 60000;
@@ -23,7 +23,7 @@ const maxCooldownEntries = verificationDefaults.maxCooldownEntries ?? 10000;
 const maxAttemptEntries = verificationDefaults.maxAttemptEntries ?? 10000;
 const cooldownCleanupIntervalMs = verificationDefaults.cooldownCleanupInterval ?? 300000;
 const maxAuditMetadataBytes = verificationDefaults.maxAuditMetadataBytes ?? 4096;
-const shouldSendAutoVerifizierenDm = autoVerifizierenDefaults.sendDMNotification ?? true;
+const shouldSendAutoVerifyDm = autoVerifyDefaults.sendDMNotification ?? true;
 const shouldLogVerifications = verificationDefaults.logAllVerifications ?? true;
 const shouldKeepAuditTrail = verificationDefaults.keepAuditTrail ?? false;
 let lastCleanupAt = 0;
@@ -35,9 +35,9 @@ export async function verifyUser(client, guildId, userId, options = {}) {
         
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            throw createFehler(
+            throw createError(
                 `Guild ${guildId} not found`,
-                FehlerTypes.CONFIGURATION,
+                ErrorTypes.CONFIGURATION,
                 "Guild not found in bot cache.",
                 { guildId }
             );
@@ -47,9 +47,9 @@ export async function verifyUser(client, guildId, userId, options = {}) {
         try {
             member = await guild.members.fetch(userId);
         } catch (error) {
-            throw createFehler(
+            throw createError(
                 `Member ${userId} not found in guild`,
-                FehlerTypes.USER_INPUT,
+                ErrorTypes.USER_INPUT,
                 "User is not in this server.",
                 { userId, guildId }
             );
@@ -58,9 +58,9 @@ export async function verifyUser(client, guildId, userId, options = {}) {
         const guildConfig = await getGuildConfig(client, guildId);
         
         if (!guildConfig.verification?.enabled) {
-            throw createFehler(
-                "Verifizierungssystem disabled",
-                FehlerTypes.CONFIGURATION,
+            throw createError(
+                "Verification system disabled",
+                ErrorTypes.CONFIGURATION,
                 "The verification system is not enabled on this server.",
                 { guildId }
             );
@@ -71,10 +71,10 @@ export async function verifyUser(client, guildId, userId, options = {}) {
         const verifiedRole = guild.roles.cache.get(guildConfig.verification.roleId);
         const canAssignRole = await validateBotCanAssignRole(guild, verifiedRole.id);
         if (!canAssignRole) {
-            throw createFehler(
+            throw createError(
                 'Bot cannot assign verified role',
-                FehlerTypes.PERMISSION,
-                "I can't assign the verified Rolle zu bekommen. Please check my **Manage Roles** permission and role hierarchy.",
+                ErrorTypes.PERMISSION,
+                "I can't assign the verified role. Please check my **Manage Roles** permission and role hierarchy.",
                 { guildId, roleId: verifiedRole.id }
             );
         }
@@ -116,22 +116,22 @@ export async function verifyUser(client, guildId, userId, options = {}) {
         };
 
     } catch (error) {
-        const typedFehler = ensureTypedServiceFehler(error, {
+        const typedError = ensureTypedServiceError(error, {
             service: 'verificationService',
             operation: 'verifyUser',
-            type: FehlerTypes.UNKNOWN,
+            type: ErrorTypes.UNKNOWN,
             message: 'Verification operation failed: verifyUser',
             userMessage: 'Verification failed. Please try again in a moment.',
             context: { guildId, userId, source: options.source }
         });
-        logger.error('Fehler verifying user', {
+        logger.error('Error verifying user', {
             guildId,
             userId,
             source: options.source,
-            error: typedFehler.message,
-            errorCode: typedFehler.context?.errorCode
+            error: typedError.message,
+            errorCode: typedError.context?.errorCode
         });
-        throw typedFehler;
+        throw typedError;
     }
 }
 
@@ -174,18 +174,18 @@ function pruneVerificationTrackers(now = Date.now()) {
     }
 }
 
-export async function autoVerifizierenAnJoin(client, guild, member, verificationConfig) {
+export async function autoVerifyOnJoin(client, guild, member, verificationConfig) {
     try {
         
-        if (!verificationConfig.autoVerifizieren?.enabled) {
+        if (!verificationConfig.autoVerify?.enabled) {
             return {
                 autoVerified: false,
                 reason: 'auto_verify_disabled'
             };
         }
 
-        const autoVerifizierenRoleId = verificationConfig.autoVerifizieren?.roleId || verificationConfig.roleId;
-        if (!autoVerifizierenRoleId) {
+        const autoVerifyRoleId = verificationConfig.autoVerify?.roleId || verificationConfig.roleId;
+        if (!autoVerifyRoleId) {
             return {
                 autoVerified: false,
                 reason: 'auto_verify_role_not_configured'
@@ -194,25 +194,25 @@ export async function autoVerifizierenAnJoin(client, guild, member, verification
 
         const effectiveVerificationConfig = {
             ...verificationConfig,
-            roleId: autoVerifizierenRoleId
+            roleId: autoVerifyRoleId
         };
 
         await validateVerificationSetup(guild, effectiveVerificationConfig);
 
-        const shouldVerifizieren = evaluateAutoVerifizierenKriterien(
+        const shouldVerify = evaluateAutoVerifyCriteria(
             member,
-            verificationConfig.autoVerifizieren
+            verificationConfig.autoVerify
         );
 
-        if (!shouldVerifizieren) {
+        if (!shouldVerify) {
             return {
                 autoVerified: false,
                 reason: 'criteria_not_met',
-                criteria: verificationConfig.autoVerifizieren.criteria
+                criteria: verificationConfig.autoVerify.criteria
             };
         }
 
-        const verifiedRole = guild.roles.cache.get(autoVerifizierenRoleId);
+        const verifiedRole = guild.roles.cache.get(autoVerifyRoleId);
 
         const canAssign = await validateBotCanAssignRole(guild, verifiedRole.id);
         if (!canAssign) {
@@ -238,7 +238,7 @@ export async function autoVerifizierenAnJoin(client, guild, member, verification
         await member.roles.add(verifiedRole.id, 'Auto-verified on join');
 
         logVerificationAction(client, guild.id, member.id, 'auto_verified', {
-            criteria: verificationConfig.autoVerifizieren.criteria,
+            criteria: verificationConfig.autoVerify.criteria,
             accountAge: Date.now() - member.user.createdTimestamp,
             roleId: verifiedRole.id,
             roleName: verifiedRole.name
@@ -248,12 +248,12 @@ export async function autoVerifizierenAnJoin(client, guild, member, verification
             guildId: guild.id,
             userId: member.id,
             userTag: member.user.tag,
-            criteria: verificationConfig.autoVerifizieren.criteria,
+            criteria: verificationConfig.autoVerify.criteria,
             accountAge: Date.now() - member.user.createdTimestamp
         });
 
-        if (shouldSendAutoVerifizierenDm) {
-            await sendAutoVerifizierenNotification(member, verifiedRole, guild);
+        if (shouldSendAutoVerifyDm) {
+            await sendAutoVerifyNotification(member, verifiedRole, guild);
         }
 
         return {
@@ -261,30 +261,30 @@ export async function autoVerifizierenAnJoin(client, guild, member, verification
             userId: member.id,
             roleId: verifiedRole.id,
             roleName: verifiedRole.name,
-            criteria: verificationConfig.autoVerifizieren.criteria
+            criteria: verificationConfig.autoVerify.criteria
         };
 
     } catch (error) {
-        const typedFehler = ensureTypedServiceFehler(error, {
+        const typedError = ensureTypedServiceError(error, {
             service: 'verificationService',
-            operation: 'autoVerifizierenAnJoin',
-            type: FehlerTypes.UNKNOWN,
-            message: 'Verification operation failed: autoVerifizierenAnJoin',
+            operation: 'autoVerifyOnJoin',
+            type: ErrorTypes.UNKNOWN,
+            message: 'Verification operation failed: autoVerifyOnJoin',
             userMessage: 'Automatic verification failed. Please verify manually.',
             context: { guildId: guild.id, userId: member.id }
         });
-        logger.error('Fehler in auto-verification on join', {
+        logger.error('Error in auto-verification on join', {
             guildId: guild.id,
             userId: member.id,
-            error: typedFehler.message,
-            errorCode: typedFehler.context?.errorCode
+            error: typedError.message,
+            errorCode: typedError.context?.errorCode
         });
         
         return {
             autoVerified: false,
             reason: 'auto_verify_error',
-            error: typedFehler.userMessage || typedFehler.message,
-            errorCode: typedFehler.context?.errorCode
+            error: typedError.userMessage || typedError.message,
+            errorCode: typedError.context?.errorCode
         };
     }
 }
@@ -295,9 +295,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
     try {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            throw createFehler(
+            throw createError(
                 `Guild ${guildId} not found`,
-                FehlerTypes.CONFIGURATION,
+                ErrorTypes.CONFIGURATION,
                 "Guild not found.",
                 { guildId }
             );
@@ -307,9 +307,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
         try {
             member = await guild.members.fetch(userId);
         } catch (error) {
-            throw createFehler(
+            throw createError(
                 `Member ${userId} not found`,
-                FehlerTypes.USER_INPUT,
+                ErrorTypes.USER_INPUT,
                 "User is not in this server.",
                 { userId }
             );
@@ -318,9 +318,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
         const guildConfig = await getGuildConfig(client, guildId);
         
         if (!guildConfig.verification?.enabled) {
-            throw createFehler(
-                "Verifizierungssystem disabled",
-                FehlerTypes.CONFIGURATION,
+            throw createError(
+                "Verification system disabled",
+                ErrorTypes.CONFIGURATION,
                 "The verification system is not enabled.",
                 { guildId }
             );
@@ -328,9 +328,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
 
         const verifiedRole = guild.roles.cache.get(guildConfig.verification.roleId);
         if (!verifiedRole) {
-            throw createFehler(
+            throw createError(
                 "Verified role not found",
-                FehlerTypes.CONFIGURATION,
+                ErrorTypes.CONFIGURATION,
                 "The verified role no longer exists.",
                 { roleId: guildConfig.verification.roleId }
             );
@@ -338,9 +338,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
 
         const canAssignRole = await validateBotCanAssignRole(guild, verifiedRole.id);
         if (!canAssignRole) {
-            throw createFehler(
+            throw createError(
                 'Bot cannot manage verified role',
-                FehlerTypes.PERMISSION,
+                ErrorTypes.PERMISSION,
                 "I can't remove the verified role right now. Please check my **Manage Roles** permission and role hierarchy.",
                 { guildId, roleId: verifiedRole.id }
             );
@@ -379,30 +379,30 @@ export async function removeVerification(client, guildId, userId, options = {}) 
         };
 
     } catch (error) {
-        const typedFehler = ensureTypedServiceFehler(error, {
+        const typedError = ensureTypedServiceError(error, {
             service: 'verificationService',
             operation: 'removeVerification',
-            type: FehlerTypes.UNKNOWN,
+            type: ErrorTypes.UNKNOWN,
             message: 'Verification operation failed: removeVerification',
             userMessage: 'Failed to remove verification. Please try again in a moment.',
             context: { guildId, userId, reason }
         });
-        logger.error('Fehler removing verification', {
+        logger.error('Error removing verification', {
             guildId,
             userId,
-            error: typedFehler.message,
-            errorCode: typedFehler.context?.errorCode
+            error: typedError.message,
+            errorCode: typedError.context?.errorCode
         });
-        throw typedFehler;
+        throw typedError;
     }
 }
 
 export async function validateVerificationSetup(guild, verificationConfig) {
     const botMember = guild.members.me;
     if (!botMember) {
-        throw createFehler(
+        throw createError(
             'Bot member not available in guild cache',
-            FehlerTypes.CONFIGURATION,
+            ErrorTypes.CONFIGURATION,
             "I couldn't verify my server permissions. Please try again.",
             { guildId: guild.id }
         );
@@ -410,9 +410,9 @@ export async function validateVerificationSetup(guild, verificationConfig) {
 
     const verifiedRole = guild.roles.cache.get(verificationConfig.roleId);
     if (!verifiedRole) {
-        throw createFehler(
+        throw createError(
             "Verified role not found",
-            FehlerTypes.CONFIGURATION,
+            ErrorTypes.CONFIGURATION,
             "The verified role was deleted. Please run `/verification setup` again.",
             { roleId: verificationConfig.roleId, guildId: guild.id }
         );
@@ -421,9 +421,9 @@ export async function validateVerificationSetup(guild, verificationConfig) {
     if (verificationConfig.channelId) {
         const channel = guild.channels.cache.get(verificationConfig.channelId);
         if (!channel) {
-            throw createFehler(
+            throw createError(
                 "Verification channel not found",
-                FehlerTypes.CONFIGURATION,
+                ErrorTypes.CONFIGURATION,
                 "The verification channel was deleted.",
                 { channelId: verificationConfig.channelId, guildId: guild.id }
             );
@@ -434,9 +434,9 @@ export async function validateVerificationSetup(guild, verificationConfig) {
         const missingPerms = requiredPerms.filter(perm => !botPerms.has(perm));
 
         if (missingPerms.length > 0) {
-            throw createFehler(
+            throw createError(
                 "Bot missing permissions in verification channel",
-                FehlerTypes.PERMISSION,
+                ErrorTypes.PERMISSION,
                 `I'm missing permissions in the verification channel: ${missingPerms.join(', ')}`,
                 { missingPerms, channelId: channel.id }
             );
@@ -475,11 +475,11 @@ export async function validateBotCanAssignRole(guild, roleId) {
     }
 
     const botHighest = botMember.roles.highest;
-    if (Rolle zu bekommen.position >= botHighest.position) {
+    if (role.position >= botHighest.position) {
         logger.warn('Cannot assign role - role hierarchy issue', {
             guildId: guild.id,
             roleId,
-            rolePosition: Rolle zu bekommen.position,
+            rolePosition: role.position,
             botHighestPosition: botHighest.position
         });
         return false;
@@ -488,8 +488,8 @@ export async function validateBotCanAssignRole(guild, roleId) {
     return true;
 }
 
-function evaluateAutoVerifizierenKriterien(member, autoVerifizierenConfig) {
-    const { criteria, accountAgeDays } = autoVerifizierenConfig;
+function evaluateAutoVerifyCriteria(member, autoVerifyConfig) {
+    const { criteria, accountAgeDays } = autoVerifyConfig;
 
     switch (criteria) {
         case 'account_age': {
@@ -518,9 +518,9 @@ export async function checkVerificationCooldown(userId, guildId, cooldownMs = de
     
     if (lastVerified && Date.now() - lastVerified < cooldownMs) {
         const remaining = cooldownMs - (Date.now() - lastVerified);
-        throw createFehler(
+        throw createError(
             "User on verification cooldown",
-            FehlerTypes.RATE_LIMIT,
+            ErrorTypes.RATE_LIMIT,
             `Please wait ${Math.ceil(remaining / 1000)} seconds before verifying again.`,
             { userId, guildId, cooldownRemaining: remaining }
         );
@@ -544,9 +544,9 @@ export async function trackVerificationAttempt(
     const recentAttempts = attempts.filter(timestamp => now - timestamp < windowMs);
 
     if (recentAttempts.length >= maxAttempts) {
-        throw createFehler(
+        throw createError(
             "Too many verification attempts",
-            FehlerTypes.RATE_LIMIT,
+            ErrorTypes.RATE_LIMIT,
             "You've attempted too many times. Please wait a moment.",
             { attempts: recentAttempts.length, maxAttempts }
         );
@@ -556,7 +556,7 @@ export async function trackVerificationAttempt(
     attemptTracker.set(key, recentAttempts);
 }
 
-async function sendAutoVerifizierenNotification(member, role, guild) {
+async function sendAutoVerifyNotification(member, role, guild) {
     try {
         const { createEmbed } = await import('../utils/embeds.js');
         
@@ -570,8 +570,8 @@ async function sendAutoVerifizierenNotification(member, role, guild) {
                     inline: false
                 },
                 {
-                    name: "📖 What's Weiter?",
-                    value: "Du hast jetzt Zugriff auf alle Serverkanäle und Funktionen. Willkommen!",
+                    name: "📖 What's Next?",
+                    value: "You now have access to all server channels and features. Welcome!",
                     inline: false
                 }
             ],
@@ -648,25 +648,25 @@ function sanitizeAuditMetadata(metadata = {}) {
     }
 }
 
-export function validateAutoVerifizierenKriterien(criteria, accountAgeDays) {
-    const validKriterien = ['account_age', 'server_size', 'none'];
+export function validateAutoVerifyCriteria(criteria, accountAgeDays) {
+    const validCriteria = ['account_age', 'server_size', 'none'];
     
-    if (!validKriterien.includes(criteria)) {
-        throw createFehler(
+    if (!validCriteria.includes(criteria)) {
+        throw createError(
             `Invalid auto-verify criteria: ${criteria}`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             "Please select a valid criteria option.",
-            { criteria, validKriterien }
+            { criteria, validCriteria }
         );
     }
     
     if (criteria === 'account_age') {
-        if (!accountAgeDays || accountAgeDays < minAutoVerifizierenAccountAgeDays || accountAgeDays > maxAutoVerifizierenAccountAgeDays) {
-            throw createFehler(
+        if (!accountAgeDays || accountAgeDays < minAutoVerifyAccountAgeDays || accountAgeDays > maxAutoVerifyAccountAgeDays) {
+            throw createError(
                 "Invalid account age days",
-                FehlerTypes.VALIDATION,
-                `Account age must be between ${minAutoVerifizierenAccountAgeDays} and ${maxAutoVerifizierenAccountAgeDays} days.`,
-                { accountAgeDays, minAutoVerifizierenAccountAgeDays, maxAutoVerifizierenAccountAgeDays }
+                ErrorTypes.VALIDATION,
+                `Account age must be between ${minAutoVerifyAccountAgeDays} and ${maxAutoVerifyAccountAgeDays} days.`,
+                { accountAgeDays, minAutoVerifyAccountAgeDays, maxAutoVerifyAccountAgeDays }
             );
         }
     }
@@ -676,11 +676,11 @@ export function validateAutoVerifizierenKriterien(criteria, accountAgeDays) {
 
 export default {
     verifyUser,
-    autoVerifizierenAnJoin,
+    autoVerifyOnJoin,
     removeVerification,
     validateVerificationSetup,
     validateBotCanAssignRole,
     checkVerificationCooldown,
     trackVerificationAttempt,
-    validateAutoVerifizierenKriterien
+    validateAutoVerifyCriteria
 };

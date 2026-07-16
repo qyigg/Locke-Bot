@@ -6,39 +6,39 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("ping")
-        .setDescription("Prüft die Latenz des Bots und die API-Geschwindigkeit"),
+        .setDescription("Checks the bot's latency and API speed"),
 
     async prefixExecute(interaction) {
         try {
             const startTime = Date.now();
-            const pingingMessage = await interaction.reply({ content: 'Ping wird geprüft...' });
+            const pingingMessage = await interaction.reply({ content: 'Pinging...' });
 
             const latency = Date.now() - startTime;
             const apiLatency = Math.max(0, Math.round(interaction.client.ws.ping));
 
             const embed = createEmbed({ title: 'Pong!', description: null }).addFields(
-                { name: 'Bot-Latenz', value: `${latency}ms`, inline: true },
-                { name: 'API-Latenz', value: `${apiLatency}ms`, inline: true },
+                { name: 'Bot Latency', value: `${latency}ms`, inline: true },
+                { name: 'API Latency', value: `${apiLatency}ms`, inline: true },
             );
 
             await pingingMessage.edit({ content: null, embeds: [embed] });
         } catch (error) {
-            logger.error('Fehler beim Prefix-Befehl ping:', error);
+            logger.error('Ping prefix command error:', error);
             if (!interaction.replied && !interaction._replyMessage) {
                 await interaction.channel.send({
-                    embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Latenz konnte derzeit nicht ermittelt werden.', color: 'error' })],
+                    embeds: [createEmbed({ title: 'System Error', description: 'Could not determine latency at this time.', color: 'error' })],
                 }).catch(() => {});
             }
         }
     },
 
     async execute(interaction) {
-        logger.info('execute aufgerufen - prüfe, ob Slash-Command oder Prefix-Command');
-        logger.info(`execute - hat _commandStartTime: ${!!interaction._commandStartTime}, createdTimestamp: ${interaction.createdTimestamp}`);
+        logger.info('execute called - checking if slash command or prefix command');
+        logger.info(`execute - has _commandStartTime: ${!!interaction._commandStartTime}, createdTimestamp: ${interaction.createdTimestamp}`);
         
-        const deferErfolg = await InteractionHelper.safeDefer(interaction);
-        if (!deferErfolg) {
-            logger.warn(`Defer für Ping-Interaction fehlgeschlagen`, {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
+            logger.warn(`Ping interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'ping'
@@ -48,18 +48,18 @@ export default {
 
         try {
             await InteractionHelper.safeEditReply(interaction, {
-                content: "Ping wird geprüft...",
+                content: "Pinging...",
             });
 
             const startTime = interaction._commandStartTime || interaction.createdTimestamp;
-            logger.info(`execute - verwendete startTime: ${startTime}, Typ: ${interaction._commandStartTime ? 'prefix' : 'slash'}`);
+            logger.info(`execute - using startTime: ${startTime}, type: ${interaction._commandStartTime ? 'prefix' : 'slash'}`);
             const latency = Math.max(0, Date.now() - startTime);
             const apiLatency = Math.max(0, Math.round(interaction.client.ws.ping));
-            logger.info(`execute - berechnete Latenz: ${latency}ms, apiLatency: ${apiLatency}ms`);
+            logger.info(`execute - calculated latency: ${latency}ms, apiLatency: ${apiLatency}ms`);
 
             const embed = createEmbed({ title: "Pong!", description: null }).addFields(
-                { name: "Bot-Latenz", value: `${latency}ms`, inline: true },
-                { name: "API-Latenz", value: `${apiLatency}ms`, inline: true },
+                { name: "Bot Latency", value: `${latency}ms`, inline: true },
+                { name: "API Latency", value: `${apiLatency}ms`, inline: true },
             );
 
             await InteractionHelper.safeEditReply(interaction, {
@@ -67,14 +67,14 @@ export default {
                 embeds: [embed],
             });
         } catch (error) {
-            logger.error('Fehler beim Ping-Befehl:', error);
+            logger.error('Ping command error:', error);
             try {
                 return await InteractionHelper.safeReply(interaction, {
-                    embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Latenz konnte derzeit nicht ermittelt werden.', color: 'error' })],
+                    embeds: [createEmbed({ title: 'System Error', description: 'Could not determine latency at this time.', color: 'error' })],
                     flags: MessageFlags.Ephemeral,
                 });
-            } catch (replyFehler) {
-                logger.error('Fehler beim Senden der Fehlermeldung:', replyFehler);
+            } catch (replyError) {
+                logger.error('Failed to send error reply:', replyError);
             }
         }
     },

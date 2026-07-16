@@ -3,13 +3,13 @@ import { getGuildConfig } from '../../../services/config/guildConfig.js';
 import { logEvent, EVENT_TYPES, resolveLogChannel } from '../../../services/loggingService.js';
 import { formatLogLine, resolveUserAuthor } from '../../../utils/logging/logEmbeds.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
-import { replyUserFehler, FehlerTypes } from '../../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
 import { logger } from '../../../utils/logger.js';
 
 export default {
     async execute(interaction, config, client) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
-        if (!deferErfolg) {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
+        if (!deferSuccess) {
             logger.warn('Report interaction defer failed', { userId: interaction.user.id, guildId: interaction.guildId });
             return;
         }
@@ -22,7 +22,7 @@ export default {
         const reportChannelId = resolveLogChannel(guildConfig, 'reports');
 
         if (!reportChannelId) {
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'The report channel has not been set up. Ask a moderator to use `/logging dashboard` or `/logging channel`.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'The report channel has not been set up. Ask a moderator to use `/logging dashboard` or `/logging channel`.' });
         }
 
         const ownerMention = interaction.guild.ownerId
@@ -49,7 +49,7 @@ export default {
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [createEmbed({
-                title: 'Report Absendented',
+                title: 'Report Submitted',
                 description: `Your report against **${targetUser.tag}** has been successfully filed and sent to the moderation team. Thank you!`,
             })],
         });

@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { botConfig } from '../../config/bot.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const COOLDOWN = 30 * 60 * 1000;
@@ -15,7 +15,7 @@ export default {
         .setName('beg')
         .setDescription('Beg for a small amount of money'),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -25,10 +25,10 @@ export default {
             let userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createFehler(
+                throw createError(
                     "Failed to load economy data",
-                    FehlerTypes.DATABASE,
-                    "Failed to load your economy data. Bitte versuche es später erneut.",
+                    ErrorTypes.DATABASE,
+                    "Failed to load your economy data. Please try again later.",
                     { userId, guildId }
                 );
             }
@@ -43,9 +43,9 @@ export default {
                 let timeMessage =
                     minutes > 0 ? `${minutes} minute(s)` : `${seconds} second(s)`;
 
-                throw createFehler(
+                throw createError(
                     "Beg cooldown active",
-                    FehlerTypes.RATE_LIMIT,
+                    ErrorTypes.RATE_LIMIT,
                     `You are tired from begging! Try again in **${timeMessage}**.`,
                     { remainingTime, minutes, seconds, cooldownType: 'beg' }
                 );
@@ -70,7 +70,7 @@ export default {
                 ];
 
                 replyEmbed = successEmbed(
-                    'Begging Erfolgful',
+                    'Begging Successful',
                     successMessages[
                         Math.floor(Math.random() * successMessages.length)
                     ]

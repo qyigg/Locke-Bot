@@ -45,7 +45,7 @@ function getLoopLabel(loop) {
         case 'queue':
             return 'Queue';
         default:
-            return 'Aus';
+            return 'Off';
     }
 }
 
@@ -114,13 +114,13 @@ export function buildPlayerButtonRows(player, guildData) {
             .setLabel('Pause')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('⏸️')
-            .setDeaktiviert(Boolean(paused)),
+            .setDisabled(Boolean(paused)),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.RESUME)
             .setLabel('Resume')
-            .setStyle(ButtonStyle.Erfolg)
+            .setStyle(ButtonStyle.Success)
             .setEmoji('▶️')
-            .setDeaktiviert(!paused),
+            .setDisabled(!paused),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.SKIP)
             .setLabel('Skip')
@@ -134,7 +134,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.SHUFFLE)
             .setLabel('Shuffle')
-            .setStyle(guildData?.shuffle ? ButtonStyle.Erfolg : ButtonStyle.Secondary)
+            .setStyle(guildData?.shuffle ? ButtonStyle.Success : ButtonStyle.Secondary)
             .setEmoji('🔀'),
     );
 
@@ -142,7 +142,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.LOOP)
             .setLabel('Loop')
-            .setStyle(guildData?.loop !== 'none' ? ButtonStyle.Erfolg : ButtonStyle.Secondary)
+            .setStyle(guildData?.loop !== 'none' ? ButtonStyle.Success : ButtonStyle.Secondary)
             .setEmoji('🔁'),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.VOL_DOWN)

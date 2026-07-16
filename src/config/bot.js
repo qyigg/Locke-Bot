@@ -23,9 +23,9 @@ export const botConfig = {
     // 5 = Competing
     activities: [
       {
-        name: "Minecraft", // required by Discord API, not shown in the client
-        state: "Searching for Diamonds",     // this is what people actually see
-        type: 0,               // Custom
+        name: "Custom Status", // required by Discord API, not shown in the client
+        state: "stalking",     // this is what people actually see
+        type: 4,               // Custom
       },
     ],
   },
@@ -194,7 +194,7 @@ export const botConfig = {
     },
 
     // Chance to succeed when robbing (0.4 = 40%).
-    robErfolgRate: 0.4,
+    robSuccessRate: 0.4,
 
     // Jail time after failed rob (milliseconds).
     // 3600000 = 1 hour.
@@ -305,20 +305,20 @@ export const botConfig = {
     defaultMessage: "Click the button below to verify yourself and gain access to the server!",
 
     // Text on the verification button.
-    defaultButtonText: "Verifizieren",
+    defaultButtonText: "Verify",
 
     // Automatic verification behavior.
-    autoVerifizieren: {
+    autoVerify: {
       // How automatic verification decides who is auto-approved:
       // - "none"        = everyone is auto-verified immediately
       // - "account_age" = account must be older than set days
       // - "server_size" = auto-verify everyone only in smaller servers
-      defaultKriterien: "none",
+      defaultCriteria: "none",
 
-      // Days used when `defaultKriterien` is `account_age`.
+      // Days used when `defaultCriteria` is `account_age`.
       defaultAccountAgeDays: 7,
 
-      // Member count threshold used when `defaultKriterien` is `server_size`.
+      // Member count threshold used when `defaultCriteria` is `server_size`.
       // Example: 1000 means auto-verify if server has fewer than 1000 members.
       serverSizeThreshold: 1000,
 
@@ -372,11 +372,11 @@ export const botConfig = {
     // Welcome template posted when a user joins.
     // Placeholders: {user}, {server}, {memberCount}
     defaultWelcomeMessage:
-      "Willkommen {user} auf dem {server}! Wir haben jetzt {memberCount} Member!",
+      "Welcome {user} to {server}! We now have {memberCount} members!",
     // Goodbye template posted when a user leaves.
     // Placeholders: {user}, {memberCount}
     defaultGoodbyeMessage:
-      "{user} hat den Server verlassen. Wir haben jetzt {memberCount} Member.",
+      "{user} has left the server. We now have {memberCount} members.",
     // Channel ID for welcome messages.
     defaultWelcomeChannel: null,
     // Channel ID for goodbye messages.
@@ -405,7 +405,7 @@ export const botConfig = {
     messages: {
       // Default response messages for counter actions.
       created: "✅ Created counter **{name}**",
-      deleted: "🗑️ Löschend counter **{name}**",
+      deleted: "🗑️ Deleted counter **{name}**",
       updated: "🔄 Updated counter **{name}**",
     },
     types: {
@@ -434,13 +434,13 @@ export const botConfig = {
   // GENERIC BOT MESSAGES
   // =========================
   messages: {
-    noPermission: "Du hast keine Rechte für diesen Command.",
-    cooldownActive: "Bitte warte {time} bevor du diesen Command noch einmal verwendest.",
-    errorOccurred: "Beim ausführen des Commands ist ein Fehler aufgetreten.",
+    noPermission: "You do not have permission to use this command.",
+    cooldownActive: "Please wait {time} before using this command again.",
+    errorOccurred: "An error occurred while executing this command.",
     missingPermissions:
-      "Ich habe nicht genug Rechte um dies zu tun.",
-    commandDeaktiviert: "Dieser Command wurde deaktiviert.",
-    maintenanceMode: "Der Bot ist aktuell in Wartung.",
+      "I am missing required permissions to perform this action.",
+    commandDisabled: "This command has been disabled.",
+    maintenanceMode: "The bot is currently in maintenance mode.",
   },
 
   // =========================
@@ -519,9 +519,9 @@ export function validateConfig(config) {
   return errors;
 }
 
-const configFehlers = validateConfig(botConfig);
-if (configFehlers.length > 0) {
-  logger.error("Bot configuration errors:", configFehlers.join("\n"));
+const configErrors = validateConfig(botConfig);
+if (configErrors.length > 0) {
+  logger.error("Bot configuration errors:", configErrors.join("\n"));
   if (process.env.NODE_ENV === "production") {
     process.exit(1);
   }
@@ -586,7 +586,7 @@ export function getBotMessage(key, replacements = {}) {
   return message;
 }
 
-export function isFeatureAktiviert(featureKey) {
+export function isFeatureEnabled(featureKey) {
   if (!featureKey) {
     return true;
   }
@@ -594,7 +594,7 @@ export function isFeatureAktiviert(featureKey) {
   return botConfig.features?.[featureKey] !== false;
 }
 
-export function isCommandCategoryAktiviert(category) {
+export function isCommandCategoryEnabled(category) {
   const normalized = normalizeCategoryKey(category);
 
   if (!normalized || normalized === "core") {
@@ -606,7 +606,7 @@ export function isCommandCategoryAktiviert(category) {
     return true;
   }
 
-  return isFeatureAktiviert(featureKey);
+  return isFeatureEnabled(featureKey);
 }
 
 export function getApplicationStatusColor(status) {

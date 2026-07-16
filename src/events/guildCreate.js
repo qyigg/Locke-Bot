@@ -16,7 +16,7 @@ export default {
       const config = await getGuildConfig(client, guild.id);
       await setGuildConfig(client, guild.id, config);
     } catch (error) {
-      logger.error(`Fehler initializing guild ${guild?.id} on join:`, error);
+      logger.error(`Error initializing guild ${guild?.id} on join:`, error);
     }
   },
 };

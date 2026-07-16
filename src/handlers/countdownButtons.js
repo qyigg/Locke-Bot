@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } fro
 import { successEmbed } from '../utils/embeds.js';
 import { logger } from '../utils/logger.js';
 
-import { replyUserFehler, FehlerTypes } from '../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
 function createControlButtons(countdownId, isPaused = false) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -11,7 +11,7 @@ function createControlButtons(countdownId, isPaused = false) {
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(`countdown_cancel:${countdownId}`)
-            .setLabel("❌ Abbrechen")
+            .setLabel("❌ Cancel")
             .setStyle(ButtonStyle.Danger),
     );
 }
@@ -65,7 +65,7 @@ function startCountdown(countdownId, countdownData, activeCountdowns) {
                         ],
                     });
                 } catch (error) {
-                    logger.error("Fehler updating countdown message:", error);
+                    logger.error("Error updating countdown message:", error);
                 }
             }
 
@@ -159,7 +159,7 @@ async function countdownButtonHandler(interaction, client, args) {
                 clearInterval(countdownData.interval);
 
                 const embed = successEmbed(
-                    `⏱️ ${countdownData.title} (Abbrechenled)`,
+                    `⏱️ ${countdownData.title} (Cancelled)`,
                     "The countdown was cancelled.",
                 );
 
@@ -180,7 +180,7 @@ async function countdownButtonHandler(interaction, client, args) {
         logger.error('Countdown button handler error:', error);
         try {
             if (!interaction.replied && !interaction.deferred) {
-                await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred controlling the countdown.' });
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred controlling the countdown.' });
             }
         } catch (err) {
             logger.error('Failed to send error message:', err);

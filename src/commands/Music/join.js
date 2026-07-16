@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { joinVoiceChannel, replyMusicErfolg } from '../../services/music/musicActions.js';
+import { joinVoiceChannel, replyMusicSuccess } from '../../services/music/musicActions.js';
 import { deferMusicCommand } from '../../services/music/prefixSupport.js';
 
 export default {
@@ -12,6 +12,6 @@ export default {
     async execute(interaction, config, client) {
         await deferMusicCommand(interaction);
         const embed = await joinVoiceChannel(client, interaction);
-        await replyMusicErfolg(interaction, embed);
+        await replyMusicSuccess(interaction, embed);
     },
 };

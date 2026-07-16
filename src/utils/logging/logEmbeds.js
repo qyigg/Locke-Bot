@@ -179,22 +179,22 @@ export function buildRoleAuditFields(role, { includeMemberCount = false } = {}) 
   const fields = [
     {
       name: 'Role Name',
-      value: Rolle zu bekommen.name,
+      value: role.name,
       inline: true
     },
     {
       name: 'Color',
-      value: Rolle zu bekommen.hexColor || '#000000',
+      value: role.hexColor || '#000000',
       inline: true
     },
     {
       name: 'Role ID',
-      value: Rolle zu bekommen.id,
+      value: role.id,
       inline: true
     }
   ];
 
-  const permissions = Rolle zu bekommen.permissions.toArray();
+  const permissions = role.permissions.toArray();
   if (permissions.length > 0) {
     const displayPerms = permissions.slice(0, MAX_DISPLAYED_ROLE_PERMISSIONS).join(',');
     fields.push({
@@ -209,17 +209,17 @@ export function buildRoleAuditFields(role, { includeMemberCount = false } = {}) 
   fields.push(
     {
       name: 'Hoisted',
-      value: Rolle zu bekommen.hoist ? 'Yes' : 'No',
+      value: role.hoist ? 'Yes' : 'No',
       inline: true
     },
     {
       name: 'Managed',
-      value: Rolle zu bekommen.managed ? 'Yes (Bot role)' : 'No',
+      value: role.managed ? 'Yes (Bot role)' : 'No',
       inline: true
     },
     {
       name: 'Position',
-      value: Rolle zu bekommen.position.toString(),
+      value: role.position.toString(),
       inline: true
     }
   );
@@ -227,7 +227,7 @@ export function buildRoleAuditFields(role, { includeMemberCount = false } = {}) 
   if (includeMemberCount) {
     fields.push({
       name: 'Members with Role',
-      value: Rolle zu bekommen.members.size.toString(),
+      value: role.members.size.toString(),
       inline: true
     });
   }

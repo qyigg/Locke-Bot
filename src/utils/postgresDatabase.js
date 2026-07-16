@@ -10,7 +10,7 @@ import {
 } from './database/keys.js';
 import {
     parseKey,
-    isTempZurückedType,
+    isTempBackedType,
     getStructuredListPlan,
 } from './database/keyParser.js';
 import { runKeyMigration } from './database/keyMigration.js';
@@ -108,7 +108,7 @@ class PostgreSQLDatabase {
                             return true;
                         }
 
-                        const error = new Fehler(
+                        const error = new Error(
                             `Schema version check failed: expected ${migrationCheck.expectedVersion} but found ${migrationCheck.currentVersion === null ? 'none' : migrationCheck.currentVersion}`
                         );
                         error.code = 'SCHEMA_VERSION_MISMATCH';
@@ -125,8 +125,8 @@ class PostgreSQLDatabase {
                 if (this.pool) {
                     try {
                         await this.pool.end();
-                    } catch (closeFehler) {
-                        logger.warn('Failed to close PostgreSQL pool after error:', closeFehler.message);
+                    } catch (closeError) {
+                        logger.warn('Failed to close PostgreSQL pool after error:', closeError.message);
                     }
                     this.pool = null;
                 }
@@ -258,7 +258,7 @@ class PostgreSQLDatabase {
             try {
                 await this.pool.query(table);
             } catch (error) {
-                logger.error('Fehler creating table:', error);
+                logger.error('Error creating table:', error);
             }
         }
         
@@ -273,7 +273,7 @@ class PostgreSQLDatabase {
             try {
                 await this.pool.query(index);
             } catch (error) {
-                logger.warn('Fehler creating index:', error.message);
+                logger.warn('Error creating index:', error.message);
             }
         }
         
@@ -310,13 +310,13 @@ class PostgreSQLDatabase {
                          FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`
                     );
                 } catch (error) {
-                    logger.warn(`Fehler creating trigger ${trigger.name} on ${trigger.table}: ${error.message}`);
+                    logger.warn(`Error creating trigger ${trigger.name} on ${trigger.table}: ${error.message}`);
                 }
             }
             
             logger.info('Audit triggers created/verified');
         } catch (error) {
-            logger.warn('Fehler creating audit triggers:', error.message);
+            logger.warn('Error creating audit triggers:', error.message);
         }
     }
 
@@ -359,7 +359,7 @@ class PostgreSQLDatabase {
             const canonicalKey = canonicalizeKey(key);
             const parsedKey = parseKey(canonicalKey);
 
-            if (parsedKey.type === 'temp' || isTempZurückedType(parsedKey.type)) {
+            if (parsedKey.type === 'temp' || isTempBackedType(parsedKey.type)) {
                 return await this._getWithLegacyFallback(parsedKey.fullKey, key, defaultValue);
             }
 
@@ -385,7 +385,7 @@ class PostgreSQLDatabase {
 
             return structuredValue;
         } catch (error) {
-            logger.error(`Fehler getting value for key ${key}:`, error);
+            logger.error(`Error getting value for key ${key}:`, error);
             return defaultValue;
         }
     }
@@ -402,7 +402,7 @@ class PostgreSQLDatabase {
             const expiresAt = ttl ? new Date(Date.now() + ttl * 1000) : null;
             const jsonValue = JSON.stringify(value ?? null);
 
-            if (parsedKey.type === 'temp' || isTempZurückedType(parsedKey.type)) {
+            if (parsedKey.type === 'temp' || isTempBackedType(parsedKey.type)) {
                 await this.pool.query(
                     `INSERT INTO ${pgConfig.tables.temp_data} (key, value, expires_at)
                      VALUES ($1, $2, $3)
@@ -424,7 +424,7 @@ class PostgreSQLDatabase {
 
             return await this.setStructuredData(parsedKey, value, ttl);
         } catch (error) {
-            logger.error(`Fehler setting value for key ${key}:`, error);
+            logger.error(`Error setting value for key ${key}:`, error);
             return false;
         }
     }
@@ -440,7 +440,7 @@ class PostgreSQLDatabase {
             const parsedKey = parseKey(canonicalKey);
             let deleted = false;
 
-            if (parsedKey.type === 'temp' || isTempZurückedType(parsedKey.type)) {
+            if (parsedKey.type === 'temp' || isTempBackedType(parsedKey.type)) {
                 await this.pool.query(`DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [parsedKey.fullKey]);
                 deleted = true;
             } else if (parsedKey.type === 'cache') {
@@ -460,7 +460,7 @@ class PostgreSQLDatabase {
 
             return deleted;
         } catch (error) {
-            logger.error(`Fehler deleting key ${key}:`, error);
+            logger.error(`Error deleting key ${key}:`, error);
             return false;
         }
     }
@@ -510,7 +510,7 @@ class PostgreSQLDatabase {
 
             return [...keys];
         } catch (error) {
-            logger.error(`Fehler listing keys with prefix ${prefix}:`, error);
+            logger.error(`Error listing keys with prefix ${prefix}:`, error);
             return [];
         }
     }
@@ -541,7 +541,7 @@ class PostgreSQLDatabase {
 
             return true;
         } catch (error) {
-            logger.error('Fehler inserting verification audit:', error);
+            logger.error('Error inserting verification audit:', error);
             return false;
         }
     }
@@ -555,7 +555,7 @@ class PostgreSQLDatabase {
             const value = await this.get(key);
             return value !== null;
         } catch (error) {
-            logger.error(`Fehler checking if key exists ${key}:`, error);
+            logger.error(`Error checking if key exists ${key}:`, error);
             return false;
         }
     }
@@ -571,7 +571,7 @@ class PostgreSQLDatabase {
             await this.set(key, newValue);
             return newValue;
         } catch (error) {
-            logger.error(`Fehler incrementing key ${key}:`, error);
+            logger.error(`Error incrementing key ${key}:`, error);
             return amount;
         }
     }
@@ -587,7 +587,7 @@ class PostgreSQLDatabase {
             await this.set(key, newValue);
             return newValue;
         } catch (error) {
-            logger.error(`Fehler decrementing key ${key}:`, error);
+            logger.error(`Error decrementing key ${key}:`, error);
             return -amount;
         }
     }
@@ -697,7 +697,7 @@ class PostgreSQLDatabase {
                     return defaultValue;
             }
         } catch (error) {
-            logger.error(`Fehler getting structured data for ${parsedKey.fullKey}:`, error);
+            logger.error(`Error getting structured data for ${parsedKey.fullKey}:`, error);
             return defaultValue;
         }
     }
@@ -909,9 +909,9 @@ class PostgreSQLDatabase {
                                 ADD COLUMN counters JSONB DEFAULT '[]'
                             `);
                             logger.info('Added counters column to guilds table');
-                        } catch (alterFehler) {
-                            logger.error('Failed to add counters column:', alterFehler);
-                            throw new Fehler(`Counters column missing and could not be created: ${alterFehler.message}`);
+                        } catch (alterError) {
+                            logger.error('Failed to add counters column:', alterError);
+                            throw new Error(`Counters column missing and could not be created: ${alterError.message}`);
                         }
                     }
                     
@@ -927,9 +927,9 @@ class PostgreSQLDatabase {
                              ON CONFLICT (id) DO UPDATE SET counters = $2::jsonb, updated_at = CURRENT_TIMESTAMP`,
                             [parsedKey.guildId, jsonString]
                         );
-                    } catch (queryFehler) {
-                        logger.error('PostgreSQL query error', { message: queryFehler.message, detail: queryFehler.detail, hint: queryFehler.hint });
-                        throw queryFehler;
+                    } catch (queryError) {
+                        logger.error('PostgreSQL query error', { message: queryError.message, detail: queryError.detail, hint: queryError.hint });
+                        throw queryError;
                     }
                     return true;
                 
@@ -937,7 +937,7 @@ class PostgreSQLDatabase {
                     return false;
             }
         } catch (error) {
-            logger.error(`Fehler setting structured data for ${parsedKey.fullKey}:`, error);
+            logger.error(`Error setting structured data for ${parsedKey.fullKey}:`, error);
             return false;
         }
     }
@@ -992,7 +992,7 @@ class PostgreSQLDatabase {
                     return false;
             }
         } catch (error) {
-            logger.error(`Fehler deleting structured data for ${parsedKey.fullKey}:`, error);
+            logger.error(`Error deleting structured data for ${parsedKey.fullKey}:`, error);
             return false;
         }
     }
@@ -1004,7 +1004,7 @@ class PostgreSQLDatabase {
                 logger.info('PostgreSQL connection closed');
             }
         } catch (error) {
-            logger.error('Fehler closing PostgreSQL connection:', error);
+            logger.error('Error closing PostgreSQL connection:', error);
         }
     }
 
@@ -1023,7 +1023,7 @@ class PostgreSQLDatabase {
                 waitingCount: this.pool.waitingCount
             };
         } catch (error) {
-            logger.error('Fehler getting PostgreSQL info:', error);
+            logger.error('Error getting PostgreSQL info:', error);
             return null;
         }
     }

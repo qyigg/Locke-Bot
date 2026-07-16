@@ -38,7 +38,7 @@ export default {
                 const messageContent = welcomeConfig.welcomePing ? user.toString() : null;
 
                 const embedTitle = formatWelcomeMessage(
-                    welcomeConfig.welcomeEmbed?.title || '🎉 Willkommen!',
+                    welcomeConfig.welcomeEmbed?.title || '🎉 Welcome!',
                     formatData
                 );
                 const embedFooter = welcomeConfig.welcomeEmbed?.footer
@@ -100,7 +100,7 @@ export default {
             }
         }
         
-        if (config?.verification?.enabled || config?.verification?.autoVerifizieren?.enabled) {
+        if (config?.verification?.enabled || config?.verification?.autoVerify?.enabled) {
             await handleVerification(member, guild, config.verification, member.client);
         }
 
@@ -123,7 +123,7 @@ export default {
                 }
             });
         } catch (error) {
-            logger.debug('Fehler logging member join:', error);
+            logger.debug('Error logging member join:', error);
         }
 
         try {
@@ -134,7 +134,7 @@ export default {
                 }
             }
         } catch (error) {
-            logger.debug('Fehler updating counters on member join:', error);
+            logger.debug('Error updating counters on member join:', error);
         }
 
         try {
@@ -148,20 +148,20 @@ export default {
                 logger.debug(`Birthday restored for user ${user.id} in guild ${guild.id}`);
             }
         } catch (error) {
-            logger.debug('Fehler restoring birthday on member join:', error);
+            logger.debug('Error restoring birthday on member join:', error);
         }
         
     } catch (error) {
-        logger.error('Fehler in guildMemberAdd event:', error);
+        logger.error('Error in guildMemberAdd event:', error);
     }
   }
 };
 
 async function handleVerification(member, guild, verificationConfig, client) {
-    const { autoVerifizierenAnJoin } = await import('../services/verificationService.js');
+    const { autoVerifyOnJoin } = await import('../services/verificationService.js');
     
     try {
-        const result = await autoVerifizierenAnJoin(client, guild, member, verificationConfig);
+        const result = await autoVerifyOnJoin(client, guild, member, verificationConfig);
         
         if (result.autoVerified) {
             logger.info('User auto-verified on join', {
@@ -180,7 +180,7 @@ async function handleVerification(member, guild, verificationConfig, client) {
         }
 
     } catch (error) {
-        logger.error('Fehler in auto-verification for member', {
+        logger.error('Error in auto-verification for member', {
             guildId: guild.id,
             userId: member.id,
             userTag: member.user.tag,
@@ -193,6 +193,6 @@ async function assignRoleSafely(member, role) {
     try {
         await member.roles.add(role);
     } catch (error) {
-        logger.warn(`Failed to assign role ${Rolle zu bekommen.id} to member ${member.id}:`, error);
+        logger.warn(`Failed to assign role ${role.id} to member ${member.id}:`, error);
     }
 }

@@ -13,9 +13,9 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { logger } from '../../../utils/logger.js';
 
-import { replyUserFehler, FehlerTypes } from '../../../utils/errorHandler.js';
-export function getCategoryStatus(enabledEvents, category, auditAktiviert) {
-  if (!auditAktiviert) return false;
+import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+export function getCategoryStatus(enabledEvents, category, auditEnabled) {
+  if (!auditEnabled) return false;
   const events = enabledEvents || {};
   if (events[`${category}.*`] === false) return false;
   const categoryEvents = EVENT_TYPES_BY_CATEGORY[category] || [];
@@ -24,14 +24,14 @@ export function getCategoryStatus(enabledEvents, category, auditAktiviert) {
 }
 
 async function formatChannelMention(guild, id) {
-  if (!id) return '`Nicht konfiguriert`';
+  if (!id) return '`Not configured`';
   const channel = guild.channels.cache.get(id) ?? await guild.channels.fetch(id).catch(() => null);
   return channel ? channel.toString() : `⚠️ Missing (${id})`;
 }
 
-function countAktiviertCategories(enabledEvents, auditAktiviert) {
+function countEnabledCategories(enabledEvents, auditEnabled) {
   const enabled = DASHBOARD_CATEGORIES.filter((key) =>
-    getCategoryStatus(enabledEvents, key, auditAktiviert),
+    getCategoryStatus(enabledEvents, key, auditEnabled),
   ).length;
   return { enabled, total: DASHBOARD_CATEGORIES.length };
 }
@@ -40,7 +40,7 @@ export async function buildLoggingDashboardView(interaction, client) {
   const guildConfig = await getGuildConfig(client, interaction.guildId);
   const loggingStatus = await getLoggingStatus(client, interaction.guildId);
 
-  const auditAktiviert = Boolean(loggingStatus.enabled);
+  const auditEnabled = Boolean(loggingStatus.enabled);
   const channels = loggingStatus.channels || {};
 
   const auditChannel = await formatChannelMention(interaction.guild, channels.audit);
@@ -50,21 +50,21 @@ export async function buildLoggingDashboardView(interaction, client) {
   const transcriptChannel = await formatChannelMention(interaction.guild, guildConfig.ticketTranscriptChannelId);
 
   const ignore = loggingStatus.ignore || { users: [], channels: [] };
-  const { enabled: enabledCount, total } = countAktiviertCategories(loggingStatus.enabledEvents, auditAktiviert);
+  const { enabled: enabledCount, total } = countEnabledCategories(loggingStatus.enabledEvents, auditEnabled);
 
   const embed = new EmbedBuilder()
     .setTitle('📝 Logging Dashboard')
     .setDescription(`Manage server logging for **${interaction.guild.name}**. Use the menu below to configure channels, categories, and filters.`)
-    .setColor(auditAktiviert ? getColor('success') : getColor('warning'))
+    .setColor(auditEnabled ? getColor('success') : getColor('warning'))
     .addFields(
       {
         name: 'Logging Status',
-        value: auditAktiviert ? '✅ Aktiviert' : '❌ Deaktiviert',
+        value: auditEnabled ? '✅ Enabled' : '❌ Disabled',
         inline: true,
       },
       {
         name: 'Event Categories',
-        value: auditAktiviert ? `${enabledCount}/${total} enabled` : '`Logging disabled`',
+        value: auditEnabled ? `${enabledCount}/${total} enabled` : '`Logging disabled`',
         inline: true,
       },
       {
@@ -93,16 +93,16 @@ export async function buildLoggingDashboardView(interaction, client) {
     .setFooter({ text: 'Ticket channels: configure via /ticket dashboard' })
     .setTimestamp();
 
-  const components = createLoggingDashboardComponents(loggingStatus.enabledEvents, auditAktiviert);
+  const components = createLoggingDashboardComponents(loggingStatus.enabledEvents, auditEnabled);
   return { embed, components };
 }
 
 export async function buildLoggingCategoriesView(interaction, client) {
   const loggingStatus = await getLoggingStatus(client, interaction.guildId);
-  const auditAktiviert = Boolean(loggingStatus.enabled);
+  const auditEnabled = Boolean(loggingStatus.enabled);
 
   const categoryLines = DASHBOARD_CATEGORIES.map((key) => {
-    const on = getCategoryStatus(loggingStatus.enabledEvents, key, auditAktiviert);
+    const on = getCategoryStatus(loggingStatus.enabledEvents, key, auditEnabled);
     const label = DASHBOARD_CATEGORY_LABELS[key] || key;
     return `${on ? '✅' : '❌'} ${label}`;
   }).join('\n');
@@ -110,7 +110,7 @@ export async function buildLoggingCategoriesView(interaction, client) {
   const embed = new EmbedBuilder()
     .setTitle('📋 Event Categories')
     .setDescription(
-      auditAktiviert
+      auditEnabled
         ? 'Toggle which types of events are logged to your audit channel.'
         : '⚠️ Logging is disabled. Enable it from the main dashboard to send logs.',
     )
@@ -119,7 +119,7 @@ export async function buildLoggingCategoriesView(interaction, client) {
     .setFooter({ text: 'Green = logging on · Red = logging off' })
     .setTimestamp();
 
-  const components = createLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditAktiviert);
+  const components = createLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditEnabled);
   return { embed, components };
 }
 
@@ -176,11 +176,11 @@ export async function refreshDashboardMessage(interaction, client) {
 }
 
 export default {
-  prefixAnly: false,
+  prefixOnly: false,
   async execute(interaction, config, client) {
     try {
       if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-        return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need **Manage Server** permissions to view the logging dashboard.' });
+        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to view the logging dashboard.' });
       }
 
       await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
@@ -188,7 +188,7 @@ export default {
       await InteractionHelper.safeEditReply(interaction, { embeds: [embed], components });
     } catch (error) {
       logger.error('logging_dashboard error:', error);
-      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Failed to load the logging dashboard.' });
+      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to load the logging dashboard.' });
     }
   },
 };

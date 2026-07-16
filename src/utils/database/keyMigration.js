@@ -162,7 +162,7 @@ async function writeCompletedMarker(client, summary) {
  */
 export async function runKeyMigration({ pool, dryRun = false, force = false, logger = console } = {}) {
     if (!pool) {
-        throw new Fehler('runKeyMigration requires a connected pg pool');
+        throw new Error('runKeyMigration requires a connected pg pool');
     }
 
     const client = await pool.connect();

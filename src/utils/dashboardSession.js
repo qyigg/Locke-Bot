@@ -1,6 +1,6 @@
 import { ComponentType, EmbedBuilder } from 'discord.js';
 import { getColor } from '../config/bot.js';
-import { TitanBotFehler, FehlerTypes, replyUserFehler } from './errorHandler.js';
+import { TitanBotError, ErrorTypes, replyUserError } from './errorHandler.js';
 import { InteractionHelper } from './interactionHelper.js';
 import { logger } from './logger.js';
 
@@ -17,14 +17,14 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
         } catch (error) {
             if (error?.code === 40060) return;
 
-            if (error instanceof TitanBotFehler) {
+            if (error instanceof TitanBotError) {
                 logger.debug(`${interactionLabel} error: ${error.message}`);
             } else {
                 logger.error(`Unexpected ${interactionLabel} error:`, error);
             }
 
             const errorMessage =
-                error instanceof TitanBotFehler
+                error instanceof TitanBotError
                     ? error.userMessage || 'An error occurred while processing your selection.'
                     : 'An unexpected error occurred while updating the configuration.';
 
@@ -32,8 +32,8 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
                 await componentInteraction.deferUpdate().catch(() => {});
             }
 
-            await replyUserFehler(componentInteraction, {
-                type: FehlerTypes.CONFIGURATION,
+            await replyUserError(componentInteraction, {
+                type: ErrorTypes.CONFIGURATION,
                 message: errorMessage,
             }).catch(() => {});
         }
@@ -101,9 +101,9 @@ export async function startDashboardSession({
             }
 
             const timeoutEmbed = new EmbedBuilder()
-                .setTitle('Dashboard-Zeitüberschreitung')
+                .setTitle('Dashboard Timed Out')
                 .setDescription(
-                    'Dieses Dashboard wurde aufgrund von Inaktivität geschlossen. Bitte führe den Befehl erneut aus, um fortzufahren.',
+                    'This dashboard has been closed due to inactivity. Please run the command again to continue.',
                 )
                 .setColor(getColor('error'));
 

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 
 import searchDefine from './modules/search_define.js';
 import searchGoogle from './modules/search_google.js';
@@ -16,7 +16,7 @@ export default {
                 .addStringOption(option =>
                     option.setName('word')
                         .setDescription('The word to look up')
-                        .setErforderlich(true))
+                        .setRequired(true))
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -25,7 +25,7 @@ export default {
                 .addStringOption(option =>
                     option.setName('query')
                         .setDescription('What would you like to search for?')
-                        .setErforderlich(true))
+                        .setRequired(true))
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -34,7 +34,7 @@ export default {
                 .addStringOption(option =>
                     option.setName('term')
                         .setDescription('The term to look up on Urban Dictionary')
-                        .setErforderlich(true))
+                        .setRequired(true))
         ),
 
     async execute(interaction, config, client) {
@@ -48,7 +48,7 @@ export default {
             case 'urban':
                 return await searchUrban.execute(interaction, config, client);
             default:
-                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Unknown subcommand' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unknown subcommand' });
         }
     }
 };

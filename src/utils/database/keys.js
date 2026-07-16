@@ -5,7 +5,7 @@
 
 export const getGuildConfigKey = (guildId) => `guild:${guildId}:config`;
 export const getGuildBirthdaysKey = (guildId) => `guild:${guildId}:birthdays`;
-export const getBirthdayLeftZurückupKey = (guildId) => `guild:${guildId}:birthdays:left`;
+export const getBirthdayLeftBackupKey = (guildId) => `guild:${guildId}:birthdays:left`;
 export const getBirthdayTrackingKey = (guildId) => `guild:${guildId}:birthdays:tracking`;
 
 export function getTicketKey(guildId, channelId) {
@@ -64,7 +64,7 @@ export function getApplicationRolesKey(guildId) {
     return `guild:${guildId}:applications:roles`;
 }
 
-export function getApplicationEinstellungenKey(guildId) {
+export function getApplicationSettingsKey(guildId) {
     return `guild:${guildId}:applications:settings`;
 }
 
@@ -88,11 +88,11 @@ export function getJoinToCreateChannelsKey(guildId) {
     return `guild:${guildId}:jointocreate:channels`;
 }
 
-export function getWarnungsKey(guildId, userId) {
+export function getWarningsKey(guildId, userId) {
     return `guild:${guildId}:warnings:${userId}`;
 }
 
-export function getWarnungsPrefix(guildId) {
+export function getWarningsPrefix(guildId) {
     return `guild:${guildId}:warnings:`;
 }
 
@@ -144,7 +144,7 @@ export const LEGACY_KEY_RESOLVERS = [
     },
     {
         pattern: /^moderation:warnings:([^:]+):([^:]+)$/,
-        toCanonical: ([, guildId, userId]) => getWarnungsKey(guildId, userId),
+        toCanonical: ([, guildId, userId]) => getWarningsKey(guildId, userId),
     },
     {
         pattern: /^moderation_user_notes_([^_]+)_([^_]+)$/,

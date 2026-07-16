@@ -4,11 +4,11 @@ import { getGuildConfig, setGuildConfig } from '../../../services/config/guildCo
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { logger } from '../../../utils/logger.js';
 
-import { replyUserFehler, FehlerTypes } from '../../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
 export default {
     async execute(interaction, config, client) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need **Manage Server** permissions to set the premium Rolle zu bekommen.' });
+            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to set the premium role.' });
         }
 
         const role = interaction.options.getRole('role');
@@ -16,16 +16,16 @@ export default {
 
         try {
             const currentConfig = await getGuildConfig(client, guildId);
-            currentConfig.premiumRoleId = Rolle zu bekommen.id;
+            currentConfig.premiumRoleId = role.id;
             await setGuildConfig(client, guildId, currentConfig);
 
             return InteractionHelper.safeReply(interaction, {
-                embeds: [successEmbed('Premium Role Set', `The **Premium Shop Role** has been set to ${Rolle zu bekommen.toString()}. Members who purchase the Premium Role item will be granted this Rolle zu bekommen.`)],
+                embeds: [successEmbed('Premium Role Set', `The **Premium Shop Role** has been set to ${role.toString()}. Members who purchase the Premium Role item will be granted this role.`)],
                 ephemeral: true,
             });
         } catch (error) {
             logger.error('shop_config_setrole error:', error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Could not save the guild configuration.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not save the guild configuration.' });
         }
     },
 };

@@ -1,29 +1,29 @@
 // warningService.js
 
-import { db, getFromDb, setInDb, getWarnungsKey, getWarnungsPrefix } from '../../utils/database.js';
+import { db, getFromDb, setInDb, getWarningsKey, getWarningsPrefix } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
-import { createFehler, FehlerTypes, wrapServiceClassMethods } from '../../utils/errorHandler.js';
+import { createError, ErrorTypes, wrapServiceClassMethods } from '../../utils/errorHandler.js';
 
-class WarnungService {
+class WarningService {
 
-  static async addWarnung({
+  static async addWarning({
     guildId,
     userId,
     moderatorId,
     reason,
     timestamp = Date.now()
   }) {
-    const key = getWarnungsKey(guildId, userId);
+    const key = getWarningsKey(guildId, userId);
     const warnings = await getFromDb(key, []);
 
     if (!Array.isArray(warnings)) {
-      logger.warn(`Warnungs for ${userId} in ${guildId} corrupted, resetting`);
+      logger.warn(`Warnings for ${userId} in ${guildId} corrupted, resetting`);
       await setInDb(key, []);
-      throw createFehler(
+      throw createError(
         'Corrupted warning data',
-        FehlerTypes.DATABASE,
-        'Warnung data was corrupted and has been reset. Please try again.',
-        { guildId, userId, service: 'warningService', operation: 'addWarnung' }
+        ErrorTypes.DATABASE,
+        'Warning data was corrupted and has been reset. Please try again.',
+        { guildId, userId, service: 'warningService', operation: 'addWarning' }
       );
     }
 
@@ -40,7 +40,7 @@ class WarnungService {
     warnings.push(warning);
     await setInDb(key, warnings);
 
-    logger.info(`Warnung added: ${userId} in ${guildId} by ${moderatorId}`);
+    logger.info(`Warning added: ${userId} in ${guildId} by ${moderatorId}`);
 
     return {
       id: warning.id,
@@ -48,8 +48,8 @@ class WarnungService {
     };
   }
 
-  static async getWarnungs(guildId, userId) {
-    const key = getWarnungsKey(guildId, userId);
+  static async getWarnings(guildId, userId) {
+    const key = getWarningsKey(guildId, userId);
     const warnings = await getFromDb(key, []);
 
     return Array.isArray(warnings)
@@ -57,49 +57,49 @@ class WarnungService {
       : [];
   }
 
-  static async getWarnungCount(guildId, userId) {
-    const warnings = await this.getWarnungs(guildId, userId);
+  static async getWarningCount(guildId, userId) {
+    const warnings = await this.getWarnings(guildId, userId);
     return warnings.length;
   }
 
-  static async removeWarnung(guildId, userId, warningId) {
-    const key = getWarnungsKey(guildId, userId);
+  static async removeWarning(guildId, userId, warningId) {
+    const key = getWarningsKey(guildId, userId);
     const warnings = await getFromDb(key, []);
 
     const index = warnings.findIndex(w => w.id === warningId);
     if (index === -1) {
-      throw createFehler(
-        'Warnung not found',
-        FehlerTypes.USER_INPUT,
+      throw createError(
+        'Warning not found',
+        ErrorTypes.USER_INPUT,
         'That warning could not be found. It may have already been removed.',
-        { guildId, userId, warningId, service: 'warningService', operation: 'removeWarnung' }
+        { guildId, userId, warningId, service: 'warningService', operation: 'removeWarning' }
       );
     }
 
     warnings[index].status = 'deleted';
     await setInDb(key, warnings);
 
-    logger.info(`Warnung removed: ${warningId} for ${userId} in ${guildId}`);
+    logger.info(`Warning removed: ${warningId} for ${userId} in ${guildId}`);
     return { removed: true };
   }
 
-  static async clearWarnungs(guildId, userId) {
-    const key = getWarnungsKey(guildId, userId);
+  static async clearWarnings(guildId, userId) {
+    const key = getWarningsKey(guildId, userId);
     const warnings = await getFromDb(key, []);
     const count = warnings.length;
 
     await setInDb(key, []);
 
-    logger.info(`Warnungs cleared for ${userId} in ${guildId} (${count} removed)`);
+    logger.info(`Warnings cleared for ${userId} in ${guildId} (${count} removed)`);
     return { count };
   }
 
-  static async getGuildWarnungs(guildId, filters = {}) {
+  static async getGuildWarnings(guildId, filters = {}) {
     const { moderatorId, limit = 100 } = filters;
-    const prefix = getWarnungsPrefix(guildId);
+    const prefix = getWarningsPrefix(guildId);
 
     const keys = await db.list(prefix);
-    const allWarnungs = [];
+    const allWarnings = [];
 
     for (const key of Array.isArray(keys) ? keys : []) {
       const warnings = await getFromDb(key, []);
@@ -108,17 +108,17 @@ class WarnungService {
       for (const warning of warnings) {
         if (!warning || warning.status === 'deleted') continue;
         if (moderatorId && warning.moderatorId !== moderatorId) continue;
-        allWarnungs.push(warning);
+        allWarnings.push(warning);
       }
     }
 
-    allWarnungs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    allWarnings.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    logger.debug(`Fetched guild warnings for ${guildId} with ${allWarnungs.length} total`);
-    return allWarnungs.slice(0, limit);
+    logger.debug(`Fetched guild warnings for ${guildId} with ${allWarnings.length} total`);
+    return allWarnings.slice(0, limit);
   }
 }
 
-wrapServiceClassMethods(WarnungService);
+wrapServiceClassMethods(WarningService);
 
-export { WarnungService };
+export { WarningService };

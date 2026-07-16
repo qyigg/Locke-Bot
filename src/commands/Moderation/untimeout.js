@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
@@ -13,14 +13,14 @@ export default {
             option
                 .setName("target")
                 .setDescription("User to untimeout")
-                .setErforderlich(true),
+                .setRequired(true),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction);
-        if (!deferErfolg) {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
             logger.warn(`Untimeout interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -33,18 +33,18 @@ export default {
         const member = interaction.options.getMember("target");
 
         if (!targetUser) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Missing target user',
-                FehlerTypes.USER_INPUT,
+                ErrorTypes.USER_INPUT,
                 'You must specify a user to untimeout.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (!member) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 "Target not found",
-                FehlerTypes.USER_INPUT,
+                ErrorTypes.USER_INPUT,
                 "The target user is not currently in this server.",
             );
         }

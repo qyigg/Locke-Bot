@@ -5,7 +5,7 @@ import { getServerCounters, saveServerCounters, getCounterEmoji as getCounterTyp
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
-import { replyUserFehler, FehlerTypes } from '../../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
 export async function handleList(interaction, client) {
     const guild = interaction.guild;
 
@@ -17,7 +17,7 @@ export async function handleList(interaction, client) {
     }
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need **Manage Channels** permission to view counters.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to view counters.' }).catch(logger.error);
         return;
     }
 
@@ -52,7 +52,7 @@ export async function handleList(interaction, client) {
 
             embed.addFields({
                 name: "**Available Counter Types**",
-                value: "**Members + Bots** - Total server members\n **Members Anly** - Human members only\n **Bots Anly** - Bot members only",
+                value: "**Members + Bots** - Total server members\n **Members Only** - Human members only\n **Bots Only** - Bot members only",
                 inline: false
             });
 
@@ -101,13 +101,13 @@ export async function handleList(interaction, client) {
             value: `**Total Counters:** ${validCounters.length}\n**Active Counters:** ${validCounters.filter(c => {
                 const channel = guild.channels.cache.get(c.channelId);
                 return channel && channel.name.includes(':');
-            }).length}\n**Weiter Update:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
+            }).length}\n**Next Update:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
             inline: false
         });
 
         embed.addFields({
             name: "**Management Commands**",
-            value: "`/serverstats create` - Create new counter\n`/serverstats update` - Update existing counter\n`/serverstats delete` - Löschen counter",
+            value: "`/serverstats create` - Create new counter\n`/serverstats update` - Update existing counter\n`/serverstats delete` - Delete counter",
             inline: false
         });
 
@@ -119,8 +119,8 @@ export async function handleList(interaction, client) {
         await InteractionHelper.safeEditReply(interaction, { embeds: [embed] }).catch(logger.error);
 
     } catch (error) {
-        logger.error("Fehler displaying counters:", error);
-        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
+        logger.error("Error displaying counters:", error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
     }
 }
 

@@ -2,7 +2,7 @@
 
 import { PermissionFlagsBits } from 'discord.js';
 import { logger } from './logger.js';
-import { replyUserFehler, FehlerTypes } from './errorHandler.js';
+import { replyUserError, ErrorTypes } from './errorHandler.js';
 import { isBotOwner, getBotMessage } from '../config/bot.js';
 
 /**
@@ -30,8 +30,8 @@ function normalizeRoleId(role) {
     return role;
   }
 
-  if (typeof role === 'object' && Rolle zu bekommen.id) {
-    return Rolle zu bekommen.id;
+  if (typeof role === 'object' && role.id) {
+    return role.id;
   }
 
   return null;
@@ -128,8 +128,8 @@ export async function checkModerationPermissions(
     return true;
   }
 
-  await replyUserFehler(interaction, {
-    type: FehlerTypes.PERMISSION,
+  await replyUserError(interaction, {
+    type: ErrorTypes.PERMISSION,
     message: errorMessage,
     context: { source: 'permissionGuard.checkModerationPermissions' },
   });
@@ -167,8 +167,8 @@ export async function enforceDefaultCommandPermissions(interaction, command, con
   }
 
   const commandName = command?.data?.name ?? interaction.commandName ?? 'command';
-  await replyUserFehler(interaction, {
-    type: FehlerTypes.PERMISSION,
+  await replyUserError(interaction, {
+    type: ErrorTypes.PERMISSION,
     message: getBotMessage('noPermission'),
     context: {
       source: context.source ?? 'permissionGuard.enforceDefaultCommandPermissions',
@@ -223,8 +223,8 @@ export async function checkUserPermissions(
   const member = interaction.member;
 
   if (!member.permissions.has(requiredPermissions)) {
-    await replyUserFehler(interaction, {
-      type: FehlerTypes.PERMISSION,
+    await replyUserError(interaction, {
+      type: ErrorTypes.PERMISSION,
       message: errorMessage,
       context: { source: 'permissionGuard.checkUserPermissions' }
     });
@@ -246,8 +246,8 @@ export async function checkBotPermissions(
   const targetChannel = channel || interaction.channel;
 
   if (!targetChannel || !targetChannel.guild) {
-    await replyUserFehler(interaction, {
-      type: FehlerTypes.UNKNOWN,
+    await replyUserError(interaction, {
+      type: ErrorTypes.UNKNOWN,
       message: 'Could not determine channel.',
       context: { source: 'permissionGuard.checkBotPermissions' }
     });
@@ -256,8 +256,8 @@ export async function checkBotPermissions(
 
   const botMember = targetChannel.guild.members.me;
   if (!botMember) {
-    await replyUserFehler(interaction, {
-      type: FehlerTypes.UNKNOWN,
+    await replyUserError(interaction, {
+      type: ErrorTypes.UNKNOWN,
       message: 'Could not find bot member in this guild.',
       context: { source: 'permissionGuard.checkBotPermissions' }
     });
@@ -275,8 +275,8 @@ export async function checkBotPermissions(
   }
 
   if (missingPerms.length > 0) {
-    await replyUserFehler(interaction, {
-      type: FehlerTypes.PERMISSION,
+    await replyUserError(interaction, {
+      type: ErrorTypes.PERMISSION,
       message: `I need the following permissions in ${targetChannel}: ${missingPerms.join(', ')}`,
       context: { source: 'permissionGuard.checkBotPermissions', subtype: 'bot_permission' }
     });

@@ -9,23 +9,23 @@ export default {
 
   async execute(role) {
     try {
-      if (!Rolle zu bekommen.guild) return;
+      if (!role.guild) return;
 
       const lines = buildRoleAuditLines(role);
 
       await logEvent({
-        client: Rolle zu bekommen.client,
-        guildId: Rolle zu bekommen.guild.id,
+        client: role.client,
+        guildId: role.guild.id,
         eventType: EVENT_TYPES.ROLE_CREATE,
         data: {
           title: 'Role Created',
-          headline: `${Rolle zu bekommen.toString()} was created`,
+          headline: `${role.toString()} was created`,
           lines,
         },
       });
 
     } catch (error) {
-      logger.error('Fehler in roleCreate event:', error);
+      logger.error('Error in roleCreate event:', error);
     }
   }
 };

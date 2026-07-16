@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getLeaderboard, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -31,9 +31,9 @@ export default {
     const leaderboard = await getLeaderboard(client, interaction.guildId, 10);
 
     if (leaderboard.length === 0) {
-      throw new TitanBotFehler(
+      throw new TitanBotError(
         'No leaderboard data found',
-        FehlerTypes.DATABASE,
+        ErrorTypes.DATABASE,
         'No level data found yet. Start chatting to gain XP!'
       );
     }
@@ -49,7 +49,7 @@ export default {
         try {
           const member = await interaction.guild.members.fetch(user.userId).catch(() => null);
           const userMention = member?.user.toString() || `<@${user.userId}>`;
-          const xpForWeiterLevel = getXpForLevel(user.level + 1);
+          const xpForNextLevel = getXpForLevel(user.level + 1);
 
           let rankPrefix = `${index + 1}.`;
           if (index === 0) rankPrefix = '🥇';
@@ -57,9 +57,9 @@ export default {
           else if (index === 2) rankPrefix = '🥉';
           else rankPrefix = `**${index + 1}.**`;
 
-          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForWeiterLevel} XP)`;
+          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNextLevel} XP)`;
         } catch {
-          return `**${index + 1}.** Fehler loading user ${user.userId}`;
+          return `**${index + 1}.** Error loading user ${user.userId}`;
         }
       })
     );

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -12,23 +12,23 @@ export default {
         .addRoleOption(option =>
             option.setName('role')
                 .setDescription('Limit selection to users with this role')
-                .setErforderlich(false))
+                .setRequired(false))
         .addBooleanOption(option =>
             option.setName('bots')
                 .setDescription('Include bots in the selection (default: false)')
-                .setErforderlich(false))
+                .setRequired(false))
         .addBooleanOption(option =>
             option.setName('online')
-                .setDescription('Anly select from online users (default: false)')
-                .setErforderlich(false))
+                .setDescription('Only select from online users (default: false)')
+                .setRequired(false))
         .addBooleanOption(option =>
             option.setName('mention')
                 .setDescription('Mention the selected user (default: false)')
-                .setErforderlich(false)),
+                .setRequired(false)),
 
     async execute(interaction) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction);
-        if (!deferErfolg) {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
             logger.warn(`RandomUser interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -38,23 +38,23 @@ export default {
         }
 
         if (!interaction.guild) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.VALIDATION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.VALIDATION,
                 message: 'This command can only be used in a server/guild.',
             });
         }
 
         const role = interaction.options.getRole('role');
         const includeBots = interaction.options.getBoolean('bots') || false;
-        const onlineAnly = interaction.options.getBoolean('online') || false;
+        const onlineOnly = interaction.options.getBoolean('online') || false;
         const shouldMention = interaction.options.getBoolean('mention') || false;
 
         let members = interaction.guild.members.cache.filter(member => {
             if (member.user.bot && !includeBots) return false;
 
-            if (onlineAnly && member.presence?.status === 'offline') return false;
+            if (onlineOnly && member.presence?.status === 'offline') return false;
 
-            if (role && !member.roles.cache.has(Rolle zu bekommen.id)) return false;
+            if (role && !member.roles.cache.has(role.id)) return false;
 
             return true;
         });
@@ -67,12 +67,12 @@ export default {
 
         if (memberArray.length === 0) {
             let errorMessage = 'Could not find any users matching your filters:';
-            if (role) errorMessage = `No users have the **${Rolle zu bekommen.name}** Rolle zu bekommen.`;
-            if (onlineAnly) errorMessage = 'No users are currently online.';
-            if (role && onlineAnly) errorMessage = `No **${Rolle zu bekommen.name}** members are online.`;
+            if (role) errorMessage = `No users have the **${role.name}** role.`;
+            if (onlineOnly) errorMessage = 'No users are currently online.';
+            if (role && onlineOnly) errorMessage = `No **${role.name}** members are online.`;
 
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.USER_INPUT,
+            return replyUserError(interaction, {
+                type: ErrorTypes.USER_INPUT,
                 message: errorMessage + '\n\nTry adjusting your filters.',
             });
         }
@@ -83,9 +83,9 @@ export default {
         const user = selectedMember.user;
         const joinDate = selectedMember.joinedAt;
         const roles = selectedMember.roles.cache
-            .filter(role => Rolle zu bekommen.id !== interaction.guild.id)
+            .filter(role => role.id !== interaction.guild.id)
             .sort((a, b) => b.position - a.position)
-            .map(role => Rolle zu bekommen.toString())
+            .map(role => role.toString())
             .slice(0, 10);
 
         const embed = successEmbed(
@@ -123,9 +123,9 @@ export default {
                 let newMembers = interaction.guild.members.cache.filter(member => {
                     if (member.user.bot && !includeBots) return false;
 
-                    if (onlineAnly && member.presence?.status === 'offline') return false;
+                    if (onlineOnly && member.presence?.status === 'offline') return false;
 
-                    if (role && !member.roles.cache.has(Rolle zu bekommen.id)) return false;
+                    if (role && !member.roles.cache.has(role.id)) return false;
 
                     return true;
                 });
@@ -137,8 +137,8 @@ export default {
                 }
 
                 if (newMemberArray.length === 0) {
-                    await replyUserFehler(i, {
-                        type: FehlerTypes.USER_INPUT,
+                    await replyUserError(i, {
+                        type: ErrorTypes.USER_INPUT,
                         message: 'No users found matching the criteria.',
                     });
                     return;
@@ -184,7 +184,7 @@ export default {
 
         collector.on('end', () => {
             const disabledRow = ActionRowBuilder.from(row).setComponents(
-                ButtonBuilder.from(row.components[0]).setDeaktiviert(true)
+                ButtonBuilder.from(row.components[0]).setDisabled(true)
             );
 
             interaction.editReply({ components: [disabledRow] }).catch(console.error);

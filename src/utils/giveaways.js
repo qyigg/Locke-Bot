@@ -2,7 +2,7 @@
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { logger } from './logger.js';
-import { TitanBotFehler, FehlerTypes } from './errorHandler.js';
+import { TitanBotError, ErrorTypes } from './errorHandler.js';
 import { unwrapReplitData } from './database.js';
 import { 
     createGiveawayEmbed as createGiveawayEmbedService,
@@ -42,7 +42,7 @@ export async function getGuildGiveaways(client, guildId) {
         }
         return Array.isArray(unwrappedGiveaways) ? unwrappedGiveaways : [];
     } catch (error) {
-        logger.error(`Fehler getting giveaways for guild ${guildId}:`, error);
+        logger.error(`Error getting giveaways for guild ${guildId}:`, error);
         return [];
     }
 }
@@ -55,9 +55,9 @@ export async function saveGiveaway(client, guildId, giveawayData) {
         }
 
         if (!giveawayData || !giveawayData.messageId) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Invalid giveaway data: missing messageId',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'Cannot save giveaway without a message ID.',
                 { giveawayData }
             );
@@ -71,11 +71,11 @@ export async function saveGiveaway(client, guildId, giveawayData) {
         
         await client.db.set(key, giveawayMap);
         
-        logger.debug(`Speichernd giveaway ${giveawayData.messageId} in guild ${guildId}`);
+        logger.debug(`Saved giveaway ${giveawayData.messageId} in guild ${guildId}`);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving giveaway in guild ${guildId}:`, error);
-        if (error instanceof TitanBotFehler) {
+        logger.error(`Error saving giveaway in guild ${guildId}:`, error);
+        if (error instanceof TitanBotError) {
             throw error;
         }
         return false;
@@ -90,9 +90,9 @@ export async function deleteGiveaway(client, guildId, messageId) {
         }
 
         if (!messageId) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Missing messageId parameter',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'Cannot delete giveaway without a message ID.',
                 { messageId }
             );
@@ -111,11 +111,11 @@ export async function deleteGiveaway(client, guildId, messageId) {
         delete giveawayMap[messageId];
         await client.db.set(key, giveawayMap);
         
-        logger.debug(`Löschend giveaway ${messageId} from guild ${guildId}`);
+        logger.debug(`Deleted giveaway ${messageId} from guild ${guildId}`);
         return true;
     } catch (error) {
-        logger.error(`Fehler deleting giveaway ${messageId} in guild ${guildId}:`, error);
-        if (error instanceof TitanBotFehler) {
+        logger.error(`Error deleting giveaway ${messageId} in guild ${guildId}:`, error);
+        if (error instanceof TitanBotError) {
             throw error;
         }
         return false;
@@ -126,7 +126,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
     try {
         return createGiveawayEmbedService(giveaway, status, winners);
     } catch (error) {
-        logger.error('Fehler creating giveaway embed:', error);
+        logger.error('Error creating giveaway embed:', error);
         throw error;
     }
 }
@@ -141,7 +141,7 @@ export function pickWinners(entrants, count) {
     try {
         return selectWinnersService(entrants, count);
     } catch (error) {
-        logger.error('Fehler picking winners:', error);
+        logger.error('Error picking winners:', error);
         
         if (!entrants || entrants.length === 0) return [];
         const requested = Math.min(count, entrants.length);
@@ -162,7 +162,7 @@ export function giveawayButtons(ended = false) {
     try {
         return createGiveawayButtonsService(ended);
     } catch (error) {
-        logger.error('Fehler creating giveaway buttons:', error);
+        logger.error('Error creating giveaway buttons:', error);
         
         const row = new ActionRowBuilder();
         if (ended) {

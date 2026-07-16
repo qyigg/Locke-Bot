@@ -2,7 +2,7 @@
 
 import { mapArgumentsToOptions } from './prefixParser.js';
 import { createEmbed } from './embeds.js';
-import { handleInteractionFehler } from './errorHandler.js';
+import { handleInteractionError } from './errorHandler.js';
 import { logger } from './logger.js';
 import { InteractionHelper } from './interactionHelper.js';
 import { SLASH_ONLY_COMMANDS } from '../config/commands/prefixRestrictions.js';
@@ -124,7 +124,7 @@ export function createMockInteraction(message, commandData, args) {
       getBoolean: (name) => options.getBoolean(name),
       getSubcommand: () => options.getSubcommand(),
       getSubcommandGroup: () => options.getSubcommandGroup(),
-      validateErforderlich: () => options.validateErforderlich(),
+      validateRequired: () => options.validateRequired(),
       _hoistedOptions: args.map((arg, index) => ({
         name: commandData?.options?.[index]?.name || `arg${index}`,
         value: arg,
@@ -172,7 +172,7 @@ export function createMockInteraction(message, commandData, args) {
 }
 
 export function supportsPrefixExecution(command) {
-  if (command.prefixAnly === false || command.slashAnly === true) {
+  if (command.prefixOnly === false || command.slashOnly === true) {
     return false;
   }
 
@@ -202,7 +202,7 @@ export async function executePrefixCommand(command, message, args, client, prefi
       return;
     }
 
-    const validation = mockInteraction.options.validateErforderlich();
+    const validation = mockInteraction.options.validateRequired();
     if (!validation.valid) {
       await coordinator.respondUsageFromCommand(prefix, command.data, validation);
       return;
@@ -214,7 +214,7 @@ export async function executePrefixCommand(command, message, args, client, prefi
       await command.execute(mockInteraction, guildConfig, client);
     }
   } catch (error) {
-    await handleInteractionFehler(mockInteraction, error, {
+    await handleInteractionError(mockInteraction, error, {
       type: 'prefix_command',
       command: command.data?.name,
       source: 'messageAdapter.executePrefixCommand',

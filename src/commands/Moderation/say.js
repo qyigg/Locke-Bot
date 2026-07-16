@@ -8,7 +8,7 @@ import { successEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { sanitizeInput } from '../../utils/validation.js';
 
 const TEXT_CHANNEL_TYPES = [
@@ -37,7 +37,7 @@ export default {
             option
                 .setName('message')
                 .setDescription('The message the bot should send')
-                .setErforderlich(true)
+                .setRequired(true)
                 .setMaxLength(2000),
         )
         .addChannelOption((option) =>
@@ -45,7 +45,7 @@ export default {
                 .setName('channel')
                 .setDescription('Channel to send in (defaults to the current channel)')
                 .addChannelTypes(...TEXT_CHANNEL_TYPES)
-                .setErforderlich(false),
+                .setRequired(false),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
         .setDMPermission(false),
@@ -53,10 +53,10 @@ export default {
     abuseProtection: { maxAttempts: 8, windowMs: 60_000 },
 
     async execute(interaction, _config, client) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction, {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction, {
             flags: MessageFlags.Ephemeral,
         });
-        if (!deferErfolg) {
+        if (!deferSuccess) {
             logger.warn('Say interaction defer failed', {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -69,16 +69,16 @@ export default {
         const message = sanitizeInput(rawMessage, 2000);
 
         if (!message) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.VALIDATION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.VALIDATION,
                 message: 'Message cannot be empty.',
             });
         }
 
         const channel = resolveTargetChannel(interaction);
         if (!channel) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.VALIDATION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.VALIDATION,
                 message: 'Choose a text channel or run this command in one.',
             });
         }
@@ -87,15 +87,15 @@ export default {
         const botPermissions = channel.permissionsFor(interaction.guild.members.me);
 
         if (!memberPermissions?.has(PermissionFlagsBits.SendMessages)) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.PERMISSION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.PERMISSION,
                 message: `You do not have permission to send messages in ${channel}.`,
             });
         }
 
         if (!botPermissions?.has(PermissionFlagsBits.SendMessages)) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.PERMISSION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.PERMISSION,
                 message: `I do not have permission to send messages in ${channel}.`,
             });
         }

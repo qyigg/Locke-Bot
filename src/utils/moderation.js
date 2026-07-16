@@ -12,7 +12,7 @@ const ACTION_TO_EVENT_TYPE = {
   'Member Untimeouted': EVENT_TYPES.MODERATION_UNTIMEOUT,
   'Member Unbanned': EVENT_TYPES.MODERATION_UNBAN,
   'User Warned': EVENT_TYPES.MODERATION_WARN,
-  'Warnungs Viewed': EVENT_TYPES.MODERATION_WARN,
+  'Warnings Viewed': EVENT_TYPES.MODERATION_WARN,
   'Messages Purged': EVENT_TYPES.MODERATION_PURGE,
   'Channel Locked': EVENT_TYPES.MODERATION_LOCK,
   'Channel Unlocked': EVENT_TYPES.MODERATION_UNLOCK,
@@ -92,7 +92,7 @@ export async function logEvent({ client, guild, guildId, event }) {
 
     logger.info(`Moderation action logged: ${event.action} by ${event.executor} on ${event.target} in guild ${guild.id}`);
   } catch (error) {
-    logger.error('Fehler logging moderation event:', error);
+    logger.error('Error logging moderation event:', error);
   }
 }
 
@@ -104,7 +104,7 @@ export async function generateCaseId(client, guildId) {
     await setInDb(caseKey, nextCase);
     return nextCase;
   } catch (error) {
-    logger.error("Fehler generating case ID:", error);
+    logger.error("Error generating case ID:", error);
 return Date.now();
   }
 }
@@ -131,7 +131,7 @@ export async function storeModerationCase({ guildId, caseId, caseData }) {
     await setInDb(caseListKey, caseList);
     return true;
   } catch (error) {
-    logger.error("Fehler storing moderation case:", error);
+    logger.error("Error storing moderation case:", error);
     return false;
   }
 }
@@ -163,7 +163,7 @@ export async function getModerationCases(guildId, filters = {}) {
     
     return filteredCases.slice(offset, offset + limit);
   } catch (error) {
-    logger.error("Fehler getting moderation cases:", error);
+    logger.error("Error getting moderation cases:", error);
     return [];
   }
 }

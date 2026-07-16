@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const MINE_COOLDOWN = 60 * 60 * 1000;
@@ -23,7 +23,7 @@ export default {
         .setName('mine')
         .setDescription('Go mining to earn money'),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -43,9 +43,9 @@ export default {
                     (remaining % (1000 * 60 * 60)) / (1000 * 60),
                 );
 
-                throw createFehler(
+                throw createError(
                     "Mining cooldown active",
-                    FehlerTypes.RATE_LIMIT,
+                    ErrorTypes.RATE_LIMIT,
                     `Your pickaxe is cooling down. Wait for **${hours}h ${minutes}m** before mining again.`,
                     { remaining, cooldownType: 'mine' }
                 );
@@ -78,7 +78,7 @@ userData.lastMine = now;
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                "💰 Mining Expedition Erfolgful!",
+                "💰 Mining Expedition Successful!",
                 `You explored a **${location}** and managed to find minerals worth **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
             )
                 .addFields({
@@ -86,7 +86,7 @@ userData.lastMine = now;
                     value: `$${userData.wallet.toLocaleString()}`,
                     inline: true,
                 })
-                .setFooter({ text: `Weiter mine available in 1 hour.` });
+                .setFooter({ text: `Next mine available in 1 hour.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'mine' })

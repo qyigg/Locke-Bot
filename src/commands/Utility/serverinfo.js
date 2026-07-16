@@ -9,8 +9,8 @@ export default {
     .setDescription("Get detailed information about the server"),
 
   async execute(interaction) {
-    const deferErfolg = await InteractionHelper.safeDefer(interaction);
-    if (!deferErfolg) {
+    const deferSuccess = await InteractionHelper.safeDefer(interaction);
+    if (!deferSuccess) {
       logger.warn(`ServerInfo interaction defer failed`, {
         userId: interaction.user.id,
         guildId: interaction.guildId,

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -13,22 +13,22 @@ export default {
             option
                 .setName("url")
                 .setDescription("The URL to shorten")
-                .setErforderlich(true)
+                .setRequired(true)
         )
         .addStringOption(option =>
             option
                 .setName("custom")
                 .setDescription("Custom URL ending (optional)")
-                .setErforderlich(false)
+                .setRequired(false)
         )
         .setDMPermission(false),
     category: "Tools",
 
     async execute(interaction) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction, {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction, {
             flags: MessageFlags.Ephemeral
         });
-        if (!deferErfolg) {
+        if (!deferSuccess) {
             logger.warn(`Shorten interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -43,15 +43,15 @@ export default {
         try {
             new URL(url);
         } catch (e) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.VALIDATION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.VALIDATION,
                 message: 'Invalid URL format. Include http:// or https://',
             });
         }
 
         if (custom && !/^[a-zA-Z0-9_-]+$/.test(custom)) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.VALIDATION,
+            return replyUserError(interaction, {
+                type: ErrorTypes.VALIDATION,
                 message: 'Custom URL can only contain letters, numbers, underscores, and hyphens.',
             });
         }
@@ -72,12 +72,12 @@ export default {
                     'User-Agent': 'TitanBot URL Shortener/1.0'
                 }
             });
-        } catch (networkFehler) {
-            const message = networkFehler?.name === 'AbortFehler'
+        } catch (networkError) {
+            const message = networkError?.name === 'AbortError'
                 ? 'The URL shortener timed out. Please try again in a moment.'
-                : 'Unable to reach the URL shortener service right now. Bitte versuche es später erneut.';
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.NETWORK,
+                : 'Unable to reach the URL shortener service right now. Please try again later.';
+            return replyUserError(interaction, {
+                type: ErrorTypes.NETWORK,
                 message,
             });
         } finally {
@@ -85,9 +85,9 @@ export default {
         }
 
         if (!response.ok) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.UNKNOWN,
-                message: `Shortener service returned HTTP ${response.status}. Bitte versuche es später erneut.`,
+            return replyUserError(interaction, {
+                type: ErrorTypes.UNKNOWN,
+                message: `Shortener service returned HTTP ${response.status}. Please try again later.`,
             });
         }
 
@@ -97,18 +97,18 @@ export default {
             new URL(shortUrl);
         } catch (e) {
             if (shortUrl.includes("already exists")) {
-                return replyUserFehler(interaction, {
-                    type: FehlerTypes.VALIDATION,
+                return replyUserError(interaction, {
+                    type: ErrorTypes.VALIDATION,
                     message: 'That custom URL is already taken. Try a different one.',
                 });
             } else if (shortUrl.includes("invalid")) {
-                return replyUserFehler(interaction, {
-                    type: FehlerTypes.VALIDATION,
+                return replyUserError(interaction, {
+                    type: ErrorTypes.VALIDATION,
                     message: 'Invalid URL. Include http:// or https://',
                 });
             }
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.UNKNOWN,
+            return replyUserError(interaction, {
+                type: ErrorTypes.UNKNOWN,
                 message: `URL shortening failed: ${shortUrl}`,
             });
         }

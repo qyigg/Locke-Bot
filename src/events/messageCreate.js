@@ -8,10 +8,10 @@ import { supportsPrefixExecution, executePrefixCommand, resolvePrefixAccessKey }
 import { resolveCommandAlias, resolveSubcommandAlias } from '../config/commands/commandAliases.js';
 import { getPrefixRestriction } from '../config/commands/prefixRestrictions.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
-import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryAktiviert, isMaintenanceMode } from '../config/bot.js';
+import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryEnabled, isMaintenanceMode } from '../config/bot.js';
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
 import { createEmbed } from '../utils/embeds.js';
-import { isCommandAktiviert } from '../services/commandAccessService.js';
+import { isCommandEnabled } from '../services/commandAccessService.js';
 import {
   getCountingGameConfig,
   saveCountingGameConfig,
@@ -28,7 +28,7 @@ export default {
     try {
       if (message.author.bot || !message.guild) return;
 
-      logger.debug(`Nachricht von ${message.author.tag} empfangen: ${message.content}`);
+      logger.debug(`Message received from ${message.author.tag}: ${message.content}`);
 
       const countingProcessed = await handleCountingGame(message, client);
       if (countingProcessed) {
@@ -39,7 +39,7 @@ export default {
 
       await handleLeveling(message, client);
     } catch (error) {
-      logger.error('Fehler im messageCreate-Event:', error);
+      logger.error('Error in messageCreate event:', error);
     }
   }
 };
@@ -62,21 +62,21 @@ async function handlePrefixCommand(message, client) {
       args = [musicPrefixShortcut, ...args];
     }
 
-    logger.info(`Prefix-Befehl erkannt: ${commandName}, args: ${args.join(', ')}`);
+    logger.info(`Prefix command detected: ${commandName}, args: ${args.join(', ')}`);
 
     const resolvedCommandName = resolveCommandAlias(commandName);
-    logger.info(`Aufgelöster Befehlsname: ${resolvedCommandName}`);
+    logger.info(`Resolved command name: ${resolvedCommandName}`);
     const command = client.commands.get(resolvedCommandName);
 
     if (!command) {
-      logger.warn(`Befehl nicht gefunden: ${resolvedCommandName}`);
+      logger.warn(`Command not found: ${resolvedCommandName}`);
       return; 
     }
 
     if (isMaintenanceMode() && !isBotOwner(message.author.id)) {
       await message.channel.send({
         embeds: [createEmbed({
-          title: 'Wartungsmodus',
+          title: 'Maintenance Mode',
           description: getBotMessage('maintenanceMode'),
           color: 'warning',
         })],
@@ -84,11 +84,11 @@ async function handlePrefixCommand(message, client) {
       return;
     }
 
-    if (!isCommandCategoryAktiviert(command.category)) {
+    if (!isCommandCategoryEnabled(command.category)) {
       await message.channel.send({
         embeds: [createEmbed({
-          title: 'Funktion deaktiviert',
-          description: getBotMessage('commandDeaktiviert'),
+          title: 'Feature Disabled',
+          description: getBotMessage('commandDisabled'),
           color: 'error',
         })],
       }).catch(() => {});
@@ -99,8 +99,8 @@ async function handlePrefixCommand(message, client) {
     if (!supportsPrefixExecution(command) || restriction.blocked) {
       if (restriction.blocked && restriction.reason) {
         const embed = createEmbed({
-          title: 'Nur Slash-Command',
-          description: `${restriction.reason}\nVerwende stattdessen \`/${resolvedCommandName}\`.`,
+          title: 'Slash Command Only',
+          description: `${restriction.reason}\nUse \`/${resolvedCommandName}\` instead.`,
           color: 'info',
         });
         await message.channel.send({ embeds: [embed] }).catch(() => {});
@@ -108,10 +108,10 @@ async function handlePrefixCommand(message, client) {
       return;
     }
 
-    if (!(await isCommandAktiviert(client, message.guild.id, resolvePrefixAccessKey(command.data, args), command.category))) {
+    if (!(await isCommandEnabled(client, message.guild.id, resolvePrefixAccessKey(command.data, args), command.category))) {
       const embed = createEmbed({
-        title: 'Befehl deaktiviert',
-        description: 'Dieser Befehl wurde für diesen Server deaktiviert.',
+        title: 'Command Disabled',
+        description: 'This command has been disabled for this server.',
         color: 'error',
       });
       await message.channel.send({ embeds: [embed] }).catch(() => {});
@@ -130,19 +130,19 @@ async function handlePrefixCommand(message, client) {
     if (!abuseProtection.allowed) {
       const formattedCooldown = formatCooldownDuration(abuseProtection.remainingMs);
       const embed = createEmbed({
-        title: 'Befehls-Cooldown',
-        description: `Dieser Befehl hat aktuell eine Abklingzeit. Bitte warte ${formattedCooldown}, bevor du es erneut versuchst.`,
+        title: 'Command Cooldown',
+        description: `This command is on cooldown. Please wait ${formattedCooldown} before trying again.`,
         color: 'error',
       });
       await message.channel.send({ embeds: [embed] }).catch(() => {});
       return;
     }
 
-    logger.info(`Prefix-Befehl wird ausgeführt: ${prefix}${commandName} (aufgelöst zu ${resolvedCommandName}) von ${message.author.tag}`);
+    logger.info(`Executing prefix command: ${prefix}${commandName} (resolved to ${resolvedCommandName}) by ${message.author.tag}`);
     
     await executePrefixCommand(command, message, args, client, prefix, guildConfig);
   } catch (error) {
-    logger.error('Fehler beim Verarbeiten des Prefix-Befehls:', error);
+    logger.error('Error handling prefix command:', error);
   }
 }
 
@@ -166,7 +166,7 @@ async function handleCountingGame(message, client) {
         currentStreak: 0,
       });
 
-      const failureMessage = await message.channel.send(`❌ Zählung von <@${message.author.id}> unterbrochen. Die Folge wurde auf **1** zurückgesetzt.`);
+      const failureMessage = await message.channel.send(`❌ Count broken by <@${message.author.id}>. The sequence has been reset to **1**.`);
       setTimeout(() => {
         failureMessage.delete().catch(() => {});
       }, 10000);
@@ -177,7 +177,7 @@ async function handleCountingGame(message, client) {
     await recordCorrectCount(client, message.guild.id, message.author.id);
     return true;
   } catch (error) {
-    logger.error('Fehler beim Verarbeiten des Zählspiels:', error);
+    logger.error('Error handling counting game:', error);
     return false;
   }
 }
@@ -204,7 +204,7 @@ async function handleLeveling(message, client) {
       const member = await message.guild.members.fetch(message.author.id).catch(() => {
         return null;
       });
-      if (member && member.roles.cache.some(role => levelingConfig.ignoredRoles.includes(Rolle zu bekommen.id))) {
+      if (member && member.roles.cache.some(role => levelingConfig.ignoredRoles.includes(role.id))) {
         return;
       }
     }
@@ -244,10 +244,10 @@ async function handleLeveling(message, client) {
 
     if (result?.leveledUp) {
       logger.info(
-        `${message.author.tag} ist in ${message.guild.name} auf Level ${result.level} aufgestiegen`
+        `${message.author.tag} leveled up to level ${result.level} in ${message.guild.name}`
       );
     }
   } catch (error) {
-    logger.error('Fehler beim Verarbeiten des Levelings für eine Nachricht:', error);
+    logger.error('Error handling leveling for message:', error);
   }
 }

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -13,10 +13,10 @@ export default {
             option
                 .setName('user')
                 .setDescription('User to check balance for')
-                .setErforderlich(false)
+                .setRequired(false)
         ),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
 
@@ -29,9 +29,9 @@ export default {
         logger.debug(`[ECONOMY] Balance check for ${targetUser.id}`, { userId: targetUser.id, guildId });
 
         if (targetUser.bot) {
-            throw createFehler(
+            throw createError(
                 "Bot user queried for balance",
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 "Bots don't have an economy balance."
             );
         }
@@ -41,10 +41,10 @@ export default {
         logger.info(`[ECONOMY] Economy data retrieved - userData:`, userData);
 
         if (!userData) {
-            throw createFehler(
+            throw createError(
                 "Failed to load economy data",
-                FehlerTypes.DATABASE,
-                "Failed to load economy data. Bitte versuche es später erneut.",
+                ErrorTypes.DATABASE,
+                "Failed to load economy data. Please try again later.",
                 { userId: targetUser.id, guildId }
             );
         }

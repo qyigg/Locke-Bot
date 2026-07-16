@@ -1,6 +1,6 @@
 import {
-  wipedataBestätigenHandler,
-  wipedataAbbrechenHandler,
+  wipedataConfirmHandler,
+  wipedataCancelHandler,
 } from '../../../handlers/wipedataButtons.js';
 
-export default [wipedataBestätigenHandler, wipedataAbbrechenHandler];
+export default [wipedataConfirmHandler, wipedataCancelHandler];

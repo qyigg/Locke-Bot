@@ -96,7 +96,7 @@ export async function loadCommands(client) {
             }
             
         } catch (error) {
-            logger.error(`Fehler loading command from ${filePath}:`, error);
+            logger.error(`Error loading command from ${filePath}:`, error);
         }
     }
     
@@ -153,14 +153,14 @@ function collectCommandPayloads(client) {
 }
 
 function validateCommands(commands) {
-    const validationFehlers = [];
+    const validationErrors = [];
 
     for (const cmd of commands) {
         if (cmd.name && cmd.name.length > 32) {
-            validationFehlers.push(`Command ${cmd.name} has name longer than 32 chars: "${cmd.name}" (${cmd.name.length} chars)`);
+            validationErrors.push(`Command ${cmd.name} has name longer than 32 chars: "${cmd.name}" (${cmd.name.length} chars)`);
         }
         if (cmd.description && cmd.description.length > 110) {
-            validationFehlers.push(`Command ${cmd.name} has description longer than 110 chars: "${cmd.description}" (${cmd.description.length} chars)`);
+            validationErrors.push(`Command ${cmd.name} has description longer than 110 chars: "${cmd.description}" (${cmd.description.length} chars)`);
         }
 
         if (!cmd.options) {
@@ -169,19 +169,19 @@ function validateCommands(commands) {
 
         for (const option of cmd.options) {
             if (option.name && option.name.length > 32) {
-                validationFehlers.push(`Command ${cmd.name} option ${option.name} has name longer than 32 chars: "${option.name}" (${option.name.length} chars)`);
+                validationErrors.push(`Command ${cmd.name} option ${option.name} has name longer than 32 chars: "${option.name}" (${option.name.length} chars)`);
             }
             if (option.description && option.description.length > 110) {
-                validationFehlers.push(`Command ${cmd.name} option ${option.name} has description longer than 110 chars: "${option.description}" (${option.description.length} chars)`);
+                validationErrors.push(`Command ${cmd.name} option ${option.name} has description longer than 110 chars: "${option.description}" (${option.description.length} chars)`);
             }
 
             if (option.choices) {
                 for (const choice of option.choices) {
                     if (choice.name && choice.name.length > 110) {
-                        validationFehlers.push(`Command ${cmd.name} option ${option.name} choice ${choice.name} has name longer than 110 chars: "${choice.name}" (${choice.name.length} chars)`);
+                        validationErrors.push(`Command ${cmd.name} option ${option.name} choice ${choice.name} has name longer than 110 chars: "${choice.name}" (${choice.name.length} chars)`);
                     }
                     if (choice.value && choice.value.length > 100) {
-                        validationFehlers.push(`Command ${cmd.name} option ${option.name} choice ${choice.name} has value longer than 100 chars: "${choice.value}" (${choice.value.length} chars)`);
+                        validationErrors.push(`Command ${cmd.name} option ${option.name} choice ${choice.name} has value longer than 100 chars: "${choice.value}" (${choice.value.length} chars)`);
                     }
                 }
             }
@@ -192,10 +192,10 @@ function validateCommands(commands) {
 
             for (const subOption of option.options) {
                 if (subOption.name && subOption.name.length > 32) {
-                    validationFehlers.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} has name longer than 32 chars: "${subOption.name}" (${subOption.name.length} chars)`);
+                    validationErrors.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} has name longer than 32 chars: "${subOption.name}" (${subOption.name.length} chars)`);
                 }
                 if (subOption.description && subOption.description.length > 110) {
-                    validationFehlers.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} has description longer than 110 chars: "${subOption.description}" (${subOption.description.length} chars)`);
+                    validationErrors.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} has description longer than 110 chars: "${subOption.description}" (${subOption.description.length} chars)`);
                 }
 
                 if (!subOption.choices) {
@@ -204,20 +204,20 @@ function validateCommands(commands) {
 
                 for (const choice of subOption.choices) {
                     if (choice.name && choice.name.length > 110) {
-                        validationFehlers.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} choice ${choice.name} has name longer than 110 chars: "${choice.name}" (${choice.name.length} chars)`);
+                        validationErrors.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} choice ${choice.name} has name longer than 110 chars: "${choice.name}" (${choice.name.length} chars)`);
                     }
                     if (choice.value && choice.value.length > 100) {
-                        validationFehlers.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} choice ${choice.name} has value longer than 100 chars: "${choice.value}" (${choice.value.length} chars)`);
+                        validationErrors.push(`Command ${cmd.name} subcommand ${option.name} option ${subOption.name} choice ${choice.name} has value longer than 100 chars: "${choice.value}" (${choice.value.length} chars)`);
                     }
                 }
             }
         }
     }
 
-    if (validationFehlers.length > 0) {
-        logger.error('Command validation failed. Fehlers:');
-        validationFehlers.forEach((error) => logger.error(`  - ${error}`));
-        throw new Fehler(`Command validation failed with ${validationFehlers.length} errors`);
+    if (validationErrors.length > 0) {
+        logger.error('Command validation failed. Errors:');
+        validationErrors.forEach((error) => logger.error(`  - ${error}`));
+        throw new Error(`Command validation failed with ${validationErrors.length} errors`);
     }
 }
 
@@ -238,11 +238,11 @@ function prepareCommandsForRegistration(commands) {
 
 async function registerGlobalCommands(client, clientId, commands, totalSubcommands) {
     if (!clientId) {
-        throw new Fehler('CLIENT_ID is required for slash command registration');
+        throw new Error('CLIENT_ID is required for slash command registration');
     }
 
     if (!client.rest) {
-        throw new Fehler('Discord REST client is not available for slash command registration');
+        throw new Error('Discord REST client is not available for slash command registration');
     }
 
     logger.info(`Preparing to register ${totalSubcommands + commands.length} commands globally`);
@@ -259,7 +259,7 @@ async function registerGlobalCommands(client, clientId, commands, totalSubcomman
 
     logger.info(`Registering ${commandsToRegister.length} global commands...`);
     await client.rest.put(`/applications/${clientId}/commands`, { body: commandsToRegister });
-    logger.info(`Erfolgfully registered ${commandsToRegister.length} global commands`);
+    logger.info(`Successfully registered ${commandsToRegister.length} global commands`);
     logger.info('Global commands may take up to an hour to appear in all servers on first deploy');
 }
 
@@ -270,7 +270,7 @@ export async function registerCommands(client, options = {}) {
         const { commands, totalSubcommands } = collectCommandPayloads(client);
         await registerGlobalCommands(client, clientId, commands, totalSubcommands);
     } catch (error) {
-        logger.error('Fehler registering commands:', error);
+        logger.error('Error registering commands:', error);
         throw error;
     }
 }
@@ -292,9 +292,9 @@ export async function reloadCommand(client, commandName) {
         client.commands.set(commandName, newCommand);
         
         logger.info(`Reloaded command: ${commandName}`);
-        return { success: true, message: `Erfolgfully reloaded command "${commandName}"` };
+        return { success: true, message: `Successfully reloaded command "${commandName}"` };
     } catch (error) {
-        logger.error(`Fehler reloading command "${commandName}":`, error);
-        return { success: false, message: `Fehler reloading command: ${error.message}` };
+        logger.error(`Error reloading command "${commandName}":`, error);
+        return { success: false, message: `Error reloading command: ${error.message}` };
     }
 }

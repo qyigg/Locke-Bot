@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, addMoney, removeMoney, setEconomyData } from '../../utils/economy.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import EconomyService from '../../services/economyService.js';
@@ -14,17 +14,17 @@ export default {
             option
                 .setName('user')
                 .setDescription('User to pay')
-                .setErforderlich(true)
+                .setRequired(true)
         )
         .addIntegerOption(option =>
             option
                 .setName('amount')
                 .setDescription('Amount to pay')
-                .setErforderlich(true)
+                .setRequired(true)
                 .setMinValue(1)
         ),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -41,27 +41,27 @@ export default {
             });
 
             if (receiver.bot) {
-                throw createFehler(
+                throw createError(
                     "Cannot pay bot",
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     "You cannot pay a bot.",
                     { receiverId: receiver.id, isBot: true }
                 );
             }
             
             if (receiver.id === senderId) {
-                throw createFehler(
+                throw createError(
                     "Cannot pay self",
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     "You cannot pay yourself.",
                     { senderId, receiverId: receiver.id }
                 );
             }
             
             if (amount <= 0) {
-                throw createFehler(
+                throw createError(
                     "Invalid payment amount",
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     "Amount must be greater than zero.",
                     { amount, senderId }
                 );
@@ -73,19 +73,19 @@ export default {
             ]);
 
             if (!senderData) {
-                throw createFehler(
+                throw createError(
                     "Failed to load sender economy data",
-                    FehlerTypes.DATABASE,
-                    "Failed to load your economy data. Bitte versuche es später erneut.",
+                    ErrorTypes.DATABASE,
+                    "Failed to load your economy data. Please try again later.",
                     { userId: senderId, guildId }
                 );
             }
             
             if (!receiverData) {
-                throw createFehler(
+                throw createError(
                     "Failed to load receiver economy data",
-                    FehlerTypes.DATABASE,
-                    "Failed to load the receiver's economy data. Bitte versuche es später erneut.",
+                    ErrorTypes.DATABASE,
+                    "Failed to load the receiver's economy data. Please try again later.",
                     { userId: receiver.id, guildId }
                 );
             }
@@ -102,7 +102,7 @@ export default {
             const updatedReceiverData = await getEconomyData(client, guildId, receiver.id);
 
             const embed = successEmbed(
-                'Payment Erfolgful',
+                'Payment Successful',
                 `You successfully paid **${receiver.username}** the amount of **$${amount.toLocaleString()}**!`
             )
                 .addFields(

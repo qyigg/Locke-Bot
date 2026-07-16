@@ -13,12 +13,12 @@ export const COUNTER_TYPE_CONFIG = {
     emoji: '👥'
   },
   members_only: {
-    label: 'Members Anly',
+    label: 'Members Only',
     baseName: 'Members',
     emoji: '👤'
   },
   bots: {
-    label: 'Bots Anly',
+    label: 'Bots Only',
     baseName: 'Bots',
     emoji: '🤖'
   }
@@ -200,7 +200,7 @@ export async function updateCounter(client, guild, counter) {
             },
           });
         } catch (error) {
-          logger.debug('Fehler logging counter update:', error);
+          logger.debug('Error logging counter update:', error);
         }
 
       } catch (error) {
@@ -214,7 +214,7 @@ export async function updateCounter(client, guild, counter) {
     }
     return true;
   } catch (error) {
-    logger.error("Fehler updating counter:", error);
+    logger.error("Error updating counter:", error);
     return false;
   }
 }
@@ -252,7 +252,7 @@ export async function getServerCounters(client, guildId) {
 
     return sanitizeCounters(counters, guildId);
   } catch (error) {
-    logger.error("Fehler getting server counters:", error);
+    logger.error("Error getting server counters:", error);
     return [];
   }
 }
@@ -276,7 +276,7 @@ export async function saveServerCounters(client, guildId, counters) {
     }
     return true;
   } catch (error) {
-    logger.error("Fehler saving server counters:", error);
+    logger.error("Error saving server counters:", error);
     return false;
   }
 }

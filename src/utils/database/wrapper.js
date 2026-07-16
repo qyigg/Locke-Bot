@@ -9,7 +9,7 @@ class DatabaseWrapper {
         this.db = null;
         this.useFallback = false;
         this.connectionType = 'none';
-        this.degradedModeWarnungShown = false;
+        this.degradedModeWarningShown = false;
         this.degradedReason = null;
     }
 
@@ -32,11 +32,11 @@ class DatabaseWrapper {
 
             const pgFailure = pgDb.getLastFailure?.();
             if (pgFailure?.reason === 'SCHEMA_VERSION_MISMATCH') {
-                const schemaFehler = new Fehler(
+                const schemaError = new Error(
                     `Schema version mismatch detected (${pgFailure.message}). Run migrations before startup.`,
                 );
-                schemaFehler.code = 'SCHEMA_VERSION_MISMATCH';
-                throw schemaFehler;
+                schemaError.code = 'SCHEMA_VERSION_MISMATCH';
+                throw schemaError;
             }
         } catch (error) {
             logger.warn('PostgreSQL connection failed:', error.message);
@@ -53,7 +53,7 @@ class DatabaseWrapper {
         logger.warn('⚠️ DATABASE DEGRADED MODE ENABLED - Using in-memory storage (data will be lost on restart)');
         logger.warn('⚠️ Please check PostgreSQL connection and restart the bot when fixed');
         this.initialized = true;
-        this.degradedModeWarnungShown = true;
+        this.degradedModeWarningShown = true;
     }
 
     async set(key, value, ttl = null) {
@@ -153,7 +153,7 @@ export async function initializeDatabase() {
         logger.info('✅ Database initialized');
         return { db };
     } catch (error) {
-        logger.error('❌ Database Initialization Fehler:', error);
+        logger.error('❌ Database Initialization Error:', error);
 
         if (error.code === 'SCHEMA_VERSION_MISMATCH') {
             throw error;
@@ -168,7 +168,7 @@ export async function getFromDb(key, defaultValue = null) {
         const value = await db.get(key);
         return value === null ? defaultValue : value;
     } catch (error) {
-        logger.error(`Fehler getting value for key ${key}:`, error);
+        logger.error(`Error getting value for key ${key}:`, error);
         return defaultValue;
     }
 }
@@ -178,7 +178,7 @@ export async function setInDb(key, value, ttl = null) {
         await db.set(key, value, ttl);
         return true;
     } catch (error) {
-        logger.error(`Fehler setting value for key ${key}:`, error);
+        logger.error(`Error setting value for key ${key}:`, error);
         return false;
     }
 }
@@ -188,7 +188,7 @@ export async function deleteFromDb(key) {
         await db.delete(key);
         return true;
     } catch (error) {
-        logger.error(`Fehler deleting key ${key}:`, error);
+        logger.error(`Error deleting key ${key}:`, error);
         return false;
     }
 }

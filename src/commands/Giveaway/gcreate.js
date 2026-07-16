@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { saveGiveaway } from '../../utils/giveaways.js';
 import { 
     parseDuration, 
@@ -28,7 +28,7 @@ export default {
                 .setDescription(
                     "How long the giveaway should last (e.g., 1h, 30m, 5d).",
                 )
-                .setErforderlich(true),
+                .setRequired(true),
         )
         .addIntegerOption((option) =>
             option
@@ -36,20 +36,20 @@ export default {
                 .setDescription("The number of winners to pick.")
                 .setMinValue(GIVEAWAY_MIN_WINNERS)
                 .setMaxValue(GIVEAWAY_MAX_WINNERS)
-                .setErforderlich(true),
+                .setRequired(true),
         )
         .addStringOption((option) =>
             option
                 .setName("prize")
                 .setDescription("The prize being given away.")
-                .setErforderlich(true),
+                .setRequired(true),
         )
         .addChannelOption((option) =>
             option
                 .setName("channel")
                 .setDescription("The channel to send the giveaway to (defaults to current channel).")
                 .addChannelTypes(ChannelType.GuildText)
-                .setErforderlich(false),
+                .setRequired(false),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
@@ -58,18 +58,18 @@ export default {
         await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
 
         if (!interaction.inGuild()) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Giveaway command used outside guild',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'This command can only be used in a server.',
                 { userId: interaction.user.id }
             );
         }
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'User lacks ManageGuild permission',
-                FehlerTypes.PERMISSION,
+                ErrorTypes.PERMISSION,
                 "You need the 'Manage Server' permission to start a giveaway.",
                 { userId: interaction.user.id, guildId: interaction.guildId }
             );
@@ -87,9 +87,9 @@ export default {
         const prizeName = validatePrize(prize);
 
         if (!targetChannel.isTextBased()) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Target channel is not text-based',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'The channel must be a text channel.',
                 { channelId: targetChannel.id, channelType: targetChannel.type }
             );
@@ -165,8 +165,8 @@ export default {
                     ]
                 }
             });
-        } catch (logFehler) {
-            logger.debug('Fehler logging giveaway creation event:', logFehler);
+        } catch (logError) {
+            logger.debug('Error logging giveaway creation event:', logError);
         }
 
         logger.info(`Giveaway created successfully: ${giveawayMessage.id} in ${targetChannel.name}`);

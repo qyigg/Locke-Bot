@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getUserLevelData, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -12,7 +12,7 @@ export default {
       option
         .setName('user')
         .setDescription('The user to check the rank of')
-        .setErforderlich(false)
+        .setRequired(false)
     )
     .setDMPermission(false),
   category: 'Leveling',
@@ -39,9 +39,9 @@ export default {
       .catch(() => null);
 
     if (!member) {
-      throw new TitanBotFehler(
+      throw new TitanBotError(
         `User ${targetUser.id} not found in guild`,
-        FehlerTypes.USER_INPUT,
+        ErrorTypes.USER_INPUT,
         'Could not find the specified user in this server.'
       );
     }

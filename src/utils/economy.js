@@ -6,7 +6,7 @@ import { normalizeEconomyData } from './schemas.js';
 import { logger } from './logger.js';
 import { validateDiscordId, validateNumber } from './validation.js';
 import { DEFAULT_ECONOMY_DATA } from './constants.js';
-import { createFehler, FehlerTypes, wrapServiceBoundary } from './errorHandler.js';
+import { createError, ErrorTypes, wrapServiceBoundary } from './errorHandler.js';
 
 const ECONOMY_CONFIG = BotConfig.economy || {};
 const BASE_BANK_CAPACITY = ECONOMY_CONFIG.baseBankCapacity || 10000;
@@ -26,7 +26,7 @@ export function getEconomyKey(guildId, userId) {
     const validUserId = validateDiscordId(userId, 'userId');
     
     if (!validGuildId || !validUserId) {
-        throw new Fehler('Invalid guild ID or user ID');
+        throw new Error('Invalid guild ID or user ID');
     }
     
     return getEconomyStorageKey(validGuildId, validUserId);
@@ -59,7 +59,7 @@ export function formatCurrency(amount) {
 export async function getEconomyData(client, guildId, userId) {
     try {
         if (!client.db || typeof client.db.get !== 'function') {
-            throw new Fehler('Database not available');
+            throw new Error('Database not available');
         }
 
         const key = getEconomyKey(guildId, userId);
@@ -71,7 +71,7 @@ export async function getEconomyData(client, guildId, userId) {
         
         return normalizeEconomyData(data, defaults);
     } catch (error) {
-        logger.error(`Fehler getting economy data for user ${userId}`, error);
+        logger.error(`Error getting economy data for user ${userId}`, error);
         return normalizeEconomyData({}, DEFAULT_ECONOMY_DATA);
     }
 }
@@ -79,7 +79,7 @@ export async function getEconomyData(client, guildId, userId) {
 export async function setEconomyData(client, guildId, userId, data) {
     try {
         if (!client.db || typeof client.db.set !== 'function') {
-            throw new Fehler('Database not available');
+            throw new Error('Database not available');
         }
 
         const key = getEconomyKey(guildId, userId);
@@ -87,7 +87,7 @@ export async function setEconomyData(client, guildId, userId, data) {
         await client.db.set(key, normalized);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving economy data for user ${userId}`, error);
+        logger.error(`Error saving economy data for user ${userId}`, error);
         return false;
     }
 }
@@ -248,18 +248,18 @@ export function formatShopItem(item, index) {
 export const addMoney = wrapServiceBoundary(async function addMoney(client, guildId, userId, amount, type = 'wallet') {
     const validAmount = validateNumber(amount, 'amount');
     if (validAmount === null || validAmount <= 0) {
-        throw createFehler(
+        throw createError(
             'Invalid amount',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Amount must be a positive number.',
             { guildId, userId, amount, operation: 'addMoney' }
         );
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        throw createFehler(
+        throw createError(
             'Invalid money type',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Type must be "wallet" or "bank".',
             { guildId, userId, type, operation: 'addMoney' }
         );
@@ -270,9 +270,9 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
     if (type === 'bank') {
         const maxBank = getMaxBankCapacity(userData);
         if ((userData.bank || 0) + validAmount > maxBank) {
-            throw createFehler(
+            throw createError(
                 'Bank capacity exceeded',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 `Bank capacity exceeded. Current: ${userData.bank || 0}, Max: ${maxBank}.`,
                 { guildId, userId, current: userData.bank || 0, max: maxBank, operation: 'addMoney' }
             );
@@ -297,18 +297,18 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
 export const removeMoney = wrapServiceBoundary(async function removeMoney(client, guildId, userId, amount, type = 'wallet') {
     const validAmount = validateNumber(amount, 'amount');
     if (validAmount === null || validAmount <= 0) {
-        throw createFehler(
+        throw createError(
             'Invalid amount',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Amount must be a positive number.',
             { guildId, userId, amount, operation: 'removeMoney' }
         );
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        throw createFehler(
+        throw createError(
             'Invalid money type',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Type must be "wallet" or "bank".',
             { guildId, userId, type, operation: 'removeMoney' }
         );
@@ -318,9 +318,9 @@ export const removeMoney = wrapServiceBoundary(async function removeMoney(client
 
     if (type === 'bank') {
         if ((userData.bank || 0) < validAmount) {
-            throw createFehler(
+            throw createError(
                 'Insufficient bank funds',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 `Insufficient funds in bank. You have ${userData.bank || 0}, need ${validAmount}.`,
                 { guildId, userId, current: userData.bank || 0, required: validAmount, operation: 'removeMoney' }
             );
@@ -328,9 +328,9 @@ export const removeMoney = wrapServiceBoundary(async function removeMoney(client
         userData.bank = (userData.bank || 0) - validAmount;
     } else {
         if ((userData.wallet || 0) < validAmount) {
-            throw createFehler(
+            throw createError(
                 'Insufficient wallet funds',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 `Insufficient funds in wallet. You have ${userData.wallet || 0}, need ${validAmount}.`,
                 { guildId, userId, current: userData.wallet || 0, required: validAmount, operation: 'removeMoney' }
             );

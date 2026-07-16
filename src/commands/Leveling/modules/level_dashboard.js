@@ -19,13 +19,13 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
 import { getLevelingConfig, saveLevelingConfig } from '../../../services/leveling/leveling.js';
 import { botHasPermission } from '../../../utils/permissionGuard.js';
 import { startDashboardSession } from '../../../utils/dashboardSession.js';
 
 function buildDashboardEmbed(cfg, guild) {
-    const channel = cfg.levelUpChannel ? `<#${cfg.levelUpChannel}>` : '`Nicht gesetzt`';
+    const channel = cfg.levelUpChannel ? `<#${cfg.levelUpChannel}>` : '`Not set`';
     const xpMin = cfg.xpRange?.min ?? cfg.xpPerMessage?.min ?? 15;
     const xpMax = cfg.xpRange?.max ?? cfg.xpPerMessage?.max ?? 25;
     const cooldown = cfg.xpCooldown ?? 60;
@@ -49,8 +49,8 @@ function buildDashboardEmbed(cfg, guild) {
         .setColor(getColor('info'))
         .addFields(
             { name: 'Level-up Channel', value: channel, inline: true },
-            { name: 'Systemstatus', value: cfg.enabled ? '**Aktiviert**' : '**Deaktiviert**', inline: true },
-            { name: 'Announcements', value: cfg.announceLevelUp !== false ? '**Aktiviert**' : '**Deaktiviert**', inline: true },
+            { name: 'System Status', value: cfg.enabled ? '**Enabled**' : '**Disabled**', inline: true },
+            { name: 'Announcements', value: cfg.announceLevelUp !== false ? '**Enabled**' : '**Disabled**', inline: true },
             { name: 'XP per Message', value: `\`${xpMin} – ${xpMax}\``, inline: true },
             { name: 'XP Cooldown', value: `\`${cooldown}s\``, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
@@ -59,14 +59,14 @@ function buildDashboardEmbed(cfg, guild) {
             { name: 'Ignored Channels', value: ignoredChValue, inline: true },
             { name: 'Ignored Roles', value: ignoredRoValue, inline: true },
         )
-        .setFooter({ text: 'Dashboard schließt nach 10 Minuten Inaktivität' })
+        .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
         .setTimestamp();
 }
 
 function buildSelectMenu(guildId) {
     return new StringSelectMenuBuilder()
         .setCustomId(`level_cfg_${guildId}`)
-        .setPlaceholder('Wähle eine Einstellung zum Konfigurieren aus...')
+        .setPlaceholder('Select a setting to configure...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Change Level-up Channel')
@@ -112,21 +112,21 @@ function buildSelectMenu(guildId) {
 }
 
 function buildButtonRow(cfg, guildId, disabled = false) {
-    const announceAn = cfg.announceLevelUp !== false;
-    const systemAn = cfg.enabled !== false;
+    const announceOn = cfg.announceLevelUp !== false;
+    const systemOn = cfg.enabled !== false;
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`level_cfg_toggle_announce_${guildId}`)
             .setLabel('Announcements')
-            .setStyle(announceAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(announceOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('📣')
-            .setDeaktiviert(disabled),
+            .setDisabled(disabled),
         new ButtonBuilder()
             .setCustomId(`level_cfg_toggle_system_${guildId}`)
             .setLabel('Leveling')
-            .setStyle(systemAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('⚡')
-            .setDeaktiviert(disabled),
+            .setDisabled(disabled),
     );
 }
 
@@ -142,16 +142,16 @@ async function refreshDashboard(rootInteraction, cfg, guildId) {
 }
 
 export default {
-    prefixAnly: false,
+    prefixOnly: false,
     async execute(interaction, config, client) {
         try {
             const guildId = interaction.guild.id;
             const cfg = await getLevelingConfig(client, guildId);
 
             if (!cfg.configured) {
-                throw new TitanBotFehler(
+                throw new TitanBotError(
                     'Leveling system not configured',
-                    FehlerTypes.CONFIGURATION,
+                    ErrorTypes.CONFIGURATION,
                     'The leveling system has not been set up yet. Run `/level setup` first to configure it.',
                 );
             }
@@ -213,8 +213,8 @@ export default {
                             flags: MessageFlags.Ephemeral,
                         });
                     } else {
-                        const wasAktiviert = cfg.enabled !== false;
-                        cfg.enabled = !wasAktiviert;
+                        const wasEnabled = cfg.enabled !== false;
+                        cfg.enabled = !wasEnabled;
                         await saveLevelingConfig(client, guildId, cfg);
                         await btnInteraction.followUp({
                             embeds: [
@@ -231,11 +231,11 @@ export default {
                 },
             });
         } catch (error) {
-            if (error instanceof TitanBotFehler) throw error;
+            if (error instanceof TitanBotError) throw error;
             logger.error('Unexpected error in level_dashboard:', error);
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 `Level dashboard failed: ${error.message}`,
-                FehlerTypes.UNKNOWN,
+                ErrorTypes.UNKNOWN,
                 'Failed to open the leveling dashboard.',
             );
         }
@@ -252,7 +252,7 @@ async function handleRoleRewardAdd(selectInteraction, rootInteraction, cfg, guil
         .setPlaceholder('Select a role to award...')
         .setMinValues(1)
         .setMaxValues(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const roleLabel = new LabelBuilder()
         .setLabel('Role to Award')
@@ -266,7 +266,7 @@ async function handleRoleRewardAdd(selectInteraction, rootInteraction, cfg, guil
         .setPlaceholder('10')
         .setMaxLength(3)
         .setMinLength(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     modal.addLabelComponents(roleLabel);
     modal.addComponents(new ActionRowBuilder().addComponents(levelInput));
@@ -274,7 +274,7 @@ async function handleRoleRewardAdd(selectInteraction, rootInteraction, cfg, guil
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `level_cfg_role_reward_add_${guildId}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -286,7 +286,7 @@ async function handleRoleRewardAdd(selectInteraction, rootInteraction, cfg, guil
     const level = parseInt(rawLevel, 10);
 
     if (isNaN(level) || level < 1 || level > 500) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Level must be a whole number between **1** and **500**.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Level must be a whole number between **1** and **500**.' });
         return;
     }
 
@@ -310,8 +310,8 @@ async function handleRoleRewardRemove(selectInteraction, rootInteraction, cfg, g
 
     if (entries.length === 0) {
         await selectInteraction.deferUpdate();
-        await replyUserFehler(selectInteraction, {
-            type: FehlerTypes.USER_INPUT,
+        await replyUserError(selectInteraction, {
+            type: ErrorTypes.USER_INPUT,
             message: 'There are no role rewards configured to remove.',
         });
         return;
@@ -326,7 +326,7 @@ async function handleRoleRewardRemove(selectInteraction, rootInteraction, cfg, g
         .setLabel('Current rewards (read-only)')
         .setStyle(TextInputStyle.Paragraph)
         .setValue(entries.map(([lvl, roleId]) => `Level ${lvl}: <@&${roleId}>`).join('\n'))
-        .setErforderlich(false);
+        .setRequired(false);
 
     const levelInput = new TextInputBuilder()
         .setCustomId('remove_level')
@@ -335,7 +335,7 @@ async function handleRoleRewardRemove(selectInteraction, rootInteraction, cfg, g
         .setValue(entries[0][0])
         .setMaxLength(3)
         .setMinLength(1)
-        .setErforderlich(true);
+        .setRequired(true);
 
     modal.addComponents(
         new ActionRowBuilder().addComponents(infoInput),
@@ -345,7 +345,7 @@ async function handleRoleRewardRemove(selectInteraction, rootInteraction, cfg, g
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `level_cfg_role_reward_remove_${guildId}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -357,7 +357,7 @@ async function handleRoleRewardRemove(selectInteraction, rootInteraction, cfg, g
     const level = parseInt(rawLevel, 10);
 
     if (isNaN(level) || !cfg.roleRewards?.[level]) {
-        await replyUserFehler(submitted, { type: FehlerTypes.USER_INPUT, message: `No role reward is configured for level **${rawLevel}**.` });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: `No role reward is configured for level **${rawLevel}**.` });
         return;
     }
 
@@ -379,11 +379,11 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
 
     const channelSelect = new ChannelSelectMenuBuilder()
         .setCustomId('levelup_channel')
-        .setPlaceholder('Wähle einen Textkanal aus...')
+        .setPlaceholder('Select a text channel...')
         .setMinValues(1)
         .setMaxValues(1)
         .addChannelTypes(ChannelType.GuildText)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const channelLabel = new LabelBuilder()
         .setLabel('Level-up Channel')
@@ -395,7 +395,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `level_cfg_channel_modal_${guildId}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -407,7 +407,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
     const channel = selectInteraction.guild.channels.cache.get(channelId);
 
     if (channel && !botHasPermission(channel, ['SendMessages', 'EmbedLinks'])) {
-        await replyUserFehler(submitted, { type: FehlerTypes.PERMISSION, message: `I need **SendMessages** and **EmbedLinks** permissions in ${channel} to send level-up notifications.` });
+        await replyUserError(submitted, { type: ErrorTypes.PERMISSION, message: `I need **SendMessages** and **EmbedLinks** permissions in ${channel} to send level-up notifications.` });
         return;
     }
 
@@ -415,7 +415,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
     await saveLevelingConfig(client, guildId, cfg);
 
     await submitted.reply({
-        embeds: [successEmbed('\u2705 Kanal aktualisiert', `Level-up notifications will now be sent in ${channel ??`<#${channelId}>`}.`)],
+        embeds: [successEmbed('\u2705 Channel Updated', `Level-up notifications will now be sent in ${channel ??`<#${channelId}>`}.`)],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -433,7 +433,7 @@ async function handleIgnoreChannels(selectInteraction, rootInteraction, cfg, gui
         .setMinValues(1)
         .setMaxValues(10)
         .addChannelTypes(ChannelType.GuildText)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const channelLabel = new LabelBuilder()
         .setLabel('Toggle Ignored Channels')
@@ -445,7 +445,7 @@ async function handleIgnoreChannels(selectInteraction, rootInteraction, cfg, gui
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `level_cfg_ignore_channels_${guildId}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -489,7 +489,7 @@ async function handleIgnoreRoles(selectInteraction, rootInteraction, cfg, guildI
         .setPlaceholder('Select roles to toggle...')
         .setMinValues(1)
         .setMaxValues(10)
-        .setErforderlich(true);
+        .setRequired(true);
 
     const roleLabel = new LabelBuilder()
         .setLabel('Toggle Ignored Roles')
@@ -501,7 +501,7 @@ async function handleIgnoreRoles(selectInteraction, rootInteraction, cfg, guildI
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i => i.customId === `level_cfg_ignore_roles_${guildId}` && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -548,7 +548,7 @@ async function handleMessage(selectInteraction, rootInteraction, cfg, guildId, c
                     .setValue(cfg.levelUpMessage || '{user} has leveled up to level {level}!')
                     .setMaxLength(500)
                     .setMinLength(1)
-                    .setErforderlich(true)
+                    .setRequired(true)
                     .setPlaceholder('{user} has leveled up to level {level}!'),
             ),
         );
@@ -556,7 +556,7 @@ async function handleMessage(selectInteraction, rootInteraction, cfg, guildId, c
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'level_cfg_message' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -581,7 +581,7 @@ async function handleMessage(selectInteraction, rootInteraction, cfg, guildId, c
     await submitted.reply({
         embeds: [
             successEmbed(
-                '✅ Nachricht aktualisiert',
+                '✅ Message Updated',
                 `Level-up message saved.\n**Preview:** ${preview}`,
             ),
         ],
@@ -607,7 +607,7 @@ async function handleXpRange(selectInteraction, rootInteraction, cfg, guildId, c
                     .setValue(String(currentMin))
                     .setMaxLength(3)
                     .setMinLength(1)
-                    .setErforderlich(true)
+                    .setRequired(true)
                     .setPlaceholder('15'),
             ),
             new ActionRowBuilder().addComponents(
@@ -618,7 +618,7 @@ async function handleXpRange(selectInteraction, rootInteraction, cfg, guildId, c
                     .setValue(String(currentMax))
                     .setMaxLength(3)
                     .setMinLength(1)
-                    .setErforderlich(true)
+                    .setRequired(true)
                     .setPlaceholder('25'),
             ),
         );
@@ -626,7 +626,7 @@ async function handleXpRange(selectInteraction, rootInteraction, cfg, guildId, c
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'level_cfg_xp_range' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -641,12 +641,12 @@ async function handleXpRange(selectInteraction, rootInteraction, cfg, guildId, c
     const newMax = parseInt(rawMax, 10);
 
     if (isNaN(newMin) || isNaN(newMax) || newMin < 1 || newMax < 1 || newMin > 500 || newMax > 500) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Both XP values must be whole numbers between **1** and **500**.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Both XP values must be whole numbers between **1** and **500**.' });
         return;
     }
 
     if (newMin > newMax) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Minimum XP cannot be greater than maximum XP.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Minimum XP cannot be greater than maximum XP.' });
         return;
     }
 
@@ -679,7 +679,7 @@ async function handleXpCooldown(selectInteraction, rootInteraction, cfg, guildId
                     .setValue(String(cfg.xpCooldown ?? 60))
                     .setMaxLength(4)
                     .setMinLength(1)
-                    .setErforderlich(true)
+                    .setRequired(true)
                     .setPlaceholder('60'),
             ),
         );
@@ -687,7 +687,7 @@ async function handleXpCooldown(selectInteraction, rootInteraction, cfg, guildId
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'level_cfg_cooldown' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -700,7 +700,7 @@ async function handleXpCooldown(selectInteraction, rootInteraction, cfg, guildId
     const newCooldown = parseInt(raw, 10);
 
     if (isNaN(newCooldown) || newCooldown < 0 || newCooldown > 3600) {
-        await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Cooldown must be a whole number between **0** and **3600** seconds.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Cooldown must be a whole number between **0** and **3600** seconds.' });
         return;
     }
 

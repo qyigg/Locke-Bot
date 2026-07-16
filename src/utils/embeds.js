@@ -1,3 +1,5 @@
+// embeds.js
+
 import { EmbedBuilder } from 'discord.js';
 import { getColor, botConfig } from '../config/bot.js';
 
@@ -12,10 +14,10 @@ function sanitizeEmbedText(text = '') {
 
   return text
     .replace(EMOJI_REGEX, '')
-    .replace(/[ \t]+/g, ' ')
-    .replace(/[ \t]\n/g, '\n')
-    .replace(/\n[ \t]/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]+/g, ' ')  // Replace consecutive spaces/tabs with single space
+    .replace(/[ \t]\n/g, '\n')  // Remove spaces before newlines
+    .replace(/\n[ \t]/g, '\n')  // Remove spaces after newlines
+    .replace(/\n{3,}/g, '\n\n')  // Limit consecutive newlines to 2
     .trim();
 }
 
@@ -82,7 +84,7 @@ function isImportantFooter(footerText) {
   }
 
   const normalized = footerText.toLowerCase();
-  return /\b(schließen|schließt|geschlossen|läuft ab|verfügbar in|seite\s+\d+|dashboard schließt|ticket-id)\b/.test(normalized);
+  return /\b(close|closes|closed|expire|expires|available in|page\s+\d+|dashboard closes|ticket id)\b/.test(normalized);
 }
 
 const originalSetDescription = EmbedBuilder.prototype.setDescription;
@@ -225,23 +227,23 @@ export function createEmbed({
 }
 
 const NOTIFICATION_DEFAULT_TITLES = {
-  success: 'Erfolg',
-  error: 'Fehler',
+  success: 'Success',
+  error: 'Error',
   info: 'Information',
-  warning: 'Warnung',
-  primary: 'Hinweis',
+  warning: 'Warning',
+  primary: 'Notice',
 };
 
 export const USER_ERROR_TITLES = {
-  validation: 'Ungültige Eingabe',
-  permission: 'Berechtigung verweigert',
-  configuration: 'Konfigurationsfehler',
-  database: 'Databasefehler',
-  network: 'Netzwerkfehler',
-  discord_api: 'Discord-API-Fehler',
-  user_input: 'Eingabefehler',
-  rate_limit: 'Zu schnell',
-  unknown: 'Etwas ist schiefgelaufen',
+  validation: 'Invalid Input',
+  permission: 'Permission Denied',
+  configuration: 'Configuration Error',
+  database: 'Database Error',
+  network: 'Network Error',
+  discord_api: 'Discord API Error',
+  user_input: 'Input Error',
+  rate_limit: 'Too Fast',
+  unknown: 'Something Went Wrong',
 };
 
 const USER_ERROR_COLORS = {
@@ -249,12 +251,12 @@ const USER_ERROR_COLORS = {
 };
 
 /**
- * Erstellt ein einheitliches, benutzerfreundliches Fehler-Embed.
- * @param {string} errorType - Fehlerkategorie (z. B. validation, permission)
- * @param {string} [description] - Konkrete, umsetzbare Meldung für den Nutzer
+ * Build a consistent user-facing error embed.
+ * @param {string} errorType - Error category key (e.g. validation, permission)
+ * @param {string} [description] - Specific, actionable message for the user
  * @param {{ titleOverride?: string }} [options]
  */
-export function buildUserFehlerEmbed(errorType, description = '', options = {}) {
+export function buildUserErrorEmbed(errorType, description = '', options = {}) {
   const type = errorType || 'unknown';
   const title = options.titleOverride || USER_ERROR_TITLES[type] || USER_ERROR_TITLES.unknown;
   const color = USER_ERROR_COLORS[type] || 'error';
@@ -289,7 +291,7 @@ function buildNotificationEmbed(title, body = '', color = 'primary') {
 }
 
 /**
- * @deprecated Bevorzugt buildUserFehlerEmbed oder replyUserFehler aus errorHandler.js.
+ * @deprecated Prefer buildUserErrorEmbed or replyUserError from errorHandler.js.
  */
 export function errorEmbed(title, detail = null, options = {}) {
   const { showDetails = process.env.NODE_ENV !== 'production' } = options;
@@ -301,21 +303,21 @@ export function errorEmbed(title, detail = null, options = {}) {
   }
 
   const description = body ? String(body).trim() : '';
-  const titleOverride = title && title !== 'Fehler' ? title : undefined;
+  const titleOverride = title && title !== 'Error' ? title : undefined;
 
-  return buildUserFehlerEmbed('unknown', description, { titleOverride });
+  return buildUserErrorEmbed('unknown', description, { titleOverride });
 }
 
-/** @param {string} titleOrBody - Bei einem Argument: Body-Text. Bei zwei Argumenten: Titel und Body. */
+/** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
 export function successEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Erfolg', title, 'success');
+    return buildNotificationEmbed('Success', title, 'success');
   }
 
-  return buildNotificationEmbed(title || 'Erfolg', body, 'success');
+  return buildNotificationEmbed(title || 'Success', body, 'success');
 }
 
-/** @param {string} titleOrBody - Bei einem Argument: Body-Text. Bei zwei Argumenten: Titel und Body. */
+/** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
 export function infoEmbed(title, body = '') {
   if (arguments.length === 1) {
     return buildNotificationEmbed('Information', title, 'info');
@@ -324,13 +326,13 @@ export function infoEmbed(title, body = '') {
   return buildNotificationEmbed(title || 'Information', body, 'info');
 }
 
-/** @param {string} titleOrBody - Bei einem Argument: Body-Text. Bei zwei Argumenten: Titel und Body. */
+/** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
 export function warningEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Warnung', title, 'warning');
+    return buildNotificationEmbed('Warning', title, 'warning');
   }
 
-  return buildNotificationEmbed(title || 'Warnung', body, 'warning');
+  return buildNotificationEmbed(title || 'Warning', body, 'warning');
 }
 
 export function formatUser(user) {

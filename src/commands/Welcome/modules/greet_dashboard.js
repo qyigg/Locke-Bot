@@ -20,7 +20,7 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
 import { getWelcomeConfig, saveWelcomeConfig } from '../../../utils/database.js';
 import { botHasPermission } from '../../../utils/permissionGuard.js';
 
@@ -33,7 +33,7 @@ async function deferComponent(interaction) {
         await interaction.deferUpdate();
         return true;
     } catch (error) {
-        logger.debug('Component-Interaction abgelaufen oder bereits bestätigt:', error.message);
+        logger.debug('Component interaction expired or already acknowledged:', error.message);
         return false;
     }
 }
@@ -45,111 +45,111 @@ async function sendEphemeralFollowUp(interaction, payload) {
             flags: MessageFlags.Ephemeral,
         });
     } catch (error) {
-        logger.debug('Ephemeres Follow-up konnte nicht gesendet werden:', error.message);
+        logger.debug('Failed to send ephemeral follow-up:', error.message);
     }
 }
 
 function buildDashboardEmbed(cfg, guild) {
-    const welcomeChannel = cfg.channelId ? `<#${cfg.channelId}>` : '`Nicht gesetzt`';
-    const goodbyeChannel = cfg.goodbyeChannelId ? `<#${cfg.goodbyeChannelId}>` : '`Nicht gesetzt`';
+    const welcomeChannel = cfg.channelId ? `<#${cfg.channelId}>` : '`Not set`';
+    const goodbyeChannel = cfg.goodbyeChannelId ? `<#${cfg.goodbyeChannelId}>` : '`Not set`';
 
-    const rawWelcome = cfg.welcomeMessage || 'Willkommen {user} auf {server}!';
-    const rawGoodbye = cfg.leaveMessage || '{user.tag} hat den Server verlassen.';
+    const rawWelcome = cfg.welcomeMessage || 'Welcome {user} to {server}!';
+    const rawGoodbye = cfg.leaveMessage || '{user.tag} has left the server.';
     const welcomePreview = `\`${rawWelcome.length > 55 ? rawWelcome.substring(0, 55) + '…' : rawWelcome}\``;
     const goodbyePreview = `\`${rawGoodbye.length > 55 ? rawGoodbye.substring(0, 55) + '…' : rawGoodbye}\``;
 
     return new EmbedBuilder()
-        .setTitle('👋 Greet-System-Dashboard')
+        .setTitle('👋 Greet System Dashboard')
         .setDescription(
-            `Verwalte die Welcome- & Goodbye-Einstellungen für **${guild.name}**.\nVerwende die Schalter, um jede Seite zu aktivieren/deaktivieren, und wähle dann eine Option zum Bearbeiten aus.`,
+            `Manage welcome & goodbye settings for **${guild.name}**.\nUse the toggles to enable/disable each side, then select an option to edit.`,
         )
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Welcome-Kanal', value: welcomeChannel, inline: true },
-            { name: 'Welcome-Status', value: cfg.enabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
-            { name: 'Welcome-Ping', value: cfg.welcomePing ? 'An' : 'Aus', inline: true },
-            { name: 'Goodbye-Kanal', value: goodbyeChannel, inline: true },
-            { name: 'Goodbye-Status', value: cfg.goodbyeAktiviert ? 'Aktiviert' : 'Deaktiviert', inline: true },
-            { name: 'Goodbye-Ping', value: cfg.goodbyePing ? 'An' : 'Aus', inline: true },
-            { name: 'Welcome-Nachricht', value: welcomePreview, inline: false },
-            { name: 'Goodbye-Nachricht', value: goodbyePreview, inline: false },
+            { name: 'Welcome Channel', value: welcomeChannel, inline: true },
+            { name: 'Welcome Status', value: cfg.enabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Welcome Ping', value: cfg.welcomePing ? 'On' : 'Off', inline: true },
+            { name: 'Goodbye Channel', value: goodbyeChannel, inline: true },
+            { name: 'Goodbye Status', value: cfg.goodbyeEnabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Goodbye Ping', value: cfg.goodbyePing ? 'On' : 'Off', inline: true },
+            { name: 'Welcome Message', value: welcomePreview, inline: false },
+            { name: 'Goodbye Message', value: goodbyePreview, inline: false },
         )
-        .setFooter({ text: 'Dashboard schließt nach 10 Minuten Inaktivität' })
+        .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
         .setTimestamp();
 }
 
 function buildSelectMenu(guildId) {
     return new StringSelectMenuBuilder()
         .setCustomId(`greet_cfg_${guildId}`)
-        .setPlaceholder('Wähle eine Einstellung zum Konfigurieren aus...')
+        .setPlaceholder('Select a setting to configure...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel('Welcome-Kanal')
-                .setDescription('Lege den Kanal fest, in den Welcome-Nachrichten gesendet werden')
+                .setLabel('Welcome Channel')
+                .setDescription('Set the channel where welcome messages are sent')
                 .setValue('welcome_channel')
                 .setEmoji('🟢'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Welcome-Nachricht')
-                .setDescription('Bearbeite den Text, der angezeigt wird, wenn ein Mitglied beitritt')
+                .setLabel('Welcome Message')
+                .setDescription('Edit the text shown when a member joins')
                 .setValue('welcome_message')
                 .setEmoji('💬'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Welcome-Bild')
-                .setDescription('Lege das Bild für Welcome-Nachrichten fest')
+                .setLabel('Welcome Image')
+                .setDescription('Set the image for welcome messages')
                 .setValue('welcome_image')
                 .setEmoji('🖼️'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Goodbye-Kanal')
-                .setDescription('Lege den Kanal fest, in den Goodbye-Nachrichten gesendet werden')
+                .setLabel('Goodbye Channel')
+                .setDescription('Set the channel where goodbye messages are sent')
                 .setValue('goodbye_channel')
                 .setEmoji('🔴'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Goodbye-Nachricht')
-                .setDescription('Bearbeite den Text, der angezeigt wird, wenn ein Mitglied geht')
+                .setLabel('Goodbye Message')
+                .setDescription('Edit the text shown when a member leaves')
                 .setValue('goodbye_message')
                 .setEmoji('💬'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Goodbye-Bild')
-                .setDescription('Lege das Bild für Goodbye-Nachrichten fest')
+                .setLabel('Goodbye Image')
+                .setDescription('Set the image for goodbye messages')
                 .setValue('goodbye_image')
                 .setEmoji('🖼️'),
         );
 }
 
 function buildButtonRow(cfg, guildId, disabled = false) {
-    const welcomeAn = cfg.enabled === true;
-    const goodbyeAn = cfg.goodbyeAktiviert === true;
-    const welcomePingAn = cfg.welcomePing === true;
-    const goodbyePingAn = cfg.goodbyePing === true;
+    const welcomeOn = cfg.enabled === true;
+    const goodbyeOn = cfg.goodbyeEnabled === true;
+    const welcomePingOn = cfg.welcomePing === true;
+    const goodbyePingOn = cfg.goodbyePing === true;
     
     return [
         new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_toggle_welcome_${guildId}`)
                 .setLabel('Welcome')
-                .setStyle(welcomeAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+                .setStyle(welcomeOn ? ButtonStyle.Success : ButtonStyle.Danger)
                 .setEmoji('🟢')
-                .setDeaktiviert(disabled),
+                .setDisabled(disabled),
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_toggle_goodbye_${guildId}`)
                 .setLabel('Goodbye')
-                .setStyle(goodbyeAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+                .setStyle(goodbyeOn ? ButtonStyle.Success : ButtonStyle.Danger)
                 .setEmoji('🔴')
-                .setDeaktiviert(disabled),
+                .setDisabled(disabled),
         ),
         new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_ping_welcome_${guildId}`)
-                .setLabel('Welcome pingen')
-                .setStyle(welcomePingAn ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                .setLabel('Ping Welcome')
+                .setStyle(welcomePingOn ? ButtonStyle.Primary : ButtonStyle.Secondary)
                 .setEmoji('🔔')
-                .setDeaktiviert(disabled),
+                .setDisabled(disabled),
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_ping_goodbye_${guildId}`)
-                .setLabel('Goodbye pingen')
-                .setStyle(goodbyePingAn ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                .setLabel('Ping Goodbye')
+                .setStyle(goodbyePingOn ? ButtonStyle.Primary : ButtonStyle.Secondary)
                 .setEmoji('🔔')
-                .setDeaktiviert(disabled),
+                .setDisabled(disabled),
         ),
     ];
 }
@@ -165,22 +165,22 @@ async function refreshDashboard(rootInteraction, cfg, guildId) {
             ],
         });
     } catch (error) {
-        logger.debug('Greet-Dashboard konnte nicht aktualisiert werden (Interaction ist möglicherweise abgelaufen):', error.message);
+        logger.debug('Could not refresh greet dashboard (interaction may have expired):', error.message);
     }
 }
 
 export default {
-    prefixAnly: false,
+    prefixOnly: false,
     async execute(interaction, config, client) {
         try {
             const guildId = interaction.guild.id;
             const cfg = await getWelcomeConfig(client, guildId);
 
             if (!cfg.channelId && !cfg.goodbyeChannelId) {
-                throw new TitanBotFehler(
+                throw new TitanBotError(
                     'Greet system not configured',
-                    FehlerTypes.CONFIGURATION,
-                    'Weder Welcome noch Goodbye wurden bisher eingerichtet. Führe zuerst `/welcome setup` oder `/goodbye setup` aus.',
+                    ErrorTypes.CONFIGURATION,
+                    'Neither Welcome nor Goodbye has been set up yet. Run `/welcome setup` or `/goodbye setup` first.',
                 );
             }
 
@@ -230,23 +230,23 @@ export default {
                             break;
                     }
                 } catch (error) {
-                    if (error instanceof TitanBotFehler) {
-                        logger.debug(`Greet-Konfigurations-Validierungsfehler: ${error.message}`);
+                    if (error instanceof TitanBotError) {
+                        logger.debug(`Greet config validation error: ${error.message}`);
                     } else {
-                        logger.error('Unerwarteter Greet-Dashboard-Fehler:', error);
+                        logger.error('Unexpected greet dashboard error:', error);
                     }
 
                     const errorMessage =
-                        error instanceof TitanBotFehler
-                            ? error.userMessage || 'Beim Verarbeiten deiner Auswahl ist ein Fehler aufgetreten.'
-                            : 'Beim Aktualisieren der Konfiguration ist ein unerwarteter Fehler aufgetreten.';
+                        error instanceof TitanBotError
+                            ? error.userMessage || 'An error occurred while processing your selection.'
+                            : 'An unexpected error occurred while updating the configuration.';
 
                     if (!selectInteraction.replied && !selectInteraction.deferred) {
                         await selectInteraction.deferUpdate().catch(() => {});
                     }
 
-                    await replyUserFehler(selectInteraction, {
-                        type: FehlerTypes.CONFIGURATION,
+                    await replyUserError(selectInteraction, {
+                        type: ErrorTypes.CONFIGURATION,
                         message: errorMessage,
                     }).catch(() => {});
                 }
@@ -277,19 +277,19 @@ export default {
                         await sendEphemeralFollowUp(btnInteraction, {
                             embeds: [
                                 successEmbed(
-                                    '✅ Welcome aktualisiert',
-                                    `Welcome-Nachrichten sind jetzt **${cfg.enabled ? 'aktiviert' : 'deaktiviert'}**.`,
+                                    '✅ Welcome Updated',
+                                    `Welcome messages are now **${cfg.enabled ? 'enabled' : 'disabled'}**.`,
                                 ),
                             ],
                         });
                     } else if (customId === `greet_cfg_toggle_goodbye_${guildId}`) {
-                        cfg.goodbyeAktiviert = !cfg.goodbyeAktiviert;
+                        cfg.goodbyeEnabled = !cfg.goodbyeEnabled;
                         await saveWelcomeConfig(client, guildId, cfg);
                         await sendEphemeralFollowUp(btnInteraction, {
                             embeds: [
                                 successEmbed(
-                                    '✅ Goodbye aktualisiert',
-                                    `Goodbye-Nachrichten sind jetzt **${cfg.goodbyeAktiviert ? 'aktiviert' : 'deaktiviert'}**.`,
+                                    '✅ Goodbye Updated',
+                                    `Goodbye messages are now **${cfg.goodbyeEnabled ? 'enabled' : 'disabled'}**.`,
                                 ),
                             ],
                         });
@@ -299,8 +299,8 @@ export default {
                         await sendEphemeralFollowUp(btnInteraction, {
                             embeds: [
                                 successEmbed(
-                                    '✅ Welcome-Ping aktualisiert',
-                                    `Beitretende Benutzer werden in der Welcome-Nachricht${cfg.welcomePing ? '' : ' **nicht**'} gepingt.`,
+                                    '✅ Welcome Ping Updated',
+                                    `Joining users will${cfg.welcomePing ? '' : ' **not**'} be pinged in the welcome message.`,
                                 ),
                             ],
                         });
@@ -310,8 +310,8 @@ export default {
                         await sendEphemeralFollowUp(btnInteraction, {
                             embeds: [
                                 successEmbed(
-                                    '✅ Goodbye-Ping aktualisiert',
-                                    `Verlassende Benutzer werden in der Goodbye-Nachricht${cfg.goodbyePing ? '' : ' **nicht**'} gepingt.`,
+                                    '✅ Goodbye Ping Updated',
+                                    `Leaving users will${cfg.goodbyePing ? '' : ' **not**'} be pinged in the goodbye message.`,
                                 ),
                             ],
                         });
@@ -319,7 +319,7 @@ export default {
 
                     await refreshDashboard(interaction, cfg, guildId);
                 } catch (error) {
-                    logger.error('Fehler beim Verarbeiten eines Greet-Dashboard-Buttons:', error);
+                    logger.error('Error handling greet dashboard button:', error);
                 }
             });
 
@@ -330,24 +330,24 @@ export default {
                         await InteractionHelper.safeEditReply(interaction, {
                             embeds: [
                                 new EmbedBuilder()
-                                    .setTitle('Dashboard-Zeitüberschreitung')
-                                    .setDescription('Dieses Dashboard wurde aufgrund von Inaktivität geschlossen. Bitte führe den Befehl erneut aus, um fortzufahren.')
+                                    .setTitle('Dashboard Timed Out')
+                                    .setDescription('This dashboard has been closed due to inactivity. Please run the command again to continue.')
                                     .setColor(getColor('error'))
                             ],
                             components: [],
                         });
                     } catch (error) {
-                        logger.debug('Dashboard konnte bei Zeitüberschreitung nicht aktualisiert werden:', error.message);
+                        logger.debug('Could not update dashboard on timeout:', error.message);
                     }
                 }
             });
         } catch (error) {
-            if (error instanceof TitanBotFehler) throw error;
-            logger.error('Unerwarteter Fehler in greet_dashboard:', error);
-            throw new TitanBotFehler(
+            if (error instanceof TitanBotError) throw error;
+            logger.error('Unexpected error in greet_dashboard:', error);
+            throw new TitanBotError(
                 `Greet dashboard failed: ${error.message}`,
-                FehlerTypes.UNKNOWN,
-                'Das Greet-Dashboard konnte nicht geöffnet werden.',
+                ErrorTypes.UNKNOWN,
+                'Failed to open the greet dashboard.',
             );
         }
     },
@@ -360,16 +360,16 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
 
     const channelSelect = new ChannelSelectMenuBuilder()
         .setCustomId('greet_cfg_welcome_channel')
-        .setPlaceholder('Wähle einen Textkanal aus...')
+        .setPlaceholder('Select a text channel...')
         .addChannelTypes(ChannelType.GuildText)
         .setMaxValues(1);
 
     await sendEphemeralFollowUp(selectInteraction, {
         embeds: [
             new EmbedBuilder()
-                .setTitle('🟢 Welcome-Kanal')
+                .setTitle('🟢 Welcome Channel')
                 .setDescription(
-                    `**Aktuell:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Nicht gesetzt`'}\n\nWähle den Kanal aus, in den Welcome-Nachrichten gesendet werden sollen.`,
+                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect the channel where welcome messages will be sent.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -391,9 +391,9 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
         const channel = chanInteraction.channels.first();
 
         if (!botHasPermission(channel, ['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
-            await replyUserFehler(chanInteraction, {
-                type: FehlerTypes.PERMISSION,
-                message: `Ich benötige **Kanal anzeigen**, **Nachrichten senden** und **Links einbetten** in ${channel}.`,
+            await replyUserError(chanInteraction, {
+                type: ErrorTypes.PERMISSION,
+                message: `I need **View Channel**, **Send Messages**, and **Embed Links** in ${channel}.`,
             });
             return;
         }
@@ -402,7 +402,7 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
         await saveWelcomeConfig(client, guildId, cfg);
 
         await sendEphemeralFollowUp(chanInteraction, {
-            embeds: [successEmbed('Kanal aktualisiert', `Welcome-Nachrichten werden jetzt in ${channel} gesendet.`)],
+            embeds: [successEmbed('Channel Updated', `Welcome messages will now be sent in ${channel}.`)],
         });
 
         await refreshDashboard(rootInteraction, cfg, guildId);
@@ -410,9 +410,9 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
 
     chanCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserFehler(selectInteraction, {
-                type: FehlerTypes.RATE_LIMIT,
-                message: 'Es wurde kein Kanal ausgewählt. Die Einstellung wurde nicht geändert.',
+            replyUserError(selectInteraction, {
+                type: ErrorTypes.RATE_LIMIT,
+                message: 'No channel was selected. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -421,17 +421,17 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
 async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, guildId, client) {
     const modal = new ModalBuilder()
         .setCustomId('greet_cfg_welcome_message')
-        .setTitle('Welcome-Nachricht bearbeiten')
+        .setTitle('Edit Welcome Message')
         .addComponents(
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
                     .setCustomId('message_input')
-                    .setLabel('Nachricht (Variablen: {user}, {server}, usw.)')
+                    .setLabel('Message (variables: {user}, {server}, etc)')
                     .setStyle(TextInputStyle.Paragraph)
-                    .setValue(cfg.welcomeMessage || 'Willkommen {user} auf {server}!')
+                    .setValue(cfg.welcomeMessage || 'Welcome {user} to {server}!')
                     .setMaxLength(2000)
                     .setMinLength(1)
-                    .setErforderlich(true),
+                    .setRequired(true),
             ),
         );
 
@@ -442,7 +442,7 @@ async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, gui
     }
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'greet_cfg_welcome_message' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -455,7 +455,7 @@ async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, gui
     await saveWelcomeConfig(client, guildId, cfg);
 
     await submitted.reply({
-        embeds: [successEmbed('Welcome-Nachricht aktualisiert', 'Die Welcome-Nachricht wurde gespeichert.')],
+        embeds: [successEmbed('Welcome Message Updated', 'The welcome message has been saved.')],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -465,28 +465,28 @@ async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, gui
 async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guildId, client) {
     const modal = new ModalBuilder()
         .setCustomId('greet_cfg_welcome_image')
-        .setTitle('Welcome-Bild festlegen');
+        .setTitle('Set Welcome Image');
 
     const imageHint = new TextDisplayBuilder()
-        .setContent('Gib eine direkte Bild-URL **oder** lade unten eine Datei hoch. Wenn beides angegeben wird, hat die hochgeladene Datei Vorrang. Lass die URL leer und überspringe den Upload, um das Bild zu entfernen.');
+        .setContent('Provide a direct image URL **or** upload a file below. If both are given, the uploaded file takes priority. Leave the URL blank and skip the upload to remove the image.');
 
     const urlLabel = new LabelBuilder()
-        .setLabel('Bild-URL (optional)')
+        .setLabel('Image URL (optional)')
         .setTextInputComponent(
             new TextInputBuilder()
                 .setCustomId('image_input')
                 .setPlaceholder('https://example.com/welcome.png')
                 .setStyle(TextInputStyle.Short)
                 .setValue(cfg.welcomeImage || '')
-                .setErforderlich(false),
+                .setRequired(false),
         );
 
     const uploadLabel = new LabelBuilder()
-        .setLabel('Oder lade eine Bilddatei hoch (optional)')
+        .setLabel('Or upload an image file (optional)')
         .setFileUploadComponent(
             new FileUploadBuilder()
                 .setCustomId('image_upload')
-                .setErforderlich(false),
+                .setRequired(false),
         );
 
     modal
@@ -500,7 +500,7 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
     }
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'greet_cfg_welcome_image' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -516,11 +516,11 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
         try {
             new URL(imageUrl);
             if (!['http:', 'https:'].includes(new URL(imageUrl).protocol)) {
-                await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Die Bild-URL muss mit `http://` oder `https://` beginnen.' });
+                await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Image URL must start with `http://` or `https://`.' });
                 return;
             }
         } catch {
-            await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an.' });
+            await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid image URL.' });
             return;
         }
     }
@@ -529,7 +529,7 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
     await saveWelcomeConfig(client, guildId, cfg);
 
     await submitted.reply({
-        embeds: [successEmbed('Welcome-Bild aktualisiert', `Bild wurde erfolgreich ${imageUrl ? 'aktualisiert' : 'entfernt'}.`)],
+        embeds: [successEmbed('Welcome Image Updated', `Image ${imageUrl ? 'updated' : 'removed'} successfully.`)],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -547,8 +547,8 @@ async function handleWelcomePing(selectInteraction, rootInteraction, cfg, guildI
     await sendEphemeralFollowUp(selectInteraction, {
         embeds: [
             successEmbed(
-                '✅ Welcome-Ping aktualisiert',
-                `Beitretende Benutzer werden in der Welcome-Nachricht${cfg.welcomePing ? '' : ' **nicht**'} gepingt.`,
+                '✅ Welcome Ping Updated',
+                `Joining users will${cfg.welcomePing ? '' : ' **not**'} be pinged in the welcome message.`,
             ),
         ],
     });
@@ -563,16 +563,16 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
 
     const channelSelect = new ChannelSelectMenuBuilder()
         .setCustomId('greet_cfg_goodbye_channel')
-        .setPlaceholder('Wähle einen Textkanal aus...')
+        .setPlaceholder('Select a text channel...')
         .addChannelTypes(ChannelType.GuildText)
         .setMaxValues(1);
 
     await sendEphemeralFollowUp(selectInteraction, {
         embeds: [
             new EmbedBuilder()
-                .setTitle('🔴 Goodbye-Kanal')
+                .setTitle('🔴 Goodbye Channel')
                 .setDescription(
-                    `**Aktuell:** ${cfg.goodbyeChannelId ?`<#${cfg.goodbyeChannelId}>`: '`Nicht gesetzt`'}\n\nWähle den Kanal aus, in den Goodbye-Nachrichten gesendet werden sollen.`,
+                    `**Current:** ${cfg.goodbyeChannelId ?`<#${cfg.goodbyeChannelId}>`: '`Not set`'}\n\nSelect the channel where goodbye messages will be sent.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -594,9 +594,9 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
         const channel = chanInteraction.channels.first();
 
         if (!botHasPermission(channel, ['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
-            await replyUserFehler(chanInteraction, {
-                type: FehlerTypes.PERMISSION,
-                message: `Ich benötige **Kanal anzeigen**, **Nachrichten senden** und **Links einbetten** in ${channel}.`,
+            await replyUserError(chanInteraction, {
+                type: ErrorTypes.PERMISSION,
+                message: `I need **View Channel**, **Send Messages**, and **Embed Links** in ${channel}.`,
             });
             return;
         }
@@ -605,7 +605,7 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
         await saveWelcomeConfig(client, guildId, cfg);
 
         await sendEphemeralFollowUp(chanInteraction, {
-            embeds: [successEmbed('Kanal aktualisiert', `Goodbye-Nachrichten werden jetzt in ${channel} gesendet.`)],
+            embeds: [successEmbed('Channel Updated', `Goodbye messages will now be sent in ${channel}.`)],
         });
 
         await refreshDashboard(rootInteraction, cfg, guildId);
@@ -613,9 +613,9 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
 
     chanCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserFehler(selectInteraction, {
-                type: FehlerTypes.RATE_LIMIT,
-                message: 'Es wurde kein Kanal ausgewählt. Die Einstellung wurde nicht geändert.',
+            replyUserError(selectInteraction, {
+                type: ErrorTypes.RATE_LIMIT,
+                message: 'No channel was selected. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -624,17 +624,17 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
 async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, guildId, client) {
     const modal = new ModalBuilder()
         .setCustomId('greet_cfg_goodbye_message')
-        .setTitle('Goodbye-Nachricht bearbeiten')
+        .setTitle('Edit Goodbye Message')
         .addComponents(
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
                     .setCustomId('message_input')
-                    .setLabel('Nachricht (Variablen: {user}, {server}, usw.)')
+                    .setLabel('Message (variables: {user}, {server}, etc)')
                     .setStyle(TextInputStyle.Paragraph)
-                    .setValue(cfg.leaveMessage || '{user.tag} hat den Server verlassen.')
+                    .setValue(cfg.leaveMessage || '{user.tag} has left the server.')
                     .setMaxLength(2000)
                     .setMinLength(1)
-                    .setErforderlich(true),
+                    .setRequired(true),
             ),
         );
 
@@ -645,7 +645,7 @@ async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, gui
     }
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'greet_cfg_goodbye_message' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -658,7 +658,7 @@ async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, gui
     await saveWelcomeConfig(client, guildId, cfg);
 
     await submitted.reply({
-        embeds: [successEmbed('Goodbye-Nachricht aktualisiert', 'Die Goodbye-Nachricht wurde gespeichert.')],
+        embeds: [successEmbed('Goodbye Message Updated', 'The goodbye message has been saved.')],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -668,13 +668,13 @@ async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, gui
 async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guildId, client) {
     const modal = new ModalBuilder()
         .setCustomId('greet_cfg_goodbye_image')
-        .setTitle('Goodbye-Bild festlegen');
+        .setTitle('Set Goodbye Image');
 
     const imageHint = new TextDisplayBuilder()
-        .setContent('Gib eine direkte Bild-URL **oder** lade unten eine Datei hoch. Wenn beides angegeben wird, hat die hochgeladene Datei Vorrang. Lass die URL leer und überspringe den Upload, um das Bild zu entfernen.');
+        .setContent('Provide a direct image URL **or** upload a file below. If both are given, the uploaded file takes priority. Leave the URL blank and skip the upload to remove the image.');
 
     const urlLabel = new LabelBuilder()
-        .setLabel('Bild-URL (optional)')
+        .setLabel('Image URL (optional)')
         .setTextInputComponent(
             new TextInputBuilder()
                 .setCustomId('image_input')
@@ -685,15 +685,15 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
                         ? cfg.leaveEmbed.image
                         : cfg.leaveEmbed?.image?.url || ''
                 )
-                .setErforderlich(false),
+                .setRequired(false),
         );
 
     const uploadLabel = new LabelBuilder()
-        .setLabel('Oder lade eine Bilddatei hoch (optional)')
+        .setLabel('Or upload an image file (optional)')
         .setFileUploadComponent(
             new FileUploadBuilder()
                 .setCustomId('image_upload')
-                .setErforderlich(false),
+                .setRequired(false),
         );
 
     modal
@@ -707,7 +707,7 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
     }
 
     const submitted = await selectInteraction
-        .awaitModalAbsenden({
+        .awaitModalSubmit({
             filter: i =>
                 i.customId === 'greet_cfg_goodbye_image' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -723,11 +723,11 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
         try {
             new URL(imageUrl);
             if (!['http:', 'https:'].includes(new URL(imageUrl).protocol)) {
-                await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Die Bild-URL muss mit `http://` oder `https://` beginnen.' });
+                await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Image URL must start with `http://` or `https://`.' });
                 return;
             }
         } catch {
-            await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an.' });
+            await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid image URL.' });
             return;
         }
     }
@@ -743,7 +743,7 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
     await saveWelcomeConfig(client, guildId, cfg);
 
     await submitted.reply({
-        embeds: [successEmbed('Goodbye-Bild aktualisiert', `Bild wurde erfolgreich ${imageUrl ? 'aktualisiert' : 'entfernt'}.`)],
+        embeds: [successEmbed('Goodbye Image Updated', `Image ${imageUrl ? 'updated' : 'removed'} successfully.`)],
         flags: MessageFlags.Ephemeral,
     });
 
@@ -761,8 +761,8 @@ async function handleGoodbyePing(selectInteraction, rootInteraction, cfg, guildI
     await sendEphemeralFollowUp(selectInteraction, {
         embeds: [
             successEmbed(
-                '✅ Goodbye-Ping aktualisiert',
-                `Verlassende Benutzer werden in der Goodbye-Nachricht${cfg.goodbyePing ? '' : ' **nicht**'} gepingt.`,
+                '✅ Goodbye Ping Updated',
+                `Leaving users will${cfg.goodbyePing ? '' : ' **not**'} be pinged in the goodbye message.`,
             ),
         ],
     });

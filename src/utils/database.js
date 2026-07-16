@@ -15,7 +15,7 @@ export {
 export {
     getGuildConfigKey,
     getGuildBirthdaysKey,
-    getBirthdayLeftZurückupKey,
+    getBirthdayLeftBackupKey,
     getBirthdayTrackingKey,
     getTicketKey,
     getTicketCounterKey,
@@ -31,14 +31,14 @@ export {
     getUserLevelKey,
     getUserLevelPrefix,
     getApplicationRolesKey,
-    getApplicationEinstellungenKey,
+    getApplicationSettingsKey,
     getUserApplicationsKey,
     getApplicationKey,
     getApplicationsPrefix,
     getJoinToCreateConfigKey,
     getJoinToCreateChannelsKey,
-    getWarnungsKey,
-    getWarnungsPrefix,
+    getWarningsKey,
+    getWarningsPrefix,
     getUserNotesKey,
     getUserNotesListKey,
     getReactionRoleKey,
@@ -67,7 +67,7 @@ import {
     getLevelingKey,
     getUserLevelKey,
     getApplicationRolesKey,
-    getApplicationEinstellungenKey,
+    getApplicationSettingsKey,
     getUserApplicationsKey,
     getApplicationKey,
     getJoinToCreateConfigKey,
@@ -105,7 +105,7 @@ export async function insertVerificationAudit(record) {
         await setInDb(key, auditEntries);
         return true;
     } catch (error) {
-        logger.error('Fehler storing verification audit:', error);
+        logger.error('Error storing verification audit:', error);
         return false;
     }
 }
@@ -161,7 +161,7 @@ export async function getGuildBirthdays(client, guildId) {
         const rawData = await client.db.get(key, {});
         return unwrapReplitData(rawData) || {};
     } catch (error) {
-        logger.error(`Fehler retrieving birthdays for guild ${guildId}:`, error);
+        logger.error(`Error retrieving birthdays for guild ${guildId}:`, error);
         return {};
     }
 }
@@ -179,7 +179,7 @@ export async function setBirthday(client, guildId, userId, month, day) {
         await client.db.set(key, birthdays);
         return true;
     } catch (error) {
-        logger.error(`Fehler setting birthday for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Error setting birthday for user ${userId} in guild ${guildId}:`, error);
         return false;
     }
 }
@@ -199,7 +199,7 @@ export async function deleteBirthday(client, guildId, userId) {
         }
         return true;
     } catch (error) {
-        logger.error(`Fehler deleting birthday for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Error deleting birthday for user ${userId} in guild ${guildId}:`, error);
         return false;
     }
 }
@@ -295,7 +295,7 @@ export async function getEndedGiveaways(client) {
 
         return await getEndedGiveawaysFromKv(client);
     } catch (error) {
-        logger.error('Fehler getting ended giveaways:', error);
+        logger.error('Error getting ended giveaways:', error);
         try {
             return await getEndedGiveawaysFromKv(client);
         } catch {
@@ -332,7 +332,7 @@ export async function markGiveawayEnded(client, giveawayId, endedData) {
         const { saveGiveaway } = await import('./giveaways.js');
         return saveGiveaway(client, guildId, endedData);
     } catch (error) {
-        logger.error('Fehler marking giveaway as ended:', error);
+        logger.error('Error marking giveaway as ended:', error);
         return false;
     }
 }
@@ -347,7 +347,7 @@ function normalizeWelcomeConfig(raw = {}) {
     const leaveMessage = base.leaveMessage ?? "{user.tag} has left the server.";
 
     const welcomeEmbed = base.welcomeEmbed ?? {
-        title: "🎉 Willkommen!",
+        title: "🎉 Welcome!",
         description: "Welcome {user} to {server}!",
         color: getColor("success"),
         thumbnail: true,
@@ -372,7 +372,7 @@ function normalizeWelcomeConfig(raw = {}) {
         welcomeEmbed,
         welcomePing: Boolean(base.welcomePing),
         welcomeImage: base.welcomeImage ?? null,
-        goodbyeAktiviert: Boolean(base.goodbyeAktiviert),
+        goodbyeEnabled: Boolean(base.goodbyeEnabled),
         goodbyeChannelId,
         leaveMessage,
         leaveEmbed,
@@ -397,7 +397,7 @@ export async function getWelcomeConfig(client, guildId) {
         const unwrapped = unwrapReplitData(config);
         return normalizeWelcomeConfig(unwrapped);
     } catch (error) {
-        logger.error(`Fehler getting welcome config for guild ${guildId}:`, error);
+        logger.error(`Error getting welcome config for guild ${guildId}:`, error);
         return normalizeWelcomeConfig();
     }
 }
@@ -416,7 +416,7 @@ export async function saveWelcomeConfig(client, guildId, config) {
         await client.db.set(key, mergedConfig);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving welcome config for guild ${guildId}:`, error);
+        logger.error(`Error saving welcome config for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -429,7 +429,7 @@ export async function updateWelcomeConfig(client, guildId, updates) {
         await saveWelcomeConfig(client, guildId, updatedConfig);
         return updatedConfig;
     } catch (error) {
-        logger.error(`Fehler updating welcome config for guild ${guildId}:`, error);
+        logger.error(`Error updating welcome config for guild ${guildId}:`, error);
         throw error;
     }
 }
@@ -441,7 +441,7 @@ export async function getLevelingConfig(client, guildId) {
             enabled: false,
             xpPerMessage: 10,
             xpPerMinute: 60,
-            cooldownAktiviert: true,
+            cooldownEnabled: true,
             messageLengthMultiplier: true,
             levelUpMessages: true,
             levelUpChannel: null,
@@ -451,12 +451,12 @@ export async function getLevelingConfig(client, guildId) {
         
         return config;
     } catch (error) {
-        logger.error('Fehler getting leveling config:', error);
+        logger.error('Error getting leveling config:', error);
         return {
             enabled: false,
             xpPerMessage: 10,
             xpPerMinute: 60,
-            cooldownAktiviert: true,
+            cooldownEnabled: true,
             messageLengthMultiplier: true,
             levelUpMessages: true,
             levelUpChannel: null,
@@ -472,7 +472,7 @@ export async function saveLevelingConfig(client, guildId, config) {
         await setInDb(key, config);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving leveling config for guild ${guildId}:`, error);
+        logger.error(`Error saving leveling config for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -488,7 +488,7 @@ export async function getUserLevelData(client, guildId, userId) {
                 totalXp: 0,
                 lastMessage: 0,
                 rank: 0,
-                xpToWeiterLevel: getXpForLevel(1)
+                xpToNextLevel: getXpForLevel(1)
             };
         }
         
@@ -498,19 +498,19 @@ export async function getUserLevelData(client, guildId, userId) {
             totalXp: data.totalXp || 0,
             lastMessage: data.lastMessage || 0,
             rank: data.rank || 0,
-            xpToWeiterLevel: getXpForLevel((data.level || 0) + 1)
+            xpToNextLevel: getXpForLevel((data.level || 0) + 1)
         };
         
         return levelData;
     } catch (error) {
-        logger.error(`Fehler getting level data for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Error getting level data for user ${userId} in guild ${guildId}:`, error);
         return {
             xp: 0,
             level: 0,
             totalXp: 0,
             lastMessage: 0,
             rank: 0,
-            xpToWeiterLevel: getXpForLevel(1)
+            xpToNextLevel: getXpForLevel(1)
         };
     }
 }
@@ -531,7 +531,7 @@ export async function saveUserLevelData(client, guildId, userId, data) {
         await setInDb(key, levelData);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving level data for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Error saving level data for user ${userId} in guild ${guildId}:`, error);
         return false;
     }
 }
@@ -577,7 +577,7 @@ export async function getLeaderboard(client, guildId, limit = 10) {
 rank: 0
                 };
             } catch (error) {
-                logger.error(`Fehler processing leaderboard key ${key}:`, error);
+                logger.error(`Error processing leaderboard key ${key}:`, error);
                 return null;
             }
         });
@@ -593,7 +593,7 @@ rank: 0
         
         return userData.slice(0, limit);
     } catch (error) {
-        logger.error(`Fehler getting leaderboard for guild ${guildId}:`, error);
+        logger.error(`Error getting leaderboard for guild ${guildId}:`, error);
         return [];
     }
 }
@@ -610,7 +610,7 @@ export async function getApplicationRoles(client, guildId) {
         const unwrappedRoles = unwrapReplitData(roles);
         return Array.isArray(unwrappedRoles) ? unwrappedRoles : [];
     } catch (error) {
-        logger.error(`Fehler getting application roles for guild ${guildId}:`, error);
+        logger.error(`Error getting application roles for guild ${guildId}:`, error);
         return [];
     }
 }
@@ -626,12 +626,12 @@ export async function saveApplicationRoles(client, guildId, roles) {
         await client.db.set(key, roles);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving application roles for guild ${guildId}:`, error);
+        logger.error(`Error saving application roles for guild ${guildId}:`, error);
         return false;
     }
 }
 
-function buildApplicationEinstellungenDefaults() {
+function buildApplicationSettingsDefaults() {
     return {
         enabled: false,
         applicationChannelId: null,
@@ -656,23 +656,23 @@ function buildApplicationEinstellungenDefaults() {
     };
 }
 
-export async function getApplicationEinstellungen(client, guildId) {
+export async function getApplicationSettings(client, guildId) {
     if (!client.db) {
-        logger.warn('Database not available for getApplicationEinstellungen');
-        return buildApplicationEinstellungenDefaults();
+        logger.warn('Database not available for getApplicationSettings');
+        return buildApplicationSettingsDefaults();
     }
     
-    const key = getApplicationEinstellungenKey(guildId);
+    const key = getApplicationSettingsKey(guildId);
     try {
         const settings = await client.db.get(key, {});
         const unwrapped = unwrapReplitData(settings);
         
-        const defaultEinstellungen = buildApplicationEinstellungenDefaults();
+        const defaultSettings = buildApplicationSettingsDefaults();
         
-        return { ...defaultEinstellungen, ...unwrapped };
+        return { ...defaultSettings, ...unwrapped };
     } catch (error) {
-        logger.error(`Fehler getting application settings for guild ${guildId}:`, error);
-        return buildApplicationEinstellungenDefaults();
+        logger.error(`Error getting application settings for guild ${guildId}:`, error);
+        return buildApplicationSettingsDefaults();
     }
 }
 
@@ -732,7 +732,7 @@ export async function deleteApplication(client, guildId, applicationId, userIdHi
 
         return true;
     } catch (error) {
-        logger.error(`Fehler deleting application ${applicationId} in guild ${guildId}:`, error);
+        logger.error(`Error deleting application ${applicationId} in guild ${guildId}:`, error);
         return false;
     }
 }
@@ -743,7 +743,7 @@ export async function cleanupExpiredApplications(client, guildId) {
             return { removed: 0, scanned: 0 };
         }
 
-        const settings = await getApplicationEinstellungen(client, guildId);
+        const settings = await getApplicationSettings(client, guildId);
         const retentionDays = getApplicationRetentionDays(settings);
         const prefix = `guild:${guildId}:applications:`;
         let keys = await client.db.list(prefix);
@@ -778,72 +778,72 @@ export async function cleanupExpiredApplications(client, guildId) {
 
         return { removed, scanned: applicationKeys.length };
     } catch (error) {
-        logger.error(`Fehler cleaning expired applications for guild ${guildId}:`, error);
+        logger.error(`Error cleaning expired applications for guild ${guildId}:`, error);
         return { removed: 0, scanned: 0 };
     }
 }
 
-export async function saveApplicationEinstellungen(client, guildId, settings) {
-    const key = getApplicationEinstellungenKey(guildId);
+export async function saveApplicationSettings(client, guildId, settings) {
+    const key = getApplicationSettingsKey(guildId);
     try {
-        const existingEinstellungen = await getApplicationEinstellungen(client, guildId);
-        const mergedEinstellungen = { ...existingEinstellungen, ...settings };
+        const existingSettings = await getApplicationSettings(client, guildId);
+        const mergedSettings = { ...existingSettings, ...settings };
         
-        await client.db.set(key, mergedEinstellungen);
+        await client.db.set(key, mergedSettings);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving application settings for guild ${guildId}:`, error);
+        logger.error(`Error saving application settings for guild ${guildId}:`, error);
         return false;
     }
 }
 
-function getApplicationRoleEinstellungenKey(guildId, roleId) {
+function getApplicationRoleSettingsKey(guildId, roleId) {
     return `guild:${guildId}:applications:role:${roleId}:settings`;
 }
 
-export async function getApplicationRoleEinstellungen(client, guildId, roleId) {
+export async function getApplicationRoleSettings(client, guildId, roleId) {
     try {
         if (!client.db || typeof client.db.get !== "function") {
             return { questions: null, logChannelId: null };
         }
 
-        const key = getApplicationRoleEinstellungenKey(guildId, roleId);
+        const key = getApplicationRoleSettingsKey(guildId, roleId);
         const settings = await client.db.get(key, {});
         return unwrapReplitData(settings) || { questions: null, logChannelId: null };
     } catch (error) {
-        logger.error(`Fehler getting application role settings for ${guildId}:${roleId}:`, error);
+        logger.error(`Error getting application role settings for ${guildId}:${roleId}:`, error);
         return { questions: null, logChannelId: null };
     }
 }
 
-export async function saveApplicationRoleEinstellungen(client, guildId, roleId, settings) {
+export async function saveApplicationRoleSettings(client, guildId, roleId, settings) {
     try {
         if (!client.db || typeof client.db.set !== "function") {
-            logger.error("Database client is not available for saveApplicationRoleEinstellungen.");
+            logger.error("Database client is not available for saveApplicationRoleSettings.");
             return false;
         }
 
-        const key = getApplicationRoleEinstellungenKey(guildId, roleId);
+        const key = getApplicationRoleSettingsKey(guildId, roleId);
         await client.db.set(key, settings);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving application role settings for ${guildId}:${roleId}:`, error);
+        logger.error(`Error saving application role settings for ${guildId}:${roleId}:`, error);
         return false;
     }
 }
 
-export async function deleteApplicationRoleEinstellungen(client, guildId, roleId) {
+export async function deleteApplicationRoleSettings(client, guildId, roleId) {
     try {
         if (!client.db || typeof client.db.delete !== "function") {
-            logger.error("Database client is not available for deleteApplicationRoleEinstellungen.");
+            logger.error("Database client is not available for deleteApplicationRoleSettings.");
             return false;
         }
 
-        const key = getApplicationRoleEinstellungenKey(guildId, roleId);
+        const key = getApplicationRoleSettingsKey(guildId, roleId);
         await client.db.delete(key);
         return true;
     } catch (error) {
-        logger.error(`Fehler deleting application role settings for ${guildId}:${roleId}:`, error);
+        logger.error(`Error deleting application role settings for ${guildId}:${roleId}:`, error);
         return false;
     }
 }
@@ -867,7 +867,7 @@ status: 'pending',
     try {
         if (!client.db || typeof client.db.set !== "function") {
             logger.error("Database client is not available for createApplication.");
-            throw new Fehler("Database not available");
+            throw new Error("Database not available");
         }
 
         await client.db.set(key, newApplication);
@@ -881,12 +881,12 @@ status: 'pending',
         
         await client.db.set(userKey, applicationsArray);
         if (process.env.NODE_ENV !== 'production') {
-            logger.debug(`Erfolgfully created application ${applicationId} for user ${userId}`);
+            logger.debug(`Successfully created application ${applicationId} for user ${userId}`);
         }
         
         return newApplication;
     } catch (error) {
-        logger.error(`Fehler creating application for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Error creating application for user ${userId} in guild ${guildId}:`, error);
         throw error;
     }
 }
@@ -898,7 +898,7 @@ export async function getApplication(client, guildId, applicationId) {
         const application = await client.db.get(key, null);
         return unwrapReplitData(application);
     } catch (error) {
-        logger.error(`Fehler getting application ${applicationId} in guild ${guildId}:`, error);
+        logger.error(`Error getting application ${applicationId} in guild ${guildId}:`, error);
         return null;
     }
 }
@@ -908,7 +908,7 @@ export async function updateApplication(client, guildId, applicationId, updates)
     try {
         const existingApplication = await getApplication(client, guildId, applicationId);
         if (!existingApplication) {
-            throw new Fehler(`Application ${applicationId} not found`);
+            throw new Error(`Application ${applicationId} not found`);
         }
         
         const updatedApplication = {
@@ -920,7 +920,7 @@ export async function updateApplication(client, guildId, applicationId, updates)
         await client.db.set(key, updatedApplication);
         return updatedApplication;
     } catch (error) {
-        logger.error(`Fehler updating application ${applicationId} in guild ${guildId}:`, error);
+        logger.error(`Error updating application ${applicationId} in guild ${guildId}:`, error);
         throw error;
     }
 }
@@ -947,7 +947,7 @@ export async function getUserApplications(client, guildId, userId) {
         const applications = await Promise.all(applicationPromises);
         return applications.filter(Boolean);
     } catch (error) {
-        logger.error(`Fehler getting applications for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Error getting applications for user ${userId} in guild ${guildId}:`, error);
         return [];
     }
 }
@@ -1000,7 +1000,7 @@ export async function getApplications(client, guildId, filters = {}) {
         
         return applications.slice(offset, offset + limit);
     } catch (error) {
-        logger.error(`Fehler getting applications for guild ${guildId}:`, error);
+        logger.error(`Error getting applications for guild ${guildId}:`, error);
         return [];
     }
 }
@@ -1035,7 +1035,7 @@ export async function getJoinToCreateConfig(client, guildId) {
             ...unwrapped
         };
     } catch (error) {
-        logger.error(`Fehler getting Join to Create config for guild ${guildId}:`, error);
+        logger.error(`Error getting Join to Create config for guild ${guildId}:`, error);
         return {
             enabled: false,
             triggerChannels: [],
@@ -1057,7 +1057,7 @@ export async function saveJoinToCreateConfig(client, guildId, config) {
         await client.db.set(key, mergedConfig);
         return true;
     } catch (error) {
-        logger.error(`Fehler saving Join to Create config for guild ${guildId}:`, error);
+        logger.error(`Error saving Join to Create config for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -1070,7 +1070,7 @@ export async function updateJoinToCreateConfig(client, guildId, updates) {
         await saveJoinToCreateConfig(client, guildId, updatedConfig);
         return updatedConfig;
     } catch (error) {
-        logger.error(`Fehler updating Join to Create config for guild ${guildId}:`, error);
+        logger.error(`Error updating Join to Create config for guild ${guildId}:`, error);
         throw error;
     }
 }
@@ -1099,7 +1099,7 @@ export async function addJoinToCreateTrigger(client, guildId, channelId, options
         
         return await saveJoinToCreateConfig(client, guildId, config);
     } catch (error) {
-        logger.error(`Fehler adding Join to Create trigger for guild ${guildId}:`, error);
+        logger.error(`Error adding Join to Create trigger for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -1122,7 +1122,7 @@ export async function removeJoinToCreateTrigger(client, guildId, channelId) {
         
         return await saveJoinToCreateConfig(client, guildId, config);
     } catch (error) {
-        logger.error(`Fehler removing Join to Create trigger for guild ${guildId}:`, error);
+        logger.error(`Error removing Join to Create trigger for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -1139,7 +1139,7 @@ export async function registerTemporaryChannel(client, guildId, channelId, owner
         
         return await saveJoinToCreateConfig(client, guildId, config);
     } catch (error) {
-        logger.error(`Fehler registering temporary channel for guild ${guildId}:`, error);
+        logger.error(`Error registering temporary channel for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -1155,7 +1155,7 @@ export async function unregisterTemporaryChannel(client, guildId, channelId) {
         
         return false;
     } catch (error) {
-        logger.error(`Fehler unregistering temporary channel for guild ${guildId}:`, error);
+        logger.error(`Error unregistering temporary channel for guild ${guildId}:`, error);
         return false;
     }
 }
@@ -1165,7 +1165,7 @@ export async function getTemporaryChannelInfo(client, guildId, channelId) {
         const config = await getJoinToCreateConfig(client, guildId);
         return config.temporaryChannels[channelId] || null;
     } catch (error) {
-        logger.error(`Fehler getting temporary channel info for guild ${guildId}:`, error);
+        logger.error(`Error getting temporary channel info for guild ${guildId}:`, error);
         return null;
     }
 }

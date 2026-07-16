@@ -16,10 +16,10 @@ export default {
         if (!birthdayData) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('Kein Geburtstag gefunden')
+                .setTitle('No Birthday Found')
                 .setDescription(targetUser.id === interaction.user.id 
-                    ? "Du hast deinen Geburtstag noch nicht gesetzt. Nutze `/birthday set`, um ihn hinzuzufügen!"
-                    : `${targetUser.username} hat noch keinen Geburtstag gesetzt.`);
+                    ? "You haven't set your birthday yet. Use `/birthday set` to add it!"
+                    : `${targetUser.username} hasn't set their birthday yet.`);
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -27,14 +27,14 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Geburtstagsinformationen')
-            .setDescription(`**Datum:** ${birthdayData.monthName} ${birthdayData.day}\n**Benutzer:** ${targetUser.toString()}`);
+            .setTitle('Birthday Information')
+            .setDescription(`**Date:** ${birthdayData.monthName} ${birthdayData.day}\n**User:** ${targetUser.toString()}`);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
         });
 
-        logger.info('Geburtstagsinformationen erfolgreich abgerufen', {
+        logger.info('Birthday info retrieved successfully', {
             userId: interaction.user.id,
             targetUserId: targetUser.id,
             guildId,

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { removeLevels, getUserLevelData, getLevelingConfig } from '../../services/leveling/leveling.js';
 import { createEmbed } from '../../utils/embeds.js';
@@ -14,13 +14,13 @@ export default {
       option
         .setName('user')
         .setDescription('The user to remove levels from')
-        .setErforderlich(true)
+        .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
         .setDescription('Number of levels to remove')
-        .setErforderlich(true)
+        .setRequired(true)
         .setMinValue(1)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
@@ -55,18 +55,18 @@ export default {
 
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
     if (!member) {
-      throw new TitanBotFehler(
+      throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
-        FehlerTypes.USER_INPUT,
+        ErrorTypes.USER_INPUT,
         'The specified user is not in this server.'
       );
     }
 
     const userData = await getUserLevelData(client, interaction.guildId, targetUser.id);
     if (userData.level === 0) {
-      throw new TitanBotFehler(
+      throw new TitanBotError(
         `User ${targetUser.id} is already at minimum level`,
-        FehlerTypes.VALIDATION,
+        ErrorTypes.VALIDATION,
         `${targetUser.tag} is already at level 0 and cannot have levels removed.`
       );
     }
@@ -77,7 +77,7 @@ export default {
       embeds: [
         createEmbed({
           title: 'Levels Removed',
-          description: `Erfolgfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${updatedData.level}`,
+          description: `Successfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${updatedData.level}`,
           color: 'success'
         })
       ]

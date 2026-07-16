@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
-import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getEconomyPrefix } from '../../utils/database.js';
@@ -11,7 +11,7 @@ export default {
         .setDescription("View the server's top 10 richest users.")
         .setDMPermission(false),
 
-    execute: withFehlerHandling(async (interaction, config, client) => {
+    execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
 
@@ -28,9 +28,9 @@ export default {
             }
 
             if (allKeys.length === 0) {
-                throw createFehler(
+                throw createError(
                     "No economy data found",
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     "No economy data found for this server."
                 );
             }

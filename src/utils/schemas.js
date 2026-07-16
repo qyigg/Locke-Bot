@@ -1,7 +1,7 @@
 // schemas.js
 
 import { z } from 'zod';
-import { createFehler, FehlerTypes } from './errorHandler.js';
+import { createError, ErrorTypes } from './errorHandler.js';
 
 export const LogIgnoreSchema = z
   .object({
@@ -36,7 +36,7 @@ const TicketLoggingSchema = z
   })
   .optional();
 
-const AutoVerifizierenConfigSchema = z
+const AutoVerifyConfigSchema = z
   .object({
     enabled: z.boolean().default(false),
     criteria: z.enum(['account_age', 'server_size', 'none']).default('none'),
@@ -52,8 +52,8 @@ const VerificationConfigSchema = z
     messageId: z.string().nullable().optional(),
     roleId: z.string().optional(),
     message: z.string().optional(),
-    buttonText: z.string().default('Verifizieren'),
-    autoVerifizieren: AutoVerifizierenConfigSchema
+    buttonText: z.string().default('Verify'),
+    autoVerify: AutoVerifyConfigSchema
   })
   .optional();
 
@@ -66,7 +66,7 @@ export const GuildConfigSchema = z
     welcomeChannel: z.string().nullable().optional(),
     welcomeMessage: z.string().optional(),
     autoRole: z.string().nullable().optional(),
-    dmAnSchließen: z.boolean().optional(),
+    dmOnClose: z.boolean().optional(),
     reportChannelId: z.string().nullable().optional(),
     birthdayChannelId: z.string().nullable().optional(),
     premiumRoleId: z.string().nullable().optional(),
@@ -220,9 +220,9 @@ export function validateGuildConfigOrThrow(rawConfig, context = {}) {
     });
   }
 
-  throw createFehler(
+  throw createError(
     'Invalid guild configuration payload',
-    FehlerTypes.VALIDATION,
+    ErrorTypes.VALIDATION,
     'Configuration payload is invalid. Please review provided values and try again.',
     {
       ...context,

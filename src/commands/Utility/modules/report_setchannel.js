@@ -4,11 +4,11 @@ import { setLogChannel } from '../../../services/loggingService.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { logger } from '../../../utils/logger.js';
 
-import { replyUserFehler, FehlerTypes } from '../../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
 export default {
     async execute(interaction, config, client) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need **Manage Server** permissions to set the report channel.' });
+            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to set the report channel.' });
         }
 
         const channel = interaction.options.getChannel('channel');
@@ -26,7 +26,7 @@ export default {
             });
         } catch (error) {
             logger.error('report_setchannel error:', error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Could not save the channel configuration.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not save the channel configuration.' });
         }
     },
 };

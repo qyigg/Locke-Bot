@@ -3,7 +3,7 @@ import { createEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotFehler, replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { TitanBotError, replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
@@ -14,12 +14,12 @@ export default {
             option
                 .setName("users")
                 .setDescription("User IDs or mentions to ban (separated by spaces or commas)")
-                .setErforderlich(true)
+                .setRequired(true)
         )
         .addStringOption(option =>
             option.setName("reason")
                 .setDescription("Reason for the mass ban")
-                .setErforderlich(false)
+                .setRequired(false)
         )
         .addIntegerOption(option =>
             option
@@ -27,15 +27,15 @@ export default {
                 .setDescription("Number of days of messages to delete (0-7)")
                 .setMinValue(0)
                 .setMaxValue(7)
-                .setErforderlich(false)
+                .setRequired(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
     category: "moderation",
     abuseProtection: { maxAttempts: 3, windowMs: 60_000 },
 
     async execute(interaction, config, client) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction);
-        if (!deferErfolg) {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
             logger.warn(`Massban interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -56,15 +56,15 @@ export default {
 .slice(0, 20);
 
             if (userIds.length === 0) {
-                return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please provide valid user IDs or mentions. Maximum 20 users at once.' });
+                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide valid user IDs or mentions. Maximum 20 users at once.' });
             }
 
             if (userIds.includes(interaction.user.id)) {
-                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You cannot include yourself in a mass ban.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include yourself in a mass ban.' });
             }
 
             if (userIds.includes(client.user.id)) {
-                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You cannot include the bot in a mass ban.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include the bot in a mass ban.' });
             }
 
             const results = {
@@ -135,7 +135,7 @@ export default {
 
                 } catch (error) {
                     logger.error(`Failed to ban user ${userId}:`, error);
-                    const reason = error instanceof TitanBotFehler
+                    const reason = error instanceof TitanBotError
                         ? (error.userMessage || error.message)
                         : (error.message || "Unknown error");
                     results.failed.push({ 
@@ -148,7 +148,7 @@ export default {
             let description = `**Mass Ban Results:**\n\n`;
             
             if (results.successful.length > 0) {
-                description += `✅ **Erfolgfully Banned (${results.successful.length}):**\n`;
+                description += `✅ **Successfully Banned (${results.successful.length}):**\n`;
                 results.successful.forEach(result => {
                     description += `• ${result.user} (${result.userId})\n`;
                 });
@@ -182,8 +182,8 @@ export default {
             });
 
         } catch (error) {
-            logger.error("Fehler in massban command:", error);
-            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing the mass ban. Bitte versuche es später erneut.' });
+            logger.error("Error in massban command:", error);
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing the mass ban. Please try again later.' });
         }
     }
 };

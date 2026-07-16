@@ -47,7 +47,7 @@ export default {
         `Level role sync: scanned ${levelRoleSummary.scannedGuilds} guilds, pruned ${levelRoleSummary.prunedRewardEntries} stale rewards, re-awarded ${levelRoleSummary.rolesReAwarded} roles, errors ${levelRoleSummary.errors}`
       );
     } catch (error) {
-      logger.error("Fehler in ready event:", error);
+      logger.error("Error in ready event:", error);
     }
   },
 };

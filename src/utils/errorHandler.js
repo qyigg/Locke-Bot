@@ -1,34 +1,32 @@
-// errorHandler.js — der zentrale Einstiegspunkt für alle Fehlerbehandlung.
+// errorHandler.js — the single entry point for all error handling.
 //
-// Regeln:
-// 1. Commands/Handler: TitanBotFehler werfen (über createFehler) oder Fehler durchreichen;
-//    interactionCreate führt sie dann über handleInteractionFehler zusammen. Für erwartbare,
-//    benutzerseitige Fehler (Validierung, Cooldowns) replyUserFehler verwenden.
-//    Packe den execute()-Body eines Commands NICHT in ein try/catch, dessen einziger Zweck
-//    handleInteractionFehler ist — das ist überflüssig, weil interactionCreate bereits
-//    command.execute-Fehler abfängt und handleInteractionFehler mit COMMAND_ERROR_SUBTYPES aufruft.
-//    Ein lokales try/catch nur dort behalten, wo der catch wirklich mehr tut (eigene Recovery,
-//    typisiertes Re-Throwing, Verzweigung nach Statuscode) oder wenn er in einem separaten Handler
-//    sitzt (Collector-Callbacks, Modal-/Component-Handler), der nicht über den Command-Pfad läuft.
-// 2. Services: Fehler werfen, niemals { success: false } zurückgeben. Exporte mit
-//    wrapServiceBoundary (hier re-exportiert) umschließen, damit unbekannte Fehler
-//    mit Service-/Operations-Kontext typisiert werden.
-// 3. Hintergrundjobs (Cron, Timer): mit handleTaskFehler / runSafeTask umschließen.
-// 4. Eine konkrete userMessage setzen, wenn die Ursache klar ist; FehlerTypes verwenden,
-//    keine eigenen „Fehlertitel“ erfinden.
-// 5. Erfolgs-/Info-/Warn-Antworten über successEmbed / infoEmbed / warningEmbed schicken.
+// Rules:
+// 1. Commands/handlers: throw TitanBotError (via createError) or let errors propagate;
+//    interactionCreate routes them through handleInteractionError. For expected user-facing
+//    failures (validation, cooldowns), use replyUserError.
+//    Do NOT wrap a command's execute() body in a try/catch whose only purpose is to call
+//    handleInteractionError — that is redundant because interactionCreate already catches
+//    command.execute errors and calls handleInteractionError with COMMAND_ERROR_SUBTYPES.
+//    Only keep a local try/catch when the catch does something more (custom recovery,
+//    typed re-throw, status-code branching) or when it lives in a standalone handler
+//    (collector callbacks, modal/component handlers) not reached via the command path.
+// 2. Services: throw, never return { success: false }. Wrap exports with wrapServiceBoundary
+//    (re-exported here) so unknown errors get typed with service/operation context.
+// 3. Background tasks (cron, timers): wrap with handleTaskError / runSafeTask.
+// 4. Set a specific userMessage when you know the cause; use ErrorTypes, don't invent titles.
+// 5. Success/info/warning replies use successEmbed / infoEmbed / warningEmbed.
 
 import { logger } from './logger.js';
-import { buildUserFehlerEmbed } from './embeds.js';
+import { buildUserErrorEmbed } from './embeds.js';
 import { MessageFlags } from 'discord.js';
-import { getFehlerMetadata, getDefaultFehlerCodeByType, resolveFehlerCode, FehlerCodes } from './errorRegistry.js';
+import { getErrorMetadata, getDefaultErrorCodeByType, resolveErrorCode, ErrorCodes } from './errorRegistry.js';
 import { InteractionHelper } from './interactionHelper.js';
 
-// Re-Export, damit andere Module nur aus errorHandler.js importieren müssen
-export { FehlerCodes, getFehlerMetadata, resolveFehlerCode, getDefaultFehlerCodeByType } from './errorRegistry.js';
-export { ensureTypedServiceFehler, wrapServiceBoundary, wrapServiceClassMethods } from './serviceErrorBoundary.js';
+// Re-export so consumers only ever need to import from errorHandler.js
+export { ErrorCodes, getErrorMetadata, resolveErrorCode, getDefaultErrorCodeByType } from './errorRegistry.js';
+export { ensureTypedServiceError, wrapServiceBoundary, wrapServiceClassMethods } from './serviceErrorBoundary.js';
 
-export const FehlerTypes = {
+export const ErrorTypes = {
     VALIDATION: 'validation',
     PERMISSION: 'permission',
     CONFIGURATION: 'configuration',
@@ -40,37 +38,37 @@ export const FehlerTypes = {
     UNKNOWN: 'unknown'
 };
 
-export class TitanBotFehler extends Fehler {
-    constructor(message, type = FehlerTypes.UNKNOWN, userMessage = null, context = {}) {
+export class TitanBotError extends Error {
+    constructor(message, type = ErrorTypes.UNKNOWN, userMessage = null, context = {}) {
         super(message);
-        this.name = 'TitanBotFehler';
+        this.name = 'TitanBotError';
         this.type = type;
         this.userMessage = userMessage;
         this.context = context;
-        this.code = context?.errorCode || getDefaultFehlerCodeByType(type);
+        this.code = context?.errorCode || getDefaultErrorCodeByType(type);
         this.timestamp = new Date().toISOString();
     }
 }
 
-// Discord-API-Fehlercodes, die eher auf fehlende Berechtigungen als auf einen Bug hindeuten.
+// Discord API error codes that indicate a permission problem rather than a bug.
 const DISCORD_PERMISSION_CODES = new Set([
     50001, // Missing Access
     50013, // Missing Permissions
-    50007, // Kann diesem User keine Nachrichten senden (DMs zu)
-    160002, // Antwort nicht möglich ohne Berechtigung zum Lesen des Nachrichtenverlaufs
+    50007, // Cannot send messages to this user (DMs closed)
+    160002, // Cannot reply without permission to read message history
 ]);
 
-// PostgreSQL-/node-postgres-Fehlercodes und errno-Werte, die auf DB-Probleme hindeuten.
+// PostgreSQL / node-postgres error codes and errno values that indicate database trouble.
 const DATABASE_ERROR_CODES = new Set([
     'ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT',
-    '57014', // query_canceled (Statement-Timeout)
+    '57014', // query_canceled (statement timeout)
     '53300', // too_many_connections
-    '08006', '08001', '08003', // Verbindungsfehler
-    '40001', '40P01', // Serialisierungsfehler / Deadlock
+    '08006', '08001', '08003', // connection failures
+    '40001', '40P01', // serialization failure / deadlock
 ]);
 
-export function categorizeFehler(error) {
-    if (error instanceof TitanBotFehler) {
+export function categorizeError(error) {
+    if (error instanceof TitanBotError) {
         return error.type;
     }
 
@@ -78,101 +76,101 @@ export function categorizeFehler(error) {
     const code = error?.code;
 
     if (typeof code === 'string' && DATABASE_ERROR_CODES.has(code)) {
-        return FehlerTypes.DATABASE;
+        return ErrorTypes.DATABASE;
     }
 
     if (message.includes('rate limit') || code === 429) {
-        return FehlerTypes.RATE_LIMIT;
+        return ErrorTypes.RATE_LIMIT;
     }
 
     if (DISCORD_PERMISSION_CODES.has(code)) {
-        return FehlerTypes.PERMISSION;
+        return ErrorTypes.PERMISSION;
     }
 
-    // Übrige numerische Codes in Discord-Ranges (unbekannte Entität 10xxx, Request-Level 5xxxx, etc.)
+    // Remaining numeric codes in Discord's ranges (unknown entity 10xxx, request-level 5xxxx, etc.)
     if (typeof code === 'number' && code >= 10000) {
-        return FehlerTypes.DISCORD_API;
+        return ErrorTypes.DISCORD_API;
     }
 
-    if (error?.name === 'AbortFehler' || message.includes('network') || message.includes('fetch failed') || message.includes('enotconn')) {
-        return FehlerTypes.NETWORK;
+    if (error?.name === 'AbortError' || message.includes('network') || message.includes('fetch failed') || message.includes('enotconn')) {
+        return ErrorTypes.NETWORK;
     }
 
     if (message.includes('permission') || message.includes('missing access') || message.includes('missing permissions')) {
-        return FehlerTypes.PERMISSION;
+        return ErrorTypes.PERMISSION;
     }
 
     if (message.includes('database') || message.includes('postgres') || message.includes('sql') || message.includes('connection') || message.includes('timeout')) {
-        return FehlerTypes.DATABASE;
+        return ErrorTypes.DATABASE;
     }
 
     if (message.includes('validation') || message.includes('invalid') || message.includes('required')) {
-        return FehlerTypes.VALIDATION;
+        return ErrorTypes.VALIDATION;
     }
 
     if (message.includes('config') || message.includes('not found')) {
-        return FehlerTypes.CONFIGURATION;
+        return ErrorTypes.CONFIGURATION;
     }
 
-    return FehlerTypes.UNKNOWN;
+    return ErrorTypes.UNKNOWN;
 }
 
 const UserMessages = {
-    [FehlerTypes.VALIDATION]: {
-        default: 'Bitte prüfe deine Eingaben und versuch es nochmal.',
-        missing_required: 'Es fehlen noch benötigte Angaben. Schau dir die Befehlsoptionen an und versuch es nochmal.',
-        invalid_format: 'Das angegebene Format passt nicht. Sieh dir die Befehlsverwendung an und versuch es erneut.'
+    [ErrorTypes.VALIDATION]: {
+        default: 'Please check your input and try again.',
+        missing_required: "You're missing some required information. Check the command options and try again.",
+        invalid_format: 'The format you provided is incorrect. Check the command usage and try again.'
     },
-    [FehlerTypes.PERMISSION]: {
-        default: 'Du hast keine Berechtigung für diese Aktion.',
-        user_permission: 'Du darfst diesen Befehl nicht benutzen.',
-        bot_permission: 'Ich habe in diesem Kanal nicht die nötigen Berechtigungen dafür.'
+    [ErrorTypes.PERMISSION]: {
+        default: "You don't have permission to do that.",
+        user_permission: "You don't have permission to use this command.",
+        bot_permission: "I don't have the permissions needed to do that in this channel."
     },
-    [FehlerTypes.CONFIGURATION]: {
-        default: 'Diese Funktion ist noch nicht eingerichtet. Bitte einen Server-Administrator, sie zu konfigurieren.',
-        missing_config: 'Diese Funktion wurde noch nicht konfiguriert. Bitte einen Server-Administrator, sie einzurichten.',
-        invalid_config: 'Die Serverkonfiguration für diese Funktion ist fehlerhaft. Bitte einen Server-Administrator, sie zu prüfen.'
+    [ErrorTypes.CONFIGURATION]: {
+        default: 'This feature is not set up yet. Ask a server administrator to configure it.',
+        missing_config: 'This feature has not been configured yet. Ask a server administrator to set it up.',
+        invalid_config: 'The server configuration for this feature is invalid. Ask a server administrator to review it.'
     },
-    [FehlerTypes.DATABASE]: {
-        default: 'Beim Speichern ist etwas schiefgelaufen. Versuch es gleich nochmal.',
-        connection_failed: 'Ich kann gerade nicht auf die Database zugreifen. Versuch es später noch einmal.',
-        timeout: 'Das hat zu lange gedauert. Versuch es bitte noch einmal.'
+    [ErrorTypes.DATABASE]: {
+        default: 'Something went wrong while saving data. Please try again in a moment.',
+        connection_failed: 'I could not reach the database. Please try again later.',
+        timeout: 'That took too long to complete. Please try again.'
     },
-    [FehlerTypes.NETWORK]: {
-        default: 'Ich konnte einen externen Dienst nicht erreichen. Versuch es gleich nochmal.',
-        timeout: 'Die Anfrage ist abgelaufen. Versuch es bitte noch einmal.',
-        unreachable: 'Der Dienst ist im Moment nicht erreichbar. Versuch es später erneut.'
+    [ErrorTypes.NETWORK]: {
+        default: 'I could not reach an external service. Please try again in a moment.',
+        timeout: 'The request timed out. Please try again.',
+        unreachable: 'The service is unavailable right now. Please try again later.'
     },
-    [FehlerTypes.DISCORD_API]: {
-        default: 'Discord hat diese Anfrage abgelehnt. Versuch es gleich nochmal.',
-        rate_limit: 'Du machst das gerade zu schnell. Warte kurz und versuch es erneut.',
-        forbidden: 'Ich darf das hier nicht ausführen. Überprüfe meine Rollen und Berechtigungen.'
+    [ErrorTypes.DISCORD_API]: {
+        default: 'Discord rejected that request. Please try again in a moment.',
+        rate_limit: "You're doing that too quickly. Wait a moment and try again.",
+        forbidden: "I'm not allowed to do that here. Check my role permissions."
     },
-    [FehlerTypes.USER_INPUT]: {
-        default: 'Mit deiner Anfrage stimmt etwas nicht. Überprüfe deine Eingaben und versuch es erneut.',
-        invalid_user: 'Ich konnte diesen Nutzer nicht finden. Prüfe Mention oder ID und versuch es nochmal.',
-        invalid_channel: 'Ich konnte diesen Kanal nicht finden. Prüfe Mention oder ID und versuch es nochmal.'
+    [ErrorTypes.USER_INPUT]: {
+        default: 'There was a problem with your request. Check your input and try again.',
+        invalid_user: 'I could not find that user. Check the mention or ID and try again.',
+        invalid_channel: 'I could not find that channel. Check the mention or ID and try again.'
     },
-    [FehlerTypes.RATE_LIMIT]: {
-        default: 'Du machst das gerade zu schnell. Warte kurz und versuch es erneut.',
-        command_cooldown: 'Dieser Befehl hat gerade Abklingzeit. Warte kurz, bevor du ihn erneut benutzt.',
-        global_rate_limit: 'Discord bremst Anfragen im Moment. Warte kurz und versuch es nochmal.'
+    [ErrorTypes.RATE_LIMIT]: {
+        default: "You're doing that too quickly. Wait a moment and try again.",
+        command_cooldown: 'This command is on cooldown. Wait before using it again.',
+        global_rate_limit: 'Discord is rate limiting requests. Wait a moment and try again.'
     },
-    [FehlerTypes.UNKNOWN]: {
-        default: 'Es ist ein unerwarteter Fehler aufgetreten. Versuch es gleich nochmal.',
-        unexpected: 'Da ist etwas Unerwartetes schiefgelaufen. Versuch es später noch einmal.',
-        warn_failed: 'Ich konnte dieses Mitglied nicht verwarnen. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
-        kick_failed: 'Ich konnte dieses Mitglied nicht kicken. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
-        ban_failed: 'Ich konnte dieses Mitglied nicht bannen. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
-        unban_failed: 'Ich konnte diesen Nutzer nicht entbannen. Prüfe meine Berechtigungen und versuch es erneut.',
-        timeout_failed: 'Ich konnte dieses Mitglied nicht timeouten. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
-        untimeout_failed: 'Ich konnte den Timeout nicht entfernen. Prüfe meine Berechtigungen und versuch es erneut.'
+    [ErrorTypes.UNKNOWN]: {
+        default: 'Something went wrong. Please try again in a moment.',
+        unexpected: 'An unexpected error occurred. Please try again later.',
+        warn_failed: 'I could not warn that member. Check my permissions and role hierarchy, then try again.',
+        kick_failed: 'I could not kick that member. Check my permissions and role hierarchy, then try again.',
+        ban_failed: 'I could not ban that member. Check my permissions and role hierarchy, then try again.',
+        unban_failed: 'I could not unban that user. Check my permissions and try again.',
+        timeout_failed: 'I could not timeout that member. Check my permissions and role hierarchy, then try again.',
+        untimeout_failed: 'I could not remove the timeout. Check my permissions and try again.'
     }
 };
 
 export function getUserMessage(error, context = {}) {
-    const type = categorizeFehler(error);
-    const messages = UserMessages[type] || UserMessages[FehlerTypes.UNKNOWN];
+    const type = categorizeError(error);
+    const messages = UserMessages[type] || UserMessages[ErrorTypes.UNKNOWN];
 
     if (error.userMessage) {
         return error.userMessage;
@@ -182,22 +180,22 @@ export function getUserMessage(error, context = {}) {
         return messages[context.subtype];
     }
 
-    if (context.subtype && UserMessages[FehlerTypes.UNKNOWN][context.subtype]) {
-        return UserMessages[FehlerTypes.UNKNOWN][context.subtype];
+    if (context.subtype && UserMessages[ErrorTypes.UNKNOWN][context.subtype]) {
+        return UserMessages[ErrorTypes.UNKNOWN][context.subtype];
     }
 
     return messages.default;
 }
 
-function buildFehlerLogData(interaction, error, errorType, context = {}) {
-    const resolvedFehlerCode = resolveFehlerCode({ error, errorType, context });
-    const errorMetadata = getFehlerMetadata(resolvedFehlerCode);
+function buildErrorLogData(interaction, error, errorType, context = {}) {
+    const resolvedErrorCode = resolveErrorCode({ error, errorType, context });
+    const errorMetadata = getErrorMetadata(resolvedErrorCode);
     const traceId = context.traceId || interaction?.traceContext?.traceId || interaction?.traceId || error?.context?.traceId;
 
     return {
         logData: {
             event: 'interaction.error',
-            errorCode: resolvedFehlerCode,
+            errorCode: resolvedErrorCode,
             remediationHint: errorMetadata.remediation,
             severity: errorMetadata.severity,
             retryable: errorMetadata.retryable,
@@ -218,34 +216,34 @@ function buildFehlerLogData(interaction, error, errorType, context = {}) {
             context
         },
         traceId,
-        resolvedFehlerCode,
+        resolvedErrorCode,
         errorMetadata
     };
 }
 
-function logInteractionFehler(error, errorType, logData) {
-    const isUserFehler = USER_ERROR_TYPES.has(errorType);
-    const isExpectedFehler = Boolean(error?.context?.expected === true || error?.context?.suppressFehlerLog === true);
+function logInteractionError(error, errorType, logData) {
+    const isUserError = USER_ERROR_TYPES.has(errorType);
+    const isExpectedError = Boolean(error?.context?.expected === true || error?.context?.suppressErrorLog === true);
 
-    if (isUserFehler || isExpectedFehler) {
-        if (errorType !== FehlerTypes.RATE_LIMIT) {
-            logger.debug(`Benutzerfehler [${errorType.toUpperCase()}]: ${error.userMessage || error.message}`, logData);
+    if (isUserError || isExpectedError) {
+        if (errorType !== ErrorTypes.RATE_LIMIT) {
+            logger.debug(`User Error [${errorType.toUpperCase()}]: ${error.userMessage || error.message}`, logData);
         }
     } else {
-        logger.error(`Systemfehler [${errorType.toUpperCase()}]`, {
+        logger.error(`System Error [${errorType.toUpperCase()}]`, {
             ...logData,
             stack: error.stack
         });
     }
 }
 
-async function sendFehlerResponse(interaction, embed, context = {}) {
+async function sendErrorResponse(interaction, embed, context = {}) {
     try {
         if (!interaction || !interaction.id) {
-            logger.warn('Interaction war null oder ungültig, als der Fehler behandelt werden sollte', {
+            logger.warn('Interaction was null or invalid when handling error', {
                 event: 'interaction.error.invalid_interaction',
-                errorCode: FehlerCodes.INTERACTION_INVALID,
-                remediationHint: getFehlerMetadata(FehlerCodes.INTERACTION_INVALID).remediation,
+                errorCode: ErrorCodes.INTERACTION_INVALID,
+                remediationHint: getErrorMetadata(ErrorCodes.INTERACTION_INVALID).remediation,
                 traceId: context.traceId
             });
             return false;
@@ -257,10 +255,10 @@ async function sendFehlerResponse(interaction, embed, context = {}) {
         }
 
         if (interaction.createdTimestamp && (Date.now() - interaction.createdTimestamp) > 14 * 60 * 1000) {
-            logger.warn('Interaction ist abgelaufen, bevor der Fehler-Handler antworten konnte', {
+            logger.warn('Interaction expired before error handler could send response', {
                 event: 'interaction.error.expired',
-                errorCode: FehlerCodes.INTERACTION_EXPIRED,
-                remediationHint: getFehlerMetadata(FehlerCodes.INTERACTION_EXPIRED).remediation,
+                errorCode: ErrorCodes.INTERACTION_EXPIRED,
+                remediationHint: getErrorMetadata(ErrorCodes.INTERACTION_EXPIRED).remediation,
                 traceId: context.traceId,
                 guildId: interaction.guildId,
                 userId: interaction.user?.id,
@@ -283,7 +281,7 @@ async function sendFehlerResponse(interaction, embed, context = {}) {
         const useEphemeral = context.ephemeral !== false;
 
         if (interaction.replied) {
-            // Es existiert bereits eine sichtbare Antwort; nicht überschreiben — stattdessen ephemer nachfassen.
+            // A visible reply already exists; don't overwrite it — follow up ephemerally.
             await interaction.followUp({ ...errorMessage, flags: MessageFlags.Ephemeral });
         } else if (interaction.deferred) {
             await interaction.editReply(errorMessage);
@@ -295,104 +293,104 @@ async function sendFehlerResponse(interaction, embed, context = {}) {
         }
 
         return true;
-    } catch (replyFehler) {
-        if (replyFehler.code === 40060 || replyFehler.code === 10062 || replyFehler.code === 50027) {
-            logger.warn('Interaction bereits bestätigt, abgelaufen oder Token ungültig; Fehlerantwort kann nicht gesendet werden:', {
+    } catch (replyError) {
+        if (replyError.code === 40060 || replyError.code === 10062 || replyError.code === 50027) {
+            logger.warn('Interaction already acknowledged, expired, or token invalid; cannot send error response:', {
                 event: 'interaction.error.response_unavailable',
-                errorCode: String(replyFehler.code),
+                errorCode: String(replyError.code),
                 traceId: context.traceId,
                 guildId: interaction.guildId,
                 userId: interaction.user?.id,
                 command: interaction.commandName || context.command,
-                code: replyFehler.code
+                code: replyError.code
             });
             return false;
         }
 
-        logger.error('Fehler beim Senden der Fehlerantwort:', {
+        logger.error('Failed to send error response:', {
             event: 'interaction.error.response_failed',
-            errorCode: String(replyFehler.code || FehlerCodes.INTERACTION_RESPONSE_FAILED),
-            remediationHint: getFehlerMetadata(FehlerCodes.INTERACTION_RESPONSE_FAILED).remediation,
+            errorCode: String(replyError.code || ErrorCodes.INTERACTION_RESPONSE_FAILED),
+            remediationHint: getErrorMetadata(ErrorCodes.INTERACTION_RESPONSE_FAILED).remediation,
             traceId: context.traceId,
             guildId: interaction.guildId,
             userId: interaction.user?.id,
             command: interaction.commandName || context.command,
-            error: replyFehler
+            error: replyError
         });
         return false;
     }
 }
 
 /**
- * Antwortet mit einem typisierten, benutzerfreundlichen Fehler (frühe Rückgabe bei Validierung, Berechtigungen usw.).
+ * Reply with a typed user-facing error (early-return validation, permission checks, etc.).
  */
-export async function replyUserFehler(interaction, {
-    type = FehlerTypes.UNKNOWN,
+export async function replyUserError(interaction, {
+    type = ErrorTypes.UNKNOWN,
     message,
     subtype = null,
     ephemeral = true,
     context = {}
 } = {}) {
-    const errorType = type || FehlerTypes.UNKNOWN;
-    const syntheticFehler = message
-        ? createFehler('Benutzerfehler', errorType, message, { expected: true, ...context })
-        : createFehler('Benutzerfehler', errorType, null, { expected: true, ...context });
+    const errorType = type || ErrorTypes.UNKNOWN;
+    const syntheticError = message
+        ? createError('User error', errorType, message, { expected: true, ...context })
+        : createError('User error', errorType, null, { expected: true, ...context });
 
-    const userMessage = getUserMessage(syntheticFehler, { subtype, ...context });
-    const { logData, traceId } = buildFehlerLogData(interaction, syntheticFehler, errorType, {
+    const userMessage = getUserMessage(syntheticError, { subtype, ...context });
+    const { logData, traceId } = buildErrorLogData(interaction, syntheticError, errorType, {
         ...context,
         subtype,
-        source: context.source || 'replyUserFehler'
+        source: context.source || 'replyUserError'
     });
 
-    logInteractionFehler(syntheticFehler, errorType, logData);
+    logInteractionError(syntheticError, errorType, logData);
 
-    const embed = buildUserFehlerEmbed(errorType, userMessage);
-    return sendFehlerResponse(interaction, embed, { ...context, traceId, ephemeral, subtype });
+    const embed = buildUserErrorEmbed(errorType, userMessage);
+    return sendErrorResponse(interaction, embed, { ...context, traceId, ephemeral, subtype });
 }
 
 const USER_ERROR_TYPES = new Set([
-    FehlerTypes.VALIDATION,
-    FehlerTypes.RATE_LIMIT,
-    FehlerTypes.USER_INPUT,
-    FehlerTypes.PERMISSION
+    ErrorTypes.VALIDATION,
+    ErrorTypes.RATE_LIMIT,
+    ErrorTypes.USER_INPUT,
+    ErrorTypes.PERMISSION
 ]);
 
-function buildFehlerReference(resolvedFehlerCode, traceId) {
+function buildErrorReference(resolvedErrorCode, traceId) {
     const shortTrace = traceId ? String(traceId).slice(0, 8) : null;
-    return shortTrace ? `${resolvedFehlerCode} · ${shortTrace}` : resolvedFehlerCode;
+    return shortTrace ? `${resolvedErrorCode} · ${shortTrace}` : resolvedErrorCode;
 }
 
-export async function handleInteractionFehler(interaction, error, context = {}) {
-    const errorType = categorizeFehler(error);
+export async function handleInteractionError(interaction, error, context = {}) {
+    const errorType = categorizeError(error);
     const userMessage = getUserMessage(error, context);
-    const { logData, traceId, resolvedFehlerCode } = buildFehlerLogData(interaction, error, errorType, context);
+    const { logData, traceId, resolvedErrorCode } = buildErrorLogData(interaction, error, errorType, context);
 
-    logInteractionFehler(error, errorType, logData);
+    logInteractionError(error, errorType, logData);
 
-    // Systemfehler bekommen einen Referenzcode, damit User sie melden können und wir sie im Log finden.
-    const isUserFehler = USER_ERROR_TYPES.has(errorType) || error?.context?.expected === true;
-    const description = isUserFehler
+    // System errors get a reference code so users can report them and we can grep logs.
+    const isUserError = USER_ERROR_TYPES.has(errorType) || error?.context?.expected === true;
+    const description = isUserError
         ? userMessage
-        : `${userMessage}\n\n-# Ref: \`${buildFehlerReference(resolvedFehlerCode, traceId)}\``;
+        : `${userMessage}\n\n-# Ref: \`${buildErrorReference(resolvedErrorCode, traceId)}\``;
 
-    const embed = buildUserFehlerEmbed(errorType, description);
-    await sendFehlerResponse(interaction, embed, { ...context, traceId });
+    const embed = buildUserErrorEmbed(errorType, description);
+    await sendErrorResponse(interaction, embed, { ...context, traceId });
 }
 
 /**
- * Zentraler Fehler-Handler für Kontexte ohne Interaction (Cronjobs, Timer, Nebenwirkungen von Events).
- * Loggt mit denselben strukturierten Feldern wie Interaction-Fehler.
+ * Central error handler for non-interaction contexts (cron jobs, timers, event
+ * side-effects). Logs with the same structured fields as interaction errors.
  */
-export function handleTaskFehler(taskName, error, context = {}) {
-    const errorType = categorizeFehler(error);
-    const resolvedFehlerCode = resolveFehlerCode({ error, errorType, context });
-    const errorMetadata = getFehlerMetadata(resolvedFehlerCode);
+export function handleTaskError(taskName, error, context = {}) {
+    const errorType = categorizeError(error);
+    const resolvedErrorCode = resolveErrorCode({ error, errorType, context });
+    const errorMetadata = getErrorMetadata(resolvedErrorCode);
 
-    logger.error(`Task-Fehler [${taskName}] [${errorType.toUpperCase()}]`, {
+    logger.error(`Task Error [${taskName}] [${errorType.toUpperCase()}]`, {
         event: 'task.error',
         task: taskName,
-        errorCode: resolvedFehlerCode || FehlerCodes.TASK_ERROR,
+        errorCode: resolvedErrorCode || ErrorCodes.TASK_ERROR,
         remediationHint: errorMetadata.remediation,
         severity: errorMetadata.severity,
         retryable: errorMetadata.retryable,
@@ -404,40 +402,40 @@ export function handleTaskFehler(taskName, error, context = {}) {
 }
 
 /**
- * Verpackt einen Hintergrundtask so, dass er niemals eine unhandled rejection erzeugt.
- * Beispiel: cron.schedule('* * * * *', runSafeTask('giveaways', () => checkGiveaways(client)))
+ * Wrap a background task so it can never produce an unhandled rejection.
+ * Usage: cron.schedule('* * * * *', runSafeTask('giveaways', () => checkGiveaways(client)))
  */
 export function runSafeTask(taskName, fn, context = {}) {
     return async (...args) => {
         try {
             return await fn(...args);
         } catch (error) {
-            handleTaskFehler(taskName, error, context);
+            handleTaskError(taskName, error, context);
             return null;
         }
     };
 }
 
-export function withFehlerHandling(fn, context = {}) {
+export function withErrorHandling(fn, context = {}) {
     return async (...args) => {
         try {
             return await fn(...args);
         } catch (error) {
             const interaction = args.find((arg) =>
                 arg && typeof arg === 'object' &&
-                (arg.isCommand || arg.isButton || arg.isModalAbsenden || arg.isStringSelectMenu || arg.isChatInputCommand || arg._isPrefixCommand)
+                (arg.isCommand || arg.isButton || arg.isModalSubmit || arg.isStringSelectMenu || arg.isChatInputCommand || arg._isPrefixCommand)
             );
 
-            // Slash-Commands werden von interactionCreate behandelt — erneut werfen,
-            // damit der zentrale Handler Trace-Kontext und Command-Subtypen anhängen kann.
+            // Slash commands are handled by interactionCreate — re-throw so the
+            // central handler can attach trace context and command subtypes.
             if (interaction?.isChatInputCommand?.()) {
                 throw error;
             }
 
             if (interaction) {
-                await handleInteractionFehler(interaction, error, context);
+                await handleInteractionError(interaction, error, context);
             } else {
-                logger.error('Fehler in einem Kontext ohne Interaction:', error);
+                logger.error('Error in non-interaction context:', error);
             }
 
             return null;
@@ -445,24 +443,24 @@ export function withFehlerHandling(fn, context = {}) {
     };
 }
 
-export function createFehler(message, type = FehlerTypes.UNKNOWN, userMessage = null, context = {}) {
+export function createError(message, type = ErrorTypes.UNKNOWN, userMessage = null, context = {}) {
     const normalizedContext = {
         ...context,
-        errorCode: context?.errorCode || getDefaultFehlerCodeByType(type)
+        errorCode: context?.errorCode || getDefaultErrorCodeByType(type)
     };
 
-    return new TitanBotFehler(message, type, userMessage, normalizedContext);
+    return new TitanBotError(message, type, userMessage, normalizedContext);
 }
 
 export default {
-    FehlerTypes,
-    TitanBotFehler,
-    categorizeFehler,
+    ErrorTypes,
+    TitanBotError,
+    categorizeError,
     getUserMessage,
-    replyUserFehler,
-    handleInteractionFehler,
-    handleTaskFehler,
+    replyUserError,
+    handleInteractionError,
+    handleTaskError,
     runSafeTask,
-    withFehlerHandling,
-    createFehler
+    withErrorHandling,
+    createError
 };

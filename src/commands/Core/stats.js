@@ -6,7 +6,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("stats")
-    .setDescription("Zeigt Bot-Statistiken an"),
+    .setDescription("View bot statistics"),
 
   async execute(interaction) {
     try {
@@ -19,13 +19,13 @@ export default {
       );
       const nodeVersion = process.version;
 
-      const embed = createEmbed({ title: "Systemstatistiken", description: "Leistungsdaten in Echtzeit." }).addFields(
-        { name: "Server", value: `${totalGuilds}`, inline: true },
-        { name: "Benutzer", value: `${totalMembers}`, inline: true },
+      const embed = createEmbed({ title: "System Statistics", description: "Real-time performance metrics." }).addFields(
+        { name: "Servers", value: `${totalGuilds}`, inline: true },
+        { name: "Users", value: `${totalMembers}`, inline: true },
         { name: "Node.js", value: `${nodeVersion}`, inline: true },
         { name: "Discord.js", value: `v${version}`, inline: true },
         {
-          name: "Speichernutzung",
+          name: "Memory Usage",
           value: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`,
           inline: true,
         },
@@ -33,9 +33,9 @@ export default {
 
       await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     } catch (error) {
-      logger.error('Fehler beim Stats-Befehl:', error);
+      logger.error('Stats command error:', error);
       return InteractionHelper.safeEditReply(interaction, {
-        embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Systemstatistiken konnten nicht geladen werden.', color: 'error' })],
+        embeds: [createEmbed({ title: 'System Error', description: 'Could not fetch system statistics.', color: 'error' })],
         flags: MessageFlags.Ephemeral,
       });
     }

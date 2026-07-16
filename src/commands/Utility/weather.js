@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
@@ -14,12 +14,12 @@ export default {
             option
                 .setName("city")
                 .setDescription("The city name, e.g., 'London' or 'Tokyo'")
-                .setErforderlich(true),
+                .setRequired(true),
         ),
 
     async execute(interaction) {
-        const deferErfolg = await InteractionHelper.safeDefer(interaction);
-        if (!deferErfolg) {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
             logger.warn(`Weather interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -41,7 +41,7 @@ export default {
                 city: city,
                 guildId: interaction.guildId
             });
-            await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `Could not find a location for **${city}**. Please check the spelling.` });
+            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Could not find a location for **${city}**. Please check the spelling.` });
             return;
         }
 
@@ -60,7 +60,7 @@ export default {
                 userId: interaction.user.id,
                 guildId: interaction.guildId
             });
-            await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'A weather service error occurred.' });
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'A weather service error occurred.' });
             return;
         }
 

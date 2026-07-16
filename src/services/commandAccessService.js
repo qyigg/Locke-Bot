@@ -108,7 +108,7 @@ export function isProtectedCommand(commandName) {
   return PROTECTED_COMMANDS.has(String(commandName || '').toLowerCase());
 }
 
-export function isCommandAktiviertInConfig(config, commandName, category) {
+export function isCommandEnabledInConfig(config, commandName, category) {
   const normalizedName = String(commandName || '').toLowerCase();
 
   // Check if it's a subcommand (contains space)
@@ -141,7 +141,7 @@ export function isCommandAktiviertInConfig(config, commandName, category) {
   return true;
 }
 
-export async function isCommandAktiviert(client, guildId, commandName, category = null) {
+export async function isCommandEnabled(client, guildId, commandName, category = null) {
   const config = await getGuildConfig(client, guildId);
   let resolvedCategory = category;
 
@@ -150,7 +150,7 @@ export async function isCommandAktiviert(client, guildId, commandName, category 
     resolvedCategory = command?.category || 'Core';
   }
 
-  return isCommandAktiviertInConfig(config, commandName, resolvedCategory);
+  return isCommandEnabledInConfig(config, commandName, resolvedCategory);
 }
 
 export function getCommandAccessSnapshot(client, config) {
@@ -161,12 +161,12 @@ export function getCommandAccessSnapshot(client, config) {
   const categories = [];
 
   for (const category of registry.values()) {
-    const categoryDeaktiviert = Boolean(disabledCategories[category.key]);
+    const categoryDisabled = Boolean(disabledCategories[category.key]);
     const enabledCommands = [];
     const disabledCommandNames = [];
 
     for (const command of category.commands) {
-      const enabled = isCommandAktiviertInConfig(config, command.name, category.folder);
+      const enabled = isCommandEnabledInConfig(config, command.name, category.folder);
       if (enabled) {
         enabledCommands.push(command.name);
       } else {
@@ -176,7 +176,7 @@ export function getCommandAccessSnapshot(client, config) {
 
     categories.push({
       ...category,
-      categoryDeaktiviert,
+      categoryDisabled,
       enabledCount: enabledCommands.length,
       disabledCount: disabledCommandNames.length,
       totalCount: category.commands.length,
@@ -223,11 +223,11 @@ export async function disableCommand(client, guildId, commandName, context = {})
   const target = resolveCommandTarget(client, normalizedName);
 
   if (!target) {
-    throw new Fehler(`Unknown command: \`${normalizedName}\`.`);
+    throw new Error(`Unknown command: \`${normalizedName}\`.`);
   }
 
   if (!target.isSubcommand && isProtectedCommand(normalizedName)) {
-    throw new Fehler(`The \`${normalizedName}\` command cannot be disabled.`);
+    throw new Error(`The \`${normalizedName}\` command cannot be disabled.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -243,7 +243,7 @@ export async function enableCommand(client, guildId, commandName, context = {}) 
   const target = resolveCommandTarget(client, normalizedName);
 
   if (!target) {
-    throw new Fehler(`Unknown command: \`${normalizedName}\`.`);
+    throw new Error(`Unknown command: \`${normalizedName}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -259,7 +259,7 @@ export async function disableCategory(client, guildId, categoryKey, context = {}
   const category = getCategoryRegistry(client, normalizedKey);
 
   if (!category) {
-    throw new Fehler(`Unknown category: \`${categoryKey}\`.`);
+    throw new Error(`Unknown category: \`${categoryKey}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -275,7 +275,7 @@ export async function enableCategory(client, guildId, categoryKey, context = {})
   const category = getCategoryRegistry(client, normalizedKey);
 
   if (!category) {
-    throw new Fehler(`Unknown category: \`${categoryKey}\`.`);
+    throw new Error(`Unknown category: \`${categoryKey}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -291,7 +291,7 @@ export async function resetCategoryCommands(client, guildId, categoryKey, contex
   const category = getCategoryRegistry(client, normalizedKey);
 
   if (!category) {
-    throw new Fehler(`Unknown category: \`${categoryKey}\`.`);
+    throw new Error(`Unknown category: \`${categoryKey}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);

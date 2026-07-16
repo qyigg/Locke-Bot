@@ -2,7 +2,7 @@
 
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../utils/errorHandler.js';
+import { TitanBotError, ErrorTypes } from '../utils/errorHandler.js';
 import { getColor, botConfig } from '../config/bot.js';
 import { getEndedGiveaways, markGiveawayEnded } from '../utils/database.js';
 import { checkRateLimit, getRateLimitStatus } from '../utils/rateLimiter.js';
@@ -17,9 +17,9 @@ function getGiveawayInteractionKey(userId, giveawayId) {
 
 export function parseDuration(durationString) {
     if (!durationString || typeof durationString !== 'string') {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             'Invalid duration format provided',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Please provide a valid duration (e.g., 1h, 30m, 5d, 10s).',
             { durationString }
         );
@@ -29,9 +29,9 @@ export function parseDuration(durationString) {
     const match = durationString.trim().match(regex);
 
     if (!match) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             `Invalid duration format: ${durationString}`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Invalid duration format. Use: 1h, 30m, 5d, 10s (min: 10s, max: 30d)',
             { input: durationString }
         );
@@ -41,9 +41,9 @@ export function parseDuration(durationString) {
     const unit = match[2].toLowerCase();
 
     if (amount <= 0 || amount > 999) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             `Duration amount out of range: ${amount}`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Duration amount must be between 1 and 999.',
             { amount, unit }
         );
@@ -64,9 +64,9 @@ export function parseDuration(durationString) {
             ms = amount * 24 * 60 * 60 * 1000;
             break;
         default:
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 `Unknown duration unit: ${unit}`,
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'Please use s (seconds), m (minutes), h (hours), or d (days).',
                 { unit }
             );
@@ -74,9 +74,9 @@ export function parseDuration(durationString) {
 
     const maxDuration = GIVEAWAY_CONFIG.maximumDuration ?? 30 * 24 * 60 * 60 * 1000;
     if (ms > maxDuration) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             `Duration exceeds maximum: ${ms}ms > ${maxDuration}ms`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             `Maximum duration is ${Math.floor(maxDuration / (24 * 60 * 60 * 1000))} days.`,
             { requestedMs: ms, maxMs: maxDuration }
         );
@@ -84,9 +84,9 @@ export function parseDuration(durationString) {
 
     const minDuration = GIVEAWAY_CONFIG.minimumDuration ?? 10 * 1000;
     if (ms < minDuration) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             `Duration below minimum: ${ms}ms < ${minDuration}ms`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             `Minimum duration is ${Math.ceil(minDuration / 1000)} seconds.`,
             { requestedMs: ms, minMs: minDuration }
         );
@@ -97,9 +97,9 @@ export function parseDuration(durationString) {
 
 export function validatePrize(prize) {
     if (!prize || typeof prize !== 'string') {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             'Prize must be a non-empty string',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Please provide a valid prize description.',
             { prize }
         );
@@ -107,9 +107,9 @@ export function validatePrize(prize) {
 
     const trimmed = prize.trim();
     if (trimmed.length === 0 || trimmed.length > 256) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             `Prize length out of range: ${trimmed.length}`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Prize must be between 1 and 256 characters.',
             { length: trimmed.length }
         );
@@ -123,9 +123,9 @@ export function validateWinnerCount(winnerCount) {
     const maximumWinners = GIVEAWAY_CONFIG.maximumWinners ?? 10;
 
     if (!Number.isInteger(winnerCount) || winnerCount < minimumWinners || winnerCount > maximumWinners) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             `Invalid winner count: ${winnerCount}`,
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             `Winner count must be between ${minimumWinners} and ${maximumWinners}.`,
             { winnerCount, minimumWinners, maximumWinners }
         );
@@ -162,10 +162,10 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
         
         return embed;
     } catch (error) {
-        logger.error('Fehler creating giveaway embed:', error);
-        throw new TitanBotFehler(
+        logger.error('Error creating giveaway embed:', error);
+        throw new TitanBotError(
             'Failed to create giveaway embed',
-            FehlerTypes.UNKNOWN,
+            ErrorTypes.UNKNOWN,
             'An internal error occurred while formatting the giveaway.',
             { error: error.message }
         );
@@ -182,12 +182,12 @@ export function createGiveawayButtons(ended = false) {
                     .setCustomId('giveaway_reroll')
                     .setLabel('🎲 Reroll')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDeaktiviert(false),
+                    .setDisabled(false),
                 new ButtonBuilder()
                     .setCustomId('giveaway_view')
                     .setLabel('👁️ View Winners')
                     .setStyle(ButtonStyle.Primary)
-                    .setDeaktiviert(false)
+                    .setDisabled(false)
             );
         } else {
             row.addComponents(
@@ -195,21 +195,21 @@ export function createGiveawayButtons(ended = false) {
                     .setCustomId('giveaway_join')
                     .setLabel('🎉 Join')
                     .setStyle(ButtonStyle.Primary)
-                    .setDeaktiviert(false),
+                    .setDisabled(false),
                 new ButtonBuilder()
                     .setCustomId('giveaway_end')
                     .setLabel('🛑 End')
                     .setStyle(ButtonStyle.Danger)
-                    .setDeaktiviert(false)
+                    .setDisabled(false)
             );
         }
 
         return row;
     } catch (error) {
-        logger.error('Fehler creating giveaway buttons:', error);
-        throw new TitanBotFehler(
+        logger.error('Error creating giveaway buttons:', error);
+        throw new TitanBotError(
             'Failed to create giveaway buttons',
-            FehlerTypes.UNKNOWN,
+            ErrorTypes.UNKNOWN,
             'An internal error occurred while creating interactive buttons.',
             { error: error.message }
         );
@@ -224,9 +224,9 @@ export function selectWinners(participants, winnerCount) {
     const uniqueParticipants = [...new Set(participants)];
 
     if (!Number.isInteger(winnerCount) || winnerCount < 1) {
-        throw new TitanBotFehler(
+        throw new TitanBotError(
             'Invalid winner count for selection',
-            FehlerTypes.VALIDATION,
+            ErrorTypes.VALIDATION,
             'Winner count must be at least 1.',
             { winnerCount }
         );
@@ -243,10 +243,10 @@ export function selectWinners(participants, winnerCount) {
         }
         return shuffled.slice(0, requested);
     } catch (error) {
-        logger.error('Fehler selecting winners:', error);
-        throw new TitanBotFehler(
+        logger.error('Error selecting winners:', error);
+        throw new TitanBotError(
             'Failed to select winners',
-            FehlerTypes.UNKNOWN,
+            ErrorTypes.UNKNOWN,
             'An error occurred while selecting winners.',
             { error: error.message, participantCount: participants.length }
         );
@@ -272,18 +272,18 @@ export async function recordUserInteraction(userId, giveawayId) {
 export async function endGiveaway(client, giveaway, guildId, endedBy) {
     try {
         if (!giveaway) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Giveaway object is null or undefined',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'Cannot end a non-existent giveaway.',
                 { giveaway }
             );
         }
 
         if (giveaway.ended === true || giveaway.isEnded === true) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 `Giveaway ${giveaway.messageId} is already ended`,
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'This giveaway has already ended.',
                 { giveawayId: giveaway.messageId, status: 'already_ended' }
             );
@@ -310,14 +310,14 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
             participantCount: participants.length
         };
     } catch (error) {
-        if (error instanceof TitanBotFehler) {
+        if (error instanceof TitanBotError) {
             logger.debug(`Giveaway end validation error: ${error.message}`, error.context || {});
             throw error;
         }
-        logger.error('Fehler ending giveaway:', error);
-        throw new TitanBotFehler(
+        logger.error('Error ending giveaway:', error);
+        throw new TitanBotError(
             'Failed to end giveaway',
-            FehlerTypes.UNKNOWN,
+            ErrorTypes.UNKNOWN,
             'An error occurred while ending the giveaway.',
             { error: error.message, giveawayId: giveaway?.messageId }
         );
@@ -381,8 +381,8 @@ export async function checkGiveaways(client) {
         giveaway.winnerIds = winners;
         giveaway.endedAt = new Date().toISOString();
 
-        const markedErfolg = await markGiveawayEnded(client, giveawayId, giveaway);
-        if (!markedErfolg) {
+        const markedSuccess = await markGiveawayEnded(client, giveawayId, giveaway);
+        if (!markedSuccess) {
           logger.warn(`Failed to mark giveaway ${messageId} as ended in database`);
         }
 
@@ -420,7 +420,7 @@ export async function checkGiveaways(client) {
               }
             });
           } catch (error) {
-            logger.debug('Fehler logging giveaway winner:', error);
+            logger.debug('Error logging giveaway winner:', error);
           }
         } else {
           await channel.send({ content: `The giveaway for **${giveaway.prize}** has ended with no valid entries.` });
@@ -428,10 +428,10 @@ export async function checkGiveaways(client) {
 
         logger.info(`Ended giveaway ${messageId} in guild ${guildId}`);
       } catch (error) {
-        logger.error(`Fehler processing giveaway:`, error);
+        logger.error(`Error processing giveaway:`, error);
       }
     }
   } catch (error) {
-    logger.error('Fehler checking giveaways:', error);
+    logger.error('Error checking giveaways:', error);
   }
 }

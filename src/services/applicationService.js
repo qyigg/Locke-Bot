@@ -1,12 +1,12 @@
 // applicationService.js
 
 import { logger } from '../utils/logger.js';
-import { createFehler, FehlerTypes } from '../utils/errorHandler.js';
+import { createError, ErrorTypes } from '../utils/errorHandler.js';
 import { PermissionFlagsBits } from 'discord.js';
 import { sanitizeInput, sanitizeMarkdown } from '../utils/validation.js';
 import {
-    getApplicationEinstellungen,
-    saveApplicationEinstellungen,
+    getApplicationSettings,
+    saveApplicationSettings,
     getApplication,
     getApplications,
     createApplication,
@@ -27,18 +27,18 @@ class ApplicationService {
 
     static validateApplicationSubmission(data) {
         if (!data.guildId || !data.userId || !data.roleId) {
-            throw createFehler(
+            throw createError(
                 'Missing required fields for application submission',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'Invalid application data. Please try again.',
                 { data }
             );
         }
 
         if (!data.answers || !Array.isArray(data.answers) || data.answers.length === 0) {
-            throw createFehler(
+            throw createError(
                 'Application must have answers',
-                FehlerTypes.VALIDATION,
+                ErrorTypes.VALIDATION,
                 'You must answer all application questions.',
                 { data }
             );
@@ -49,27 +49,27 @@ class ApplicationService {
             const sanitizedAnswer = this.sanitizeApplicationText(answer.answer, 1000);
 
             if (!sanitizedQuestion || !sanitizedAnswer) {
-                throw createFehler(
+                throw createError(
                     'Invalid answer format',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'All questions must have answers.',
                     { answer }
                 );
             }
 
             if (sanitizedAnswer.length > 1000) {
-                throw createFehler(
+                throw createError(
                     'Answer too long',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'Each answer must be less than 1000 characters.',
                     { length: sanitizedAnswer.length }
                 );
             }
 
             if (sanitizedAnswer.trim().length < 10) {
-                throw createFehler(
+                throw createError(
                     'Answer too short',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'Please provide meaningful answers (at least 10 characters).',
                     { length: sanitizedAnswer.length }
                 );
@@ -82,13 +82,13 @@ class ApplicationService {
     static checkApplicationCooldown(userId) {
         const now = Date.now();
         const cooldownKey = `submit_${userId}`;
-        const lastAbsenden = applicationCooldowns.get(cooldownKey);
+        const lastSubmit = applicationCooldowns.get(cooldownKey);
 
-        if (lastAbsenden && now - lastAbsenden < APPLICATION_SUBMIT_COOLDOWN) {
-            const remainingTime = Math.ceil((APPLICATION_SUBMIT_COOLDOWN - (now - lastAbsenden)) / 1000);
-            throw createFehler(
+        if (lastSubmit && now - lastSubmit < APPLICATION_SUBMIT_COOLDOWN) {
+            const remainingTime = Math.ceil((APPLICATION_SUBMIT_COOLDOWN - (now - lastSubmit)) / 1000);
+            throw createError(
                 'Application submission on cooldown',
-                FehlerTypes.RATE_LIMIT,
+                ErrorTypes.RATE_LIMIT,
                 `Please wait ${Math.ceil(remainingTime / 60)} minute(s) before submitting another application.`,
                 { remainingTime, userId }
             );
@@ -99,7 +99,7 @@ class ApplicationService {
     }
 
     static async checkManagerPermission(client, guildId, member) {
-        const settings = await getApplicationEinstellungen(client, guildId);
+        const settings = await getApplicationSettings(client, guildId);
         
         const isManager = 
             member.permissions.has(PermissionFlagsBits.ManageGuild) ||
@@ -107,9 +107,9 @@ class ApplicationService {
              settings.managerRoles.some(roleId => member.roles.cache.has(roleId)));
 
         if (!isManager) {
-            throw createFehler(
+            throw createError(
                 'User lacks permission to manage applications',
-                FehlerTypes.PERMISSION,
+                ErrorTypes.PERMISSION,
                 'You do not have permission to manage applications.',
                 { userId: member.id, guildId }
             );
@@ -125,11 +125,11 @@ class ApplicationService {
 
             this.checkApplicationCooldown(data.userId);
 
-            const settings = await getApplicationEinstellungen(client, data.guildId);
+            const settings = await getApplicationSettings(client, data.guildId);
             if (!settings.enabled) {
-                throw createFehler(
+                throw createError(
                     'Applications are disabled',
-                    FehlerTypes.CONFIGURATION,
+                    ErrorTypes.CONFIGURATION,
                     'Applications are currently disabled in this server.',
                     { guildId: data.guildId }
                 );
@@ -139,9 +139,9 @@ class ApplicationService {
             const pendingApp = userApps.find(app => app.status === 'pending');
 
             if (pendingApp) {
-                throw createFehler(
+                throw createError(
                     'User already has pending application',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'You already have a pending application. Please wait for it to be reviewed.',
                     { userId: data.userId, pendingAppId: pendingApp.id }
                 );
@@ -167,7 +167,7 @@ class ApplicationService {
 
             return application;
         } catch (error) {
-            logger.error('Fehler submitting application', {
+            logger.error('Error submitting application', {
                 error: error.message,
                 userId: data.userId,
                 guildId: data.guildId,
@@ -182,9 +182,9 @@ class ApplicationService {
             const { action, reason, reviewerId } = reviewData;
 
             if (!['approve', 'deny'].includes(action)) {
-                throw createFehler(
+                throw createError(
                     'Invalid review action',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'Review action must be either approve or deny.',
                     { action }
                 );
@@ -192,18 +192,18 @@ class ApplicationService {
 
             const application = await getApplication(client, guildId, applicationId);
             if (!application) {
-                throw createFehler(
+                throw createError(
                     'Application not found',
-                    FehlerTypes.CONFIGURATION,
+                    ErrorTypes.CONFIGURATION,
                     'The application you are trying to review does not exist.',
                     { applicationId, guildId }
                 );
             }
 
             if (application.status !== 'pending') {
-                throw createFehler(
+                throw createError(
                     'Application already processed',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'This application has already been reviewed.',
                     { applicationId, status: application.status }
                 );
@@ -229,7 +229,7 @@ class ApplicationService {
 
             return updatedApplication;
         } catch (error) {
-            logger.error('Fehler reviewing application', {
+            logger.error('Error reviewing application', {
                 error: error.message,
                 applicationId,
                 guildId,
@@ -251,37 +251,37 @@ class ApplicationService {
 
             return applications;
         } catch (error) {
-            logger.error('Fehler getting applications list', {
+            logger.error('Error getting applications list', {
                 error: error.message,
                 guildId,
                 filters,
                 stack: error.stack
             });
-            throw createFehler(
+            throw createError(
                 'Failed to retrieve applications',
-                FehlerTypes.DATABASE,
+                ErrorTypes.DATABASE,
                 'An error occurred while retrieving applications.',
                 { guildId, filters }
             );
         }
     }
 
-    static async updateEinstellungen(client, guildId, updates) {
+    static async updateSettings(client, guildId, updates) {
         try {
             
             if (updates.logChannelId && typeof updates.logChannelId !== 'string') {
-                throw createFehler(
+                throw createError(
                     'Invalid log channel ID',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'Invalid channel ID provided.',
                     { logChannelId: updates.logChannelId }
                 );
             }
 
             if (updates.managerRoles && !Array.isArray(updates.managerRoles)) {
-                throw createFehler(
+                throw createError(
                     'Invalid manager roles format',
-                    FehlerTypes.VALIDATION,
+                    ErrorTypes.VALIDATION,
                     'Manager roles must be an array.',
                     { managerRoles: updates.managerRoles }
                 );
@@ -289,9 +289,9 @@ class ApplicationService {
 
             if (updates.questions) {
                 if (!Array.isArray(updates.questions) || updates.questions.length === 0) {
-                    throw createFehler(
+                    throw createError(
                         'Invalid questions format',
-                        FehlerTypes.VALIDATION,
+                        ErrorTypes.VALIDATION,
                         'Questions must be a non-empty array.',
                         { questions: updates.questions }
                     );
@@ -302,17 +302,17 @@ class ApplicationService {
                 );
             }
 
-            await saveApplicationEinstellungen(client, guildId, updates);
-            const updatedEinstellungen = await getApplicationEinstellungen(client, guildId);
+            await saveApplicationSettings(client, guildId, updates);
+            const updatedSettings = await getApplicationSettings(client, guildId);
 
             logger.info('Application settings updated', {
                 guildId,
                 updates: Object.keys(updates)
             });
 
-            return updatedEinstellungen;
+            return updatedSettings;
         } catch (error) {
-            logger.error('Fehler updating application settings', {
+            logger.error('Error updating application settings', {
                 error: error.message,
                 guildId,
                 updates,
@@ -330,18 +330,18 @@ class ApplicationService {
 
             if (action === 'add') {
                 if (!roleId) {
-                    throw createFehler(
+                    throw createError(
                         'Missing role ID',
-                        FehlerTypes.VALIDATION,
+                        ErrorTypes.VALIDATION,
                         'You must specify a role to add.',
                         { action }
                     );
                 }
 
                 if (currentRoles.some(appRole => appRole.roleId === roleId)) {
-                    throw createFehler(
+                    throw createError(
                         'Role already configured',
-                        FehlerTypes.VALIDATION,
+                        ErrorTypes.VALIDATION,
                         'This role is already configured for applications.',
                         { roleId }
                     );
@@ -361,9 +361,9 @@ class ApplicationService {
                 });
             } else if (action === 'remove') {
                 if (!roleId) {
-                    throw createFehler(
+                    throw createError(
                         'Missing role ID',
-                        FehlerTypes.VALIDATION,
+                        ErrorTypes.VALIDATION,
                         'You must specify a role to remove.',
                         { action }
                     );
@@ -371,9 +371,9 @@ class ApplicationService {
 
                 const roleIndex = currentRoles.findIndex(appRole => appRole.roleId === roleId);
                 if (roleIndex === -1) {
-                    throw createFehler(
+                    throw createError(
                         'Role not configured',
-                        FehlerTypes.VALIDATION,
+                        ErrorTypes.VALIDATION,
                         'This role is not configured for applications.',
                         { roleId }
                     );
@@ -390,7 +390,7 @@ class ApplicationService {
 
             return currentRoles;
         } catch (error) {
-            logger.error('Fehler managing application roles', {
+            logger.error('Error managing application roles', {
                 error: error.message,
                 guildId,
                 data,
@@ -412,15 +412,15 @@ class ApplicationService {
 
             return applications;
         } catch (error) {
-            logger.error('Fehler getting user applications', {
+            logger.error('Error getting user applications', {
                 error: error.message,
                 guildId,
                 userId,
                 stack: error.stack
             });
-            throw createFehler(
+            throw createError(
                 'Failed to retrieve your applications',
-                FehlerTypes.DATABASE,
+                ErrorTypes.DATABASE,
                 'An error occurred while retrieving your applications.',
                 { guildId, userId }
             );
@@ -432,9 +432,9 @@ class ApplicationService {
             const application = await getApplication(client, guildId, applicationId);
 
             if (!application) {
-                throw createFehler(
+                throw createError(
                     'Application not found',
-                    FehlerTypes.CONFIGURATION,
+                    ErrorTypes.CONFIGURATION,
                     'The application you are looking for does not exist.',
                     { applicationId, guildId }
                 );
@@ -442,7 +442,7 @@ class ApplicationService {
 
             return application;
         } catch (error) {
-            logger.error('Fehler getting application', {
+            logger.error('Error getting application', {
                 error: error.message,
                 applicationId,
                 guildId,

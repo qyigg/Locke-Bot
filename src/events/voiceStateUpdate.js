@@ -49,7 +49,7 @@ export default {
             }
 
         } catch (error) {
-            logger.error(`Fehler in voiceStateUpdate for guild ${guildId}:`, error);
+            logger.error(`Error in voiceStateUpdate for guild ${guildId}:`, error);
         }
 
         async function handleVoiceJoin(client, state, config) {
@@ -233,8 +233,8 @@ userLimit: userLimit === 0 ? undefined : userLimit,
                     await member.send({
                         content: `❌ Failed to create your temporary voice channel. Please contact a server administrator.`
                     });
-                } catch (dmFehler) {
-                    logger.debug(`Unable to send temporary channel failure DM to user ${member.id}:`, dmFehler);
+                } catch (dmError) {
+                    logger.debug(`Unable to send temporary channel failure DM to user ${member.id}:`, dmError);
                 }
             }
         }
@@ -245,7 +245,7 @@ userLimit: userLimit === 0 ? undefined : userLimit,
 
                 await channel.delete('Temporary voice channel - empty');
 
-                logger.info(`Löschend temporary voice channel ${channel.name} (${channel.id}) in guild ${channel.guild.name}`);
+                logger.info(`Deleted temporary voice channel ${channel.name} (${channel.id}) in guild ${channel.guild.name}`);
 
             } catch (error) {
                 logger.error(`Failed to delete temporary channel ${channel.id}:`, error);

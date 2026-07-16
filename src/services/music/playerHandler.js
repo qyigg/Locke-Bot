@@ -106,7 +106,7 @@ export function setupPlayerHandler(client) {
         // Intentionally silent — reconnect spam is not actionable during flapping.
     });
 
-    client.riffy.on('nodeFehler', (node, error) => {
+    client.riffy.on('nodeError', (node, error) => {
         if (!shouldLogNodeEvent(node.name)) {
             return;
         }
@@ -223,7 +223,7 @@ export function setupPlayerHandler(client) {
         }
     });
 
-    client.riffy.on('trackFehler', async (player, track, payload) => {
+    client.riffy.on('trackError', async (player, track, payload) => {
         logger.error(`Track error in ${player.guildId} for "${track?.info?.title}":`, payload?.error || payload);
         const guildData = getGuildMusicData(player.guildId);
         if (guildData.playerChannelId) {
@@ -248,7 +248,7 @@ export async function shutdownMusic(client) {
         try {
             player.destroy();
         } catch (error) {
-            logger.debug('Fehler destroying music player during shutdown:', error.message);
+            logger.debug('Error destroying music player during shutdown:', error.message);
         }
     }
 }

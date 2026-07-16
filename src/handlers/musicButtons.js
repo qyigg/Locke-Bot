@@ -1,6 +1,6 @@
 import { MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
-import { handleInteractionFehler } from '../utils/errorHandler.js';
+import { handleInteractionError } from '../utils/errorHandler.js';
 import { getGuildMusicData } from '../services/music/playerStore.js';
 import {
     getPlayer,
@@ -13,7 +13,7 @@ import {
 import { canControlMusic, VOICE_CHANNEL_DENIAL } from '../services/music/permissions.js';
 import { refreshPlayerMessage } from '../services/music/playerHandler.js';
 import { MUSIC_BUTTON_IDS } from '../services/music/musicEmbeds.js';
-import { replyUserFehler, FehlerTypes } from '../utils/errorHandler.js';
+import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
 
 async function handleMusicButton(interaction, client) {
     const player = getPlayer(client, interaction.guild.id);
@@ -22,10 +22,10 @@ async function handleMusicButton(interaction, client) {
 
     if (customId === MUSIC_BUTTON_IDS.QUEUE) {
         if (!player?.current) {
-            return replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'Nothing is playing right now.' });
+            return replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Nothing is playing right now.' });
         }
         if (!canControlMusic(interaction.member, player)) {
-            return replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
+            return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
         }
         guildData.queuePages.set(interaction.user.id, 0);
         const payload = buildQueueReply(client, interaction.guild.id, 0);
@@ -45,10 +45,10 @@ async function handleMusicButton(interaction, client) {
 
     if (queuePaginationIds.includes(customId)) {
         if (!player?.current) {
-            return replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'Nothing is playing right now.' });
+            return replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Nothing is playing right now.' });
         }
         if (!canControlMusic(interaction.member, player)) {
-            return replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
+            return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
         }
 
         await interaction.deferUpdate();
@@ -82,11 +82,11 @@ async function handleMusicButton(interaction, client) {
     }
 
     if (!player) {
-        return replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'No music is playing. Use `/play` first.' });
+        return replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'No music is playing. Use `/play` first.' });
     }
 
     if (!canControlMusic(interaction.member, player)) {
-        return replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
+        return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
     }
 
     await interaction.deferUpdate();
@@ -137,7 +137,7 @@ async function handleMusicButton(interaction, client) {
                 break;
         }
     } catch (error) {
-        await handleInteractionFehler(interaction, error, {
+        await handleInteractionError(interaction, error, {
             type: 'button',
             customId: interaction.customId,
             handler: 'music',
@@ -149,11 +149,11 @@ export const musicButtonHandler = {
     async execute(interaction, client) {
         try {
             if (!client.riffy) {
-                return replyUserFehler(interaction, { type: FehlerTypes.CONFIGURATION, message: 'Music is unavailable — Lavalink is not configured.' });
+                return replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: 'Music is unavailable — Lavalink is not configured.' });
             }
             await handleMusicButton(interaction, client);
         } catch (error) {
-            await handleInteractionFehler(interaction, error, { handler: 'musicButton' });
+            await handleInteractionError(interaction, error, { handler: 'musicButton' });
         }
     },
 };
