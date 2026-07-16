@@ -1,5 +1,3 @@
-// errorRegistry.js
-
 const ErrorCodes = Object.freeze({
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
@@ -22,77 +20,77 @@ const ErrorCodeRegistry = Object.freeze({
   [ErrorCodes.VALIDATION_FAILED]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Validate command inputs before processing and return field-specific guidance.'
+    remediation: 'Prüfe die Befehls-Eingaben vor der Verarbeitung und gib feldspezifische Hinweise zurück.'
   },
   [ErrorCodes.PERMISSION_DENIED]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Review bot/user role permissions and required Discord permissions for this command.'
+    remediation: 'Überprüfe die Rollen- und Berechtigungen von Bot und Benutzer sowie die benötigten Discord-Berechtigungen für diesen Befehl.'
   },
   [ErrorCodes.CONFIGURATION_ERROR]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Check required environment variables and guild feature configuration.'
+    remediation: 'Prüfe die erforderlichen Umgebungsvariablen und die Guild-Funktionskonfiguration.'
   },
   [ErrorCodes.DATABASE_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Check Postgres connectivity, pool saturation, statement timeouts, and recent migrations.'
+    remediation: 'Prüfe die Postgres-Verbindung, Pool-Auslastung, Statement-Timeouts und kürzliche Migrationen.'
   },
   [ErrorCodes.NETWORK_ERROR]: {
     severity: 'medium',
     retryable: true,
-    remediation: 'Check network reachability, upstream service status, and retry/backoff behavior.'
+    remediation: 'Prüfe die Netzwerkerreichbarkeit, den Status des Upstream-Dienstes und das Retry-/Backoff-Verhalten.'
   },
   [ErrorCodes.DISCORD_API_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Check Discord API status, rate-limit response patterns, and bot token validity.'
+    remediation: 'Prüfe den Status der Discord-API, Rate-Limit-Antworten und die Gültigkeit des Bot-Tokens.'
   },
   [ErrorCodes.USER_INPUT_ERROR]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Validate user-provided IDs/mentions and return clearer input examples.'
+    remediation: 'Prüfe vom Nutzer eingegebene IDs/Mentions und gib klarere Eingabe-Beispiele zurück.'
   },
   [ErrorCodes.RATE_LIMITED]: {
     severity: 'low',
     retryable: true,
-    remediation: 'Apply cooldown-aware retries and reduce bursty command execution.'
+    remediation: 'Nutze cooldown-bewusste Retries und reduziere burstartige Befehlsausführung.'
   },
   [ErrorCodes.INTERACTION_INVALID]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Ensure interaction object is available and valid before replying.'
+    remediation: 'Stelle sicher, dass das Interaction-Objekt vor dem Antworten verfügbar und gültig ist.'
   },
   [ErrorCodes.INTERACTION_EXPIRED]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Defer or reply to interactions earlier to avoid 15-minute expiry windows.'
+    remediation: 'Defer oder antworte auf Interactions früher, um das 15-Minuten-Ablauf-Fenster zu vermeiden.'
   },
   [ErrorCodes.INTERACTION_RESPONSE_FAILED]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Check interaction acknowledgement state and Discord response error codes.'
+    remediation: 'Prüfe den Acknowledgement-Status der Interaction und die Discord-Antwortfehlercodes.'
   },
   [ErrorCodes.INTERACTION_UNHANDLED]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Add a handler for this interaction type or register the missing button/modal/select handler.'
+    remediation: 'Füge einen Handler für diesen Interaction-Typ hinzu oder registriere den fehlenden Button-/Modal-/Select-Handler.'
   },
   [ErrorCodes.TASK_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Inspect the named background task for thrown errors or unawaited promises.'
+    remediation: 'Untersuche den benannten Hintergrundtask auf geworfene Fehler oder nicht wartete Promises.'
   },
   [ErrorCodes.UNHANDLED_REJECTION]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Find the promise that rejected without a catch handler and route it through runSafeTask or an explicit catch.'
+    remediation: 'Finde das Promise, das ohne Catch-Handler abgelehnt wurde, und leite es über runSafeTask oder einen expliziten Catch weiter.'
   },
   [ErrorCodes.UNKNOWN_ERROR]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Capture trace context and stack, then classify this failure under a specific error code.'
+    remediation: 'Erfasse Trace-Kontext und Stack und ordne diesen Fehler einem konkreten Fehlercode zu.'
   }
 });
 
