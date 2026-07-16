@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { evaluateMathExpression } from '../../utils/safeMathParser.js';
 
@@ -26,12 +26,12 @@ export default {
                 .setDescription(
                     "The mathematical expression to evaluate (e.g., 2+2*3, sin(45 deg), 16^0.5)",
                 )
-                .setRequired(true),
+                .setErforderlich(true),
         ),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Calculate interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -45,8 +45,8 @@ export default {
         if (
             !/^[0-9+\-*/.()^%! ,<>=&|~?:\[\]{}a-z√π∞°]+$/i.test(expression)
         ) {
-            return await replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return await replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: '**Contains unsupported characters.**\n\n' +
                     '✅ Supported: Numbers, decimals, + - * / ^ %, sin cos tan sqrt abs log exp, pi e, ()\n' +
                     '❌ Not supported: Brackets, curly braces, and other symbols'
@@ -64,8 +64,8 @@ export default {
 
         for (const pattern of dangerousPatterns) {
             if (pattern.test(expression)) {
-                return await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+                return await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: '**Contains blocked code patterns.**\n\n' +
                         '🚫 **Blocked:** import, require, eval, Function, setTimeout, setInterval, process, fs, document, window, fetch, loops, async/await\n\n' +
                         'Code-like syntax is not allowed in calculations.'
@@ -247,8 +247,8 @@ export default {
                                 },
                             ],
                         });
-                    } catch (modalError) {
-                        logger.error("Failed to show modal:", modalError);
+                    } catch (modalFehler) {
+                        logger.error("Failed to show modal:", modalFehler);
                         if (!i.replied && !i.deferred) {
                             await i.reply({
                                 content: "Failed to open calculator. Please try again.",
@@ -326,8 +326,8 @@ export default {
                 errorMessage += 'Please check the syntax and try again.';
             }
 
-            await replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            await replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: errorMessage,
             });
         }

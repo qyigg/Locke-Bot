@@ -18,7 +18,7 @@ export default {
                 .setDescription("Number of minutes to count down (0-1440)")
                 .setMinValue(0)
                 .setMaxValue(1440)
-                .setRequired(false),
+                .setErforderlich(false),
         )
         .addIntegerOption((option) =>
             option
@@ -26,18 +26,18 @@ export default {
                 .setDescription("Number of seconds to count down (0-59)")
                 .setMinValue(0)
                 .setMaxValue(59)
-                .setRequired(false),
+                .setErforderlich(false),
         )
         .addStringOption((option) =>
             option
                 .setName("title")
                 .setDescription("Optional title for the countdown")
-                .setRequired(false),
+                .setErforderlich(false),
         ),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Countdown interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -53,11 +53,11 @@ export default {
         const totalSeconds = minutes * 60 + seconds;
 
         if (totalSeconds <= 0) {
-            throw new Error("Please specify a duration of at least 1 second.");
+            throw new Fehler("Please specify a duration of at least 1 second.");
         }
 
         if (totalSeconds > 86400) {
-            throw new Error("Countdown cannot be longer than 24 hours.");
+            throw new Fehler("Countdown cannot be longer than 24 hours.");
         }
 
         const endTime = Date.now() + totalSeconds * 1000;

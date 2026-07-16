@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { getGuildGiveaways, deleteGiveaway } from '../../utils/giveaways.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 
@@ -10,30 +10,30 @@ export default {
     data: new SlashCommandBuilder()
         .setName("gdelete")
         .setDescription(
-            "Deletes a giveaway message and removes it from the database.",
+            "Löschens a giveaway message and removes it from the database.",
         )
         .addStringOption((option) =>
             option
                 .setName("messageid")
                 .setDescription("The message ID of the giveaway to delete.")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
         if (!interaction.inGuild()) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Giveaway command used outside guild',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'This command can only be used in a server.',
                 { userId: interaction.user.id }
             );
         }
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'User lacks ManageGuild permission',
-                ErrorTypes.PERMISSION,
+                FehlerTypes.PERMISSION,
                 "You need the 'Manage Server' permission to delete a giveaway.",
                 { userId: interaction.user.id, guildId: interaction.guildId }
             );
@@ -44,9 +44,9 @@ export default {
         const messageId = interaction.options.getString("messageid");
 
         if (!messageId || !/^\d+$/.test(messageId)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Invalid message ID format',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Please provide a valid message ID.',
                 { providedId: messageId }
             );
@@ -56,9 +56,9 @@ export default {
         const giveaway = giveaways.find(g => g.messageId === messageId);
 
         if (!giveaway) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway not found: ${messageId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "No giveaway was found with that message ID.",
                 { messageId, guildId: interaction.guildId }
             );
@@ -67,7 +67,7 @@ export default {
         let deletedMessage = false;
         let channelName = "Unknown Channel";
 
-        const tryDeleteFromChannel = async (channel) => {
+        const tryLöschenFromChannel = async (channel) => {
             if (!channel || !channel.isTextBased() || !channel.messages?.fetch) {
                 return false;
             }
@@ -85,8 +85,8 @@ export default {
 
         try {
             const channel = await interaction.client.channels.fetch(giveaway.channelId).catch(() => null);
-            if (await tryDeleteFromChannel(channel)) {
-                logger.debug(`Deleted giveaway message ${messageId} from channel ${channelName}`);
+            if (await tryLöschenFromChannel(channel)) {
+                logger.debug(`Löschend giveaway message ${messageId} from channel ${channelName}`);
             }
 
             if (!deletedMessage && interaction.guild) {
@@ -95,9 +95,9 @@ export default {
                 );
 
                 for (const [, guildChannel] of textChannels) {
-                    const foundAndDeleted = await tryDeleteFromChannel(guildChannel).catch(() => false);
-                    if (foundAndDeleted) {
-                        logger.debug(`Deleted giveaway message ${messageId} via fallback lookup in #${channelName}`);
+                    const foundAndLöschend = await tryLöschenFromChannel(guildChannel).catch(() => false);
+                    if (foundAndLöschend) {
+                        logger.debug(`Löschend giveaway message ${messageId} via fallback lookup in #${channelName}`);
                         break;
                     }
                 }
@@ -113,21 +113,21 @@ export default {
         );
 
         if (!removedFromDatabase) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Failed to delete giveaway from database: ${messageId}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'The giveaway could not be removed from the database. Please try again.',
                 { messageId, guildId: interaction.guildId }
             );
         }
 
-        const giveawaysAfterDelete = await getGuildGiveaways(interaction.client, interaction.guildId);
-        const stillExistsInDatabase = giveawaysAfterDelete.some(g => g.messageId === messageId);
+        const giveawaysAfterLöschen = await getGuildGiveaways(interaction.client, interaction.guildId);
+        const stillExistsInDatabase = giveawaysAfterLöschen.some(g => g.messageId === messageId);
 
         if (stillExistsInDatabase) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway still exists after deletion: ${messageId}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Deletion did not persist in the database. Please try again.',
                 { messageId, guildId: interaction.guildId }
             );
@@ -172,15 +172,15 @@ export default {
                     ]
                 }
             });
-        } catch (logError) {
-            logger.debug('Error logging giveaway deletion:', logError);
+        } catch (logFehler) {
+            logger.debug('Fehler logging giveaway deletion:', logFehler);
         }
 
         return InteractionHelper.safeReply(interaction, {
             embeds: [
                 successEmbed(
-                    "Giveaway Deleted",
-                    `Successfully deleted the giveaway for **${giveaway.prize}** ${statusMsg}. ${winnerStatusMsg}`,
+                    "Giveaway Löschend",
+                    `Erfolgfully deleted the giveaway for **${giveaway.prize}** ${statusMsg}. ${winnerStatusMsg}`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,

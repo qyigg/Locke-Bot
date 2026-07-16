@@ -20,7 +20,7 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
 import { getWelcomeConfig, saveWelcomeConfig } from '../../../utils/database.js';
 import { botHasPermission } from '../../../utils/permissionGuard.js';
 
@@ -117,23 +117,23 @@ function buildSelectMenu(guildId) {
 }
 
 function buildButtonRow(cfg, guildId, disabled = false) {
-    const welcomeOn = cfg.enabled === true;
-    const goodbyeOn = cfg.goodbyeAktiviert === true;
-    const welcomePingOn = cfg.welcomePing === true;
-    const goodbyePingOn = cfg.goodbyePing === true;
+    const welcomeAn = cfg.enabled === true;
+    const goodbyeAn = cfg.goodbyeAktiviert === true;
+    const welcomePingAn = cfg.welcomePing === true;
+    const goodbyePingAn = cfg.goodbyePing === true;
     
     return [
         new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_toggle_welcome_${guildId}`)
                 .setLabel('Welcome')
-                .setStyle(welcomeOn ? ButtonStyle.Success : ButtonStyle.Danger)
+                .setStyle(welcomeAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
                 .setEmoji('🟢')
                 .setDeaktiviert(disabled),
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_toggle_goodbye_${guildId}`)
                 .setLabel('Goodbye')
-                .setStyle(goodbyeOn ? ButtonStyle.Success : ButtonStyle.Danger)
+                .setStyle(goodbyeAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
                 .setEmoji('🔴')
                 .setDeaktiviert(disabled),
         ),
@@ -141,13 +141,13 @@ function buildButtonRow(cfg, guildId, disabled = false) {
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_ping_welcome_${guildId}`)
                 .setLabel('Welcome pingen')
-                .setStyle(welcomePingOn ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                .setStyle(welcomePingAn ? ButtonStyle.Primary : ButtonStyle.Secondary)
                 .setEmoji('🔔')
                 .setDeaktiviert(disabled),
             new ButtonBuilder()
                 .setCustomId(`greet_cfg_ping_goodbye_${guildId}`)
                 .setLabel('Goodbye pingen')
-                .setStyle(goodbyePingOn ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                .setStyle(goodbyePingAn ? ButtonStyle.Primary : ButtonStyle.Secondary)
                 .setEmoji('🔔')
                 .setDeaktiviert(disabled),
         ),
@@ -170,16 +170,16 @@ async function refreshDashboard(rootInteraction, cfg, guildId) {
 }
 
 export default {
-    prefixOnly: false,
+    prefixAnly: false,
     async execute(interaction, config, client) {
         try {
             const guildId = interaction.guild.id;
             const cfg = await getWelcomeConfig(client, guildId);
 
             if (!cfg.channelId && !cfg.goodbyeChannelId) {
-                throw new TitanBotError(
+                throw new TitanBotFehler(
                     'Greet system not configured',
-                    ErrorTypes.CONFIGURATION,
+                    FehlerTypes.CONFIGURATION,
                     'Weder Welcome noch Goodbye wurden bisher eingerichtet. Führe zuerst `/welcome setup` oder `/goodbye setup` aus.',
                 );
             }
@@ -230,14 +230,14 @@ export default {
                             break;
                     }
                 } catch (error) {
-                    if (error instanceof TitanBotError) {
+                    if (error instanceof TitanBotFehler) {
                         logger.debug(`Greet-Konfigurations-Validierungsfehler: ${error.message}`);
                     } else {
                         logger.error('Unerwarteter Greet-Dashboard-Fehler:', error);
                     }
 
                     const errorMessage =
-                        error instanceof TitanBotError
+                        error instanceof TitanBotFehler
                             ? error.userMessage || 'Beim Verarbeiten deiner Auswahl ist ein Fehler aufgetreten.'
                             : 'Beim Aktualisieren der Konfiguration ist ein unerwarteter Fehler aufgetreten.';
 
@@ -245,8 +245,8 @@ export default {
                         await selectInteraction.deferUpdate().catch(() => {});
                     }
 
-                    await replyUserError(selectInteraction, {
-                        type: ErrorTypes.CONFIGURATION,
+                    await replyUserFehler(selectInteraction, {
+                        type: FehlerTypes.CONFIGURATION,
                         message: errorMessage,
                     }).catch(() => {});
                 }
@@ -342,11 +342,11 @@ export default {
                 }
             });
         } catch (error) {
-            if (error instanceof TitanBotError) throw error;
+            if (error instanceof TitanBotFehler) throw error;
             logger.error('Unerwarteter Fehler in greet_dashboard:', error);
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Greet dashboard failed: ${error.message}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Das Greet-Dashboard konnte nicht geöffnet werden.',
             );
         }
@@ -391,8 +391,8 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
         const channel = chanInteraction.channels.first();
 
         if (!botHasPermission(channel, ['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
-            await replyUserError(chanInteraction, {
-                type: ErrorTypes.PERMISSION,
+            await replyUserFehler(chanInteraction, {
+                type: FehlerTypes.PERMISSION,
                 message: `Ich benötige **Kanal anzeigen**, **Nachrichten senden** und **Links einbetten** in ${channel}.`,
             });
             return;
@@ -410,8 +410,8 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
 
     chanCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde kein Kanal ausgewählt. Die Einstellung wurde nicht geändert.',
             }).catch(() => {});
         }
@@ -431,7 +431,7 @@ async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, gui
                     .setValue(cfg.welcomeMessage || 'Willkommen {user} auf {server}!')
                     .setMaxLength(2000)
                     .setMinLength(1)
-                    .setRequired(true),
+                    .setErforderlich(true),
             ),
         );
 
@@ -442,7 +442,7 @@ async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, gui
     }
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'greet_cfg_welcome_message' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -478,7 +478,7 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
                 .setPlaceholder('https://example.com/welcome.png')
                 .setStyle(TextInputStyle.Short)
                 .setValue(cfg.welcomeImage || '')
-                .setRequired(false),
+                .setErforderlich(false),
         );
 
     const uploadLabel = new LabelBuilder()
@@ -486,7 +486,7 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
         .setFileUploadComponent(
             new FileUploadBuilder()
                 .setCustomId('image_upload')
-                .setRequired(false),
+                .setErforderlich(false),
         );
 
     modal
@@ -500,7 +500,7 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
     }
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'greet_cfg_welcome_image' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -516,11 +516,11 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
         try {
             new URL(imageUrl);
             if (!['http:', 'https:'].includes(new URL(imageUrl).protocol)) {
-                await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Die Bild-URL muss mit `http://` oder `https://` beginnen.' });
+                await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Die Bild-URL muss mit `http://` oder `https://` beginnen.' });
                 return;
             }
         } catch {
-            await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an.' });
+            await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an.' });
             return;
         }
     }
@@ -594,8 +594,8 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
         const channel = chanInteraction.channels.first();
 
         if (!botHasPermission(channel, ['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
-            await replyUserError(chanInteraction, {
-                type: ErrorTypes.PERMISSION,
+            await replyUserFehler(chanInteraction, {
+                type: FehlerTypes.PERMISSION,
                 message: `Ich benötige **Kanal anzeigen**, **Nachrichten senden** und **Links einbetten** in ${channel}.`,
             });
             return;
@@ -613,8 +613,8 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
 
     chanCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde kein Kanal ausgewählt. Die Einstellung wurde nicht geändert.',
             }).catch(() => {});
         }
@@ -634,7 +634,7 @@ async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, gui
                     .setValue(cfg.leaveMessage || '{user.tag} hat den Server verlassen.')
                     .setMaxLength(2000)
                     .setMinLength(1)
-                    .setRequired(true),
+                    .setErforderlich(true),
             ),
         );
 
@@ -645,7 +645,7 @@ async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, gui
     }
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'greet_cfg_goodbye_message' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -685,7 +685,7 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
                         ? cfg.leaveEmbed.image
                         : cfg.leaveEmbed?.image?.url || ''
                 )
-                .setRequired(false),
+                .setErforderlich(false),
         );
 
     const uploadLabel = new LabelBuilder()
@@ -693,7 +693,7 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
         .setFileUploadComponent(
             new FileUploadBuilder()
                 .setCustomId('image_upload')
-                .setRequired(false),
+                .setErforderlich(false),
         );
 
     modal
@@ -707,7 +707,7 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
     }
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'greet_cfg_goodbye_image' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -723,11 +723,11 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
         try {
             new URL(imageUrl);
             if (!['http:', 'https:'].includes(new URL(imageUrl).protocol)) {
-                await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Die Bild-URL muss mit `http://` oder `https://` beginnen.' });
+                await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Die Bild-URL muss mit `http://` oder `https://` beginnen.' });
                 return;
             }
         } catch {
-            await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an.' });
+            await replyUserFehler(submitted, { type: FehlerTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an.' });
             return;
         }
     }

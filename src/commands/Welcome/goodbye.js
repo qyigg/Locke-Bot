@@ -4,7 +4,7 @@ import { getWelcomeConfig, updateWelcomeConfig } from '../../utils/database.js';
 import { formatWelcomeMessage, truncateForEmbedField } from '../../utils/welcome.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
+import { FehlerTypes, replyUserFehler } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -19,23 +19,23 @@ export default {
                     option.setName('channel')
                         .setDescription('Der Kanal, in den Abschiedsnachrichten gesendet werden')
                         .addChannelTypes(ChannelType.GuildText)
-                        .setRequired(true))
+                        .setErforderlich(true))
                 .addStringOption(option =>
                     option.setName('message')
                         .setDescription('Abschiedsnachricht. Variablen: {user}, {username}, {server}, {memberCount}')
-                        .setRequired(true))
+                        .setErforderlich(true))
                 .addStringOption(option =>
                     option.setName('image')
                         .setDescription('URL des Bildes, das in die Abschiedsnachricht eingefügt wird')
-                        .setRequired(false))
+                        .setErforderlich(false))
                 .addBooleanOption(option =>
                     option.setName('ping')
                         .setDescription('Ob der Benutzer in der Abschiedsnachricht erwähnt werden soll')
-                        .setRequired(false))),
+                        .setErforderlich(false))),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Goodbye-Interaction defer fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -47,7 +47,7 @@ export default {
         const { options, guild, client } = interaction;
 
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um `/goodbye` zu verwenden.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um `/goodbye` zu verwenden.' });
         }
 
         const subcommand = options.getSubcommand();
@@ -61,12 +61,12 @@ export default {
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.goodbyeChannelId) {
                 logger.info(`[Goodbye] Einrichtung blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.goodbyeChannelId} für Guild ${guild.id} existiert`);
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Goodbye ist bereits für <#${existingConfig.goodbyeChannelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Goodbye ist bereits für <#${existingConfig.goodbyeChannelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
             }
 
             if (!message || message.trim().length === 0) {
                 logger.warn(`[Goodbye] Leere Nachricht von ${interaction.user.tag} in ${guild.name} angegeben`);
-                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Die Abschiedsnachricht darf nicht leer sein' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Die Abschiedsnachricht darf nicht leer sein' });
             }
 
             if (image) {
@@ -74,7 +74,7 @@ export default {
                     new URL(image);
                 } catch (e) {
                     logger.warn(`[Goodbye] Ungültige Bild-URL von ${interaction.user.tag} angegeben: ${image}`);
-                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an (muss mit http:// oder https:// beginnen)' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an (muss mit http:// oder https:// beginnen)' });
                 }
             }
 
@@ -118,7 +118,7 @@ export default {
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             } catch (error) {
                 logger.error(`[Goodbye] Fehler beim Einrichten des Abschiedssystems für Guild ${guild.id}:`, error);
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Beim Konfigurieren des Abschiedssystems ist ein Fehler aufgetreten. Bitte versuche es erneut.' });
+                await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Beim Konfigurieren des Abschiedssystems ist ein Fehler aufgetreten. Bitte versuche es erneut.' });
             }
         }
     },

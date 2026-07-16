@@ -41,7 +41,7 @@ export function initializeMusic(client) {
         client.riffy.updateVoiceState(packet);
     });
 
-    client.riffy.on('playerError', (player, error) => {
+    client.riffy.on('playerFehler', (player, error) => {
         logger.error(`Music player error in guild ${player.guildId}:`, error);
     });
 

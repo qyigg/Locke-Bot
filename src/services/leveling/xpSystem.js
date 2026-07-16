@@ -30,15 +30,15 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
     levelData.totalXp += xpToAdd;
     levelData.lastMessage = Date.now();
 
-    let xpNeededForNextLevel = getXpForLevel(levelData.level);
+    let xpNeededForWeiterLevel = getXpForLevel(levelData.level);
     let didLevelUp = false;
     const initialLevel = levelData.level;
 
-    while (levelData.xp >= xpNeededForNextLevel && levelData.level < 1000) {
-      levelData.xp -= xpNeededForNextLevel;
+    while (levelData.xp >= xpNeededForWeiterLevel && levelData.level < 1000) {
+      levelData.xp -= xpNeededForWeiterLevel;
       levelData.level += 1;
       didLevelUp = true;
-      xpNeededForNextLevel = getXpForLevel(levelData.level);
+      xpNeededForWeiterLevel = getXpForLevel(levelData.level);
 
       logger.info(`🎉 ${member.user.tag} leveled up to level ${levelData.level} in ${guild.name}`);
 
@@ -68,8 +68,8 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
             userId: member.user.id,
           },
         });
-      } catch (logError) {
-        logger.debug('Failed to log leveling event:', logError.message);
+      } catch (logFehler) {
+        logger.debug('Failed to log leveling event:', logFehler.message);
       }
     }
 
@@ -103,7 +103,7 @@ async function awardRoleReward(guild, member, roleId, level) {
     }
 
     await member.roles.add(role, `Level ${level} reward`);
-    logger.info(`✅ Awarded role ${role.name} to ${member.user.tag} for reaching level ${level}`);
+    logger.info(`✅ Awarded role ${Rolle zu bekommen.name} to ${member.user.tag} for reaching level ${level}`);
   } catch (error) {
     logger.error(`Failed to award role reward to ${member.user.id}:`, error);
   }
@@ -135,6 +135,6 @@ async function sendLevelUpAnnouncement(guild, member, levelData, config) {
       logger.error(`Failed to send level up message in channel ${levelUpChannel.id}:`, error);
     });
   } catch (error) {
-    logger.error('Error sending level up announcement:', error);
+    logger.error('Fehler sending level up announcement:', error);
   }
 }

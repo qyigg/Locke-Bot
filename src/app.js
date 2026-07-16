@@ -12,8 +12,8 @@ import { logger, startupLog, shutdownLog } from './utils/logger.js';
 import { checkBirthdays } from './services/birthdayService.js';
 import { checkGiveaways } from './services/giveawayService.js';
 import { loadCommands, registerCommands as registerSlashCommands } from './handlers/loaders/commandLoader.js';
-import { runSafeTask, handleTaskError, ErrorCodes } from './utils/errorHandler.js';
-import { initializeMusic } from './services/music/riffySetup.js';
+import { runSafeTask, handleTaskFehler, FehlerCodes } from './utils/errorHandler.js';
+import { initializeMusic } from './services/music/riffyEinrichtung.js';
 import { shutdownMusic } from './services/music/playerHandler.js';
 import pkg from '../package.json' with { type: 'json' };
 import { EXPECTED_SCHEMA_VERSION, EXPECTED_SCHEMA_LABEL } from './config/database/schemaVersion.js';
@@ -66,7 +66,7 @@ class TitanBot extends Client {
         logger.warn('║                                                       ║');
         logger.warn('║ Connection: In-Memory Storage (PostgreSQL unavailable)║');
         logger.warn('║ Data Persistence: DISABLED - data lost on restart    ║');
-        logger.warn('║ Action Required: Fix PostgreSQL and restart bot      ║');
+        logger.warn('║ Action Erforderlich: Fix PostgreSQL and restart bot      ║');
         logger.warn('╚═══════════════════════════════════════════════════════╝');
         logger.warn('');
       } else {
@@ -204,7 +204,7 @@ class TitanBot extends Client {
 
     app.get('/', (req, res) => {
       res.status(200).json({ 
-        message: 'TitanBot System Online',
+        message: 'TitanBot System Anline',
         version: pkg.version,
         timestamp: new Date().toISOString()
       });
@@ -278,14 +278,14 @@ class TitanBot extends Client {
           }
         }
         
-        // Save cleaned counters if any were orphaned
-        // Save cleaned counters if any were orphaned
+        // Speichern cleaned counters if any were orphaned
+        // Speichern cleaned counters if any were orphaned
         if (orphanedCounters.length > 0) {
           await saveServerCounters(this, guildId, validCounters);
           logger.info(`Cleaned up ${orphanedCounters.length} orphaned counter(s) from guild ${guildId} during scheduled update`);
         }
       } catch (error) {
-        logger.error(`Error updating counters for guild ${guildId}:`, error);
+        logger.error(`Fehler updating counters for guild ${guildId}:`, error);
       }
     }
   }
@@ -309,7 +309,7 @@ class TitanBot extends Client {
           await loaderFn(this);
           startupLog(`✅ Loaded ${handler.path}`);
         } else {
-          throw new Error(`Invalid loader export from ${handler.path}`);
+          throw new Fehler(`Invalid loader export from ${handler.path}`);
         }
       } catch (error) {
         if (handler.required) {
@@ -326,7 +326,7 @@ class TitanBot extends Client {
     try {
       await registerSlashCommands(this, { clientId: this.config.bot.clientId });
     } catch (error) {
-      logger.error('Error registering commands:', error);
+      logger.error('Fehler registering commands:', error);
     }
   }
 
@@ -352,8 +352,8 @@ class TitanBot extends Client {
         logger.info('✅ Web server closed');
       }
 
-      // Close database connection
-      // Close database connection
+      // Schließen database connection
+      // Schließen database connection
       if (this.db && this.db.db) {
         logger.info('Closing database connection...');
         try {
@@ -362,7 +362,7 @@ class TitanBot extends Client {
             logger.info('✅ Database connection closed');
           }
         } catch (error) {
-          logger.warn('Error closing database pool:', error.message);
+          logger.warn('Fehler closing database pool:', error.message);
         }
       }
 
@@ -381,7 +381,7 @@ class TitanBot extends Client {
   shutdownLog('Bot stopped successfully.');
       process.exit(0);
     } catch (error) {
-      logger.error('Error during graceful shutdown:', error);
+      logger.error('Fehler during graceful shutdown:', error);
       process.exit(1);
     }
   }
@@ -396,7 +396,7 @@ try {
     
     process.on('uncaughtException', (error) => {
       // Process state may be corrupt after an uncaught throw; log and shut down cleanly.
-      handleTaskError('uncaught_exception', error, { fatal: true });
+      handleTaskFehler('uncaught_exception', error, { fatal: true });
       bot.shutdown('UNCAUGHT_EXCEPTION');
     });
 
@@ -412,8 +412,8 @@ try {
 
       // A stray rejection is a bug to fix, not a reason to take the bot down.
       // Log loudly with full context; the central task handler categorizes it.
-      handleTaskError('unhandled_rejection', reason instanceof Error ? reason : new Error(String(reason)), {
-        errorCode: ErrorCodes.UNHANDLED_REJECTION,
+      handleTaskFehler('unhandled_rejection', reason instanceof Fehler ? reason : new Fehler(String(reason)), {
+        errorCode: FehlerCodes.UNHANDLED_REJECTION,
       });
     });
   };

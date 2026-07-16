@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -12,7 +12,7 @@ export default {
             option
                 .setName("target")
                 .setDescription("The user to kick")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .addStringOption((option) =>
             option.setName("reason").setDescription("Reason for the kick"),
@@ -26,34 +26,34 @@ export default {
         const reason = interaction.options.getString("reason") || "No reason provided";
 
         if (!targetUser) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Missing target user',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'You must specify a user to kick.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (targetUser.id === interaction.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot kick self",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "You cannot kick yourself.",
             );
         }
 
         if (targetUser.id === client.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot kick bot",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "You cannot kick the bot.",
             );
         }
 
         if (!member) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Target not found",
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 "The target user is not currently in this server.",
                 { subtype: 'user_not_found' },
             );

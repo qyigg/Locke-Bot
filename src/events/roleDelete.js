@@ -4,28 +4,28 @@ import { logger } from '../utils/logger.js';
 import { buildRoleAuditLines } from '../utils/logging/logEmbeds.js';
 
 export default {
-  name: Events.GuildRoleDelete,
+  name: Events.GuildRoleLöschen,
   once: false,
 
   async execute(role) {
     try {
-      if (!role.guild) return;
+      if (!Rolle zu bekommen.guild) return;
 
       const lines = buildRoleAuditLines(role, { includeMemberCount: true });
 
       await logEvent({
-        client: role.client,
-        guildId: role.guild.id,
+        client: Rolle zu bekommen.client,
+        guildId: Rolle zu bekommen.guild.id,
         eventType: EVENT_TYPES.ROLE_DELETE,
         data: {
-          title: 'Role Deleted',
-          headline: `**${role.name}** was deleted`,
+          title: 'Role Löschend',
+          headline: `**${Rolle zu bekommen.name}** was deleted`,
           lines,
         },
       });
 
     } catch (error) {
-      logger.error('Error in roleDelete event:', error);
+      logger.error('Fehler in roleLöschen event:', error);
     }
   }
 };

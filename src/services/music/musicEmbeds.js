@@ -45,7 +45,7 @@ function getLoopLabel(loop) {
         case 'queue':
             return 'Queue';
         default:
-            return 'Off';
+            return 'Aus';
     }
 }
 
@@ -118,7 +118,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.RESUME)
             .setLabel('Resume')
-            .setStyle(ButtonStyle.Success)
+            .setStyle(ButtonStyle.Erfolg)
             .setEmoji('▶️')
             .setDeaktiviert(!paused),
         new ButtonBuilder()
@@ -134,7 +134,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.SHUFFLE)
             .setLabel('Shuffle')
-            .setStyle(guildData?.shuffle ? ButtonStyle.Success : ButtonStyle.Secondary)
+            .setStyle(guildData?.shuffle ? ButtonStyle.Erfolg : ButtonStyle.Secondary)
             .setEmoji('🔀'),
     );
 
@@ -142,7 +142,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.LOOP)
             .setLabel('Loop')
-            .setStyle(guildData?.loop !== 'none' ? ButtonStyle.Success : ButtonStyle.Secondary)
+            .setStyle(guildData?.loop !== 'none' ? ButtonStyle.Erfolg : ButtonStyle.Secondary)
             .setEmoji('🔁'),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.VOL_DOWN)

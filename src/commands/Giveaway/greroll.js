@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { getGuildGiveaways, saveGiveaway } from '../../utils/giveaways.js';
 import { 
     selectWinners,
@@ -19,24 +19,24 @@ export default {
             option
                 .setName("messageid")
                 .setDescription("The message ID of the ended giveaway.")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
         if (!interaction.inGuild()) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Giveaway command used outside guild',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'This command can only be used in a server.',
                 { userId: interaction.user.id }
             );
         }
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'User lacks ManageGuild permission',
-                ErrorTypes.PERMISSION,
+                FehlerTypes.PERMISSION,
                 "You need the 'Manage Server' permission to reroll a giveaway.",
                 { userId: interaction.user.id, guildId: interaction.guildId }
             );
@@ -47,9 +47,9 @@ export default {
         const messageId = interaction.options.getString("messageid");
 
         if (!messageId || !/^\d+$/.test(messageId)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Invalid message ID format',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Please provide a valid message ID.',
                 { providedId: messageId }
             );
@@ -63,18 +63,18 @@ export default {
         const giveaway = giveaways.find(g => g.messageId === messageId);
 
         if (!giveaway) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway not found: ${messageId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "No giveaway was found with that message ID in the database.",
                 { messageId, guildId: interaction.guildId }
             );
         }
 
         if (!giveaway.isEnded && !giveaway.ended) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway still active: ${messageId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "This giveaway is still active. Please use `/gend` to end it first.",
                 { messageId, status: 'active' }
             );
@@ -83,9 +83,9 @@ export default {
         const participants = giveaway.participants || [];
 
         if (participants.length < giveaway.winnerCount) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Insufficient participants for reroll: ${participants.length} < ${giveaway.winnerCount}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Not enough entries to pick the required number of winners.",
                 { participantsCount: participants.length, winnersNeeded: giveaway.winnerCount }
             );
@@ -194,8 +194,8 @@ export default {
                         ]
                     }
                 });
-            } catch (logError) {
-                logger.debug('Error logging giveaway reroll:', logError);
+            } catch (logFehler) {
+                logger.debug('Fehler logging giveaway reroll:', logFehler);
             }
 
             return InteractionHelper.safeReply(interaction, {
@@ -272,15 +272,15 @@ export default {
                     ]
                 }
             });
-        } catch (logError) {
-            logger.debug('Error logging giveaway reroll event:', logError);
+        } catch (logFehler) {
+            logger.debug('Fehler logging giveaway reroll event:', logFehler);
         }
 
         return InteractionHelper.safeReply(interaction, {
             embeds: [
                 successEmbed(
-                    "Reroll Successful ✅",
-                    `Successfully rerolled the giveaway for **${giveaway.prize}** in ${channel}. Selected ${newWinners.length} new winner(s).`,
+                    "Reroll Erfolgful ✅",
+                    `Erfolgfully rerolled the giveaway for **${giveaway.prize}** in ${channel}. Selected ${newWinners.length} new winner(s).`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,

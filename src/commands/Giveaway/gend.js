@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { getGuildGiveaways, saveGiveaway } from '../../utils/giveaways.js';
 import { 
     endGiveaway as endGiveawayService,
@@ -21,24 +21,24 @@ export default {
             option
                 .setName("messageid")
                 .setDescription("The message ID of the giveaway to end.")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
         if (!interaction.inGuild()) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Giveaway command used outside guild',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'This command can only be used in a server.',
                 { userId: interaction.user.id }
             );
         }
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'User lacks ManageGuild permission',
-                ErrorTypes.PERMISSION,
+                FehlerTypes.PERMISSION,
                 "You need the 'Manage Server' permission to end a giveaway.",
                 { userId: interaction.user.id, guildId: interaction.guildId }
             );
@@ -49,9 +49,9 @@ export default {
         const messageId = interaction.options.getString("messageid");
 
         if (!messageId || !/^\d+$/.test(messageId)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Invalid message ID format',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Please provide a valid message ID.',
                 { providedId: messageId }
             );
@@ -61,9 +61,9 @@ export default {
         const giveaway = giveaways.find(g => g.messageId === messageId);
 
         if (!giveaway) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway not found: ${messageId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "No giveaway was found with that message ID in the database.",
                 { messageId, guildId: interaction.guildId }
             );
@@ -87,9 +87,9 @@ export default {
         });
 
         if (!channel || !channel.isTextBased()) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Channel not found: ${updatedGiveaway.channelId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Could not find the channel where the giveaway was hosted. The giveaway state has been updated.",
                 { channelId: updatedGiveaway.channelId, messageId }
             );
@@ -103,9 +103,9 @@ export default {
             });
 
         if (!message) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Message not found: ${messageId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Could not find the giveaway message. The giveaway state has been updated.",
                 { messageId, channelId: updatedGiveaway.channelId }
             );
@@ -166,8 +166,8 @@ export default {
                         ]
                     }
                 });
-            } catch (logError) {
-                logger.debug('Error logging giveaway winner event:', logError);
+            } catch (logFehler) {
+                logger.debug('Fehler logging giveaway winner event:', logFehler);
             }
         } else {
             await channel.send({
@@ -182,7 +182,7 @@ export default {
             embeds: [
                 successEmbed(
                     "Giveaway Ended ✅",
-                    `Successfully ended the giveaway for **${updatedGiveaway.prize}** in ${channel}. Selected ${winners.length} winner(s) from ${endResult.participantCount} entries.`,
+                    `Erfolgfully ended the giveaway for **${updatedGiveaway.prize}** in ${channel}. Selected ${winners.length} winner(s) from ${endResult.participantCount} entries.`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,

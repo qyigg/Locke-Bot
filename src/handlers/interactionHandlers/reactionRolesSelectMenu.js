@@ -1,20 +1,20 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { handleInteractionFehler, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 import { getReactionRoleMessage } from '../../services/reactionRoleService.js';
 
 export async function handleReactionRolesSelectMenu(interaction, client) {
     try {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-        if (!deferSuccess) return;
+        const deferErfolg = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        if (!deferErfolg) return;
 
         if (!interaction.inGuild() || !interaction.guild || !interaction.member) {
-            throw createError(
+            throw createFehler(
                 'Reaction role interaction used outside a guild context',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'This reaction role menu can only be used inside a server.',
                 { userId: interaction.user.id }
             );
@@ -41,18 +41,18 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         const me = interaction.guild.members.me ?? await interaction.guild.members.fetchMe().catch(() => null);
 
         if (!me) {
-            throw createError(
+            throw createFehler(
                 'Unable to fetch bot member for permission validation',
-                ErrorTypes.PERMISSION,
+                FehlerTypes.PERMISSION,
                 'I could not verify my server permissions. Please try again.',
                 { guildId: interaction.guildId }
             );
         }
 
         if (!me.permissions.has('ManageRoles')) {
-            throw createError(
+            throw createFehler(
                 'Bot missing ManageRoles permission',
-                ErrorTypes.PERMISSION,
+                FehlerTypes.PERMISSION,
                 'I do not have permission to manage roles in this server.',
                 { guildId: interaction.guildId }
             );
@@ -81,7 +81,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
                 continue;
             }
 
-            const roleHasDangerousPermissions = role.permissions.has([
+            const roleHasDangerousPermissions = Rolle zu bekommen.permissions.has([
                 'Administrator',
                 'ManageGuild',
                 'ManageRoles',
@@ -92,26 +92,26 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
                 'MentionEveryone'
             ]);
 
-            if (role.managed || roleHasDangerousPermissions) {
-                logger.warn(`Blocked self-assignment for protected role ${role.name} (${roleId})`);
-                skippedRoles.push(role.name);
+            if (Rolle zu bekommen.managed || roleHasDangerousPermissions) {
+                logger.warn(`Blocked self-assignment for protected role ${Rolle zu bekommen.name} (${roleId})`);
+                skippedRoles.push(Rolle zu bekommen.name);
                 continue;
             }
 
-            if (role.position >= botRolePosition) {
-                logger.warn(`Cannot assign role ${role.name} (${roleId}), hierarchy issue`);
-                skippedRoles.push(role.name);
+            if (Rolle zu bekommen.position >= botRolePosition) {
+                logger.warn(`Cannot assign role ${Rolle zu bekommen.name} (${roleId}), hierarchy issue`);
+                skippedRoles.push(Rolle zu bekommen.name);
                 continue;
             }
 
             if (!member.roles.cache.has(roleId)) {
                 try {
                     await member.roles.add(role);
-                    addedRoles.push(role.name);
-                    logger.debug(`Added role ${role.name} to ${member.user.tag}`);
-                } catch (roleError) {
-                    logger.error(`Failed to add role ${role.name} to ${member.user.tag}:`, roleError);
-                    skippedRoles.push(role.name);
+                    addedRoles.push(Rolle zu bekommen.name);
+                    logger.debug(`Added role ${Rolle zu bekommen.name} to ${member.user.tag}`);
+                } catch (roleFehler) {
+                    logger.error(`Failed to add role ${Rolle zu bekommen.name} to ${member.user.tag}:`, roleFehler);
+                    skippedRoles.push(Rolle zu bekommen.name);
                 }
             }
         }
@@ -122,15 +122,15 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             const role = interaction.guild.roles.cache.get(roleId);
             if (!role) continue;
 
-            if (role.position >= botRolePosition) continue;
+            if (Rolle zu bekommen.position >= botRolePosition) continue;
 
             if (member.roles.cache.has(roleId)) {
                 try {
                     await member.roles.remove(role);
-                    removedRoles.push(role.name);
-                    logger.debug(`Removed role ${role.name} from ${member.user.tag}`);
-                } catch (roleError) {
-                    logger.error(`Failed to remove role ${role.name} from ${member.user.tag}:`, roleError);
+                    removedRoles.push(Rolle zu bekommen.name);
+                    logger.debug(`Removed role ${Rolle zu bekommen.name} from ${member.user.tag}`);
+                } catch (roleFehler) {
+                    logger.error(`Failed to remove role ${Rolle zu bekommen.name} from ${member.user.tag}:`, roleFehler);
                 }
             }
         }
@@ -189,15 +189,15 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
                         ]
                     }
                 });
-            } catch (logError) {
-                logger.warn('Failed to log reaction role update:', logError);
+            } catch (logFehler) {
+                logger.warn('Failed to log reaction role update:', logFehler);
             }
         }
 
         logger.info(`Reaction roles updated for ${member.user.tag}: +${addedRoles.length}, -${removedRoles.length}`);
 
     } catch (error) {
-        await handleInteractionError(interaction, error, {
+        await handleInteractionFehler(interaction, error, {
             type: 'select_menu',
             customId: 'reaction_roles'
         });

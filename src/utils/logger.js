@@ -14,7 +14,7 @@ function sanitizeCommandName(interaction) {
     return interaction.commandName;
   }
 
-  if (interaction?.isButton?.() || interaction?.isModalSubmit?.() || interaction?.isStringSelectMenu?.()) {
+  if (interaction?.isButton?.() || interaction?.isModalAbsenden?.() || interaction?.isStringSelectMenu?.()) {
     return interaction.customId || null;
   }
 
@@ -71,7 +71,7 @@ const resolvedLogLevel = validLogLevels.has(requestedLogLevel)
   ? requestedLogLevel
   : defaultLogLevel;
 
-const pendingInvalidLevelWarning = requestedLogLevel && !validLogLevels.has(requestedLogLevel)
+const pendingInvalidLevelWarnung = requestedLogLevel && !validLogLevels.has(requestedLogLevel)
   ? `[logger] Invalid LOG_LEVEL "${process.env.LOG_LEVEL}". Falling back to "${defaultLogLevel}".`
   : null;
 
@@ -107,7 +107,7 @@ const attachTraceContext = format((info) => {
   return info;
 });
 
-function deriveErrorCode(info) {
+function deriveFehlerCode(info) {
   if (info.errorCode) {
     return info.errorCode;
   }
@@ -150,7 +150,7 @@ const enforceLogSchema = format((info) => {
   info.userId = info.userId ?? LOG_SCHEMA_DEFAULTS.userId;
   info.command = info.command ?? LOG_SCHEMA_DEFAULTS.command;
   info.traceId = info.traceId ?? LOG_SCHEMA_DEFAULTS.traceId;
-  info.errorCode = deriveErrorCode(info);
+  info.errorCode = deriveFehlerCode(info);
   return info;
 });
 
@@ -225,8 +225,8 @@ logger.stream = {
   },
 };
 
-if (pendingInvalidLevelWarning) {
-  logger.warn(pendingInvalidLevelWarning);
+if (pendingInvalidLevelWarnung) {
+  logger.warn(pendingInvalidLevelWarnung);
 }
 
 function startupLog(message) {

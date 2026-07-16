@@ -204,7 +204,7 @@ async function handleLeveling(message, client) {
       const member = await message.guild.members.fetch(message.author.id).catch(() => {
         return null;
       });
-      if (member && member.roles.cache.some(role => levelingConfig.ignoredRoles.includes(role.id))) {
+      if (member && member.roles.cache.some(role => levelingConfig.ignoredRoles.includes(Rolle zu bekommen.id))) {
         return;
       }
     }

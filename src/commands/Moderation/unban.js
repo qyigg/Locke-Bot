@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
@@ -13,19 +13,19 @@ export default {
             option
                 .setName("target")
                 .setDescription("The ID (or mention) of the user to unban")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .addStringOption(option =>
             option.setName("reason")
                 .setDescription("Reason for the unban")
-                .setRequired(false),
+                .setErforderlich(false),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Unban interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -38,16 +38,16 @@ export default {
         const targetId = rawTarget.replace(/[<@!>]/g, '').trim();
 
         if (!/^\d{17,20}$/.test(targetId)) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.USER_INPUT,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.USER_INPUT,
                 message: 'Please provide a valid user ID or mention.',
             });
         }
 
         const targetUser = await client.users.fetch(targetId).catch(() => null);
         if (!targetUser) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.USER_INPUT,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.USER_INPUT,
                 message: `Could not find a user with the ID \`${targetId}\`.`,
             });
         }
@@ -65,7 +65,7 @@ export default {
             embeds: [
                 successEmbed(
                     "✅ User Unbanned",
-                    `Successfully unbanned **${targetUser.tag}** from the server.\n\n**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                    `Erfolgfully unbanned **${targetUser.tag}** from the server.\n\n**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
                 ),
             ],
         });

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const FISH_COOLDOWN = 45 * 60 * 1000; 
@@ -34,7 +34,7 @@ export default {
         .setName('fish')
         .setDescription('Go fishing to catch fish and earn money'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -53,9 +53,9 @@ export default {
                     (remaining % (1000 * 60 * 60)) / (1000 * 60),
                 );
 
-                throw createError(
+                throw createFehler(
                     "Fishing cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `You're too tired to fish right now. Rest for **${hours}h ${minutes}m** before fishing again.`,
                     { remaining, cooldownType: 'fish' }
                 );
@@ -109,7 +109,7 @@ export default {
             };
 
             const embed = createEmbed({
-                title: 'Fishing Success!',
+                title: 'Fishing Erfolg!',
                 description: `${catchMessage}\n\nYou caught a **${fishCaught.emoji} ${fishCaught.name}**! You sold it for **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
                 color: rarityColors[fishCaught.rarity]
             })
@@ -125,7 +125,7 @@ export default {
                         inline: true,
                     }
                 )
-                .setFooter({ text: `Next fishing trip available in 45 minutes.` });
+                .setFooter({ text: `Weiter fishing trip available in 45 minutes.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'fish' })

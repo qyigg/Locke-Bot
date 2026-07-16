@@ -4,7 +4,7 @@ import { getWelcomeConfig, updateWelcomeConfig } from '../../utils/database.js';
 import { formatWelcomeMessage, truncateForEmbedField } from '../../utils/welcome.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
+import { FehlerTypes, replyUserFehler } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -19,24 +19,24 @@ export default {
                     option.setName('channel')
                         .setDescription('Der Kanal, in den Willkommensnachrichten gesendet werden')
                         .addChannelTypes(ChannelType.GuildText)
-                        .setRequired(true))
+                        .setErforderlich(true))
                 .addStringOption(option =>
                     option.setName('message')
                         .setDescription('Willkommensnachricht. Variablen: {user}, {username}, {server}, {memberCount}')
-                        .setRequired(true))
+                        .setErforderlich(true))
                 .addStringOption(option =>
                     option.setName('image')
                         .setDescription('URL des Bildes, das in die Willkommensnachricht eingefügt wird')
-                        .setRequired(false))
+                        .setErforderlich(false))
                 .addBooleanOption(option =>
                     option.setName('ping')
                         .setDescription('Ob der Benutzer in der Willkommensnachricht erwähnt werden soll')
-                        .setRequired(false))),
+                        .setErforderlich(false))),
 
     async execute(interaction) {
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction);
-            if (!deferSuccess) {
+            const deferErfolg = await InteractionHelper.safeDefer(interaction);
+            if (!deferErfolg) {
                 logger.warn(`Welcome-Interaction defer fehlgeschlagen`, {
                     userId: interaction.user.id,
                     guildId: interaction.guildId,
@@ -44,15 +44,15 @@ export default {
                 });
                 return;
             }
-        } catch (deferError) {
-            logger.error(`Welcome-Defer-Fehler`, { error: deferError.message });
+        } catch (deferFehler) {
+            logger.error(`Welcome-Defer-Fehler`, { error: deferFehler.message });
             return;
         }
 
         const { options, guild, client } = interaction;
 
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um `/welcome` zu verwenden.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um `/welcome` zu verwenden.' });
         }
 
         const subcommand = options.getSubcommand();
@@ -66,12 +66,12 @@ export default {
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.channelId) {
                 logger.info(`[Welcome] Einrichtung blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.channelId} für Guild ${guild.id} existiert`);
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Welcome ist bereits für <#${existingConfig.channelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Welcome ist bereits für <#${existingConfig.channelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
             }
             
             if (!message || message.trim().length === 0) {
                 logger.warn(`[Welcome] Leere Nachricht von ${interaction.user.tag} in ${guild.name} angegeben`);
-                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Die Willkommensnachricht darf nicht leer sein' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Die Willkommensnachricht darf nicht leer sein' });
             }
 
             if (image) {
@@ -79,7 +79,7 @@ export default {
                     new URL(image);
                 } catch (e) {
                     logger.warn(`[Welcome] Ungültige Bild-URL von ${interaction.user.tag} angegeben: ${image}`);
-                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an (muss mit http:// oder https:// beginnen)' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an (muss mit http:// oder https:// beginnen)' });
                 }
             }
 
@@ -117,7 +117,7 @@ export default {
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             } catch (error) {
                 logger.error(`[Welcome] Fehler beim Einrichten des Willkommenssystems für Guild ${guild.id}:`, error);
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Beim Konfigurieren des Willkommenssystems ist ein Fehler aufgetreten. Bitte versuche es erneut.' });
+                await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Beim Konfigurieren des Willkommenssystems ist ein Fehler aufgetreten. Bitte versuche es erneut.' });
             }
         }
     },

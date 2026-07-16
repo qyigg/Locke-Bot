@@ -33,8 +33,8 @@ export default {
           embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Support-Informationen konnten nicht angezeigt werden.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
-      } catch (replyError) {
-        logger.error('Fehler beim Senden der Fehlermeldung:', replyError);
+      } catch (replyFehler) {
+        logger.error('Fehler beim Senden der Fehlermeldung:', replyFehler);
       }
     }
   },

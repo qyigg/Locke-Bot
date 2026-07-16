@@ -8,7 +8,7 @@ const BACK_BUTTON_ID = "help-back-to-main";
 const PAGINATION_PREFIX = "help-page";
 const BUG_REPORT_BUTTON_ID = "help-bug-report";
 
-export const helpBackButton = {
+export const helpZurückButton = {
     name: BACK_BUTTON_ID,
     async execute(interaction, client) {
         try {

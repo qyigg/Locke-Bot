@@ -18,7 +18,7 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
 import { botHasPermission } from '../../../utils/permissionGuard.js';
@@ -45,7 +45,7 @@ async function updateLivePanel(guild, cfg) {
             new ButtonBuilder()
                 .setCustomId('verify_user')
                 .setLabel(cfg.buttonText || botConfig.verification.defaultButtonText)
-                .setStyle(ButtonStyle.Success)
+                .setStyle(ButtonStyle.Erfolg)
                 .setEmoji('✅'),
         );
 
@@ -116,9 +116,9 @@ function buildSelectMenu(guildId) {
 }
 
 function buildButtonRow(cfg, guildId, disabled = false, panelStatus = null) {
-    const systemOn = cfg.enabled !== false;
+    const systemAn = cfg.enabled !== false;
     const showRepost =
-        systemOn && panelStatus?.exists === false && panelStatus?.reason === 'panel_deleted';
+        systemAn && panelStatus?.exists === false && panelStatus?.reason === 'panel_deleted';
 
     const buttons = [];
 
@@ -137,7 +137,7 @@ function buildButtonRow(cfg, guildId, disabled = false, panelStatus = null) {
         new ButtonBuilder()
             .setCustomId(`verif_cfg_toggle_${guildId}`)
             .setLabel('Verifizierung')
-            .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
+            .setStyle(systemAn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
             .setEmoji('🔒')
             .setDeaktiviert(disabled),
     );
@@ -148,9 +148,9 @@ function buildButtonRow(cfg, guildId, disabled = false, panelStatus = null) {
 async function repostVerificationPanel(guild, cfg) {
     const channel = await guild.channels.fetch(cfg.channelId).catch(() => null);
     if (!channel) {
-        throw new TitanBotError(
+        throw new TitanBotFehler(
             'Panel-Kanal fehlt',
-            ErrorTypes.CONFIGURATION,
+            FehlerTypes.CONFIGURATION,
             'Der konfigurierte Verifizierungskanal existiert nicht mehr. Lege im Dashboard einen neuen Kanal fest.',
         );
     }
@@ -164,7 +164,7 @@ async function repostVerificationPanel(guild, cfg) {
         new ButtonBuilder()
             .setCustomId('verify_user')
             .setLabel(cfg.buttonText || botConfig.verification.defaultButtonText)
-            .setStyle(ButtonStyle.Success)
+            .setStyle(ButtonStyle.Erfolg)
             .setEmoji('✅'),
     );
 
@@ -197,11 +197,11 @@ async function refreshDashboard(rootInteraction, cfg, guildId, client) {
             
             const guildConfig = await getGuildConfig(client, guildId);
             const welcomeConfig = await getWelcomeConfig(client, guildId);
-            const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
+            const autoVerifizierenAktiviert = Boolean(guildConfig.verification?.autoVerifizieren?.enabled);
             const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
             
             const conflicts = [
-                autoVerifyAktiviert ? 'AutoVerify ist aktiviert' : null,
+                autoVerifizierenAktiviert ? 'AutoVerifizieren ist aktiviert' : null,
                 autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
             ].filter(Boolean);
             
@@ -226,7 +226,7 @@ async function refreshDashboard(rootInteraction, cfg, guildId, client) {
 }
 
 export default {
-    prefixOnly: false,
+    prefixAnly: false,
     async execute(interaction, config, client) {
         try {
             const guildId = interaction.guild.id;
@@ -234,9 +234,9 @@ export default {
             const cfg = guildConfig.verification;
 
             if (!cfg?.channelId) {
-                throw new TitanBotError(
+                throw new TitanBotFehler(
                     'Verifizierung nicht konfiguriert',
-                    ErrorTypes.CONFIGURATION,
+                    FehlerTypes.CONFIGURATION,
                     'Das Verifizierungssystem wurde noch nicht eingerichtet. Führe zuerst `/verification setup` aus.',
                 );
             }
@@ -266,11 +266,11 @@ export default {
                 }
 
                 const welcomeConfig = await getWelcomeConfig(client, guildId);
-                const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
+                const autoVerifizierenAktiviert = Boolean(guildConfig.verification?.autoVerifizieren?.enabled);
                 const autoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
                 const conflicts = [
-                    autoVerifyAktiviert ? 'AutoVerify ist aktiviert' : null,
+                    autoVerifizierenAktiviert ? 'AutoVerifizieren ist aktiviert' : null,
                     autoRoleConfigured ? 'AutoRole ist konfiguriert' : null
                 ].filter(Boolean);
 
@@ -335,12 +335,12 @@ export default {
                     await btnInteraction.deferUpdate().catch(() => null);
 
                     const wasAktiviert = cfg.enabled !== false;
-                    const autoVerifyAktiviert = Boolean(guildConfig.verification?.autoVerify?.enabled);
+                    const autoVerifizierenAktiviert = Boolean(guildConfig.verification?.autoVerifizieren?.enabled);
 
-                    if (!wasAktiviert && autoVerifyAktiviert) {
-                        await replyUserError(btnInteraction, {
-                            type: ErrorTypes.CONFIGURATION,
-                            message: 'AutoVerify ist derzeit aktiviert. Bitte deaktiviere zuerst AutoVerify, bevor du das manuelle Verifizierungssystem aktivierst.\n\nFühre `/autoverify` aus, um das AutoVerify-Dashboard zu öffnen.',
+                    if (!wasAktiviert && autoVerifizierenAktiviert) {
+                        await replyUserFehler(btnInteraction, {
+                            type: FehlerTypes.CONFIGURATION,
+                            message: 'AutoVerifizieren ist derzeit aktiviert. Bitte deaktiviere zuerst AutoVerifizieren, bevor du das manuelle Verifizierungssystem aktivierst.\n\nFühre `/autoverify` aus, um das AutoVerifizieren-Dashboard zu öffnen.',
                         });
                         return;
                     }
@@ -394,11 +394,11 @@ export default {
                 },
             });
         } catch (error) {
-            if (error instanceof TitanBotError) throw error;
+            if (error instanceof TitanBotFehler) throw error;
             logger.error('Unerwarteter Fehler in verification_dashboard:', error);
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Verification-Dashboard fehlgeschlagen: ${error.message}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Das Verifizierungs-Dashboard konnte nicht geöffnet werden.',
             );
         }
@@ -440,8 +440,8 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
         const newChannel = chanInteraction.channels.first();
 
         if (!botHasPermission(newChannel, ['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
-            await replyUserError(chanInteraction, {
-                type: ErrorTypes.PERMISSION,
+            await replyUserFehler(chanInteraction, {
+                type: FehlerTypes.PERMISSION,
                 message: `Ich benötige die Berechtigungen **Kanal anzeigen**, **Nachrichten senden** und **Links einbetten** in ${newChannel}.`,
             });
             return;
@@ -470,7 +470,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
                     new ButtonBuilder()
                         .setCustomId('verify_user')
                         .setLabel(cfg.buttonText || botConfig.verification.defaultButtonText)
-                        .setStyle(ButtonStyle.Success)
+                        .setStyle(ButtonStyle.Erfolg)
                         .setEmoji('✅'),
                 );
 
@@ -496,8 +496,8 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
 
     chanCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde kein Kanal ausgewählt. Die Einstellung wurde nicht geändert.',
             }).catch(() => {});
         }
@@ -539,23 +539,23 @@ async function handleRole(selectInteraction, rootInteraction, cfg, guildId, clie
         const guild = rootInteraction.guild;
         const botMember = guild.members.me;
 
-        if (role.id === guild.id || role.managed) {
-            await replyUserError(roleInteraction, {
-                type: ErrorTypes.VALIDATION,
+        if (Rolle zu bekommen.id === guild.id || Rolle zu bekommen.managed) {
+            await replyUserFehler(roleInteraction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'Bitte wähle eine normale zuweisbare Rolle aus (nicht @everyone und keine vom Bot verwaltete Rolle).',
             });
             return;
         }
 
-        if (role.position >= botMember.roles.highest.position) {
-            await replyUserError(roleInteraction, {
-                type: ErrorTypes.PERMISSION,
+        if (Rolle zu bekommen.position >= botMember.roles.highest.position) {
+            await replyUserFehler(roleInteraction, {
+                type: FehlerTypes.PERMISSION,
                 message: 'Die verifizierte Rolle muss in der Server-Rollenhierarchie unter meiner höchsten Rolle liegen.',
             });
             return;
         }
 
-        cfg.roleId = role.id;
+        cfg.roleId = Rolle zu bekommen.id;
         const latestConfig = await getGuildConfig(client, guildId);
         latestConfig.verification = cfg;
         await setGuildConfig(client, guildId, latestConfig);
@@ -570,8 +570,8 @@ async function handleRole(selectInteraction, rootInteraction, cfg, guildId, clie
 
     roleCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde keine Rolle ausgewählt. Die Einstellung wurde nicht geändert.',
             }).catch(() => {});
         }
@@ -592,14 +592,14 @@ async function handleMessage(selectInteraction, rootInteraction, cfg, guildId, c
                         .setValue(cfg.message || botConfig.verification.defaultMessage)
                         .setMaxLength(2000)
                         .setMinLength(1)
-                        .setRequired(true),
+                        .setErforderlich(true),
                 ),
             );
 
         await selectInteraction.showModal(modal);
 
         const submitted = await selectInteraction
-            .awaitModalSubmit({
+            .awaitModalAbsenden({
                 filter: i =>
                     i.customId === 'verif_cfg_message' && i.user.id === selectInteraction.user.id,
                 time: 120_000,
@@ -642,14 +642,14 @@ async function handleButtonText(selectInteraction, rootInteraction, cfg, guildId
                         .setValue(cfg.buttonText || botConfig.verification.defaultButtonText)
                         .setMaxLength(80)
                         .setMinLength(1)
-                        .setRequired(true),
+                        .setErforderlich(true),
                 ),
             );
 
         await selectInteraction.showModal(modal);
 
         const submitted = await selectInteraction
-            .awaitModalSubmit({
+            .awaitModalAbsenden({
                 filter: i =>
                     i.customId === 'verif_cfg_button_text' && i.user.id === selectInteraction.user.id,
                 time: 120_000,

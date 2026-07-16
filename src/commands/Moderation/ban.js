@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -12,7 +12,7 @@ export default {
             option
                 .setName("target")
                 .setDescription("The user to ban")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .addStringOption((option) =>
             option.setName("reason").setDescription("Reason for the ban"),
@@ -25,25 +25,25 @@ export default {
         const reason = interaction.options.getString("reason") || "No reason provided";
 
         if (!user) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Missing target user',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'You must specify a user to ban.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (user.id === interaction.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Cannot ban self',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'You cannot ban yourself.',
             );
         }
         if (user.id === client.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Cannot ban bot',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'You cannot ban the bot.',
             );
         }

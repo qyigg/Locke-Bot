@@ -85,7 +85,7 @@ export async function createInitialHelpMenu(client) {
             {
                 name: '🚀 Erste Schritte',
                 value: [
-                    '**1. Setup starten** — Führe `/configwizard` aus, um Prefix, Mod-Rolle und Logs zu konfigurieren.',
+                    '**1. Einrichtung starten** — Führe `/configwizard` aus, um Prefix, Mod-Rolle und Logs zu konfigurieren.',
                     '**2. Systeme aktivieren** — Nutze `/commands dashboard`, um Kategorien ein- oder auszuschalten.',
                     '**3. Befehle durchsuchen** — Verwende das Menü unten, um Kategorien und Befehle anzuzeigen.',
                 ].join('\n'),
@@ -141,7 +141,7 @@ export async function createInitialHelpMenu(client) {
 }
 
 export default {
-    slashOnly: true,
+    slashAnly: true,
     data: new SlashCommandBuilder()
         .setName("help")
         .setDescription("Zeigt das Hilfemenü mit allen verfügbaren Befehlen an"),

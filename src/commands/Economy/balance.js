@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -13,10 +13,10 @@ export default {
             option
                 .setName('user')
                 .setDescription('User to check balance for')
-                .setRequired(false)
+                .setErforderlich(false)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
 
@@ -29,9 +29,9 @@ export default {
         logger.debug(`[ECONOMY] Balance check for ${targetUser.id}`, { userId: targetUser.id, guildId });
 
         if (targetUser.bot) {
-            throw createError(
+            throw createFehler(
                 "Bot user queried for balance",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Bots don't have an economy balance."
             );
         }
@@ -41,9 +41,9 @@ export default {
         logger.info(`[ECONOMY] Economy data retrieved - userData:`, userData);
 
         if (!userData) {
-            throw createError(
+            throw createFehler(
                 "Failed to load economy data",
-                ErrorTypes.DATABASE,
+                FehlerTypes.DATABASE,
                 "Failed to load economy data. Please try again later.",
                 { userId: targetUser.id, guildId }
             );

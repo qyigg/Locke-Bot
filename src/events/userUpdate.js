@@ -68,7 +68,7 @@ export default {
 
       logger.debug(`Processed userUpdate for ${newUser.id} across ${guilds.length} guild(s)`);
     } catch (error) {
-      logger.error('Error in userUpdate event:', error);
+      logger.error('Fehler in userUpdate event:', error);
     }
   }
 };

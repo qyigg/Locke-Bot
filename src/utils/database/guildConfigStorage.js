@@ -1,7 +1,7 @@
 import { logger } from '../logger.js';
 import { GUILD_CONFIG_DEFAULTS } from '../../config/guild/guildConfigDefaults.js';
 import { normalizeGuildConfig, validateGuildConfigOrThrow } from '../schemas.js';
-import { createError, ErrorTypes } from '../errorHandler.js';
+import { createFehler, FehlerTypes } from '../errorHandler.js';
 import { getGuildConfigKey } from './keys.js';
 
 export function unwrapReplitData(data) {
@@ -44,7 +44,7 @@ export async function readGuildConfig(client, guildId, context = {}) {
         const cleanedConfig = unwrapReplitData(rawConfig);
         return normalizeGuildConfig(cleanedConfig, GUILD_CONFIG_DEFAULTS);
     } catch (error) {
-        logger.error(`Error fetching config for guild ${guildId}`, {
+        logger.error(`Fehler fetching config for guild ${guildId}`, {
             error,
             traceId: context.traceId,
             guildId,
@@ -60,9 +60,9 @@ export async function readGuildConfig(client, guildId, context = {}) {
  */
 export async function writeGuildConfig(client, guildId, config, context = {}) {
     if (!client?.db || typeof client.db.set !== 'function') {
-        throw createError(
+        throw createFehler(
             'Database client unavailable for guild config write',
-            ErrorTypes.DATABASE,
+            FehlerTypes.DATABASE,
             'Failed to save server configuration. The database is unavailable.',
             { guildId, ...context },
         );
@@ -72,9 +72,9 @@ export async function writeGuildConfig(client, guildId, config, context = {}) {
     const saved = await client.db.set(getGuildConfigKey(guildId), validated);
 
     if (!saved) {
-        throw createError(
+        throw createFehler(
             'Guild config write rejected by database layer',
-            ErrorTypes.DATABASE,
+            FehlerTypes.DATABASE,
             'Failed to save server configuration. Please try again.',
             { guildId, ...context },
         );

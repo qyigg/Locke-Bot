@@ -12,55 +12,55 @@ export default {
         .addStringOption(option =>
             option.setName('question')
                 .setDescription('The poll question')
-                .setRequired(true))
+                .setErforderlich(true))
         .addStringOption(option =>
             option.setName('option1')
                 .setDescription('First option')
-                .setRequired(true))
+                .setErforderlich(true))
         .addStringOption(option =>
             option.setName('option2')
                 .setDescription('Second option')
-                .setRequired(true))
+                .setErforderlich(true))
         .addStringOption(option =>
             option.setName('option3')
                 .setDescription('Third option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option4')
                 .setDescription('Fourth option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option5')
                 .setDescription('Fifth option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option6')
                 .setDescription('Sixth option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option7')
                 .setDescription('Seventh option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option8')
                 .setDescription('Eighth option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option9')
                 .setDescription('Ninth option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addStringOption(option =>
             option.setName('option10')
                 .setDescription('Tenth option (optional)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addBooleanOption(option =>
             option.setName('anonymous')
                 .setDescription('Make the poll anonymous (default: false)')
-                .setRequired(false)),
+                .setErforderlich(false)),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        if (!deferErfolg) {
             logger.warn(`Poll interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -79,7 +79,7 @@ export default {
         }
 
         if (options.length < 2) {
-            throw new Error("You must provide at least 2 options for the poll.");
+            throw new Fehler("You must provide at least 2 options for the poll.");
         }
 
         let description = `**${question}**\n\n`;

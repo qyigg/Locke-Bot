@@ -223,11 +223,11 @@ export async function disableCommand(client, guildId, commandName, context = {})
   const target = resolveCommandTarget(client, normalizedName);
 
   if (!target) {
-    throw new Error(`Unknown command: \`${normalizedName}\`.`);
+    throw new Fehler(`Unknown command: \`${normalizedName}\`.`);
   }
 
   if (!target.isSubcommand && isProtectedCommand(normalizedName)) {
-    throw new Error(`The \`${normalizedName}\` command cannot be disabled.`);
+    throw new Fehler(`The \`${normalizedName}\` command cannot be disabled.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -243,7 +243,7 @@ export async function enableCommand(client, guildId, commandName, context = {}) 
   const target = resolveCommandTarget(client, normalizedName);
 
   if (!target) {
-    throw new Error(`Unknown command: \`${normalizedName}\`.`);
+    throw new Fehler(`Unknown command: \`${normalizedName}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -259,7 +259,7 @@ export async function disableCategory(client, guildId, categoryKey, context = {}
   const category = getCategoryRegistry(client, normalizedKey);
 
   if (!category) {
-    throw new Error(`Unknown category: \`${categoryKey}\`.`);
+    throw new Fehler(`Unknown category: \`${categoryKey}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -275,7 +275,7 @@ export async function enableCategory(client, guildId, categoryKey, context = {})
   const category = getCategoryRegistry(client, normalizedKey);
 
   if (!category) {
-    throw new Error(`Unknown category: \`${categoryKey}\`.`);
+    throw new Fehler(`Unknown category: \`${categoryKey}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);
@@ -291,7 +291,7 @@ export async function resetCategoryCommands(client, guildId, categoryKey, contex
   const category = getCategoryRegistry(client, normalizedKey);
 
   if (!category) {
-    throw new Error(`Unknown category: \`${categoryKey}\`.`);
+    throw new Fehler(`Unknown category: \`${categoryKey}\`.`);
   }
 
   const config = await getGuildConfig(client, guildId, context);

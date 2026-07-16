@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getColor } from '../../config/bot.js';
 
@@ -35,7 +35,7 @@ function parseBigIntFromBase(value, baseKey) {
 
     const charset = BASE_CHARSETS[baseKey];
     if (!charset) {
-        throw new Error(`Unsupported base: ${baseKey}`);
+        throw new Fehler(`Unsupported base: ${baseKey}`);
     }
 
     const normalized = ['BIN', 'OCT', 'DEC', 'HEX', 'B36'].includes(baseKey)
@@ -48,7 +48,7 @@ function parseBigIntFromBase(value, baseKey) {
     for (const char of normalized) {
         const digit = charset.indexOf(char);
         if (digit < 0) {
-            throw new Error(`Invalid character '${char}' for base ${baseKey}`);
+            throw new Fehler(`Invalid character '${char}' for base ${baseKey}`);
         }
         result = (result * base) + BigInt(digit);
     }
@@ -74,7 +74,7 @@ function formatBigIntToBase(value, baseKey) {
 
     const charset = BASE_CHARSETS[baseKey];
     if (!charset) {
-        throw new Error(`Unsupported base: ${baseKey}`);
+        throw new Fehler(`Unsupported base: ${baseKey}`);
     }
 
     if (value === 0n) {
@@ -101,21 +101,21 @@ export default {
         .addStringOption(option =>
             option.setName('number')
                 .setDescription('The number to convert')
-                .setRequired(true))
+                .setErforderlich(true))
         .addStringOption(option =>
             option.setName('from')
                 .setDescription('Source base/format')
-                .setRequired(true)
+                .setErforderlich(true)
                 .addChoices(...BASE_NAMES))
         .addStringOption(option =>
             option.setName('to')
                 .setDescription('Target base/format (default: all)')
-                .setRequired(false)
+                .setErforderlich(false)
                 .addChoices(...BASE_NAMES)),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`BaseConvert interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -135,8 +135,8 @@ export default {
             : numberStr;
 
         if (!cleanNumber) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'You must provide a number to convert.\n\n**Example:** `/baseconvert number:1010 from:BIN to:DEC`',
             });
         }
@@ -156,8 +156,8 @@ export default {
                 examples = '\n\n**Valid:** FF, A1B2, DEADBEEF | **Invalid:** G (only 0-9, A-F)';
             }
             logger.warn(`Invalid base conversion input: ${cleanNumber} for base ${fromBase}`);
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: `You provided: \`${cleanNumber}\`\n\nValid characters: \`${alphabet}\`${examples}`,
             });
         }
@@ -171,8 +171,8 @@ export default {
             }
         } catch (error) {
             logger.error('Base conversion parse error:', error);
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'The number is too large to process.\n\nTry with a smaller number.',
             });
         }
@@ -196,8 +196,8 @@ export default {
 
             } catch (error) {
                 logger.error(`Base conversion error to ${toName}:`, error);
-                await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+                await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: 'The result would be too large or incompatible.\n\nTry with a smaller number or different target base.',
                 });
             }

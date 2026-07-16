@@ -79,7 +79,7 @@ export function getPrefixRestriction(command, args, resolveSubcommandAlias) {
   const commandJson = command.data.toJSON();
   const commandName = commandJson.name?.toLowerCase();
 
-  if (command.prefixOnly === false || command.slashOnly === true) {
+  if (command.prefixAnly === false || command.slashAnly === true) {
     return { blocked: true, reason: 'This command is only available as a slash command.' };
   }
 

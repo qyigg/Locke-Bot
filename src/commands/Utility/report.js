@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChannelType } from 'discord.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 import report from './modules/report.js';
@@ -18,13 +18,13 @@ export default {
                     option
                         .setName('user')
                         .setDescription('The user you want to report.')
-                        .setRequired(true),
+                        .setErforderlich(true),
                 )
                 .addStringOption(option =>
                     option
                         .setName('reason')
                         .setDescription('The reason for the report (be detailed).')
-                        .setRequired(true)
+                        .setErforderlich(true)
                         .setMaxLength(500),
                 ),
         )
@@ -37,7 +37,7 @@ export default {
                         .setName('channel')
                         .setDescription('The text channel to receive reports.')
                         .addChannelTypes(ChannelType.GuildText)
-                        .setRequired(true),
+                        .setErforderlich(true),
                 ),
         ),
     category: 'Utility',
@@ -53,6 +53,6 @@ export default {
             return await reportSetchannel.execute(interaction, config, client);
         }
 
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unknown subcommand.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Unknown subcommand.' });
     },
 };

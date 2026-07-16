@@ -20,7 +20,7 @@ import {
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
 
 const MAX_FIELDS = 25;
@@ -28,9 +28,9 @@ const IDLE_TIMEOUT = 900_000;
 
 const COLOR_PRESETS = [
     { label: 'Primary (Blue)',        value: '#336699', emoji: '' },
-    { label: 'Success (Green)',       value: '#57F287', emoji: '' },
-    { label: 'Error (Red)',           value: '#ED4245', emoji: '' },
-    { label: 'Warning (Yellow)',      value: '#FEE75C', emoji: '' },
+    { label: 'Erfolg (Green)',       value: '#57F287', emoji: '' },
+    { label: 'Fehler (Red)',           value: '#ED4245', emoji: '' },
+    { label: 'Warnung (Yellow)',      value: '#FEE75C', emoji: '' },
     { label: 'Info (Bright Blue)',    value: '#3498DB', emoji: '' },
     { label: 'Blurple (Discord)',     value: '#5865F2', emoji: '' },
     { label: 'Fuchsia',              value: '#EB459E', emoji: '' },
@@ -116,7 +116,7 @@ function buildDashboardEmbed(state) {
         .setTitle('Embed Builder — Control Panel')
         .setDescription(lines.join('\n'))
         .setColor(getColor('info'))
-        .setFooter({ text: 'The preview above updates live · Closes after 5 min of inactivity' });
+        .setFooter({ text: 'The preview above updates live · Schließens after 5 min of inactivity' });
 }
 
 function buildMainMenu(state) {
@@ -165,7 +165,7 @@ function buildMainMenu(state) {
                 .setEmoji('📝'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Remove Field')
-                .setDescription('Delete a field from the embed')
+                .setDescription('Löschen a field from the embed')
                 .setValue('remove_field')
                 .setEmoji('➖'),
         );
@@ -226,7 +226,7 @@ async function handleEditContent(selectInteraction, rootInteraction, state) {
                     .setStyle(TextInputStyle.Short)
                     .setValue(state.title || '')
                     .setMaxLength(256)
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('My Embed Title'),
             ),
             new ActionRowBuilder().addComponents(
@@ -236,7 +236,7 @@ async function handleEditContent(selectInteraction, rootInteraction, state) {
                     .setStyle(TextInputStyle.Paragraph)
                     .setValue(state.description ? state.description.substring(0, 4000) : '')
                     .setMaxLength(4000)
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('Write your embed description here...'),
             ),
         );
@@ -245,7 +245,7 @@ async function handleEditContent(selectInteraction, rootInteraction, state) {
     if (!shown) return;
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_content' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -315,34 +315,34 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
                             .setPlaceholder('#5865F2')
                             .setMaxLength(7)
                             .setMinLength(7)
-                            .setRequired(true),
+                            .setErforderlich(true),
                     ),
                 );
 
             const shown = await InteractionHelper.safeShowModal(colorInter, hexModal);
             if (!shown) return;
 
-            const hexSubmit = await colorInter
-                .awaitModalSubmit({
+            const hexAbsenden = await colorInter
+                .awaitModalAbsenden({
                     filter: i =>
                         i.customId === 'eb_custom_hex' && i.user.id === colorInter.user.id,
                     time: 60_000,
                 })
                 .catch(() => null);
 
-            if (!hexSubmit) return;
+            if (!hexAbsenden) return;
 
-            const hex = hexSubmit.fields.getTextInputValue('hex_value').trim();
+            const hex = hexAbsenden.fields.getTextInputValue('hex_value').trim();
             if (!isValidHex(hex)) {
-                await replyUserError(hexSubmit, {
-                    type: ErrorTypes.USER_INPUT,
+                await replyUserFehler(hexAbsenden, {
+                    type: FehlerTypes.USER_INPUT,
                     message: `\`${hex}\` is not a valid hex color. Use the format \`#RRGGBB\` (e.g. \`#5865F2\`).`,
                 });
                 return;
             }
 
             state.color = hex;
-            await hexSubmit.deferUpdate().catch(() => {});
+            await hexAbsenden.deferUpdate().catch(() => {});
         } else {
             state.color = picked;
             await colorInter.deferUpdate().catch(() => {});
@@ -367,7 +367,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
                     .setStyle(TextInputStyle.Short)
                     .setValue(state.author?.name || '')
                     .setMaxLength(256)
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('Your Name'),
             ),
             new ActionRowBuilder().addComponents(
@@ -376,7 +376,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
                     .setLabel('Author Icon URL (optional)')
                     .setStyle(TextInputStyle.Short)
                     .setValue(state.author?.iconUrl || '')
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('https://example.com/icon.png'),
             ),
             new ActionRowBuilder().addComponents(
@@ -385,7 +385,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
                     .setLabel('Author Link URL (optional)')
                     .setStyle(TextInputStyle.Short)
                     .setValue(state.author?.url || '')
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('https://example.com'),
             ),
         );
@@ -394,7 +394,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
     if (!shown) return;
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_author' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -407,15 +407,15 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
     const url     = submitted.fields.getTextInputValue('author_url').trim();
 
     if (iconUrl && !isValidUrl(iconUrl)) {
-        await replyUserError(submitted, {
-            type: ErrorTypes.USER_INPUT,
+        await replyUserFehler(submitted, {
+            type: FehlerTypes.USER_INPUT,
             message: 'Author icon URL must be a valid `https://` URL.',
         });
         return;
     }
     if (url && !isValidUrl(url)) {
-        await replyUserError(submitted, {
-            type: ErrorTypes.USER_INPUT,
+        await replyUserFehler(submitted, {
+            type: FehlerTypes.USER_INPUT,
             message: 'Author link URL must be a valid `https://` URL.',
         });
         return;
@@ -439,7 +439,7 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
                     .setStyle(TextInputStyle.Short)
                     .setValue(state.footer?.text || '')
                     .setMaxLength(2048)
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('Built with TitanBot'),
             ),
             new ActionRowBuilder().addComponents(
@@ -448,7 +448,7 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
                     .setLabel('Footer Icon URL (optional)')
                     .setStyle(TextInputStyle.Short)
                     .setValue(state.footer?.iconUrl || '')
-                    .setRequired(false)
+                    .setErforderlich(false)
                     .setPlaceholder('https://example.com/icon.png'),
             ),
         );
@@ -457,7 +457,7 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
     if (!shown) return;
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_footer' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -469,8 +469,8 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
     const iconUrl = submitted.fields.getTextInputValue('footer_icon').trim();
 
     if (iconUrl && !isValidUrl(iconUrl)) {
-        await replyUserError(submitted, {
-            type: ErrorTypes.USER_INPUT,
+        await replyUserFehler(submitted, {
+            type: FehlerTypes.USER_INPUT,
             message: 'Footer icon URL must be a valid `https://` URL.',
         });
         return;
@@ -563,7 +563,7 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
                         .setLabel('Image URL')
                         .setStyle(TextInputStyle.Short)
                         .setValue(isThumb ? (state.thumbnail || '') : (state.image || ''))
-                        .setRequired(true)
+                        .setErforderlich(true)
                         .setPlaceholder('https://example.com/image.png'),
                 ),
             );
@@ -572,7 +572,7 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
         if (!shown) return;
 
         const submitted = await imgInter
-            .awaitModalSubmit({
+            .awaitModalAbsenden({
                 filter: i =>
                     i.customId === 'eb_image_url' && i.user.id === imgInter.user.id,
                 time: 60_000,
@@ -583,8 +583,8 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 
         const url = submitted.fields.getTextInputValue('image_url').trim();
         if (!isValidUrl(url)) {
-            await replyUserError(submitted, {
-                type: ErrorTypes.USER_INPUT,
+            await replyUserFehler(submitted, {
+                type: FehlerTypes.USER_INPUT,
                 message: 'Image URL must be a valid `https://` link to a publicly accessible image.',
             });
             return;
@@ -604,8 +604,8 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 async function handleAddField(selectInteraction, rootInteraction, state) {
     if (state.fields.length >= MAX_FIELDS) {
         await selectInteraction.deferUpdate();
-        await replyUserError(selectInteraction, {
-            type: ErrorTypes.VALIDATION,
+        await replyUserFehler(selectInteraction, {
+            type: FehlerTypes.VALIDATION,
             message: `Embeds can have a maximum of ${MAX_FIELDS} fields.`,
         });
         return;
@@ -622,7 +622,7 @@ async function handleAddField(selectInteraction, rootInteraction, state) {
                 .setCustomId('field_name')
                 .setStyle(TextInputStyle.Short)
                 .setMaxLength(256)
-                .setRequired(true)
+                .setErforderlich(true)
                 .setPlaceholder('Field Title'),
         );
 
@@ -633,13 +633,13 @@ async function handleAddField(selectInteraction, rootInteraction, state) {
                 .setCustomId('field_value')
                 .setStyle(TextInputStyle.Paragraph)
                 .setMaxLength(1024)
-                .setRequired(true)
+                .setErforderlich(true)
                 .setPlaceholder('Field content goes here...'),
         );
 
     const inlineRadio = new RadioGroupBuilder()
         .setCustomId('field_inline')
-        .setRequired(false)
+        .setErforderlich(false)
         .addOptions([
             { label: 'No — full width', value: 'no' },
             { label: 'Yes — side-by-side', value: 'yes' },
@@ -655,7 +655,7 @@ async function handleAddField(selectInteraction, rootInteraction, state) {
     if (!shown) return;
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_add_field' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
@@ -728,7 +728,7 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
                     .setStyle(TextInputStyle.Short)
                     .setValue(field.name)
                     .setMaxLength(256)
-                    .setRequired(true),
+                    .setErforderlich(true),
             );
 
         const editValueLabel = new LabelBuilder()
@@ -739,12 +739,12 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
                     .setStyle(TextInputStyle.Paragraph)
                     .setValue(field.value.substring(0, 4000))
                     .setMaxLength(1024)
-                    .setRequired(true),
+                    .setErforderlich(true),
             );
 
         const editInlineRadio = new RadioGroupBuilder()
             .setCustomId('field_inline')
-            .setRequired(false)
+            .setErforderlich(false)
             .addOptions([
                 { label: 'No — full width', value: 'no' },
                 { label: 'Yes — side-by-side', value: 'yes' },
@@ -767,7 +767,7 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
         if (!shown) return;
 
         const submitted = await pickInter
-            .awaitModalSubmit({
+            .awaitModalAbsenden({
                 filter: i =>
                     i.customId === 'eb_edit_field_modal' && i.user.id === pickInter.user.id,
                 time: 120_000,
@@ -892,7 +892,7 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
 
         const cancelBtn = new ButtonBuilder()
             .setCustomId('eb_reorder_cancel')
-            .setLabel('Cancel')
+            .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Secondary);
 
         await pickInter.followUp({
@@ -943,8 +943,8 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         !state.author?.name
     ) {
         await selectInteraction.deferUpdate();
-        await replyUserError(selectInteraction, {
-            type: ErrorTypes.VALIDATION,
+        await replyUserFehler(selectInteraction, {
+            type: FehlerTypes.VALIDATION,
             message: 'Add at least a title, description, or field before posting.',
         });
         return;
@@ -981,8 +981,8 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         const channel = chanInter.channels.first();
 
         if (!channel) {
-            await replyUserError(chanInter, {
-                type: ErrorTypes.USER_INPUT,
+            await replyUserFehler(chanInter, {
+                type: FehlerTypes.USER_INPUT,
                 message: 'Could not resolve the selected channel.',
             });
             return;
@@ -990,8 +990,8 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
 
         const perms = channel.permissionsFor(guild.members.me);
         if (!perms?.has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks])) {
-            await replyUserError(chanInter, {
-                type: ErrorTypes.PERMISSION,
+            await replyUserFehler(chanInter, {
+                type: FehlerTypes.PERMISSION,
                 message: `I need **Send Messages** and **Embed Links** permissions in ${channel} to post there.`,
             });
             return;
@@ -1048,7 +1048,7 @@ async function handleJsonExport(selectInteraction, rootInteraction, state) {
 }
 
 export default {
-    slashOnly: true,
+    slashAnly: true,
     data: new SlashCommandBuilder()
         .setName('embedbuilder')
         .setDescription('Build and post a fully custom embed with live preview')
@@ -1056,10 +1056,10 @@ export default {
 
     async execute(interaction) {
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction, {
+            const deferErfolg = await InteractionHelper.safeDefer(interaction, {
                 flags: MessageFlags.Ephemeral,
             });
-            if (!deferSuccess) return;
+            if (!deferErfolg) return;
 
             const guild = interaction.guild;
 
@@ -1142,14 +1142,14 @@ export default {
                             await ci.deferUpdate();
                     }
                 } catch (error) {
-                    logger.error('Error in embedbuilder collector:', error);
+                    logger.error('Fehler in embedbuilder collector:', error);
                     const msg =
-                        error instanceof TitanBotError
+                        error instanceof TitanBotFehler
                             ? error.userMessage || 'An error occurred.'
                             : 'An unexpected error occurred.';
                     if (!ci.replied && !ci.deferred) await ci.deferUpdate().catch(() => {});
-                    await replyUserError(ci, {
-                        type: ErrorTypes.UNKNOWN,
+                    await replyUserFehler(ci, {
+                        type: FehlerTypes.UNKNOWN,
                         message: msg,
                     }).catch(() => {});
                 }
@@ -1161,11 +1161,11 @@ export default {
                 }
             });
         } catch (error) {
-            if (error instanceof TitanBotError) throw error;
+            if (error instanceof TitanBotFehler) throw error;
             logger.error('Unexpected error in embedbuilder:', error);
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `embedbuilder failed: ${error.message}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Failed to open the embed builder.',
             );
         }

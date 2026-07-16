@@ -3,7 +3,7 @@ import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuild
 import { createEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
-import { WarningService } from '../../services/moderation/warningService.js';
+import { WarnungService } from '../../services/moderation/warningService.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
@@ -13,16 +13,16 @@ export default {
         .addUserOption((o) =>
             o
                 .setName("target")
-                .setRequired(true)
+                .setErforderlich(true)
                 .setDescription("User to check warnings for"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Warnings interaction defer failed`, {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Warnungs interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'warnings',
@@ -33,14 +33,14 @@ export default {
         const target = interaction.options.getUser("target");
         const guildId = interaction.guildId;
 
-        const validWarnings = await WarningService.getWarnings(guildId, target.id);
-        const totalWarns = validWarnings.length;
+        const validWarnungs = await WarnungService.getWarnungs(guildId, target.id);
+        const totalWarns = validWarnungs.length;
 
         if (totalWarns === 0) {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     createEmbed({
-                        title: `Warnings: ${target.tag}`,
+                        title: `Warnungs: ${target.tag}`,
                         description: "This user has no recorded warnings.",
                     }).setColor(getColor('success')),
                 ],
@@ -49,11 +49,11 @@ export default {
         }
 
         const embed = createEmbed({
-            title: `Warnings: ${target.tag}`,
-            description: `Total Warnings: **${totalWarns}**`,
+            title: `Warnungs: ${target.tag}`,
+            description: `Total Warnungs: **${totalWarns}**`,
         }).setColor(getColor('warning'));
 
-        const warningFields = validWarnings
+        const warningFields = validWarnungs
             .map((w, i) => {
                 const discordTimestamp = Math.floor(w.timestamp / 1000);
                 return {
@@ -69,11 +69,11 @@ export default {
         const actionRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`warning_delete_specific:${target.id}:${interaction.user.id}`)
-                .setLabel('Delete Specific Warning')
+                .setLabel('Löschen Specific Warnung')
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId(`warning_clear_all:${target.id}:${interaction.user.id}`)
-                .setLabel('Clear All Warnings')
+                .setLabel('Clear All Warnungs')
                 .setStyle(ButtonStyle.Danger),
         );
 
@@ -81,14 +81,14 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: "Warnings Viewed",
+                action: "Warnungs Viewed",
                 target: `${target.tag} (${target.id})`,
                 executor: `${interaction.user.tag} (${interaction.user.id})`,
                 reason: `Viewed ${totalWarns} warnings`,
                 metadata: {
                     userId: target.id,
                     moderatorId: interaction.user.id,
-                    totalWarnings: totalWarns,
+                    totalWarnungs: totalWarns,
                 },
             },
         });

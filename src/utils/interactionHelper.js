@@ -2,14 +2,14 @@
 
 import { logger } from './logger.js';
 import { MessageFlags } from 'discord.js';
-import { handleInteractionError, createError, ErrorTypes } from './errorHandler.js';
+import { handleInteractionFehler, createFehler, FehlerTypes } from './errorHandler.js';
 import { ResponseCoordinator } from './responseCoordinator.js';
 
 const INTERACTION_TIMEOUT_MS = 15 * 60 * 1000;
 const DEFAULT_DEFER_OPTIONS = { flags: MessageFlags.Ephemeral };
 const INTERACTION_UNAVAILABLE_CODES = new Set([10062, 40060, 50027]);
 
-function isInteractionUnavailableError(error) {
+function isInteractionUnavailableFehler(error) {
     return INTERACTION_UNAVAILABLE_CODES.has(error?.code);
 }
 
@@ -126,7 +126,7 @@ export class InteractionHelper {
             await interaction.deferReply(options);
             return true;
         } catch (error) {
-            if (isInteractionUnavailableError(error)) {
+            if (isInteractionUnavailableFehler(error)) {
                 logger.warn(`Interaction ${interaction.id} unavailable during defer:`, error.message);
                 return false;
             }
@@ -164,7 +164,7 @@ export class InteractionHelper {
             await interaction.editReply(sanitizeEditReplyOptions(options));
             return true;
         } catch (error) {
-            if (isInteractionUnavailableError(error)) {
+            if (isInteractionUnavailableFehler(error)) {
                 logger.warn(`Interaction ${interaction.id} unavailable during edit:`, error.message);
                 return false;
             }
@@ -181,12 +181,12 @@ export class InteractionHelper {
                 try {
                     await interaction.followUp(options);
                     return true;
-                } catch (followUpError) {
-                    if (isInteractionUnavailableError(followUpError)) {
-                        logger.warn(`Interaction ${interaction.id} unavailable during followUp:`, followUpError.message);
+                } catch (followUpFehler) {
+                    if (isInteractionUnavailableFehler(followUpFehler)) {
+                        logger.warn(`Interaction ${interaction.id} unavailable during followUp:`, followUpFehler.message);
                         return false;
                     }
-                    logger.error('Failed to follow up after deleted reply:', followUpError);
+                    logger.error('Failed to follow up after deleted reply:', followUpFehler);
                     return false;
                 }
             }
@@ -229,7 +229,7 @@ export class InteractionHelper {
             await interaction.reply(options);
             return true;
         } catch (error) {
-            if (isInteractionUnavailableError(error)) {
+            if (isInteractionUnavailableFehler(error)) {
                 logger.warn(`Interaction ${interaction.id} unavailable during reply:`, error.message);
                 return false;
             }
@@ -257,7 +257,7 @@ export class InteractionHelper {
             await interaction.showModal(modal);
             return true;
         } catch (error) {
-            if (isInteractionUnavailableError(error)) {
+            if (isInteractionUnavailableFehler(error)) {
                 logger.warn(`Interaction ${interaction.id} unavailable during showModal:`, error.message);
                 return false;
             }
@@ -282,13 +282,13 @@ export class InteractionHelper {
 
         if (autoDefer && !interaction.replied && !interaction.deferred) {
             const deferStartTime = Date.now();
-            const deferSuccess = await this.safeDefer(interaction, deferOptions);
+            const deferErfolg = await this.safeDefer(interaction, deferOptions);
 
             if (Date.now() - deferStartTime > 3000) {
                 logger.warn(`Interaction ${interaction.id} defer took too long (${Date.now() - deferStartTime}ms), command may expire`);
             }
 
-            if (!deferSuccess) {
+            if (!deferErfolg) {
                 logger.warn(`Interaction ${interaction.id} defer failed, skipping command execution`);
                 return;
             }
@@ -297,17 +297,17 @@ export class InteractionHelper {
         try {
             await commandFunction();
         } catch (error) {
-            logger.error('Error executing command:', error);
+            logger.error('Fehler executing command:', error);
 
             if (coordinator?.isUsageFinalized()) {
                 return;
             }
 
             const errorToHandle = typeof errorEmbed === 'string'
-                ? createError(error.message || 'Command failed', ErrorTypes.UNKNOWN, errorEmbed, { expected: true })
+                ? createFehler(error.message || 'Command failed', FehlerTypes.UNKNOWN, errorEmbed, { expected: true })
                 : error;
 
-            await handleInteractionError(interaction, errorToHandle, { source: 'interactionHelper.safeExecute' });
+            await handleInteractionFehler(interaction, errorToHandle, { source: 'interactionHelper.safeExecute' });
         }
     }
 

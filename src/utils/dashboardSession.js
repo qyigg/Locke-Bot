@@ -1,6 +1,6 @@
 import { ComponentType, EmbedBuilder } from 'discord.js';
 import { getColor } from '../config/bot.js';
-import { TitanBotError, ErrorTypes, replyUserError } from './errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from './errorHandler.js';
 import { InteractionHelper } from './interactionHelper.js';
 import { logger } from './logger.js';
 
@@ -17,14 +17,14 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
         } catch (error) {
             if (error?.code === 40060) return;
 
-            if (error instanceof TitanBotError) {
+            if (error instanceof TitanBotFehler) {
                 logger.debug(`${interactionLabel} error: ${error.message}`);
             } else {
                 logger.error(`Unexpected ${interactionLabel} error:`, error);
             }
 
             const errorMessage =
-                error instanceof TitanBotError
+                error instanceof TitanBotFehler
                     ? error.userMessage || 'An error occurred while processing your selection.'
                     : 'An unexpected error occurred while updating the configuration.';
 
@@ -32,8 +32,8 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
                 await componentInteraction.deferUpdate().catch(() => {});
             }
 
-            await replyUserError(componentInteraction, {
-                type: ErrorTypes.CONFIGURATION,
+            await replyUserFehler(componentInteraction, {
+                type: FehlerTypes.CONFIGURATION,
                 message: errorMessage,
             }).catch(() => {});
         }

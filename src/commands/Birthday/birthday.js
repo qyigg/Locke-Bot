@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, MessageFlags, ChannelType } from 'discord.js';
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 
 import birthdaySet from './modules/birthday_set.js';
 import birthdayInfo from './modules/birthday_info.js';
@@ -22,7 +22,7 @@ export default {
                     option
                         .setName('month')
                         .setDescription('Geburtsmonat (1-12)')
-                        .setRequired(true)
+                        .setErforderlich(true)
                         .setMinValue(1)
                         .setMaxValue(12)
                 )
@@ -30,7 +30,7 @@ export default {
                     option
                         .setName('day')
                         .setDescription('Geburtstag im Monat (1-31)')
-                        .setRequired(true)
+                        .setErforderlich(true)
                         .setMinValue(1)
                         .setMaxValue(31)
                 )
@@ -43,7 +43,7 @@ export default {
                     option
                         .setName('user')
                         .setDescription('Benutzer, dessen Geburtstag angezeigt werden soll')
-                        .setRequired(false)
+                        .setErforderlich(false)
                 )
         )
         .addSubcommand(subcommand =>
@@ -70,7 +70,7 @@ export default {
                         .setName('channel')
                         .setDescription('Der Textkanal für Ankündigungen. Leer lassen zum Deaktivieren.')
                         .addChannelTypes(ChannelType.GuildText)
-                        .setRequired(false)
+                        .setErforderlich(false)
                 )
         ),
 
@@ -91,7 +91,7 @@ export default {
             case 'setchannel':
                 return await birthdaySetchannel.execute(interaction, config, client);
             default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unbekannter Unterbefehl' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Unbekannter Unterbefehl' });
         }
     }
 };

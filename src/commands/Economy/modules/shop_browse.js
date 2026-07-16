@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuild
 import { shopItems } from '../../../config/shop/items.js';
 import { getColor } from '../../../config/bot.js';
 import { logger } from '../../../utils/logger.js';
-import { handleInteractionError } from '../../../utils/errorHandler.js';
+import { handleInteractionFehler } from '../../../utils/errorHandler.js';
 
 export default {
     async execute(interaction, config, client) {
@@ -41,7 +41,7 @@ export default {
                             .setDeaktiviert(page === 1),
                         new ButtonBuilder()
                             .setCustomId('shop_next')
-                            .setLabel('Next ➡️')
+                            .setLabel('Weiter ➡️')
                             .setStyle(ButtonStyle.Secondary)
                             .setDeaktiviert(page === totalPages),
                     ),
@@ -88,7 +88,7 @@ export default {
                 }
             });
         } catch (error) {
-            await handleInteractionError(interaction, error, { command: 'shop_browse' });
+            await handleInteractionFehler(interaction, error, { command: 'shop_browse' });
         }
     },
 };

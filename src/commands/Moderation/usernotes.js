@@ -5,7 +5,7 @@ import { getFromDb, setInDb, deleteFromDb, getUserNotesKey, getUserNotesListKey 
 import { sanitizeInput } from '../../utils/validation.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -19,25 +19,25 @@ export default {
                     option
                         .setName("target")
                         .setDescription("The user to add a note for")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
                 .addStringOption(option =>
                     option
                         .setName("note")
                         .setDescription("The note to add")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
                 .addStringOption(option =>
                     option
                         .setName("type")
                         .setDescription("Type of note")
                         .addChoices(
-                            { name: "Warning", value: "warning" },
+                            { name: "Warnung", value: "warning" },
                             { name: "Positive", value: "positive" },
                             { name: "Neutral", value: "neutral" },
                             { name: "Alert", value: "alert" }
                         )
-                        .setRequired(false)
+                        .setErforderlich(false)
                 )
         )
         .addSubcommand(subcommand =>
@@ -48,7 +48,7 @@ export default {
                     option
                         .setName("target")
                         .setDescription("The user to view notes for")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
         )
         .addSubcommand(subcommand =>
@@ -59,13 +59,13 @@ export default {
                     option
                         .setName("target")
                         .setDescription("The user to remove a note from")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
                 .addIntegerOption(option =>
                     option
                         .setName("index")
                         .setDescription("The index of the note to remove")
-                        .setRequired(true)
+                        .setErforderlich(true)
                         .setMinValue(1)
                 )
         )
@@ -77,7 +77,7 @@ export default {
                     option
                         .setName("target")
                         .setDescription("The user to clear notes for")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
@@ -89,7 +89,7 @@ export default {
         const guildId = interaction.guild.id;
 
         if (subcommand !== "view" && subcommand !== "remove" && subcommand !== "clear" && subcommand !== "add") {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please select a valid subcommand.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please select a valid subcommand.' });
         }
 
         let notes = [];
@@ -109,11 +109,11 @@ export default {
                 case "clear":
                     return await handleClearNotes(interaction, targetUser, notes, guildId);
                 default:
-                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please select a valid subcommand.' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please select a valid subcommand.' });
             }
         } catch (error) {
-            logger.error(`Error in usernotes command (${subcommand}):`, error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing your request. Please try again later.' });
+            logger.error(`Fehler in usernotes command (${subcommand}):`, error);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while processing your request. Please try again later.' });
         }
     }
 };
@@ -123,11 +123,11 @@ async function handleAddNote(interaction, targetUser, notes, guildId) {
     const type = interaction.options.getString("type") || "neutral";
 
     if (note.length > 1000) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Notes must be 1000 characters or less.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Notes must be 1000 characters or less.' });
     }
 
     if (note.length === 0) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Note cannot be empty.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Note cannot be empty.' });
     }
 
     note = sanitizeInput(note);
@@ -203,7 +203,7 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
     const index = interaction.options.getInteger("index") - 1;
 
     if (index < 0 || index >= notes.length) {
-        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Please provide a valid note index (1-${notes.length}).` });
+        return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: `Please provide a valid note index (1-${notes.length}).` });
     }
 
     // The view command displays notes sorted newest-first, so resolve the index

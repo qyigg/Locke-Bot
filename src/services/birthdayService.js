@@ -1,9 +1,9 @@
 // birthdayService.js
 
 import { getGuildConfig } from './config/guildConfig.js';
-import { getGuildBirthdays, setBirthday as dbSetBirthday, deleteBirthday as dbDeleteBirthday, getMonthName, getBirthdayTrackingKey } from '../utils/database.js';
+import { getGuildBirthdays, setBirthday as dbSetBirthday, deleteBirthday as dbLöschenBirthday, getMonthName, getBirthdayTrackingKey } from '../utils/database.js';
 import { logger } from '../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../utils/errorHandler.js';
 
 export function validateBirthday(month, day) {
   
@@ -54,9 +54,9 @@ export async function setBirthday(client, guildId, userId, month, day) {
         error: validation.error
       });
       
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         validation.error,
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         validation.error,
         { month, day, userId, guildId }
       );
@@ -65,9 +65,9 @@ export async function setBirthday(client, guildId, userId, month, day) {
     const success = await dbSetBirthday(client, guildId, userId, month, day);
     
     if (!success) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         'Failed to save birthday to database',
-        ErrorTypes.DATABASE,
+        FehlerTypes.DATABASE,
         'Failed to set your birthday. Please try again later.',
         { userId, guildId, month, day }
       );
@@ -89,7 +89,7 @@ export async function setBirthday(client, guildId, userId, month, day) {
       }
     };
   } catch (error) {
-    logger.error('Error in setBirthday service', {
+    logger.error('Fehler in setBirthday service', {
       error: error.message,
       stack: error.stack,
       userId,
@@ -117,7 +117,7 @@ export async function getUserBirthday(client, guildId, userId) {
       monthName: getMonthName(birthdayData.month)
     };
   } catch (error) {
-    logger.error('Error in getUserBirthday service', {
+    logger.error('Fehler in getUserBirthday service', {
       error: error.message,
       userId,
       guildId
@@ -148,7 +148,7 @@ export async function getAllBirthdays(client, guildId) {
 
     return sortedBirthdays;
   } catch (error) {
-    logger.error('Error in getAllBirthdays service', {
+    logger.error('Fehler in getAllBirthdays service', {
       error: error.message,
       guildId
     });
@@ -167,12 +167,12 @@ export async function deleteBirthday(client, guildId, userId) {
       };
     }
 
-    const success = await dbDeleteBirthday(client, guildId, userId);
+    const success = await dbLöschenBirthday(client, guildId, userId);
     
     if (!success) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         'Failed to delete birthday from database',
-        ErrorTypes.DATABASE,
+        FehlerTypes.DATABASE,
         'Failed to remove your birthday. Please try again.',
         { userId, guildId }
       );
@@ -187,7 +187,7 @@ export async function deleteBirthday(client, guildId, userId) {
       status: 'removed',
     };
   } catch (error) {
-    logger.error('Error in deleteBirthday service', {
+    logger.error('Fehler in deleteBirthday service', {
       error: error.message,
       userId,
       guildId
@@ -232,7 +232,7 @@ export async function getUpcomingBirthdays(client, guildId, limit = 5) {
 
     return upcomingBirthdays.slice(0, limit);
   } catch (error) {
-    logger.error('Error in getUpcomingBirthdays service', {
+    logger.error('Fehler in getUpcomingBirthdays service', {
       error: error.message,
       guildId,
       limit
@@ -263,7 +263,7 @@ export async function getTodaysBirthdays(client, guildId) {
 
     return todaysBirthdays;
   } catch (error) {
-    logger.error('Error in getTodaysBirthdays service', {
+    logger.error('Fehler in getTodaysBirthdays service', {
       error: error.message,
       guildId
     });
@@ -310,7 +310,7 @@ export async function checkBirthdays(client) {
           }
           delete updatedTrackingData[userId];
         } catch (error) {
-           logger.error(`Error removing birthday role from ${userId}:`, error);
+           logger.error(`Fehler removing birthday role from ${userId}:`, error);
         }
       }
 
@@ -331,7 +331,7 @@ export async function checkBirthdays(client) {
                 await member.roles.add(birthdayRoleId, "Happy Birthday! 🎉");
                 updatedTrackingData[userId] = true;
               } catch (error) {
-                  logger.error(`Error adding birthday role to ${member.user.tag}:`, error);
+                  logger.error(`Fehler adding birthday role to ${member.user.tag}:`, error);
               }
             }
           }
@@ -353,7 +353,7 @@ export async function checkBirthdays(client) {
         });
       }
     } catch (error) {
-      logger.error(`Error processing birthdays for guild ${guildId}:`, error);
+      logger.error(`Fehler processing birthdays for guild ${guildId}:`, error);
     }
   }
 }

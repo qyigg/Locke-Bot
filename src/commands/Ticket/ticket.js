@@ -4,7 +4,7 @@ import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/
 import { getGuildConfig, setGuildConfig } from '../../services/config/guildConfig.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError, replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { handleInteractionFehler, replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 
 import ticketConfig from './modules/ticket_dashboard.js';
 
@@ -26,7 +26,7 @@ export default {
                             "Der Kanal, in den das Ticket-Panel gesendet wird.",
                         )
                         .addChannelTypes(ChannelType.GuildText)
-                        .setRequired(true),
+                        .setErforderlich(true),
                 )
 
                 .addStringOption((option) =>
@@ -35,7 +35,7 @@ export default {
                         .setDescription(
                             "Die Hauptnachricht/Beschreibung für das Ticket-Panel.",
                         )
-                        .setRequired(true),
+                        .setErforderlich(true),
                 )
                 .addStringOption((option) =>
                     option
@@ -43,7 +43,7 @@ export default {
                         .setDescription(
                             "Die Beschriftung für den Ticket-Erstellungsbutton (Standard: Ticket erstellen)",
                         )
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addChannelOption((option) =>
                     option
@@ -52,7 +52,7 @@ export default {
                             "Die Kategorie, in der neue Tickets erstellt werden (optional).",
                         )
                         .addChannelTypes(ChannelType.GuildCategory)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addChannelOption((option) =>
                     option
@@ -61,7 +61,7 @@ export default {
                             "Die Kategorie, in die geschlossene Tickets verschoben werden (optional).",
                         )
                         .addChannelTypes(ChannelType.GuildCategory)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addRoleOption((option) =>
                     option
@@ -69,7 +69,7 @@ export default {
                         .setDescription(
                             "Die Rolle, die Zugriff auf Tickets hat (optional).",
                         )
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addIntegerOption((option) =>
                     option
@@ -77,13 +77,13 @@ export default {
                         .setDescription("Maximale Anzahl an Tickets, die ein Benutzer erstellen kann (Standard: 3)")
                         .setMinValue(1)
                         .setMaxValue(10)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addBooleanOption((option) =>
                     option
                         .setName("dm_on_close")
                         .setDescription("Sende dem Benutzer eine DM, wenn sein Ticket geschlossen wird (Standard: true)")
-                        .setRequired(false),
+                        .setErforderlich(false),
                 ),
         )
         .addSubcommand((subcommand) =>
@@ -109,7 +109,7 @@ export default {
                 guildId: interaction.guildId,
                 commandName: 'ticket'
             });
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten` für diese Aktion.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten` für diese Aktion.' });
         }
 
         const subcommand = interaction.options.getSubcommand();
@@ -121,7 +121,7 @@ export default {
         if (subcommand === "setup") {
             const existingConfig = await getGuildConfig(client, interaction.guildId);
             if (existingConfig?.ticketPanelChannelId) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Dieser Server hat bereits ein eingerichtetes Ticketsystem (Panel in <#${existingConfig.ticketPanelChannelId}>).\n\nPro Server wird nur ein Ticketsystem unterstützt. Nutze \`/ticket dashboard\`, um die bestehende Einrichtung zu bearbeiten oder zu aktualisieren, oder wähle **System löschen** im Dashboard, um es zu entfernen und neu zu beginnen.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Dieser Server hat bereits ein eingerichtetes Ticketsystem (Panel in <#${existingConfig.ticketPanelChannelId}>).\n\nPro Server wird nur ein Ticketsystem unterstützt. Nutze \`/ticket dashboard\`, um die bestehende Einrichtung zu bearbeiten oder zu aktualisieren, oder wähle **System löschen** im Dashboard, um es zu entfernen und neu zu beginnen.` });
             }
 
             const panelChannel =
@@ -134,7 +134,7 @@ const panelMessage = interaction.options.getString("panel_message") || "Klicke a
                 interaction.options.getString("button_label") ||
 "Ticket erstellen";
             const maxTicketsPerUser = interaction.options.getInteger("max_tickets_per_user") || 3;
-const dmOnClose = interaction.options.getBoolean("dm_on_close") !== false;
+const dmAnSchließen = interaction.options.getBoolean("dm_on_close") !== false;
 
             const setupEmbed = createEmbed({ 
                 title: "Support-Tickets", 
@@ -159,14 +159,14 @@ description: panelMessage,
                 if (client.db && interaction.guildId) {
                     const currentConfig = existingConfig;
                     currentConfig.ticketCategoryId = categoryChannel ? categoryChannel.id : null;
-                    currentConfig.ticketClosedCategoryId = closedCategoryChannel ? closedCategoryChannel.id : null;
+                    currentConfig.ticketSchließendCategoryId = closedCategoryChannel ? closedCategoryChannel.id : null;
                     currentConfig.ticketStaffRoleId = staffRole ? staffRole.id : null;
                     currentConfig.ticketPanelChannelId = panelChannel.id;
                     currentConfig.ticketPanelMessageId = sentPanel?.id || null;
                     currentConfig.ticketPanelMessage = panelMessage;
                     currentConfig.ticketButtonLabel = buttonLabel;
                     currentConfig.maxTicketsPerUser = maxTicketsPerUser;
-                    currentConfig.dmOnClose = dmOnClose;
+                    currentConfig.dmAnSchließen = dmAnSchließen;
 
                     await setGuildConfig(client, interaction.guildId, currentConfig);
                     logger.info('Ticket-Konfiguration gespeichert', {
@@ -175,10 +175,10 @@ description: panelMessage,
                         closedCategoryId: closedCategoryChannel?.id,
                         staffRoleId: staffRole?.id,
                         maxTickets: maxTicketsPerUser,
-                        dmOnClose: dmOnClose,
+                        dmAnSchließen: dmAnSchließen,
                     });
                 } else {
-                    logger.error('Ticket-Setup: Datenbank nicht verfügbar, Panel wurde gesendet, aber die Konfiguration wurde NICHT gespeichert', {
+                    logger.error('Ticket-Einrichtung: Datenbank nicht verfügbar, Panel wurde gesendet, aber die Konfiguration wurde NICHT gespeichert', {
                         guildId: interaction.guildId,
                     });
                 }
@@ -199,7 +199,7 @@ description: panelMessage,
                     successMessage += `Die Rolle **${staffRole.name}** hat Zugriff auf Tickets.`;
                 }
                 
-                successMessage += `\n\n**Max. Tickets pro Benutzer:** ${maxTicketsPerUser}\n**DM bei Schließen:** ${dmOnClose ? 'Aktiviert' : 'Deaktiviert'}`;
+                successMessage += `\n\n**Max. Tickets pro Benutzer:** ${maxTicketsPerUser}\n**DM bei Schließen:** ${dmAnSchließen ? 'Aktiviert' : 'Deaktiviert'}`;
 
                 await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
@@ -218,7 +218,7 @@ description: panelMessage,
                     closedCategoryId: closedCategoryChannel?.id,
                     staffRoleId: staffRole?.id,
                     maxTickets: maxTicketsPerUser,
-                    dmOnClose: dmOnClose,
+                    dmAnSchließen: dmAnSchließen,
                     commandName: 'ticket_setup'
                 });
 
@@ -261,7 +261,7 @@ description: panelMessage,
                         },
                         {
                             name: "DM bei Schließen",
-                            value: dmOnClose ? 'Aktiviert' : 'Deaktiviert',
+                            value: dmAnSchließen ? 'Aktiviert' : 'Deaktiviert',
                             inline: true,
                         },
                         {
@@ -272,7 +272,7 @@ description: panelMessage,
                     );
 
             } catch (error) {
-                logger.error('Fehler beim Ticket-Setup', {
+                logger.error('Fehler beim Ticket-Einrichtung', {
                     error: error.message,
                     stack: error.stack,
                     userId: interaction.user.id,
@@ -280,14 +280,14 @@ description: panelMessage,
                     commandName: 'ticket_setup'
                 });
                 if (interaction.deferred || interaction.replied) {
-                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Das Ticket-Panel konnte nicht gesendet oder die Konfiguration nicht gespeichert werden. Überprüfe die Berechtigungen des Bots (insbesondere das Senden von Nachrichten im Zielkanal) und die Datenbankverbindung.' }).catch(err => {
+                    await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Das Ticket-Panel konnte nicht gesendet oder die Konfiguration nicht gespeichert werden. Überprüfe die Berechtigungen des Bots (insbesondere das Senden von Nachrichten im Zielkanal) und die Datenbankverbindung.' }).catch(err => {
                         logger.error('Fehlerantwort konnte nicht gesendet werden', {
                             error: err.message,
                             guildId: interaction.guildId
                         });
                     });
                 } else {
-                    await handleInteractionError(interaction, error, {
+                    await handleInteractionFehler(interaction, error, {
                         commandName: 'ticket_setup',
                         source: 'ticket_setup_command'
                     });

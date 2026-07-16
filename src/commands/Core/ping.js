@@ -36,8 +36,8 @@ export default {
         logger.info('execute aufgerufen - prüfe, ob Slash-Command oder Prefix-Command');
         logger.info(`execute - hat _commandStartTime: ${!!interaction._commandStartTime}, createdTimestamp: ${interaction.createdTimestamp}`);
         
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Defer für Ping-Interaction fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -73,8 +73,8 @@ export default {
                     embeds: [createEmbed({ title: 'Systemfehler', description: 'Die Latenz konnte derzeit nicht ermittelt werden.', color: 'error' })],
                     flags: MessageFlags.Ephemeral,
                 });
-            } catch (replyError) {
-                logger.error('Fehler beim Senden der Fehlermeldung:', replyError);
+            } catch (replyFehler) {
+                logger.error('Fehler beim Senden der Fehlermeldung:', replyFehler);
             }
         }
     },

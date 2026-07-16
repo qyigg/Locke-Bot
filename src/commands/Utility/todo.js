@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelT
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getFromDb, setInDb } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import crypto from 'crypto';
 
@@ -22,7 +22,7 @@ export default {
                     option
                         .setName("task")
                         .setDescription("The task to add")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
         )
         .addSubcommand(subcommand =>
@@ -38,7 +38,7 @@ export default {
                     option
                         .setName("number")
                         .setDescription("The number of the task to complete")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
         )
         .addSubcommand(subcommand =>
@@ -49,7 +49,7 @@ export default {
                     option
                         .setName("number")
                         .setDescription("The number of the task to remove")
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
         )
         .addSubcommandGroup(group => 
@@ -64,7 +64,7 @@ export default {
                             option
                                 .setName("name")
                                 .setDescription("Name for the shared list")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                 )
                 .addSubcommand(subcommand =>
@@ -75,13 +75,13 @@ export default {
                             option
                                 .setName("list_id")
                                 .setDescription("ID of the shared list")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                         .addUserOption(option =>
                             option
                                 .setName("user")
                                 .setDescription("User to add to the list")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                 )
                 .addSubcommand(subcommand =>
@@ -92,7 +92,7 @@ export default {
                             option
                                 .setName("list_id")
                                 .setDescription("ID of the shared list")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                 )
                 .addSubcommand(subcommand =>
@@ -103,13 +103,13 @@ export default {
                             option
                                 .setName("list_id")
                                 .setDescription("ID of the shared list")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                         .addStringOption(option =>
                             option
                                 .setName("task")
                                 .setDescription("The task to add")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                 )
                 .addSubcommand(subcommand =>
@@ -120,13 +120,13 @@ export default {
                             option
                                 .setName("list_id")
                                 .setDescription("ID of the shared list")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                         .addIntegerOption(option =>
                             option
                                 .setName("number")
                                 .setDescription("The number of the task to remove")
-                                .setRequired(true)
+                                .setErforderlich(true)
                         )
                 )
         )
@@ -169,8 +169,8 @@ export default {
             return listData;
         }
 
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Todo interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -211,11 +211,11 @@ export default {
 
                     const listData = await getOrCreateSharedList(listId);
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list not found.' });
                     }
 
                     if (listData.creatorId !== userId) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only the list creator can add members.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Anly the list creator can add members.' });
                     }
 
                     if (!listData.members.includes(memberToAdd.id)) {
@@ -237,7 +237,7 @@ export default {
                             ]
                         });
                     } else {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'User is already a member of this list.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'User is already a member of this list.' });
                     }
                 }
 
@@ -246,11 +246,11 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list not found.' });
                     }
 
                     if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
                     }
 
                     if (listData.tasks.length === 0) {
@@ -281,7 +281,7 @@ export default {
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_complete_${listId}`)
                                             .setLabel('Complete Task')
-                                            .setStyle(ButtonStyle.Success),
+                                            .setStyle(ButtonStyle.Erfolg),
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_remove_${listId}`)
                                             .setLabel('Remove Task')
@@ -325,7 +325,7 @@ export default {
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_complete_${listId}`)
                                     .setLabel('Complete Task')
-                                    .setStyle(ButtonStyle.Success),
+                                    .setStyle(ButtonStyle.Erfolg),
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_remove_${listId}`)
                                     .setLabel('Remove Task')
@@ -342,11 +342,11 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list not found.' });
                     }
 
                     if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
                     }
 
                     const newTask = {
@@ -374,16 +374,16 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list not found.' });
                     }
 
                     if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
                     }
 
                     const taskIndex = listData.tasks.findIndex(task => task.id === taskNumber);
                     if (taskIndex === -1) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task not found.' });
                     }
 
                     const [removedTask] = listData.tasks.splice(taskIndex, 1);
@@ -459,11 +459,11 @@ export default {
                 const task = userData.tasks.find(t => t.id === taskNumber);
 
                 if (!task) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task not found.' });
                 }
 
                 if (task.completed) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
                 }
 
                 task.completed = true;
@@ -481,7 +481,7 @@ export default {
                 const taskIndex = userData.tasks.findIndex(t => t.id === taskNumber);
 
                 if (taskIndex === -1) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task not found.' });
                 }
 
                 const [removedTask] = userData.tasks.splice(taskIndex, 1);
@@ -495,7 +495,7 @@ export default {
             }
 
             default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid subcommand.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid subcommand.' });
         }
     },
 };

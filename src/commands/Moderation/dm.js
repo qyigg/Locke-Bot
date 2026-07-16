@@ -5,7 +5,7 @@ import { logger } from '../../utils/logger.js';
 import { sanitizeMarkdown } from '../../utils/validation.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("dm")
@@ -14,27 +14,27 @@ export default {
             option
                 .setName("user")
                 .setDescription("The user to send a DM to")
-                .setRequired(true)
+                .setErforderlich(true)
         )
         .addStringOption(option =>
             option
                 .setName("message")
                 .setDescription("The message to send")
-                .setRequired(true)
+                .setErforderlich(true)
         )
         .addBooleanOption(option =>
             option
                 .setName("anonymous")
                 .setDescription("Send the message anonymously (default: false)")
-                .setRequired(false)
+                .setErforderlich(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .setDMPermission(false),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`DM interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -50,11 +50,11 @@ export default {
         try {
             
             if (message.length > 2000) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Messages must be under 2000 characters.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Messages must be under 2000 characters.' });
             }
 
             if (targetUser.bot) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot send DMs to bot accounts.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You cannot send DMs to bot accounts.' });
             }
 
             const sanitized = sanitizeMarkdown(message);
@@ -93,7 +93,7 @@ export default {
                 embeds: [
                     successEmbed(
                         "DM Sent",
-                        `Successfully sent a message to ${targetUser.tag}`
+                        `Erfolgfully sent a message to ${targetUser.tag}`
                     ),
                 ],
             });
@@ -101,10 +101,10 @@ export default {
             logger.error('DM command error:', error);
             
 if (error.code === 50007) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Could not send a DM to ${targetUser.tag}. They may have DMs disabled.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Could not send a DM to ${targetUser.tag}. They may have DMs disabled.` });
             }
             
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Failed to send DM: ${error.message}` });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Failed to send DM: ${error.message}` });
         }
     }
 };

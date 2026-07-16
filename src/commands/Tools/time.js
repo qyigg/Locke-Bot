@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
@@ -10,7 +10,7 @@ export default {
         .addStringOption(option =>
             option.setName('timezone')
                 .setDescription('The timezone to display (e.g., UTC, America/New_York)')
-                .setRequired(false)),
+                .setErforderlich(false)),
 
     async execute(interaction) {
         await InteractionHelper.safeExecute(
@@ -33,8 +33,8 @@ export default {
                     });
                 } catch (error) {
                     logger.warn(`Invalid timezone requested: ${timezone}`);
-                    await replyUserError(interaction, {
-                        type: ErrorTypes.VALIDATION,
+                    await replyUserFehler(interaction, {
+                        type: FehlerTypes.VALIDATION,
                         message: 'Invalid timezone. Please use a valid timezone identifier (e.g., UTC, America/New_York, Europe/London)',
                     });
                     return;

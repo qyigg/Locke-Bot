@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, addMoney, removeMoney, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import EconomyService from '../../services/economyService.js';
@@ -14,17 +14,17 @@ export default {
             option
                 .setName('user')
                 .setDescription('User to pay')
-                .setRequired(true)
+                .setErforderlich(true)
         )
         .addIntegerOption(option =>
             option
                 .setName('amount')
                 .setDescription('Amount to pay')
-                .setRequired(true)
+                .setErforderlich(true)
                 .setMinValue(1)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -41,27 +41,27 @@ export default {
             });
 
             if (receiver.bot) {
-                throw createError(
+                throw createFehler(
                     "Cannot pay bot",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "You cannot pay a bot.",
                     { receiverId: receiver.id, isBot: true }
                 );
             }
             
             if (receiver.id === senderId) {
-                throw createError(
+                throw createFehler(
                     "Cannot pay self",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "You cannot pay yourself.",
                     { senderId, receiverId: receiver.id }
                 );
             }
             
             if (amount <= 0) {
-                throw createError(
+                throw createFehler(
                     "Invalid payment amount",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Amount must be greater than zero.",
                     { amount, senderId }
                 );
@@ -73,18 +73,18 @@ export default {
             ]);
 
             if (!senderData) {
-                throw createError(
+                throw createFehler(
                     "Failed to load sender economy data",
-                    ErrorTypes.DATABASE,
+                    FehlerTypes.DATABASE,
                     "Failed to load your economy data. Please try again later.",
                     { userId: senderId, guildId }
                 );
             }
             
             if (!receiverData) {
-                throw createError(
+                throw createFehler(
                     "Failed to load receiver economy data",
-                    ErrorTypes.DATABASE,
+                    FehlerTypes.DATABASE,
                     "Failed to load the receiver's economy data. Please try again later.",
                     { userId: receiver.id, guildId }
                 );
@@ -102,7 +102,7 @@ export default {
             const updatedReceiverData = await getEconomyData(client, guildId, receiver.id);
 
             const embed = successEmbed(
-                'Payment Successful',
+                'Payment Erfolgful',
                 `You successfully paid **${receiver.username}** the amount of **$${amount.toLocaleString()}**!`
             )
                 .addFields(

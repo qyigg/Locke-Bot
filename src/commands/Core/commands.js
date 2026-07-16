@@ -6,7 +6,7 @@ import {
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import {
   disableCategory,
   enableCategory,
@@ -38,7 +38,7 @@ function buildCategoryChoices(client) {
 
 async function ensureManageGuild(interaction) {
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-    await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um Befehle zu verwalten.' });
+    await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um Befehle zu verwalten.' });
     return false;
   }
 
@@ -64,7 +64,7 @@ export default {
           option
             .setName('scope')
             .setDescription('Deaktiviere einen einzelnen Befehl oder eine ganze Kategorie')
-            .setRequired(true)
+            .setErforderlich(true)
             .addChoices(
               { name: 'Kategorie', value: 'category' },
               { name: 'Befehl', value: 'command' },
@@ -74,7 +74,7 @@ export default {
           option
             .setName('target')
             .setDescription('Name der Kategorie oder des Befehls')
-            .setRequired(true)
+            .setErforderlich(true)
             .setAutocomplete(true),
         ),
     )
@@ -86,7 +86,7 @@ export default {
           option
             .setName('scope')
             .setDescription('Aktiviere einen einzelnen Befehl oder eine ganze Kategorie')
-            .setRequired(true)
+            .setErforderlich(true)
             .addChoices(
               { name: 'Kategorie', value: 'category' },
               { name: 'Befehl', value: 'command' },
@@ -96,7 +96,7 @@ export default {
           option
             .setName('target')
             .setDescription('Name der Kategorie oder des Befehls')
-            .setRequired(true)
+            .setErforderlich(true)
             .setAutocomplete(true),
         ),
     ),
@@ -194,8 +194,8 @@ export default {
             customId: componentInteraction.customId,
             guildId: interaction.guildId,
           });
-          await replyUserError(componentInteraction, {
-            type: ErrorTypes.UNKNOWN,
+          await replyUserFehler(componentInteraction, {
+            type: FehlerTypes.UNKNOWN,
             message: error.message || 'Der Befehlszugriff konnte nicht aktualisiert werden.',
           }).catch(() => {});
         }
@@ -227,7 +227,7 @@ export default {
     if (scope === 'category') {
       const category = resolveCategoryChoice(client, target);
       if (!category) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Keine Kategorie passt zu \`${target}\`. Nutze \`/commands dashboard\`, um Kategorien zu durchsuchen.` });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Keine Kategorie passt zu \`${target}\`. Nutze \`/commands dashboard\`, um Kategorien zu durchsuchen.` });
       }
 
       if (isDisable) {

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { setUserLevel, getLevelingConfig } from '../../services/leveling/leveling.js';
 import { createEmbed } from '../../utils/embeds.js';
@@ -14,13 +14,13 @@ export default {
       option
         .setName('user')
         .setDescription('The user to set the level for')
-        .setRequired(true)
+        .setErforderlich(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('level')
         .setDescription('The level to set')
-        .setRequired(true)
+        .setErforderlich(true)
         .setMinValue(0)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
@@ -55,9 +55,9 @@ export default {
 
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
     if (!member) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         `User ${targetUser.id} not found in this guild`,
-        ErrorTypes.USER_INPUT,
+        FehlerTypes.USER_INPUT,
         'The specified user is not in this server.'
       );
     }
@@ -68,7 +68,7 @@ export default {
       embeds: [
         createEmbed({
           title: 'Level Set',
-          description: `Successfully set ${targetUser.tag}'s level to **${newLevel}**.\n**Total XP:** ${userData.totalXp}`,
+          description: `Erfolgfully set ${targetUser.tag}'s level to **${newLevel}**.\n**Total XP:** ${userData.totalXp}`,
           color: 'success'
         })
       ]

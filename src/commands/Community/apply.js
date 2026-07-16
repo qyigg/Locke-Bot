@@ -2,20 +2,20 @@ import { getColor, getDefaultApplicationQuestions } from '../../config/bot.js';
 import { SlashCommandBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError, withErrorHandling, createError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
+import { handleInteractionFehler, withFehlerHandling, createFehler, FehlerTypes, replyUserFehler } from '../../utils/errorHandler.js';
 import ApplicationService from '../../services/applicationService.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logEvent, EVENT_TYPES, resolveApplicationLogChannel } from '../../services/loggingService.js';
 import { formatLogLine, resolveUserAuthor } from '../../utils/logging/logEmbeds.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { 
-    getApplicationSettings, 
+    getApplicationEinstellungen, 
     getUserApplications, 
     createApplication, 
     getApplication,
     getApplicationRoles,
     updateApplication,
-    getApplicationRoleSettings
+    getApplicationRoleEinstellungen
 } from '../../utils/database.js';
 
 function getApplicationStatusPresentation(statusValue) {
@@ -35,19 +35,19 @@ function getApplicationStatusPresentation(statusValue) {
 }
 
 export default {
-    slashOnly: true,
+    slashAnly: true,
     data: new SlashCommandBuilder()
         .setName("apply")
         .setDescription("Manage role applications")
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("submit")
-                .setDescription("Submit an application for a role")
+                .setDescription("Absenden an application for a role")
                 .addStringOption((option) =>
                     option
                         .setName("application")
                         .setDescription("The application you want to submit")
-                        .setRequired(true)
+                        .setErforderlich(true)
                         .setAutocomplete(true),
                 ),
         )
@@ -59,7 +59,7 @@ export default {
                     option
                         .setName("id")
                         .setDescription("Application ID (leave empty to see all)")
-                        .setRequired(false),
+                        .setErforderlich(false),
                 ),
         )
         .addSubcommand((subcommand) =>
@@ -70,9 +70,9 @@ export default {
 
     category: "Community",
 
-    execute: withErrorHandling(async (interaction) => {
+    execute: withFehlerHandling(async (interaction) => {
         if (!interaction.inGuild()) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This command can only be used in a server.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This command can only be used in a server.' });
         }
 
         const { options, guild, member } = interaction;
@@ -89,22 +89,22 @@ export default {
             subcommand
         });
 
-        const settings = await getApplicationSettings(
+        const settings = await getApplicationEinstellungen(
             interaction.client,
             guild.id,
         );
         
         if (!settings.enabled) {
-            throw createError(
+            throw createFehler(
                 'Applications are disabled',
-                ErrorTypes.CONFIGURATION,
+                FehlerTypes.CONFIGURATION,
                 'Applications are currently disabled in this server.',
                 { guildId: guild.id }
             );
         }
 
         if (subcommand === "submit") {
-            await handleSubmit(interaction, settings);
+            await handleAbsenden(interaction, settings);
         } else if (subcommand === "status") {
             await handleStatus(interaction);
         } else if (subcommand === "list") {
@@ -114,7 +114,7 @@ export default {
 };
 
 export async function handleApplicationModal(interaction) {
-    if (!interaction.isModalSubmit()) return;
+    if (!interaction.isModalAbsenden()) return;
     
     const customId = interaction.customId;
     if (!customId.startsWith('app_modal_')) return;
@@ -125,22 +125,22 @@ export async function handleApplicationModal(interaction) {
     const applicationRole = applicationRoles.find(appRole => appRole.roleId === roleId);
     
     if (!applicationRole) {
-        return await replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: 'Application configuration not found.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.CONFIGURATION, message: 'Application configuration not found.' });
     }
     
     const role = interaction.guild.roles.cache.get(roleId);
     
     if (!role) {
-        return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Role not found.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'Role not found.' });
     }
     
     const answers = [];
-    const settings = await getApplicationSettings(interaction.client, interaction.guild.id);
+    const settings = await getApplicationEinstellungen(interaction.client, interaction.guild.id);
 
     let questions = settings.questions?.length ? settings.questions : getDefaultApplicationQuestions();
-    const roleSettings = await getApplicationRoleSettings(interaction.client, interaction.guild.id, roleId);
-    if (roleSettings.questions && roleSettings.questions.length > 0) {
-        questions = roleSettings.questions;
+    const roleEinstellungen = await getApplicationRoleEinstellungen(interaction.client, interaction.guild.id, roleId);
+    if (roleEinstellungen.questions && roleEinstellungen.questions.length > 0) {
+        questions = roleEinstellungen.questions;
     }
     
     for (let i = 0; i < questions.length; i++) {
@@ -163,7 +163,7 @@ export async function handleApplicationModal(interaction) {
         });
         
         const embed = successEmbed(
-            'Application Submitted',
+            'Application Absendented',
             `Your application for **${applicationRole.name}** has been submitted successfully!\n\n` +
             `Application ID: \`${application.id}\`\n` +
             `You can check the status with \`/apply status id:${application.id}\``
@@ -171,11 +171,11 @@ export async function handleApplicationModal(interaction) {
         
         await InteractionHelper.safeEditReply(interaction, { embeds: [embed], flags: ["Ephemeral"] });
         
-        const settings = await getApplicationSettings(interaction.client, interaction.guild.id);
-        const roleSettings = await getApplicationRoleSettings(interaction.client, interaction.guild.id, roleId);
+        const settings = await getApplicationEinstellungen(interaction.client, interaction.guild.id);
+        const roleEinstellungen = await getApplicationRoleEinstellungen(interaction.client, interaction.guild.id, roleId);
         const guildConfig = await getGuildConfig(interaction.client, interaction.guild.id);
 
-        const logChannelId = resolveApplicationLogChannel(guildConfig, roleSettings, settings);
+        const logChannelId = resolveApplicationLogChannel(guildConfig, roleEinstellungen, settings);
 
         if (logChannelId) {
             const logMessage = await logEvent({
@@ -184,11 +184,11 @@ export async function handleApplicationModal(interaction) {
                 eventType: EVENT_TYPES.APPLICATION_SUBMIT,
                 channelId: logChannelId,
                 data: {
-                    title: 'Application Submitted',
+                    title: 'Application Absendented',
                     lines: [
                         formatLogLine('Applicant', `<@${interaction.user.id}> (${interaction.user.tag})`),
                         formatLogLine('Application', applicationRole.name),
-                        formatLogLine('Role', role.name),
+                        formatLogLine('Role', Rolle zu bekommen.name),
                         formatLogLine('Application ID', `\`${application.id}\``),
                     ],
                     inlineFields: [
@@ -207,7 +207,7 @@ export async function handleApplicationModal(interaction) {
         }
         
     } catch (error) {
-        logger.error('Error creating application:', {
+        logger.error('Fehler creating application:', {
             error: error.message,
             userId: interaction.user.id,
             guildId: interaction.guild.id,
@@ -215,7 +215,7 @@ export async function handleApplicationModal(interaction) {
             stack: error.stack
         });
         
-        await handleInteractionError(interaction, error, {
+        await handleInteractionFehler(interaction, error, {
             type: 'modal',
             handler: 'application_submission'
         });
@@ -227,7 +227,7 @@ async function handleList(interaction) {
         const applicationRoles = await getApplicationRoles(interaction.client, interaction.guild.id);
         
         if (applicationRoles.length === 0) {
-            return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'No applications are currently available.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'No applications are currently available.' });
         }
 
         const embed = createEmbed({
@@ -251,22 +251,22 @@ async function handleList(interaction) {
 
         return InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     } catch (error) {
-        logger.error('Error listing applications:', {
+        logger.error('Fehler listing applications:', {
             error: error.message,
             guildId: interaction.guild.id,
             stack: error.stack
         });
         
-        throw createError(
+        throw createFehler(
             'Failed to load applications',
-            ErrorTypes.DATABASE,
+            FehlerTypes.DATABASE,
             'Failed to load applications. Please try again later.',
             { guildId: interaction.guild.id }
         );
     }
 }
 
-async function handleSubmit(interaction, settings) {
+async function handleAbsenden(interaction, settings) {
     const applicationName = interaction.options.getString("application");
     const member = interaction.member;
 
@@ -277,7 +277,7 @@ async function handleSubmit(interaction, settings) {
     );
 
     if (!applicationRole) {
-        return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Use `/apply list` to see available applications.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'Use `/apply list` to see available applications.' });
     }
 
     const userApps = await getUserApplications(
@@ -288,12 +288,12 @@ async function handleSubmit(interaction, settings) {
     const pendingApp = userApps.find((app) => app.status === "pending");
 
     if (pendingApp) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You already have a pending application. Please wait for it to be reviewed.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You already have a pending application. Please wait for it to be reviewed.' });
     }
 
     const role = interaction.guild.roles.cache.get(applicationRole.roleId);
     if (!role) {
-        return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'The role for this application no longer exists.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'The role for this application no longer exists.' });
     }
 
     const modal = new ModalBuilder()
@@ -301,9 +301,9 @@ async function handleSubmit(interaction, settings) {
         .setTitle(`Application for ${applicationRole.name}`);
 
     let questions = settings.questions?.length ? settings.questions : getDefaultApplicationQuestions();
-    const roleSettings = await getApplicationRoleSettings(interaction.client, interaction.guild.id, applicationRole.roleId);
-    if (roleSettings.questions && roleSettings.questions.length > 0) {
-        questions = roleSettings.questions;
+    const roleEinstellungen = await getApplicationRoleEinstellungen(interaction.client, interaction.guild.id, applicationRole.roleId);
+    if (roleEinstellungen.questions && roleEinstellungen.questions.length > 0) {
+        questions = roleEinstellungen.questions;
     }
 
     questions.forEach((question, index) => {
@@ -315,7 +315,7 @@ async function handleSubmit(interaction, settings) {
                     : question,
             )
             .setStyle(TextInputStyle.Paragraph)
-            .setRequired(true)
+            .setErforderlich(true)
             .setMaxLength(1000);
 
         const row = new ActionRowBuilder().addComponents(input);
@@ -336,7 +336,7 @@ async function handleStatus(interaction) {
         );
 
         if (!application || application.userId !== interaction.user.id) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Application not found or you do not have permission to view it.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Application not found or you do not have permission to view it.' });
         }
 
         const submittedAt = application?.createdAt ? new Date(application.createdAt) : null;
@@ -349,7 +349,7 @@ async function handleStatus(interaction) {
             description:
                 `**Application ID:** \`${application.id}\`\n` +
                 `**Status:** ${statusView.statusEmoji} ${statusView.statusLabel}\n` +
-                `**Submitted:** ${submittedAtDisplay}`
+                `**Absendented:** ${submittedAtDisplay}`
         });
 
         return InteractionHelper.safeEditReply(interaction, { embeds: [embed], flags: ["Ephemeral"] });
@@ -361,7 +361,7 @@ async function handleStatus(interaction) {
         );
 
         if (applications.length === 0) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You have not submitted any applications yet.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You have not submitted any applications yet.' });
         }
 
         const recentApplications = applications
@@ -385,7 +385,7 @@ async function handleStatus(interaction) {
                 value:
                     `**ID:** \`${application.id}\`\n` +
                     `**Status:** ${statusView.statusEmoji} ${statusView.statusLabel}\n` +
-                    `**Submitted:** ${submittedAtDisplay}`,
+                    `**Absendented:** ${submittedAtDisplay}`,
                 inline: true,
             });
         });

@@ -3,7 +3,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { buildQueueReply } from '../../services/music/musicActions.js';
 
 export default {
-    slashOnly: true,
+    slashAnly: true,
     category: 'Music',
     data: new SlashCommandBuilder()
         .setName('queue')

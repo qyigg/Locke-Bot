@@ -56,20 +56,20 @@ export default async (client) => {
               logger.info(`Loaded ${type.slice(0, -1)}: ${interaction.name} (${fileName})`);
             }
           } catch (error) {
-            logger.error(`Error loading interaction ${relativePath} in ${type}:`, error);
+            logger.error(`Fehler loading interaction ${relativePath} in ${type}:`, error);
           }
         }
 
         logger.info(`Loaded ${loadedCount} ${type}`);
       } catch (error) {
         if (error.code !== 'ENOENT') {
-          logger.error(`Error loading ${type}:`, error);
+          logger.error(`Fehler loading ${type}:`, error);
         } else {
           logger.debug(`No ${type} directory found, skipping...`);
         }
       }
     }
   } catch (error) {
-    logger.error('Error loading interactions:', error);
+    logger.error('Fehler loading interactions:', error);
   }
 };

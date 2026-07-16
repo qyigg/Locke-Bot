@@ -13,8 +13,8 @@ export default {
     ),
 
   async execute(interaction) {
-    const deferSuccess = await InteractionHelper.safeDefer(interaction);
-    if (!deferSuccess) {
+    const deferErfolg = await InteractionHelper.safeDefer(interaction);
+    if (!deferErfolg) {
       logger.warn(`UserInfo interaction defer failed`, {
         userId: interaction.user.id,
         guildId: interaction.guildId,

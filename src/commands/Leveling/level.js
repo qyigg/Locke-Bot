@@ -3,7 +3,7 @@ import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } f
 import { createEmbed } from '../../utils/embeds.js';
 import { getLevelingConfig, saveLevelingConfig } from '../../services/leveling/leveling.js';
 import { botHasPermission } from '../../utils/permissionGuard.js';
-import { TitanBotError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
 import levelDashboard from './modules/level_dashboard.js';
@@ -23,7 +23,7 @@ export default {
                         .setName('channel')
                         .setDescription('Channel to send level-up notifications in')
                         .addChannelTypes(ChannelType.GuildText)
-                        .setRequired(true),
+                        .setErforderlich(true),
                 )
                 .addIntegerOption((option) =>
                     option
@@ -31,7 +31,7 @@ export default {
                         .setDescription('Minimum XP awarded per message (default: 15)')
                         .setMinValue(1)
                         .setMaxValue(500)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addIntegerOption((option) =>
                     option
@@ -39,7 +39,7 @@ export default {
                         .setDescription('Maximum XP awarded per message (default: 25)')
                         .setMinValue(1)
                         .setMaxValue(500)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addStringOption((option) =>
                     option
@@ -48,7 +48,7 @@ export default {
                             'Level-up message. Use {user} and {level} as placeholders (default provided)',
                         )
                         .setMaxLength(500)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 )
                 .addIntegerOption((option) =>
                     option
@@ -56,7 +56,7 @@ export default {
                         .setDescription('Seconds between XP grants per user (default: 60)')
                         .setMinValue(0)
                         .setMaxValue(3600)
-                        .setRequired(false),
+                        .setErforderlich(false),
                 ),
         )
         .addSubcommand((subcommand) =>
@@ -73,7 +73,7 @@ export default {
         if (!deferred) return;
 
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the **Manage Server** permission to use this command.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need the **Manage Server** permission to use this command.' });
         }
 
         const subcommand = interaction.options.getSubcommand();
@@ -92,13 +92,13 @@ export default {
             const xpCooldown = interaction.options.getInteger('xp_cooldown') ?? 60;
 
             if (xpMin > xpMax) {
-                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Minimum XP (**${xpMin}**) cannot be greater than maximum XP (**${xpMax}**).` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: `Minimum XP (**${xpMin}**) cannot be greater than maximum XP (**${xpMax}**).` });
             }
 
             if (!botHasPermission(channel, ['SendMessages', 'EmbedLinks'])) {
-                throw new TitanBotError(
+                throw new TitanBotFehler(
                     'Bot missing permissions in the specified channel',
-                    ErrorTypes.PERMISSION,
+                    FehlerTypes.PERMISSION,
                     `I need **SendMessages** and **EmbedLinks** permissions in ${channel} to send level-up notifications.`,
                 );
             }
@@ -106,7 +106,7 @@ export default {
             const existingConfig = await getLevelingConfig(client, interaction.guildId);
 
             if (existingConfig.configured) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `The leveling system is already set up on this server (level-up notifications go to <#${existingConfig.levelUpChannel}>).\n\nUse \`/level dashboard\` to adjust any settings.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `The leveling system is already set up on this server (level-up notifications go to <#${existingConfig.levelUpChannel}>).\n\nUse \`/level dashboard\` to adjust any settings.` });
             }
 
             const newConfig = {

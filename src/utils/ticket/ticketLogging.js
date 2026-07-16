@@ -47,7 +47,7 @@ export async function logTicketEvent({ client, guildId, event }) {
     await channel.send(messageOptions);
     logger.info(`Ticket event logged: ${event.type} in guild ${guildId}`);
   } catch (error) {
-    logger.error('Error logging ticket event:', error);
+    logger.error('Fehler logging ticket event:', error);
   }
 }
 
@@ -99,8 +99,8 @@ function getLogChannelForEventType(config, eventType) {
 
 const TICKET_EVENT_STYLES = {
   open: { color: 0x5865F2, title: 'Ticket Created' },
-  close: { color: 0xED4245, title: 'Ticket Closed' },
-  delete: { color: 0x8b0000, title: 'Ticket Deleted' },
+  close: { color: 0xED4245, title: 'Ticket Schließend' },
+  delete: { color: 0x8b0000, title: 'Ticket Löschend' },
   claim: { color: 0x5865F2, title: 'Ticket Claimed' },
   unclaim: { color: 0xFAA61A, title: 'Ticket Unclaimed' },
   priority: { color: 0x9b59b6, title: 'Priority Updated' },
@@ -140,7 +140,7 @@ async function createTicketLogEmbed(guild, event) {
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
-        { name: 'Closed by', value: executorMention || 'Unknown', inline: true },
+        { name: 'Schließend by', value: executorMention || 'Unknown', inline: true },
       ];
       if (channelMention) {
         inlineFields.push({ name: 'Channel', value: channelMention, inline: true });
@@ -154,7 +154,7 @@ async function createTicketLogEmbed(guild, event) {
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
-        { name: 'Deleted by', value: executorMention || 'Unknown', inline: true },
+        { name: 'Löschend by', value: executorMention || 'Unknown', inline: true },
       ];
       break;
 

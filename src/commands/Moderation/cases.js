@@ -3,7 +3,7 @@ import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { getModerationCases } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('cases')
@@ -18,7 +18,7 @@ export default {
                     { name: 'Bans', value: 'Member Banned' },
                     { name: 'Kicks', value: 'Member Kicked' },
                     { name: 'Timeouts', value: 'Member Timed Out' },
-                    { name: 'Warnings', value: 'User Warned' }
+                    { name: 'Warnungs', value: 'User Warned' }
                 )
         )
         .addUserOption(option =>
@@ -35,8 +35,8 @@ export default {
     category: 'moderation',
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Cases interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -59,7 +59,7 @@ export default {
             const cases = await getModerationCases(interaction.guild.id, filters);
 
             if (cases.length === 0) {
-                throw new Error(targetUser 
+                throw new Fehler(targetUser 
                     ? `No moderation cases found for ${targetUser.tag}`
                     : `No ${filterType === 'all' ? '' : filterType} cases found in this server.`
                 );
@@ -114,7 +114,7 @@ export default {
 
                 const nextButton = new ButtonBuilder()
                     .setCustomId('next_page')
-                    .setLabel('Next ➡️')
+                    .setLabel('Weiter ➡️')
                     .setStyle(ButtonStyle.Secondary)
                     .setDeaktiviert(page === totalPages);
 
@@ -170,8 +170,8 @@ time: 120000
             });
 
         } catch (error) {
-            logger.error('Error in cases command:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Please try again later.' });
+            logger.error('Fehler in cases command:', error);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Please try again later.' });
         }
     }
 };

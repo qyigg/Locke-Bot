@@ -49,7 +49,7 @@ export async function getOpenTicketCountForUser(guildId, userId) {
 
         return 0;
     } catch (error) {
-        logger.error(`Error counting open tickets for user ${userId} in guild ${guildId}:`, error);
+        logger.error(`Fehler counting open tickets for user ${userId} in guild ${guildId}:`, error);
         return 0;
     }
 }
@@ -131,7 +131,7 @@ export async function getGuildTicketStats(guildId) {
         const tickets = await listGuildTickets(guildId);
         let openCount = 0;
         let closedCount = 0;
-        let totalCloseMs = 0;
+        let totalSchließenMs = 0;
         let closeSamples = 0;
         let feedbackCount = 0;
         let ratingSum = 0;
@@ -144,7 +144,7 @@ export async function getGuildTicketStats(guildId) {
                 if (ticket.createdAt && ticket.closedAt) {
                     const duration = new Date(ticket.closedAt) - new Date(ticket.createdAt);
                     if (Number.isFinite(duration) && duration >= 0) {
-                        totalCloseMs += duration;
+                        totalSchließenMs += duration;
                         closeSamples += 1;
                     }
                 }
@@ -160,16 +160,16 @@ export async function getGuildTicketStats(guildId) {
         return {
             openCount,
             closedCount,
-            avgCloseTimeMs: closeSamples > 0 ? Math.round(totalCloseMs / closeSamples) : null,
+            avgSchließenTimeMs: closeSamples > 0 ? Math.round(totalSchließenMs / closeSamples) : null,
             feedbackCount,
             avgRating: feedbackCount > 0 ? Math.round((ratingSum / feedbackCount) * 10) / 10 : null,
         };
     } catch (error) {
-        logger.error(`Error computing ticket stats for guild ${guildId}:`, error);
+        logger.error(`Fehler computing ticket stats for guild ${guildId}:`, error);
         return {
             openCount: 0,
             closedCount: 0,
-            avgCloseTimeMs: null,
+            avgSchließenTimeMs: null,
             feedbackCount: 0,
             avgRating: null,
         };

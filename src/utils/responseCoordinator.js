@@ -1,6 +1,6 @@
 // responseCoordinator.js — single respond-once gate for prefix and slash commands
 
-import { buildUserErrorEmbed } from './embeds.js';
+import { buildUserFehlerEmbed } from './embeds.js';
 import { logger } from './logger.js';
 
 function getCommandJson(commandData) {
@@ -179,7 +179,7 @@ export class ResponseCoordinator {
   }
 
   async respondUsage(usageLine) {
-    const embed = buildUserErrorEmbed(
+    const embed = buildUserFehlerEmbed(
       'validation',
       `Usage\n\`${usageLine}\``,
       { titleOverride: 'Wrong Usage' }

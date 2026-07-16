@@ -3,22 +3,22 @@ import { InteractionHelper } from '../utils/interactionHelper.js';
 import { MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../utils/errorHandler.js';
 import {
     getEconomyKey,
     getUserLevelKey,
     getAFKKey,
-    getWarningsKey,
+    getWarnungsKey,
     getUserNotesKey,
     getEconomyPrefix,
     getUserLevelPrefix,
 } from '../utils/database.js';
-const wipedataConfirmHandler = {
+const wipedataBestätigenHandler = {
   name: 'wipedata_yes',
   async execute(interaction, client) {
     try {
-      const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-      if (!deferSuccess) return;
+      const deferErfolg = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+      if (!deferErfolg) return;
 
       const userId = interaction.user.id;
       const guildId = interaction.guildId;
@@ -27,7 +27,7 @@ const wipedataConfirmHandler = {
         getEconomyKey(guildId, userId),
         getUserLevelKey(guildId, userId),
         getAFKKey(guildId, userId),
-        getWarningsKey(guildId, userId),
+        getWarnungsKey(guildId, userId),
         getUserNotesKey(guildId, userId),
         `level:${guildId}:${userId}`,
         `xp:${guildId}:${userId}`,
@@ -54,7 +54,7 @@ const wipedataConfirmHandler = {
       ];
 
       let deletedCount = 0;
-      const deleteErrors = [];
+      const deleteFehlers = [];
 
       for (const key of dataKeyPatterns) {
         try {
@@ -64,8 +64,8 @@ const wipedataConfirmHandler = {
             deletedCount++;
           }
         } catch (error) {
-          logger.error(`Error deleting key ${key}:`, error);
-          deleteErrors.push(key);
+          logger.error(`Fehler deleting key ${key}:`, error);
+          deleteFehlers.push(key);
         }
       }
 
@@ -89,8 +89,8 @@ const wipedataConfirmHandler = {
               if (Array.isArray(keys)) {
                 keys.forEach((key) => discoveredKeys.add(key));
               }
-            } catch (listError) {
-              logger.debug(`Key listing failed for prefix ${prefix}:`, listError);
+            } catch (listFehler) {
+              logger.debug(`Key listing failed for prefix ${prefix}:`, listFehler);
             }
           }
 
@@ -104,8 +104,8 @@ const wipedataConfirmHandler = {
               await client.db.delete(key);
               deletedCount++;
             } catch (error) {
-              logger.error(`Error deleting additional key ${key}:`, error);
-              deleteErrors.push(key);
+              logger.error(`Fehler deleting additional key ${key}:`, error);
+              deleteFehlers.push(key);
             }
           }
         }
@@ -115,7 +115,7 @@ const wipedataConfirmHandler = {
 
       const successMessage =
         `✅ **Your data has been successfully wiped!**\n\n` +
-        `**Records Deleted:** ${deletedCount}\n\n` +
+        `**Records Löschend:** ${deletedCount}\n\n` +
         `Your account has been reset to default values. You can now start fresh!\n\n` +
         `*All your economy balance, levels, items, and personal data have been removed.*`;
 
@@ -124,27 +124,27 @@ const wipedataConfirmHandler = {
         components: []
       });
 
-      logger.info(`User ${interaction.user.tag} (${userId}) wiped their data in guild ${guildId} - Deleted ${deletedCount} records`);
-      if (deleteErrors.length > 0) {
-        logger.warn(`Data wipe completed with ${deleteErrors.length} deletion errors for user ${userId} in guild ${guildId}`);
+      logger.info(`User ${interaction.user.tag} (${userId}) wiped their data in guild ${guildId} - Löschend ${deletedCount} records`);
+      if (deleteFehlers.length > 0) {
+        logger.warn(`Data wipe completed with ${deleteFehlers.length} deletion errors for user ${userId} in guild ${guildId}`);
       }
 
     } catch (error) {
       logger.error('Wipedata confirm button handler error:', error);
       
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while wiping your data. Please try again later or contact support.' });
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while wiping your data. Please try again later or contact support.' });
     }
   }
 };
 
-const wipedataCancelHandler = {
+const wipedataAbbrechenHandler = {
   name: 'wipedata_no',
   async execute(interaction, client) {
     try {
       await interaction.update({
         embeds: [
           createEmbed({
-            title: '❌ Data Wipe Cancelled',
+            title: '❌ Data Wipe Abbrechenled',
             description: 'Your data has been preserved. Your account remains unchanged.',
             color: 'info'
           })
@@ -157,10 +157,10 @@ const wipedataCancelHandler = {
       logger.error('Wipedata cancel button handler error:', error);
       
       if (!interaction.replied && !interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not cancel data wipe.' });
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Could not cancel data wipe.' });
       }
     }
   }
 };
 
-export { wipedataConfirmHandler, wipedataCancelHandler };
+export { wipedataBestätigenHandler, wipedataAbbrechenHandler };

@@ -31,7 +31,7 @@ const migrationTable = process.env.POSTGRES_MIGRATION_TABLE || 'schema_migration
 const migrationTablePattern = /^[a-z_][a-z0-9_]*$/;
 
 if (!migrationTablePattern.test(migrationTable)) {
-  throw new Error(`Invalid migration table name: ${migrationTable}`);
+  throw new Fehler(`Invalid migration table name: ${migrationTable}`);
 }
 
 const ensureMigrationLedger = async (client) => {
@@ -75,7 +75,7 @@ const createTables = async (client) => {
     try {
       await client.query(statement);
     } catch (error) {
-      logger.error(`❌ Error creating table: ${error.message}`);
+      logger.error(`❌ Fehler creating table: ${error.message}`);
       throw error;
     }
   }
@@ -90,7 +90,7 @@ const createIndexes = async (client) => {
     try {
       await client.query(statement);
     } catch (error) {
-      logger.error(`❌ Error creating index: ${error.message}`);
+      logger.error(`❌ Fehler creating index: ${error.message}`);
       throw error;
     }
   }
@@ -122,7 +122,7 @@ const createTriggers = async (client) => {
          FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`
       );
     } catch (error) {
-      logger.error(`❌ Error creating trigger for ${table}: ${error.message}`);
+      logger.error(`❌ Fehler creating trigger for ${table}: ${error.message}`);
       throw error;
     }
   }

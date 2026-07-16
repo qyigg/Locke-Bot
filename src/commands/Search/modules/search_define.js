@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { handleInteractionError, replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { handleInteractionFehler, replyUserFehler, FehlerTypes } from '../../../utils/errorHandler.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 
 export default {
@@ -20,7 +20,7 @@ export default {
                     word: word,
                     guildId: interaction.guildId
                 });
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Please enter a word with at least 2 characters.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Please enter a word with at least 2 characters.' });
             }
 
             const response = await axios.get(
@@ -29,7 +29,7 @@ export default {
             );
 
             if (!response.data || response.data.length === 0) {
-                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${word}".` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `No definitions found for "${word}".` });
             }
 
             const data = response.data[0];
@@ -82,9 +82,9 @@ export default {
             });
 
             if (error.response?.status === 404) {
-                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('word')}".` });
+                await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('word')}".` });
             } else {
-                await handleInteractionError(interaction, error, {
+                await handleInteractionFehler(interaction, error, {
                     commandName: 'define',
                     source: 'dictionary_api'
                 });

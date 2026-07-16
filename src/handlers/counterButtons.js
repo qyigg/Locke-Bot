@@ -2,9 +2,9 @@ import { MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed } from '../utils/embeds.js';
 import { performDeletionByCounterId } from '../commands/ServerStats/modules/serverstats_delete.js';
 import { logger } from '../utils/logger.js';
-import { ErrorTypes, replyUserError, handleInteractionError } from '../utils/errorHandler.js';
+import { FehlerTypes, replyUserFehler, handleInteractionFehler } from '../utils/errorHandler.js';
 
-export const counterDeleteActionHandler = {
+export const counterLöschenActionHandler = {
   name: 'counter-delete',
   async execute(interaction, client, args = []) {
     try {
@@ -19,24 +19,24 @@ export const counterDeleteActionHandler = {
       const [action, counterId, ownerId] = args;
 
       if (!interaction.inGuild()) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This action can only be used in a server.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This action can only be used in a server.' }).catch(logger.error);
         return;
       }
 
       if (!action || !counterId) {
-        await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Counter delete action data is missing.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Counter delete action data is missing.' }).catch(logger.error);
         return;
       }
 
       if (ownerId && interaction.user.id !== ownerId) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only the user who initiated this deletion can use these buttons.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Anly the user who initiated this deletion can use these buttons.' }).catch(logger.error);
         return;
       }
 
       if (action === 'cancel') {
         await interaction.editReply({
           embeds: [createEmbed({
-            title: '❌ Cancelled',
+            title: '❌ Abbrechenled',
             description: 'Counter deletion cancelled.',
             color: 'error'
           })],
@@ -46,7 +46,7 @@ export const counterDeleteActionHandler = {
       }
 
       if (action !== 'confirm') {
-        await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Unknown counter delete action.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Unknown counter delete action.' }).catch(logger.error);
         return;
       }
 
@@ -57,7 +57,7 @@ export const counterDeleteActionHandler = {
         components: []
       }).catch(logger.error);
     } catch (error) {
-      await handleInteractionError(interaction, error, {
+      await handleInteractionFehler(interaction, error, {
         type: 'button',
         handler: 'counter_delete',
         customId: interaction.customId,
@@ -66,4 +66,4 @@ export const counterDeleteActionHandler = {
   }
 };
 
-export default counterDeleteActionHandler;
+export default counterLöschenActionHandler;

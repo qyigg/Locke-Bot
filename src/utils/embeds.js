@@ -254,7 +254,7 @@ const USER_ERROR_COLORS = {
  * @param {string} [description] - Konkrete, umsetzbare Meldung für den Nutzer
  * @param {{ titleOverride?: string }} [options]
  */
-export function buildUserErrorEmbed(errorType, description = '', options = {}) {
+export function buildUserFehlerEmbed(errorType, description = '', options = {}) {
   const type = errorType || 'unknown';
   const title = options.titleOverride || USER_ERROR_TITLES[type] || USER_ERROR_TITLES.unknown;
   const color = USER_ERROR_COLORS[type] || 'error';
@@ -289,7 +289,7 @@ function buildNotificationEmbed(title, body = '', color = 'primary') {
 }
 
 /**
- * @deprecated Bevorzugt buildUserErrorEmbed oder replyUserError aus errorHandler.js.
+ * @deprecated Bevorzugt buildUserFehlerEmbed oder replyUserFehler aus errorHandler.js.
  */
 export function errorEmbed(title, detail = null, options = {}) {
   const { showDetails = process.env.NODE_ENV !== 'production' } = options;
@@ -303,7 +303,7 @@ export function errorEmbed(title, detail = null, options = {}) {
   const description = body ? String(body).trim() : '';
   const titleOverride = title && title !== 'Fehler' ? title : undefined;
 
-  return buildUserErrorEmbed('unknown', description, { titleOverride });
+  return buildUserFehlerEmbed('unknown', description, { titleOverride });
 }
 
 /** @param {string} titleOrBody - Bei einem Argument: Body-Text. Bei zwei Argumenten: Titel und Body. */

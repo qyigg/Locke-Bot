@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Collection, ActionRowBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError } from '../../utils/errorHandler.js';
+import { handleInteractionFehler } from '../../utils/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -150,7 +150,7 @@ async function createCategoryCommandsMenu(category, client) {
         }
     } catch (error) {
         logger.error(
-            `Error reading commands from category ${category}:`,
+            `Fehler reading commands from category ${category}:`,
             error,
         );
     }
@@ -166,7 +166,7 @@ async function createCategoryCommandsMenu(category, client) {
             }
         }
     } catch (error) {
-        logger.error('Error fetching registered commands:', error);
+        logger.error('Fehler fetching registered commands:', error);
     }
 
     const embed = createEmbed({
@@ -224,7 +224,7 @@ async function createCategoryCommandsMenu(category, client) {
 
     const backButton = createButton(
         BACK_BUTTON_ID,
-        "Back",
+        "Zurück",
         "primary",
         "⬅️",
         false,
@@ -281,7 +281,7 @@ export async function createAllCommandsMenu(page = 1, client) {
             }
         } catch (error) {
             logger.error(
-                `Error reading commands from category ${category}:`,
+                `Fehler reading commands from category ${category}:`,
                 error,
             );
         }
@@ -298,7 +298,7 @@ export async function createAllCommandsMenu(page = 1, client) {
             }
         }
     } catch (error) {
-        logger.error('Error fetching registered commands:', error);
+        logger.error('Fehler fetching registered commands:', error);
     }
 
     const totalPages = Math.ceil(allCommands.length / commandsPerPage);
@@ -354,7 +354,7 @@ export async function createAllCommandsMenu(page = 1, client) {
 
     const backButton = createButton(
         BACK_BUTTON_ID,
-        "Back",
+        "Zurück",
         "primary",
         "⬅️",
         false,
@@ -405,7 +405,7 @@ export const helpCategorySelectMenu = {
                 return;
             }
 
-            await handleInteractionError(interaction, error, {
+            await handleInteractionFehler(interaction, error, {
                 type: 'select_menu',
                 customId: interaction.customId,
                 handler: 'help_category',

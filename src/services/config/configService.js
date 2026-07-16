@@ -3,8 +3,8 @@
 import { logger } from '../../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from './guildConfig.js';
 import { PermissionFlagsBits } from 'discord.js';
-import { createError, ErrorTypes } from '../../utils/errorHandler.js';
-import { wrapServiceClassMethods } from '../../utils/serviceErrorBoundary.js';
+import { createFehler, FehlerTypes } from '../../utils/errorHandler.js';
+import { wrapServiceClassMethods } from '../../utils/serviceFehlerBoundary.js';
 import { z } from 'zod';
 import { LogIgnoreSchema, LoggingConfigSchema } from '../../utils/schemas.js';
 
@@ -19,7 +19,7 @@ const CONFIG_VALIDATION_RULES = {
     modRole: { type: 'role', required: false },
     adminRole: { type: 'role', required: false },
     prefix: { type: 'string', required: false, maxLength: 10, minLength: 1 },
-    dmOnClose: { type: 'boolean', required: false },
+    dmAnSchließen: { type: 'boolean', required: false },
     maxTicketsPerUser: { type: 'number', required: false, min: 1, max: 50 },
     birthdayChannelId: { type: 'channel', required: false },
     logIgnore: { type: 'object', required: false },
@@ -44,7 +44,7 @@ const ConfigValueSchemas = Object.freeze({
     modRole: z.union([z.string().min(1), z.object({ id: z.string().min(1) })]),
     adminRole: z.union([z.string().min(1), z.object({ id: z.string().min(1) })]),
     prefix: z.string().min(1).max(10),
-    dmOnClose: z.boolean(),
+    dmAnSchließen: z.boolean(),
     maxTicketsPerUser: z.number().int().min(1).max(50),
     birthdayChannelId: z.union([z.string().min(1), z.object({ id: z.string().min(1) })]),
     logIgnore: LogIgnoreSchema,
@@ -98,18 +98,18 @@ class ConfigService {
 
     static validateConfigKeySafety(key) {
         if (typeof key !== 'string' || key.trim().length === 0) {
-            throw createError(
+            throw createFehler(
                 'Invalid setting key',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Setting key must be a non-empty string.',
                 { key }
             );
         }
 
         if (this.UNSAFE_KEYS.includes(key)) {
-            throw createError(
+            throw createFehler(
                 'Unsafe setting key',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'This setting key is not allowed for security reasons.',
                 { key }
             );
@@ -134,9 +134,9 @@ class ConfigService {
         if (zodSchema) {
             const parsed = zodSchema.safeParse(value);
             if (!parsed.success) {
-                throw createError(
+                throw createFehler(
                     'Invalid configuration value',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Provided configuration value is invalid.',
                     {
                         key,
@@ -153,9 +153,9 @@ class ConfigService {
 
         if (rule.type === 'channel') {
             if (typeof value !== 'string' && typeof value !== 'object') {
-                throw createError(
+                throw createFehler(
                     'Invalid channel',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Channel ID must be a string.',
                     { key, provided: typeof value }
                 );
@@ -165,19 +165,19 @@ class ConfigService {
             const channel = guild.channels.cache.get(channelId);
 
             if (!channel) {
-                throw createError(
+                throw createFehler(
                     'Channel not found',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'The specified channel does not exist.',
                     { key, channelId }
                 );
             }
 
             if (!channel.isTextBased?.()) {
-                throw createError(
+                throw createFehler(
                     'Invalid channel type',
-                    ErrorTypes.VALIDATION,
-                    'Only text channels are allowed.',
+                    FehlerTypes.VALIDATION,
+                    'Anly text channels are allowed.',
                     { key, channelId, channelType: channel.type }
                 );
             }
@@ -187,9 +187,9 @@ class ConfigService {
 
         if (rule.type === 'role') {
             if (typeof value !== 'string' && typeof value !== 'object') {
-                throw createError(
+                throw createFehler(
                     'Invalid role',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Role ID must be a string.',
                     { key, provided: typeof value }
                 );
@@ -199,21 +199,21 @@ class ConfigService {
             const role = guild.roles.cache.get(roleId);
 
             if (!role) {
-                throw createError(
+                throw createFehler(
                     'Role not found',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'The specified role does not exist.',
                     { key, roleId }
                 );
             }
 
             const botHighestRole = guild.members.me?.roles.highest;
-            if (role.position >= botHighestRole?.position) {
-                throw createError(
+            if (Rolle zu bekommen.position >= botHighestRole?.position) {
+                throw createFehler(
                     'Role too high',
-                    ErrorTypes.VALIDATION,
-                    "Can't set roles higher than my highest role.",
-                    { key, roleId, rolePosition: role.position }
+                    FehlerTypes.VALIDATION,
+                    "Can't set roles higher than my highest Rolle zu bekommen.",
+                    { key, roleId, rolePosition: Rolle zu bekommen.position }
                 );
             }
 
@@ -222,9 +222,9 @@ class ConfigService {
 
         if (rule.type === 'string') {
             if (typeof value !== 'string') {
-                throw createError(
+                throw createFehler(
                     'Invalid value type',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Value must be a string.',
                     { key, provided: typeof value }
                 );
@@ -232,18 +232,18 @@ class ConfigService {
 
             const length = value.length;
             if (rule.maxLength && length > rule.maxLength) {
-                throw createError(
+                throw createFehler(
                     'Value too long',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     `Value cannot exceed **${rule.maxLength}** characters.`,
                     { key, current: length, max: rule.maxLength }
                 );
             }
 
             if (rule.minLength && length < rule.minLength) {
-                throw createError(
+                throw createFehler(
                     'Value too short',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     `Value must be at least **${rule.minLength}** character(s).`,
                     { key, current: length, min: rule.minLength }
                 );
@@ -254,27 +254,27 @@ class ConfigService {
 
         if (rule.type === 'number') {
             if (typeof value !== 'number') {
-                throw createError(
+                throw createFehler(
                     'Invalid value type',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Value must be a number.',
                     { key, provided: typeof value }
                 );
             }
 
             if (rule.min !== undefined && value < rule.min) {
-                throw createError(
+                throw createFehler(
                     'Value too low',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     `Value must be at least **${rule.min}**.`,
                     { key, value, min: rule.min }
                 );
             }
 
             if (rule.max !== undefined && value > rule.max) {
-                throw createError(
+                throw createFehler(
                     'Value too high',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     `Value cannot exceed **${rule.max}**.`,
                     { key, value, max: rule.max }
                 );
@@ -285,9 +285,9 @@ class ConfigService {
 
         if (rule.type === 'boolean') {
             if (typeof value !== 'boolean') {
-                throw createError(
+                throw createFehler(
                     'Invalid value type',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Value must be true or false.',
                     { key, provided: typeof value }
                 );
@@ -298,9 +298,9 @@ class ConfigService {
 
         if (rule.type === 'object') {
             if (typeof value !== 'object' || value === null) {
-                throw createError(
+                throw createFehler(
                     'Invalid value type',
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     'Value must be an object.',
                     { key, provided: typeof value }
                 );
@@ -316,9 +316,9 @@ class ConfigService {
         logger.debug(`[CONFIG_SERVICE] Checking for config conflicts`, { key });
 
         const conflicts = [];
-        const relatedSettings = SETTING_CONFLICTS[key] || [];
+        const relatedEinstellungen = SETTING_CONFLICTS[key] || [];
 
-        for (const related of relatedSettings) {
+        for (const related of relatedEinstellungen) {
             if (related === 'logging' && value === null) {
                 
                 if (currentConfig.logging?.enabled) {
@@ -348,9 +348,9 @@ class ConfigService {
                 guildId,
                 adminId
             });
-            throw createError(
+            throw createFehler(
                 'Protected setting',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 `The setting **${key}** cannot be modified.`,
                 { key }
             );
@@ -358,9 +358,9 @@ class ConfigService {
 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            throw createError(
+            throw createFehler(
                 'Guild not found',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Guild does not exist.',
                 { guildId }
             );
@@ -423,43 +423,43 @@ class ConfigService {
 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            throw createError(
+            throw createFehler(
                 'Guild not found',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Guild does not exist.',
                 { guildId }
             );
         }
 
         const validatedUpdates = {};
-        const validationErrors = [];
+        const validationFehlers = [];
 
         for (const [key, value] of Object.entries(updates)) {
             try {
                 this.validateConfigKeySafety(key);
 
                 if (this.PROTECTED_SETTINGS.includes(key)) {
-                    validationErrors.push(`${key}: Protected setting cannot be modified`);
+                    validationFehlers.push(`${key}: Protected setting cannot be modified`);
                     continue;
                 }
 
                 await this.validateConfigValue(key, value, guild);
                 validatedUpdates[key] = value;
             } catch (error) {
-                validationErrors.push(`${key}: ${error.details?.message || error.message}`);
+                validationFehlers.push(`${key}: ${error.details?.message || error.message}`);
             }
         }
 
-        if (validationErrors.length > 0) {
+        if (validationFehlers.length > 0) {
             logger.warn(`[CONFIG_SERVICE] Bulk update validation failed`, {
                 guildId,
-                errors: validationErrors
+                errors: validationFehlers
             });
-            throw createError(
+            throw createFehler(
                 'Validation failed',
-                ErrorTypes.VALIDATION,
-                `Some settings failed validation:\n• ${validationErrors.join('\n• ')}`,
-                { errors: validationErrors }
+                FehlerTypes.VALIDATION,
+                `Some settings failed validation:\n• ${validationFehlers.join('\n• ')}`,
+                { errors: validationFehlers }
             );
         }
 
@@ -483,15 +483,15 @@ class ConfigService {
             guildId,
             adminId,
             appliedCount: Object.keys(validatedUpdates).length,
-            failedCount: validationErrors.length,
+            failedCount: validationFehlers.length,
             timestamp: new Date().toISOString()
         });
 
         return {
             applied: Object.keys(validatedUpdates),
-            failed: validationErrors,
+            failed: validationFehlers,
             appliedCount: Object.keys(validatedUpdates).length,
-            failedCount: validationErrors.length
+            failedCount: validationFehlers.length
         };
     }
 
@@ -565,9 +565,9 @@ class ConfigService {
         const guild = client.guilds.cache.get(guildId);
 
         if (!guild) {
-            throw createError(
+            throw createFehler(
                 'Guild not found',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Guild does not exist.',
                 { guildId }
             );

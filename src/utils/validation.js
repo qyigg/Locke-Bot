@@ -68,7 +68,7 @@ export function validateCustomId(value, fieldName = 'customId') {
   return value;
 }
 
-export function validateRequiredProps(obj, requiredProps, objName = 'object') {
+export function validateErforderlichProps(obj, requiredProps, objName = 'object') {
   if (!obj || typeof obj !== 'object') {
     logger.warn(`[VALIDATION] ${objName} must be an object`);
     return false;
@@ -168,7 +168,7 @@ export default {
   validateNumber,
   validateDiscordId,
   validateCustomId,
-  validateRequiredProps,
+  validateErforderlichProps,
   validateUrl,
   validateRange,
   validateEnum,

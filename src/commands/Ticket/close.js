@@ -2,7 +2,7 @@ import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getTicketPermissionContext } from '../../utils/ticket/ticketPermissions.js';
 import { closeTicket } from '../../services/ticket.js';
@@ -15,7 +15,7 @@ export default {
             option
                 .setName("reason")
                 .setDescription("Der Grund für das Schließen des Tickets.")
-                .setRequired(false),
+                .setErforderlich(false),
         ),
 
     async execute(interaction, guildConfig, client) {
@@ -26,11 +26,11 @@ export default {
 
         const permissionContext = await getTicketPermissionContext({ client, interaction });
         if (!permissionContext.ticketData) {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.' });
         }
 
-        if (!permissionContext.canCloseTicket) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten`, die konfigurierte `Ticket-Staff-Rolle` oder musst der Ersteller des Tickets sein, um dieses Ticket zu schließen.' });
+        if (!permissionContext.canSchließenTicket) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten`, die konfigurierte `Ticket-Staff-Rolle` oder musst der Ersteller des Tickets sein, um dieses Ticket zu schließen.' });
         }
 
         const reason =

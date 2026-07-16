@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
@@ -12,11 +12,11 @@ export default {
             option
                 .setName('amount')
                 .setDescription('Amount to withdraw')
-                .setRequired(true)
+                .setErforderlich(true)
                 .setMinValue(1)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         await InteractionHelper.safeDefer(interaction);
             
             const userId = interaction.user.id;
@@ -26,9 +26,9 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createError(
+                throw createFehler(
                     "Failed to load economy data",
-                    ErrorTypes.DATABASE,
+                    FehlerTypes.DATABASE,
                     "Failed to load your economy data. Please try again later.",
                     { userId, guildId }
                 );
@@ -37,9 +37,9 @@ export default {
             let withdrawAmount = amountInput;
 
             if (withdrawAmount <= 0) {
-                throw createError(
+                throw createFehler(
                     "Invalid withdrawal amount",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "You must withdraw a positive amount.",
                     { amount: withdrawAmount, userId }
                 );
@@ -50,9 +50,9 @@ export default {
             }
 
             if (withdrawAmount === 0) {
-                throw createError(
+                throw createFehler(
                     "Empty bank account",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Your bank account is empty.",
                     { userId, bankBalance: userData.bank }
                 );
@@ -64,7 +64,7 @@ export default {
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                'Withdrawal Successful',
+                'Withdrawal Erfolgful',
                 `You successfully withdrew **$${withdrawAmount.toLocaleString()}** from your bank.`
             )
                 .addFields(

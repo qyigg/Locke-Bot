@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
 
@@ -23,14 +23,14 @@ export default {
             option
                 .setName("target")
                 .setDescription("User to timeout")
-                .setRequired(true),
+                .setErforderlich(true),
         )
         .addIntegerOption(
             (option) =>
                 option
                     .setName("duration")
                     .setDescription("Duration of the timeout")
-                    .setRequired(true)
+                    .setErforderlich(true)
                     .addChoices(...durationChoices),
         )
         .addStringOption((option) =>
@@ -40,8 +40,8 @@ export default {
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Timeout interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -56,32 +56,32 @@ export default {
         const reason = interaction.options.getString("reason") || "No reason provided";
 
         if (!targetUser) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Missing target user',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'You must specify a user to timeout.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (targetUser.id === interaction.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot timeout self",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "You cannot timeout yourself.",
             );
         }
         if (targetUser.id === client.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot timeout bot",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "You cannot timeout the bot.",
             );
         }
         if (!member) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Target not found",
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 "The target user is not currently in this server.",
             );
         }

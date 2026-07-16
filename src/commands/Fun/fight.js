@@ -14,7 +14,7 @@ export default {
       option
         .setName("opponent")
         .setDescription("The user to fight.")
-        .setRequired(true),
+        .setErforderlich(true),
     ),
   category: 'Fun',
 

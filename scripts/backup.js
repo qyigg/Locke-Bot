@@ -39,7 +39,7 @@ function parseArgs(argv) {
 function assertEnv(name) {
   const value = process.env[name];
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+    throw new Fehler(`Missing required environment variable: ${name}`);
   }
   return value;
 }
@@ -52,7 +52,7 @@ function ensureCommand(command) {
   });
 
   if (result.status !== 0) {
-    throw new Error(`${command} is required but was not found in PATH.`);
+    throw new Fehler(`${command} is required but was not found in PATH.`);
   }
 }
 
@@ -62,7 +62,7 @@ function createTimestamp() {
   return `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}-${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}`;
 }
 
-async function pruneBackups(backupDir, retentionDays) {
+async function pruneZurückups(backupDir, retentionDays) {
   if (!Number.isFinite(retentionDays) || retentionDays <= 0) {
     return;
   }
@@ -127,10 +127,10 @@ async function run() {
   });
 
   if (result.status !== 0) {
-    throw new Error(`pg_dump failed: ${result.stderr || result.stdout || 'Unknown error'}`);
+    throw new Fehler(`pg_dump failed: ${result.stderr || result.stdout || 'Unknown error'}`);
   }
 
-  await pruneBackups(backupDir, retentionDays);
+  await pruneZurückups(backupDir, retentionDays);
 
   logger.info('PostgreSQL backup completed', {
     event: 'backup.completed',
@@ -142,7 +142,7 @@ async function run() {
 }
 
 run().catch((error) => {
-  logger.error('Backup command failed', {
+  logger.error('Zurückup command failed', {
     event: 'backup.failed',
     error: error.message
   });

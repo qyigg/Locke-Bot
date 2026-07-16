@@ -27,7 +27,7 @@ export default async function loadEvents(client) {
                 try {
                     await event.execute(...args, client);
                 } catch (error) {
-                    logger.error(`Error executing event ${event.name}:`, error);
+                    logger.error(`Fehler executing event ${event.name}:`, error);
                 }
             };
 
@@ -39,7 +39,7 @@ export default async function loadEvents(client) {
                 logger.info(`✅ Registered event: ${event.name}`);
             }
         } catch (error) {
-            logger.error(`Error loading event ${file}:`, error);
+            logger.error(`Fehler loading event ${file}:`, error);
         }
     }
 }

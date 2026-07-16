@@ -14,7 +14,7 @@ export const shopConfig = {
         {
             id: 'consumables',
             name: 'Consumables',
-            description: 'One-time use items that provide temporary benefits',
+            description: 'Ane-time use items that provide temporary benefits',
             icon: '🍯',
             itemTypes: ['consumable']
         },

@@ -194,7 +194,7 @@ export const botConfig = {
     },
 
     // Chance to succeed when robbing (0.4 = 40%).
-    robSuccessRate: 0.4,
+    robErfolgRate: 0.4,
 
     // Jail time after failed rob (milliseconds).
     // 3600000 = 1 hour.
@@ -305,10 +305,10 @@ export const botConfig = {
     defaultMessage: "Click the button below to verify yourself and gain access to the server!",
 
     // Text on the verification button.
-    defaultButtonText: "Verify",
+    defaultButtonText: "Verifizieren",
 
     // Automatic verification behavior.
-    autoVerify: {
+    autoVerifizieren: {
       // How automatic verification decides who is auto-approved:
       // - "none"        = everyone is auto-verified immediately
       // - "account_age" = account must be older than set days
@@ -405,7 +405,7 @@ export const botConfig = {
     messages: {
       // Default response messages for counter actions.
       created: "✅ Created counter **{name}**",
-      deleted: "🗑️ Deleted counter **{name}**",
+      deleted: "🗑️ Löschend counter **{name}**",
       updated: "🔄 Updated counter **{name}**",
     },
     types: {
@@ -519,9 +519,9 @@ export function validateConfig(config) {
   return errors;
 }
 
-const configErrors = validateConfig(botConfig);
-if (configErrors.length > 0) {
-  logger.error("Bot configuration errors:", configErrors.join("\n"));
+const configFehlers = validateConfig(botConfig);
+if (configFehlers.length > 0) {
+  logger.error("Bot configuration errors:", configFehlers.join("\n"));
   if (process.env.NODE_ENV === "production") {
     process.exit(1);
   }

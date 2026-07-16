@@ -13,7 +13,7 @@ import {
 } from '../../services/countingGameService.js';
 import { logger } from '../../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('count')
@@ -28,14 +28,14 @@ export default {
           option
             .setName('channel')
             .setDescription('The channel where counting will take place')
-            .setRequired(true)
+            .setErforderlich(true)
             .addChannelTypes(ChannelType.GuildText),
         )
         .addStringOption((option) =>
           option
             .setName('system')
             .setDescription('The counting system to use')
-            .setRequired(true)
+            .setErforderlich(true)
             .addChoices(...getCountingSystemChoices()),
         ),
     )
@@ -63,14 +63,14 @@ export default {
 
   async execute(interaction) {
     try {
-      const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-      if (!deferSuccess) {
+      const deferErfolg = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+      if (!deferErfolg) {
         logger.warn('Count command defer failed', { userId: interaction.user.id, guildId: interaction.guildId });
         return;
       }
 
       if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the **Manage Server** permission to use this command.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need the **Manage Server** permission to use this command.' });
       }
 
       const guildId = interaction.guildId;
@@ -81,11 +81,11 @@ export default {
         const channel = interaction.options.getChannel('channel');
         const system = interaction.options.getString('system');
         if (!channel || channel.type !== ChannelType.GuildText) {
-          return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please choose a text channel for the counting game.' });
+          return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please choose a text channel for the counting game.' });
         }
 
         if (config.enabled && config.channelId && config.channelId !== channel.id) {
-          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `This server already has an active counting channel configured: <#${config.channelId}>. Disable the current counting game first, or use that existing channel.` });
+          return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `This server already has an active counting channel configured: <#${config.channelId}>. Disable the current counting game first, or use that existing channel.` });
         }
 
         await activateCountingGame(interaction.client, guildId, channel.id, system);
@@ -117,7 +117,7 @@ export default {
           { name: 'Aktiviert', value: config.enabled ? 'Yes' : 'No', inline: true },
           { name: 'Channel', value: config.channelId ? `<#${config.channelId}>` : 'Nicht konfiguriert', inline: true },
           { name: 'System', value: getCountingSystemLabel(config.system), inline: true },
-          { name: 'Next count', value: getExpectedCountValue(config), inline: true },
+          { name: 'Weiter count', value: getExpectedCountValue(config), inline: true },
           { name: 'Current streak', value: `${config.currentStreak}`, inline: true },
           { name: 'Best streak', value: `${config.bestStreak || 0}`, inline: true },
           { name: 'Last counter', value: config.lastUserId ? `<@${config.lastUserId}>` : 'None', inline: true },
@@ -137,7 +137,7 @@ export default {
 
       if (subcommand === 'reset') {
         if (!config.enabled) {
-          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Enable the counting game first with `/count setup`.' });
+          return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Enable the counting game first with `/count setup`.' });
         }
 
         const startNumber = interaction.options.getInteger('start') || 1;
@@ -167,10 +167,10 @@ export default {
         });
       }
 
-      return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please choose a valid counting game action.' });
+      return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please choose a valid counting game action.' });
     } catch (error) {
       logger.error('Count command error:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Something went wrong while managing the counting game.' });
+      return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Something went wrong while managing the counting game.' });
     }
   },
 };

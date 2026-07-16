@@ -4,7 +4,7 @@ import config from "../config/application.js";
 import { reconcileReactionRoleMessages } from "../services/reactionRoleService.js";
 import { reconcileTicketPanels, reconcileVerificationPanels, reconcileReactionRolePanelHealth } from "../services/panelHealthService.js";
 import { reconcileLevelRoles } from "../services/leveling/levelRoleSyncService.js";
-import { initRiffyAfterReady } from "../services/music/riffySetup.js";
+import { initRiffyAfterReady } from "../services/music/riffyEinrichtung.js";
 
 export default {
   name: Events.ClientReady,
@@ -47,7 +47,7 @@ export default {
         `Level role sync: scanned ${levelRoleSummary.scannedGuilds} guilds, pruned ${levelRoleSummary.prunedRewardEntries} stale rewards, re-awarded ${levelRoleSummary.rolesReAwarded} roles, errors ${levelRoleSummary.errors}`
       );
     } catch (error) {
-      logger.error("Error in ready event:", error);
+      logger.error("Fehler in ready event:", error);
     }
   },
 };

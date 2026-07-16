@@ -57,10 +57,10 @@ export const DASHBOARD_CATEGORY_LABELS = {
   report: 'Reports',
 };
 
-function createBackButton() {
+function createZurückButton() {
   return new ButtonBuilder()
     .setCustomId('log_dash_back')
-    .setLabel('Back to Dashboard')
+    .setLabel('Zurück to Dashboard')
     .setStyle(ButtonStyle.Secondary);
 }
 
@@ -78,7 +78,7 @@ function createCategoryToggleButtons(enabledEvents = {}, loggingAktiviert = fals
     return new ButtonBuilder()
       .setCustomId(`log_dash_toggle:${category}.*`)
       .setLabel(`${emoji} ${label}`)
-      .setStyle(isAktiviert ? ButtonStyle.Success : ButtonStyle.Danger);
+      .setStyle(isAktiviert ? ButtonStyle.Erfolg : ButtonStyle.Danger);
   });
 
   const rows = [];
@@ -140,7 +140,7 @@ export function createLoggingMainActionRow(loggingAktiviert = false) {
     new ButtonBuilder()
       .setCustomId('log_dash_toggle:audit_enabled')
       .setLabel('Audit Logging')
-      .setStyle(loggingAktiviert ? ButtonStyle.Success : ButtonStyle.Danger),
+      .setStyle(loggingAktiviert ? ButtonStyle.Erfolg : ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('log_dash_refresh')
       .setLabel('Refresh')
@@ -159,7 +159,7 @@ export function createLoggingCategoryViewComponents(enabledEvents, loggingAktivi
   const categoryRows = createCategoryToggleButtons(enabledEvents, loggingAktiviert);
 
   const actionRow = new ActionRowBuilder().addComponents(
-    createBackButton(),
+    createZurückButton(),
     new ButtonBuilder()
       .setCustomId('log_dash_toggle:all')
       .setLabel('Toggle All Categories')
@@ -176,7 +176,7 @@ export function createLoggingCategoryViewComponents(enabledEvents, loggingAktivi
 export function createLoggingFilterComponents() {
   return [
     new ActionRowBuilder().addComponents(
-      createBackButton(),
+      createZurückButton(),
       new ButtonBuilder()
         .setCustomId('log_dash_add_filter:user')
         .setLabel('Add User Filter')

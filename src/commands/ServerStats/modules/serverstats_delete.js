@@ -5,8 +5,8 @@ import { getServerCounters, saveServerCounters, getCounterEmoji, getCounterTypeL
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes, createError, wrapServiceBoundary } from '../../../utils/errorHandler.js';
-export async function handleDelete(interaction, client) {
+import { replyUserFehler, FehlerTypes, createFehler, wrapServiceBoundary } from '../../../utils/errorHandler.js';
+export async function handleLöschen(interaction, client) {
     const guild = interaction.guild;
     const counterId = interaction.options.getString("counter-id");
 
@@ -18,7 +18,7 @@ export async function handleDelete(interaction, client) {
     }
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to delete counters.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'You need **Manage Channels** permission to delete counters.' }).catch(logger.error);
         return;
     }
 
@@ -26,40 +26,40 @@ export async function handleDelete(interaction, client) {
         const counters = await getServerCounters(client, guild.id);
 
         if (counters.length === 0) {
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'No counters found to delete.' }).catch(logger.error);
+            await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: 'No counters found to delete.' }).catch(logger.error);
             return;
         }
 
-        const counterToDelete = counters.find(c => c.id === counterId);
-        if (!counterToDelete) {
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Counter with ID \`${counterId}\` not found. Use \`/serverstats list\` to see all counters.` }).catch(logger.error);
+        const counterToLöschen = counters.find(c => c.id === counterId);
+        if (!counterToLöschen) {
+            await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `Counter with ID \`${counterId}\` not found. Use \`/serverstats list\` to see all counters.` }).catch(logger.error);
             return;
         }
 
-        const channel = guild.channels.cache.get(counterToDelete.channelId);
+        const channel = guild.channels.cache.get(counterToLöschen.channelId);
 
         const embed = createEmbed({
-            title: "Delete Counter & Channel",
-            description: `Are you sure you want to delete this counter and its channel?\n\n**ID:** \`${counterToDelete.id}\`\n**Type:** ${getCounterTypeDisplay(counterToDelete.type)}\n**Channel:** ${channel || 'Deleted Channel'}\n\n **The channel will be permanently deleted!**`,
+            title: "Löschen Counter & Channel",
+            description: `Are you sure you want to delete this counter and its channel?\n\n**ID:** \`${counterToLöschen.id}\`\n**Type:** ${getCounterTypeDisplay(counterToLöschen.type)}\n**Channel:** ${channel || 'Löschend Channel'}\n\n **The channel will be permanently deleted!**`,
             color: getColor('error')
         });
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId(`counter-delete:confirm:${counterToDelete.id}:${interaction.user.id}`)
-                .setLabel("Confirm Delete")
+                .setCustomId(`counter-delete:confirm:${counterToLöschen.id}:${interaction.user.id}`)
+                .setLabel("Bestätigen Löschen")
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
-                .setCustomId(`counter-delete:cancel:${counterToDelete.id}:${interaction.user.id}`)
-                .setLabel("Cancel")
+                .setCustomId(`counter-delete:cancel:${counterToLöschen.id}:${interaction.user.id}`)
+                .setLabel("Abbrechen")
                 .setStyle(ButtonStyle.Secondary)
         );
 
         await InteractionHelper.safeEditReply(interaction, { embeds: [embed], components: [row] }).catch(logger.error);
 
     } catch (error) {
-        logger.error("Error in handleDelete:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
+        logger.error("Fehler in handleLöschen:", error);
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
     }
 }
 
@@ -68,9 +68,9 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
 
     const counter = counters.find(c => c.id === counterId);
     if (!counter) {
-        throw createError(
+        throw createFehler(
             'Counter not found',
-            ErrorTypes.USER_INPUT,
+            FehlerTypes.USER_INPUT,
             `Counter with ID \`${counterId}\` was not found.`,
             { guildId: guild.id, counterId, operation: 'performDeletionByCounterId' }
         );
@@ -80,29 +80,29 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
 
     const saved = await saveServerCounters(client, guild.id, updatedCounters);
     if (!saved) {
-        throw createError(
+        throw createFehler(
             'Counter delete failed',
-            ErrorTypes.DATABASE,
+            FehlerTypes.DATABASE,
             'Failed to delete counter. Please try again.',
             { guildId: guild.id, counterId, operation: 'performDeletionByCounterId' }
         );
     }
 
     const channel = guild.channels.cache.get(counter.channelId);
-    let channelDeleted = false;
+    let channelLöschend = false;
 
     if (channel) {
         try {
             await channel.delete(`Counter deleted - removing channel: ${counter.id}`);
-            channelDeleted = true;
+            channelLöschend = true;
         } catch (error) {
-            logger.error("Error deleting channel:", error);
+            logger.error("Fehler deleting channel:", error);
         }
     }
 
-    let message = `✅ **Counter Deleted Successfully!**\n\n**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}`;
+    let message = `✅ **Counter Löschend Erfolgfully!**\n\n**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}`;
 
-    if (channelDeleted) {
+    if (channelLöschend) {
         message += `\n**Channel:** ${channel.name} (deleted)`;
     } else if (channel) {
         message += `\n**Channel:** ${channel.name} (failed to delete)`;

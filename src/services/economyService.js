@@ -2,8 +2,8 @@
 
 import { logger } from '../utils/logger.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../utils/economy.js';
-import { createError, ErrorTypes } from '../utils/errorHandler.js';
-import { wrapServiceClassMethods } from '../utils/serviceErrorBoundary.js';
+import { createFehler, FehlerTypes } from '../utils/errorHandler.js';
+import { wrapServiceClassMethods } from '../utils/serviceFehlerBoundary.js';
 
 class EconomyService {
 
@@ -21,9 +21,9 @@ class EconomyService {
 
   static assertSafeBalance(value, context = {}) {
     if (!Number.isSafeInteger(value) || value < 0 || value > this.MAX_SAFE_INTEGER) {
-      throw createError(
+      throw createFehler(
         "Invalid balance state",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "Operation would create an invalid account balance.",
         { value, ...context }
       );
@@ -36,9 +36,9 @@ class EconomyService {
     const userData = await getEconomyData(client, guildId, userId);
     if (!userData) {
       logger.error(`[ECONOMY_SERVICE] Failed to load economy data for daily`);
-      throw createError(
+      throw createFehler(
         "Failed to load economy data",
-        ErrorTypes.DATABASE,
+        FehlerTypes.DATABASE,
         "Failed to load your economy data. Please try again later.",
         { userId, guildId }
       );
@@ -53,9 +53,9 @@ class EconomyService {
         userId,
         timeRemaining: remaining
       });
-      throw createError(
+      throw createFehler(
         "Daily cooldown active",
-        ErrorTypes.RATE_LIMIT,
+        FehlerTypes.RATE_LIMIT,
         `You need to wait before claiming daily again. Try again in **${this.formatDuration(remaining)}**.`,
         { remaining, cooldownType: 'daily' }
       );
@@ -90,9 +90,9 @@ class EconomyService {
         guildId,
         amount: earned
       });
-      throw createError(
+      throw createFehler(
         "Failed to save daily claim",
-        ErrorTypes.DATABASE,
+        FehlerTypes.DATABASE,
         "Failed to process your daily. Please try again.",
         { userId, guildId }
       );
@@ -108,18 +108,18 @@ class EconomyService {
     });
 
     if (amount <= 0) {
-      throw createError(
+      throw createFehler(
         "Invalid transfer amount",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "Amount must be greater than zero.",
         { amount, senderId }
       );
     }
 
     if (senderId === receiverId) {
-      throw createError(
+      throw createFehler(
         "Cannot pay self",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "You cannot pay yourself.",
         { senderId, receiverId }
       );
@@ -137,9 +137,9 @@ class EconomyService {
         senderLoaded: !!senderData,
         receiverLoaded: !!receiverData
       });
-      throw createError(
+      throw createFehler(
         "Failed to load economy data",
-        ErrorTypes.DATABASE,
+        FehlerTypes.DATABASE,
         "Failed to load economy data. Please try again later.",
         { senderId, receiverId, guildId }
       );
@@ -151,23 +151,23 @@ class EconomyService {
         required: amount,
         available: senderData.wallet
       });
-      throw createError(
+      throw createFehler(
         "Insufficient funds",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         `You only have **$${senderData.wallet.toLocaleString()}** in cash.`,
         { required: amount, available: senderData.wallet, senderId }
       );
     }
 
     const walletBefore = senderData.wallet;
-    const senderNext = (senderData.wallet || 0) - amount;
-    const receiverNext = (receiverData.wallet || 0) + amount;
+    const senderWeiter = (senderData.wallet || 0) - amount;
+    const receiverWeiter = (receiverData.wallet || 0) + amount;
 
-    this.assertSafeBalance(senderNext, { operation: 'transfer.sender', senderId, amount });
-    this.assertSafeBalance(receiverNext, { operation: 'transfer.receiver', receiverId, amount });
+    this.assertSafeBalance(senderWeiter, { operation: 'transfer.sender', senderId, amount });
+    this.assertSafeBalance(receiverWeiter, { operation: 'transfer.receiver', receiverId, amount });
 
-    senderData.wallet = senderNext;
-    receiverData.wallet = receiverNext;
+    senderData.wallet = senderWeiter;
+    receiverData.wallet = receiverWeiter;
 
     try {
       
@@ -176,20 +176,20 @@ class EconomyService {
       try {
         
         await setEconomyData(client, guildId, receiverId, receiverData);
-      } catch (receiverError) {
+      } catch (receiverFehler) {
         
-        logger.error(`[ECONOMY_CRITICAL] Failed to credit receiver ${receiverId}. Attempting rollback for sender ${senderId}...`, receiverError);
+        logger.error(`[ECONOMY_CRITICAL] Failed to credit receiver ${receiverId}. Attempting rollback for sender ${senderId}...`, receiverFehler);
         
         senderData.wallet = walletBefore;
         try {
           await setEconomyData(client, guildId, senderId, senderData);
-          logger.info(`[ECONOMY_ROLLBACK] Successfully rolled back sender ${senderId} after receiver credit failure.`);
-        } catch (rollbackError) {
-          logger.error(`[ECONOMY_FATAL] ROLLBACK FAILED for sender ${senderId}! Data is now inconsistent.`, rollbackError);
+          logger.info(`[ECONOMY_ROLLBACK] Erfolgfully rolled back sender ${senderId} after receiver credit failure.`);
+        } catch (rollbackFehler) {
+          logger.error(`[ECONOMY_FATAL] ROLLBACK FAILED for sender ${senderId}! Data is now inconsistent.`, rollbackFehler);
           
         }
         
-        throw receiverError;
+        throw receiverFehler;
       }
 
       logger.info(`[ECONOMY_TRANSACTION] Money transferred`, {
@@ -217,9 +217,9 @@ class EconomyService {
         senderAfter: senderData.wallet,
         receiverAfter: receiverData.wallet
       });
-      throw createError(
+      throw createFehler(
         "Failed to save transfer",
-        ErrorTypes.DATABASE,
+        FehlerTypes.DATABASE,
         "Failed to process transfer. Please try again.",
         { senderId, receiverId, amount }
       );
@@ -228,9 +228,9 @@ class EconomyService {
 
   static async addMoney(client, guildId, userId, amount, source = 'unknown') {
     if (amount <= 0) {
-      throw createError(
+      throw createFehler(
         "Invalid amount",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "Amount must be positive",
         { amount, userId, source }
       );
@@ -262,9 +262,9 @@ class EconomyService {
 
   static async removeMoney(client, guildId, userId, amount, reason = 'unknown') {
     if (amount <= 0) {
-      throw createError(
+      throw createFehler(
         "Invalid amount",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "Amount must be positive",
         { amount, userId, reason }
       );
@@ -276,9 +276,9 @@ class EconomyService {
     const balanceBefore = userData.wallet || 0;
 
     if (balanceBefore < amount) {
-      throw createError(
+      throw createFehler(
         "Insufficient funds",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         `You only have **$${balanceBefore.toLocaleString()}**.`,
         { required: amount, available: balanceBefore, reason }
       );
@@ -309,9 +309,9 @@ class EconomyService {
     const maxBank = getMaxBankCapacity(userData);
 
     if (userData.wallet < amount) {
-      throw createError(
+      throw createFehler(
         "Insufficient cash",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         `You only have **$${userData.wallet.toLocaleString()}** in cash.`,
         { required: amount, available: userData.wallet }
       );
@@ -319,9 +319,9 @@ class EconomyService {
 
     const currentBank = userData.bank || 0;
     if (currentBank + amount > maxBank) {
-      throw createError(
+      throw createFehler(
         "Bank capacity exceeded",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         `Your bank can only hold **$${maxBank.toLocaleString()}**. You would exceed capacity by **$${(currentBank + amount - maxBank).toLocaleString()}**.`,
         { capacity: maxBank, current: currentBank, requested: amount }
       );
@@ -357,9 +357,9 @@ class EconomyService {
     const bank = userData.bank || 0;
 
     if (bank < amount) {
-      throw createError(
+      throw createFehler(
         "Insufficient bank balance",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         `You only have **$${bank.toLocaleString()}** in your bank.`,
         { required: amount, available: bank }
       );
@@ -395,7 +395,7 @@ class EconomyService {
     const remaining = Math.max(0, lastTime + cooldownMs - now);
 
     return {
-      isOnCooldown: remaining > 0,
+      isAnCooldown: remaining > 0,
       remaining,
       formatted: this.formatDuration(remaining),
       nextAvailable: new Date(lastTime + cooldownMs)
@@ -404,18 +404,18 @@ class EconomyService {
 
   static validateAmount(amount, context = {}) {
     if (!Number.isInteger(amount)) {
-      throw createError(
+      throw createFehler(
         "Invalid amount - not an integer",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "Amount must be a whole number",
         context
       );
     }
 
     if (amount <= 0) {
-      throw createError(
+      throw createFehler(
         "Invalid amount - not positive",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "Amount must be positive",
         context
       );
@@ -423,9 +423,9 @@ class EconomyService {
 
     if (amount > this.MAX_SAFE_INTEGER) {
       logger.error(`[ECONOMY] Amount exceeds MAX_SAFE_INTEGER`, { amount, context });
-      throw createError(
+      throw createFehler(
         "Amount too large",
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         "The amount is too large to process",
         context
       );

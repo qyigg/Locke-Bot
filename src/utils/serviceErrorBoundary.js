@@ -1,7 +1,7 @@
-// serviceErrorBoundary.js
+// serviceFehlerBoundary.js
 
-import { createError, ErrorTypes, TitanBotError, categorizeError } from './errorHandler.js';
-import { resolveErrorCode, getErrorMetadata } from './errorRegistry.js';
+import { createFehler, FehlerTypes, TitanBotFehler, categorizeFehler } from './errorHandler.js';
+import { resolveFehlerCode, getFehlerMetadata } from './errorRegistry.js';
 
 function normalizeBoundaryContext(context = {}) {
   if (!context || typeof context !== 'object') {
@@ -11,29 +11,29 @@ function normalizeBoundaryContext(context = {}) {
   return context;
 }
 
-export function ensureTypedServiceError(error, options = {}) {
-  if (error instanceof TitanBotError) {
+export function ensureTypedServiceFehler(error, options = {}) {
+  if (error instanceof TitanBotFehler) {
     return error;
   }
 
   const context = normalizeBoundaryContext(options.context);
-  const fallbackType = options.type || ErrorTypes.UNKNOWN;
-  const categorized = categorizeError(error);
-  const type = categorized === ErrorTypes.UNKNOWN ? fallbackType : categorized;
+  const fallbackType = options.type || FehlerTypes.UNKNOWN;
+  const categorized = categorizeFehler(error);
+  const type = categorized === FehlerTypes.UNKNOWN ? fallbackType : categorized;
   const service = options.service || 'unknown_service';
   const operation = options.operation || 'unknown_operation';
-  const errorCode = resolveErrorCode({
+  const errorCode = resolveFehlerCode({
     error,
     errorType: type,
     context: {
       errorCode: options.errorCode || `${service}.${operation}.failed`
     }
   });
-  const errorMetadata = getErrorMetadata(errorCode);
+  const errorMetadata = getFehlerMetadata(errorCode);
   const message = options.message || `${service}.${operation} failed`;
   const userMessage = options.userMessage || 'Something went wrong while processing your request.';
 
-  return createError(message, type, userMessage, {
+  return createFehler(message, type, userMessage, {
     ...context,
     service,
     operation,
@@ -41,8 +41,8 @@ export function ensureTypedServiceError(error, options = {}) {
     remediationHint: errorMetadata.remediation,
     severity: errorMetadata.severity,
     retryable: errorMetadata.retryable,
-    originalErrorMessage: error?.message || String(error),
-    originalErrorName: error?.name || 'Error',
+    originalFehlerMessage: error?.message || String(error),
+    originalFehlerName: error?.name || 'Fehler',
     expected: false
   });
 }
@@ -54,13 +54,13 @@ export function wrapServiceBoundary(fn, options = {}) {
 
       if (result && typeof result.then === 'function') {
         return result.catch((error) => {
-          throw ensureTypedServiceError(error, typeof options === 'function' ? options(...args) : options);
+          throw ensureTypedServiceFehler(error, typeof options === 'function' ? options(...args) : options);
         });
       }
 
       return result;
     } catch (error) {
-      throw ensureTypedServiceError(error, typeof options === 'function' ? options(...args) : options);
+      throw ensureTypedServiceFehler(error, typeof options === 'function' ? options(...args) : options);
     }
   };
 }

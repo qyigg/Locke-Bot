@@ -1,1 +1,1 @@
-export { default } from './modules/autoVerify.js';
+export { default } from './modules/autoVerifizieren.js';

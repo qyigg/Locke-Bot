@@ -3,7 +3,7 @@
 import { GUILD_CONFIG_DEFAULTS } from '../../config/guild/guildConfigDefaults.js';
 import { readGuildConfig, writeGuildConfig } from '../../utils/database/guildConfigStorage.js';
 import { normalizeGuildConfig, validateGuildConfigOrThrow } from '../../utils/schemas.js';
-import { createError, ErrorTypes, wrapServiceBoundary } from '../../utils/errorHandler.js';
+import { createFehler, FehlerTypes, wrapServiceBoundary } from '../../utils/errorHandler.js';
 
 export { GUILD_CONFIG_DEFAULTS };
 
@@ -63,9 +63,9 @@ export const setConfigValue = wrapServiceBoundary(async function setConfigValue(
  */
 export const patchGuildConfig = wrapServiceBoundary(async function patchGuildConfig(client, guildId, patch, context = {}) {
     if (!patch || typeof patch !== 'object') {
-        throw createError(
+        throw createFehler(
             'Invalid guild config patch',
-            ErrorTypes.VALIDATION,
+            FehlerTypes.VALIDATION,
             'Invalid configuration update.',
             { guildId, ...context },
         );

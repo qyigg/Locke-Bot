@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -64,9 +64,9 @@ function resolveOutcome(activity, wallet) {
         };
     }
 
-    const remainingAfterSuccess = roll - successChance;
+    const remainingAfterErfolg = roll - successChance;
 
-    if (remainingAfterSuccess < fineChance) {
+    if (remainingAfterErfolg < fineChance) {
         const maxFine = Math.min(wallet, Math.max(150, Math.floor(activity.max * 0.4)));
         const minFine = Math.min(maxFine, Math.max(50, Math.floor(activity.min * 0.2)));
         const amount = maxFine > 0 ? randomInt(minFine, maxFine) : 0;
@@ -78,7 +78,7 @@ function resolveOutcome(activity, wallet) {
         };
     }
 
-    if (remainingAfterSuccess < fineChance + robbedChance) {
+    if (remainingAfterErfolg < fineChance + robbedChance) {
         const maxRobbed = Math.min(wallet, Math.max(200, Math.floor(wallet * 0.35)));
         const minRobbed = Math.min(maxRobbed, Math.max(75, Math.floor(wallet * 0.1)));
         const amount = maxRobbed > 0 ? randomInt(minRobbed, maxRobbed) : 0;
@@ -106,7 +106,7 @@ export default {
         .setName('slut')
         .setDescription('Take a risky provocative job for random payout or loss'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
 
@@ -119,9 +119,9 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (!userData) {
-                throw createError(
+                throw createFehler(
                     "Failed to load economy data for slut command",
-                    ErrorTypes.DATABASE,
+                    FehlerTypes.DATABASE,
                     "Failed to load your economy data. Please try again later.",
                     { userId, guildId }
                 );
@@ -131,9 +131,9 @@ export default {
 
             if (now - lastSlut < SLUT_COOLDOWN) {
                 const remainingTime = lastSlut + SLUT_COOLDOWN - now;
-                throw createError(
+                throw createFehler(
                     "Slut cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `You need to wait before you can work again! Try again in **${Math.ceil(remainingTime / 60000)}** minutes.`,
                     { timeRemaining: remainingTime, cooldownType: 'slut' }
                 );

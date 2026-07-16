@@ -7,7 +7,7 @@ import { formatLogLine } from '../utils/logging/logEmbeds.js';
 const MAX_LOGGED_MESSAGE_CONTENT_LENGTH = 1024;
 
 export default {
-  name: Events.MessageDelete,
+  name: Events.MessageLöschen,
   once: false,
 
   async execute(message) {
@@ -35,12 +35,12 @@ export default {
                 quoted: true,
               }
             });
-          } catch (logCleanupError) {
-            logger.warn('Failed to log reaction role cleanup after manual message deletion:', logCleanupError);
+          } catch (logCleanupFehler) {
+            logger.warn('Failed to log reaction role cleanup after manual message deletion:', logCleanupFehler);
           }
         }
-      } catch (reactionRoleCleanupError) {
-        logger.warn(`Failed to clean up reaction role data for deleted message ${message.id}:`, reactionRoleCleanupError);
+      } catch (reactionRoleCleanupFehler) {
+        logger.warn(`Failed to clean up reaction role data for deleted message ${message.id}:`, reactionRoleCleanupFehler);
       }
 
       if (message.author?.bot) return;
@@ -78,7 +78,7 @@ export default {
       });
 
     } catch (error) {
-      logger.error('Error in messageDelete event:', error);
+      logger.error('Fehler in messageLöschen event:', error);
     }
   }
 };

@@ -32,7 +32,7 @@ export default {
       }
 
     } catch (error) {
-      logger.error('Error in guildMemberUpdate event:', error);
+      logger.error('Fehler in guildMemberUpdate event:', error);
     }
   }
 };

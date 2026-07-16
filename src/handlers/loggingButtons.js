@@ -20,7 +20,7 @@ import {
 } from '../services/loggingService.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import { successEmbed } from '../utils/embeds.js';
-import { replyUserError, ErrorTypes, handleInteractionError } from '../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes, handleInteractionFehler } from '../utils/errorHandler.js';
 import { logger } from '../utils/logger.js';
 import {
   buildLoggingDashboardView,
@@ -62,7 +62,7 @@ export default {
       }
 
       if (interaction.customId === 'log_dash_back') {
-        return handleBackToMain(interaction);
+        return handleZurückToMain(interaction);
       }
 
       if (interaction.customId === 'log_dash_remove_filter') {
@@ -77,7 +77,7 @@ export default {
         return handleToggle(interaction);
       }
     } catch (error) {
-      await handleInteractionError(interaction, error, {
+      await handleInteractionFehler(interaction, error, {
         type: 'button',
         customId: interaction.customId,
         handler: 'logging',
@@ -101,7 +101,7 @@ async function handleRefresh(interaction) {
   await interaction.update({ embeds: [embed], components, content: null });
 }
 
-async function handleBackToMain(interaction) {
+async function handleZurückToMain(interaction) {
   const { embed, components } = await buildLoggingDashboardView(interaction, interaction.client);
   await interaction.update({ embeds: [embed], components, content: null });
 }
@@ -183,7 +183,7 @@ async function handleAddFilterModal(interaction) {
   await interaction.showModal(modal);
 
   try {
-    const modalSubmission = await interaction.awaitModalSubmit({
+    const modalSubmission = await interaction.awaitModalAbsenden({
       time: 5 * 60 * 1000,
       filter: (i) => i.user.id === interaction.user.id && i.customId === modalCustomId,
     });
@@ -196,8 +196,8 @@ async function handleAddFilterModal(interaction) {
     }
 
     if (!id) {
-      return replyUserError(modalSubmission, {
-        type: ErrorTypes.VALIDATION,
+      return replyUserFehler(modalSubmission, {
+        type: FehlerTypes.VALIDATION,
         message: `Please select a ${filterType} to ignore.`,
       });
     }
@@ -216,7 +216,7 @@ async function handleAddFilterModal(interaction) {
     if (error.code === 'INTERACTION_TIMEOUT') {
       return;
     }
-    logger.error('Error in add filter modal:', error);
+    logger.error('Fehler in add filter modal:', error);
   }
 }
 
@@ -244,8 +244,8 @@ async function handleRemoveFilterModal(interaction) {
   }
 
   if (options.length === 0) {
-    return replyUserError(interaction, {
-      type: ErrorTypes.USER_INPUT,
+    return replyUserFehler(interaction, {
+      type: FehlerTypes.USER_INPUT,
       message: 'There are no ignore filters to remove.',
     });
   }
@@ -272,15 +272,15 @@ async function handleRemoveFilterModal(interaction) {
   await interaction.showModal(modal);
 
   try {
-    const modalSubmission = await interaction.awaitModalSubmit({
+    const modalSubmission = await interaction.awaitModalAbsenden({
       time: 5 * 60 * 1000,
       filter: (i) => i.user.id === interaction.user.id && i.customId === modalCustomId,
     });
 
     const entry = modalSubmission.fields.getField('filter_entry')?.values?.[0];
     if (!entry) {
-      return replyUserError(modalSubmission, {
-        type: ErrorTypes.VALIDATION,
+      return replyUserFehler(modalSubmission, {
+        type: FehlerTypes.VALIDATION,
         message: 'Please select a filter to remove.',
       });
     }
@@ -300,7 +300,7 @@ async function handleRemoveFilterModal(interaction) {
     if (error.code === 'INTERACTION_TIMEOUT') {
       return;
     }
-    logger.error('Error in remove filter modal:', error);
+    logger.error('Fehler in remove filter modal:', error);
   }
 }
 
@@ -314,7 +314,7 @@ async function showChannelModal(interaction, destination) {
     .setMinValues(1)
     .setMaxValues(1)
     .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
-    .setRequired(true);
+    .setErforderlich(true);
 
   const channelLabel = new LabelBuilder()
     .setLabel(`${label} Channel`)
@@ -329,7 +329,7 @@ async function showChannelModal(interaction, destination) {
   await interaction.showModal(modal);
 
   try {
-    const modalSubmission = await interaction.awaitModalSubmit({
+    const modalSubmission = await interaction.awaitModalAbsenden({
       time: 5 * 60 * 1000,
       filter: (i) => i.user.id === interaction.user.id && i.customId === modalCustomId,
     });
@@ -365,7 +365,7 @@ async function showChannelModal(interaction, destination) {
     if (error.code === 'INTERACTION_TIMEOUT') {
       return;
     }
-    await handleInteractionError(interaction, error, {
+    await handleInteractionFehler(interaction, error, {
       type: 'modal',
       customId: interaction.customId,
       handler: 'logging_channel',

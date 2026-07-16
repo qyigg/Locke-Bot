@@ -2,9 +2,9 @@ import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelT
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
-import { WarningService } from '../../services/moderation/warningService.js';
+import { WarnungService } from '../../services/moderation/warningService.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
@@ -13,21 +13,21 @@ export default {
         .addUserOption((o) =>
             o
                 .setName("target")
-                .setRequired(true)
+                .setErforderlich(true)
                 .setDescription("User to warn"),
         )
         .addStringOption((o) =>
             o
                 .setName("reason")
-                .setRequired(true)
+                .setErforderlich(true)
                 .setDescription("Reason for the warning"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Warn interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -43,34 +43,34 @@ export default {
         const guildId = interaction.guildId;
 
         if (!target) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Missing target user',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'You must specify a user to warn.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (!reason) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Missing warning reason',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'You must provide a reason for the warning.',
                 { subtype: 'missing_required' },
             );
         }
 
         if (!member) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Target not found",
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 "The target user is not currently in this server."
             );
         }
 
         ModerationService.assertModerationHierarchy(interaction.member, member, 'warn');
 
-        const { id, totalCount } = await WarningService.addWarning({
+        const { id, totalCount } = await WarnungService.addWarnung({
             guildId,
             userId: target.id,
             moderatorId: moderator.id,

@@ -9,7 +9,7 @@ import {
 } from '../config/bot.js';
 import botConfig from '../config/bot.js';
 import { handleApplicationModal } from '../commands/Community/apply.js';
-import { handleInteractionError, createError, ErrorTypes, ErrorCodes } from '../utils/errorHandler.js';
+import { handleInteractionFehler, createFehler, FehlerTypes, FehlerCodes } from '../utils/errorHandler.js';
 import { InteractionHelper } from '../utils/interactionHelper.js';
 import { createInteractionTraceContext, runWithTraceContext } from '../utils/logger.js';
 import { validateChatInputPayloadOrThrow } from '../utils/commandInputValidation.js';
@@ -76,27 +76,27 @@ export default {
             const command = client.commands.get(interaction.commandName);
 
             if (!command) {
-              throw createError(
+              throw createFehler(
                 `Kein Befehl passend zu ${interaction.commandName} gefunden.`,
-                ErrorTypes.CONFIGURATION,
+                FehlerTypes.CONFIGURATION,
                 'Entschuldige, dieser Befehl existiert nicht.',
                 withTraceContext({ commandName: interaction.commandName }, interactionTraceContext)
               );
             }
 
             if (isMaintenanceMode() && !isBotOwner(interaction.user.id)) {
-              throw createError(
+              throw createFehler(
                 'Bot befindet sich im Wartungsmodus',
-                ErrorTypes.CONFIGURATION,
+                FehlerTypes.CONFIGURATION,
                 getBotMessage('maintenanceMode'),
                 withTraceContext({ commandName: interaction.commandName }, interactionTraceContext)
               );
             }
 
             if (!isCommandCategoryAktiviert(command.category)) {
-              throw createError(
+              throw createFehler(
                 `Funktion für Kategorie ${command.category} deaktiviert`,
-                ErrorTypes.CONFIGURATION,
+                FehlerTypes.CONFIGURATION,
                 getBotMessage('commandDeaktiviert'),
                 withTraceContext({ commandName: interaction.commandName, category: command.category }, interactionTraceContext)
               );
@@ -109,9 +109,9 @@ export default {
 
               if (expiresAt && Date.now() < expiresAt) {
                 const remainingSec = Math.ceil((expiresAt - Date.now()) / 1000);
-                throw createError(
+                throw createFehler(
                   `Standard-Befehls-Cooldown aktiv für ${interaction.commandName}`,
-                  ErrorTypes.RATE_LIMIT,
+                  FehlerTypes.RATE_LIMIT,
                   getBotMessage('cooldownActive', { time: `${remainingSec}s` }),
                   withTraceContext({ commandName: interaction.commandName, remainingSec }, interactionTraceContext)
                 );
@@ -123,9 +123,9 @@ export default {
             const abuseProtection = await enforceAbuseProtection(interaction, command, interaction.commandName);
             if (!abuseProtection.allowed) {
               const formattedCooldown = formatCooldownDuration(abuseProtection.remainingMs);
-              throw createError(
+              throw createFehler(
                 `Cooldown für riskanten Befehl aktiv: ${interaction.commandName}`,
-                ErrorTypes.RATE_LIMIT,
+                FehlerTypes.RATE_LIMIT,
                 `Dieser Befehl hat aktuell eine Abklingzeit. Bitte warte ${formattedCooldown}, bevor du es erneut versuchst.`,
                 withTraceContext({
                   commandName: interaction.commandName,
@@ -143,9 +143,9 @@ export default {
               guildConfig = await getGuildConfig(client, interaction.guild.id, interactionTraceContext);
               const accessKey = resolveSlashAccessKey(interaction);
               if (!(await isCommandAktiviert(client, interaction.guild.id, accessKey, command.category))) {
-                throw createError(
+                throw createFehler(
                   `Befehl ${accessKey} ist in dieser Guild deaktiviert`,
-                  ErrorTypes.CONFIGURATION,
+                  FehlerTypes.CONFIGURATION,
                   'Dieser Befehl wurde für diesen Server deaktiviert.',
                   withTraceContext({ commandName: accessKey, guildId: interaction.guild.id }, interactionTraceContext)
                 );
@@ -162,7 +162,7 @@ export default {
 
             await command.execute(interaction, guildConfig, client);
           } catch (error) {
-            await handleInteractionError(interaction, error, withTraceContext({
+            await handleInteractionFehler(interaction, error, withTraceContext({
               type: 'command',
               commandName: interaction.commandName,
               subtype: COMMAND_ERROR_SUBTYPES[interaction.commandName] || error?.context?.subtype,
@@ -193,14 +193,14 @@ export default {
               const roleName = interaction.options.getString('application', false);
 
               const filtered = roles.filter(role =>
-                role.enabled !== false && 
-                role.name.toLowerCase().startsWith(roleName?.toLowerCase() || '')
+                Rolle zu bekommen.enabled !== false && 
+                Rolle zu bekommen.name.toLowerCase().startsWith(roleName?.toLowerCase() || '')
               );
               
               await interaction.respond(
                 filtered.slice(0, 25).map(role => ({
-                  name: `${role.name}${role.enabled === false ? ' (deaktiviert)' : ''}`,
-                  value: role.name
+                  name: `${Rolle zu bekommen.name}${Rolle zu bekommen.enabled === false ? ' (deaktiviert)' : ''}`,
+                  value: Rolle zu bekommen.name
                 }))
               );
             } catch (error) {
@@ -218,13 +218,13 @@ export default {
               const appName = interaction.options.getString('application', false);
 
               const filtered = roles.filter(role =>
-                role.name.toLowerCase().startsWith(appName?.toLowerCase() || '')
+                Rolle zu bekommen.name.toLowerCase().startsWith(appName?.toLowerCase() || '')
               );
               
               await interaction.respond(
                 filtered.slice(0, 25).map(role => ({
-                  name: `${role.name}${role.enabled === false ? ' (deaktiviert)' : ''}`,
-                  value: role.name
+                  name: `${Rolle zu bekommen.name}${Rolle zu bekommen.enabled === false ? ' (deaktiviert)' : ''}`,
+                  value: Rolle zu bekommen.name
                 }))
               );
             } catch (error) {
@@ -282,16 +282,16 @@ export default {
               try {
                 await button.execute(interaction, client, [listId]);
               } catch (error) {
-                await handleInteractionError(interaction, error, withTraceContext({
+                await handleInteractionFehler(interaction, error, withTraceContext({
                   type: 'button',
                   customId: interaction.customId,
                   handler: 'todo'
                 }, interactionTraceContext));
               }
             } else {
-              throw createError(
+              throw createFehler(
                 `Kein Button-Handler für ${buttonType} gefunden`,
-                ErrorTypes.CONFIGURATION,
+                FehlerTypes.CONFIGURATION,
                 'Dieser Button ist nicht verfügbar.',
                 withTraceContext({ buttonType }, interactionTraceContext)
               );
@@ -307,9 +307,9 @@ export default {
               return;
             }
 
-            throw createError(
+            throw createFehler(
               `Kein Button-Handler für ${customId} gefunden`,
-              ErrorTypes.CONFIGURATION,
+              FehlerTypes.CONFIGURATION,
               'Dieser Button ist nicht verfügbar.',
               withTraceContext({ customId }, interactionTraceContext)
             );
@@ -318,7 +318,7 @@ export default {
           try {
             await button.execute(interaction, client, args);
           } catch (error) {
-            await handleInteractionError(interaction, error, withTraceContext({
+            await handleInteractionFehler(interaction, error, withTraceContext({
               type: 'button',
               customId: interaction.customId,
               handler: 'general'
@@ -333,9 +333,9 @@ export default {
               return;
             }
 
-            throw createError(
+            throw createFehler(
               `Kein Select-Menu-Handler für ${customId} gefunden`,
-              ErrorTypes.CONFIGURATION,
+              FehlerTypes.CONFIGURATION,
               'Dieses Auswahlmenü ist nicht verfügbar.',
               withTraceContext({ customId }, interactionTraceContext)
             );
@@ -344,17 +344,17 @@ export default {
           try {
             await selectMenu.execute(interaction, client, args);
           } catch (error) {
-            await handleInteractionError(interaction, error, withTraceContext({
+            await handleInteractionFehler(interaction, error, withTraceContext({
               type: 'select_menu',
               customId: interaction.customId
             }, interactionTraceContext));
           }
-        } else if (interaction.isModalSubmit()) {
+        } else if (interaction.isModalAbsenden()) {
           if (interaction.customId.startsWith('app_modal_')) {
             try {
               await handleApplicationModal(interaction);
             } catch (error) {
-              await handleInteractionError(interaction, error, withTraceContext({
+              await handleInteractionFehler(interaction, error, withTraceContext({
                 type: 'modal',
                 customId: interaction.customId,
                 handler: 'application'
@@ -386,9 +386,9 @@ export default {
               return;
             }
 
-            throw createError(
+            throw createFehler(
               `Kein Modal-Handler für ${customId} gefunden`,
-              ErrorTypes.CONFIGURATION,
+              FehlerTypes.CONFIGURATION,
               'Dieses Formular ist nicht verfügbar.',
               withTraceContext({ customId }, interactionTraceContext)
             );
@@ -397,7 +397,7 @@ export default {
           try {
             await modal.execute(interaction, client, args);
           } catch (error) {
-            await handleInteractionError(interaction, error, withTraceContext({
+            await handleInteractionFehler(interaction, error, withTraceContext({
               type: 'modal',
               customId: interaction.customId,
               handler: 'general'
@@ -407,7 +407,7 @@ export default {
       } catch (error) {
         logger.error('Unbehandelter Fehler in interactionCreate:', {
           event: 'interaction.unhandled_error',
-          errorCode: ErrorCodes.INTERACTION_UNHANDLED,
+          errorCode: FehlerCodes.INTERACTION_UNHANDLED,
           error,
           traceId: interactionTraceContext.traceId,
           interactionId: interaction.id,
@@ -416,17 +416,17 @@ export default {
         });
 
         try {
-          await handleInteractionError(interaction, error, withTraceContext({
+          await handleInteractionFehler(interaction, error, withTraceContext({
             type: 'interaction',
             commandName: interaction.commandName,
             customId: interaction.customId,
             source: 'interactionCreate.unhandled'
           }, interactionTraceContext));
-        } catch (replyError) {
+        } catch (replyFehler) {
           logger.error('Fallback-Fehlerantwort konnte nicht gesendet werden:', {
             event: 'interaction.error_response_failed',
-            errorCode: ErrorCodes.INTERACTION_RESPONSE_FAILED,
-            error: replyError,
+            errorCode: FehlerCodes.INTERACTION_RESPONSE_FAILED,
+            error: replyFehler,
             traceId: interactionTraceContext.traceId
           });
         }

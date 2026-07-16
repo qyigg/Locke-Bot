@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { successEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
+import { successEmbed, buildUserFehlerEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
@@ -12,10 +12,10 @@ export default {
             option
                 .setName('amount')
                 .setDescription('Amount to deposit (number or "all")')
-                .setRequired(true)
+                .setErforderlich(true)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
         
@@ -26,9 +26,9 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createError(
+                throw createFehler(
                     "Failed to load economy data",
-                    ErrorTypes.DATABASE,
+                    FehlerTypes.DATABASE,
                     "Failed to load your economy data. Please try again later.",
                     { userId, guildId }
                 );
@@ -43,9 +43,9 @@ export default {
                 depositAmount = parseInt(amountInput);
 
                 if (isNaN(depositAmount) || depositAmount <= 0) {
-                    throw createError(
+                    throw createFehler(
                         "Invalid deposit amount",
-                        ErrorTypes.VALIDATION,
+                        FehlerTypes.VALIDATION,
                         `Please enter a valid number or 'all'. You entered: \`${amountInput}\``,
                         { amountInput, userId }
                     );
@@ -53,9 +53,9 @@ export default {
             }
 
             if (depositAmount === 0) {
-                throw createError(
+                throw createFehler(
                     "Zero deposit amount",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "You have no cash to deposit.",
                     { userId, walletBalance: userData.wallet }
                 );
@@ -65,7 +65,7 @@ export default {
                 depositAmount = userData.wallet;
                 await interaction.followUp({
                     embeds: [
-                        buildUserErrorEmbed(
+                        buildUserFehlerEmbed(
                             'validation',
                             `You tried to deposit more than you have. Depositing your remaining cash: **$${depositAmount.toLocaleString()}**`
                         )
@@ -77,9 +77,9 @@ export default {
             const availableSpace = maxBank - userData.bank;
 
             if (availableSpace <= 0) {
-                throw createError(
+                throw createFehler(
                     "Bank is full",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     `Your bank is currently full (Max Capacity: $${maxBank.toLocaleString()}). Purchase a **Bank Upgrade** to increase your limit.`,
                     { maxBank, currentBank: userData.bank, userId }
                 );
@@ -92,7 +92,7 @@ export default {
                 if (amountInput.toLowerCase() !== "all") {
                     await interaction.followUp({
                         embeds: [
-                            buildUserErrorEmbed(
+                            buildUserFehlerEmbed(
                                 'validation',
                                 `You only had space for **$${depositAmount.toLocaleString()}** in your bank account (Max: $${maxBank.toLocaleString()}). The rest remains in your cash.`
                             )
@@ -103,9 +103,9 @@ export default {
             }
 
             if (depositAmount === 0) {
-                throw createError(
+                throw createFehler(
                     "No space or cash for deposit",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "The amount you tried to deposit was either 0 or exceeded your bank capacity after checking your cash balance.",
                     { depositAmount, availableSpace, walletBalance: userData.wallet }
                 );
@@ -117,7 +117,7 @@ export default {
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                'Deposit Successful',
+                'Deposit Erfolgful',
                 `You successfully deposited **$${depositAmount.toLocaleString()}** into your bank.`
             )
                 .addFields(

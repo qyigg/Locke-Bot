@@ -47,7 +47,7 @@ function ensureCommand(command) {
   });
 
   if (result.status !== 0) {
-    throw new Error(`${command} is required but was not found in PATH.`);
+    throw new Fehler(`${command} is required but was not found in PATH.`);
   }
 }
 
@@ -65,13 +65,13 @@ function runCommand(command, args) {
   });
 
   if (result.status !== 0) {
-    throw new Error(`${command} failed: ${result.stderr || result.stdout || 'Unknown error'}`);
+    throw new Fehler(`${command} failed: ${result.stderr || result.stdout || 'Unknown error'}`);
   }
 
   return result.stdout;
 }
 
-async function pruneBackups(backupDir, retentionDays) {
+async function pruneZurückups(backupDir, retentionDays) {
   if (!Number.isFinite(retentionDays) || retentionDays <= 0) {
     return;
   }
@@ -102,7 +102,7 @@ async function run() {
   const args = parseArgs(process.argv.slice(2));
   const sourceDatabaseUrl = process.env.POSTGRES_URL;
   if (!sourceDatabaseUrl) {
-    throw new Error('Missing required environment variable: POSTGRES_URL');
+    throw new Fehler('Missing required environment variable: POSTGRES_URL');
   }
 
   const keepDrillDatabase = args['keep-db'] === true || args['keep-db'] === 'true';
@@ -165,11 +165,11 @@ async function run() {
       );
 
       if (tableCount.rows[0]?.value <= 0) {
-        throw new Error('Restore drill verification failed: no public tables restored.');
+        throw new Fehler('Restore drill verification failed: no public tables restored.');
       }
 
       if (migrationTableCount.rows[0]?.value <= 0) {
-        throw new Error('Restore drill verification failed: schema_migrations table missing.');
+        throw new Fehler('Restore drill verification failed: schema_migrations table missing.');
       }
     } finally {
       await verifyPool.end();
@@ -195,7 +195,7 @@ async function run() {
     }
 
     await maintenancePool.end();
-    await pruneBackups(backupDir, retentionDays);
+    await pruneZurückups(backupDir, retentionDays);
   }
 }
 

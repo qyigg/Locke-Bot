@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { botConfig } from '../../config/bot.js';
@@ -28,7 +28,7 @@ export default {
         .setName('work')
         .setDescription('Work to earn some money'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
+    execute: withFehlerHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
         if (!deferred) return;
             
@@ -39,9 +39,9 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (!userData) {
-                throw createError(
+                throw createFehler(
                     "Failed to load economy data for work",
-                    ErrorTypes.DATABASE,
+                    FehlerTypes.DATABASE,
                     "Failed to load your economy data. Please try again later.",
                     { userId, guildId }
                 );
@@ -63,9 +63,9 @@ export default {
                     usedConsumable = true;
                 } else {
                     const remaining = lastWork + WORK_COOLDOWN - now;
-                    throw createError(
+                    throw createFehler(
                         "Work cooldown active",
-                        ErrorTypes.RATE_LIMIT,
+                        FehlerTypes.RATE_LIMIT,
                         `You're working too fast! Wait **${Math.floor(remaining / 3600000)}h ${Math.floor((remaining % 3600000) / 60000)}m** before working again.`,
                         { timeRemaining: remaining, cooldownType: 'work' }
                     );
@@ -108,7 +108,7 @@ export default {
                         inline: true,
                     },
                     {
-                        name: "Next Work",
+                        name: "Weiter Work",
                         value: `<t:${Math.floor((now + WORK_COOLDOWN) / 1000)}:R>`,
                         inline: true,
                     }

@@ -70,7 +70,7 @@ export default {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [buildEmbed(
                     '❌ Not Allowed',
-                    'Only the ticket creator can submit feedback for this ticket.',
+                    'Anly the ticket creator can submit feedback for this ticket.',
                     getColor('error'),
                 )],
             });
@@ -80,7 +80,7 @@ export default {
         ticketData.feedback = {
             ...ticketData.feedback,
             comment,
-            commentSubmittedAt: new Date().toISOString(),
+            commentAbsendentedAt: new Date().toISOString(),
         };
 
         try {
@@ -105,7 +105,7 @@ export default {
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [buildEmbed(
-                '✅ Feedback Submitted',
+                '✅ Feedback Absendented',
                 'Your written feedback has been recorded. Thank you for helping us improve!',
                 getColor('success'),
             )],

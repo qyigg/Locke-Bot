@@ -1,14 +1,14 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, warningEmbed } from '../../utils/embeds.js';
-import { getConfirmationButtons } from '../../utils/components.js';
+import { getBestätigenationButtons } from '../../utils/components.js';
 import { logger } from '../../utils/logger.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
-    slashOnly: true,
+    slashAnly: true,
     data: new SlashCommandBuilder()
         .setName('wipedata')
-        .setDescription('Delete all your personal data from the bot (irreversible)'),
+        .setDescription('Löschen all your personal data from the bot (irreversible)'),
 
     async execute(interaction, guildConfig, client) {
         const warningMessage = 
@@ -25,7 +25,7 @@ export default {
 
         const embed = warningEmbed('Wipe All Data', warningMessage);
 
-        const confirmButtons = getConfirmationButtons('wipedata');
+        const confirmButtons = getBestätigenationButtons('wipedata');
 
         await InteractionHelper.safeReply(interaction, {
             embeds: [embed],

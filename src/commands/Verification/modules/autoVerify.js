@@ -2,17 +2,17 @@ import { botConfig, getColor } from '../../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../../utils/errorHandler.js';
-import { validateAutoVerifyKriterien } from '../../../services/verificationService.js';
+import { withFehlerHandling, createFehler, FehlerTypes } from '../../../utils/errorHandler.js';
+import { validateAutoVerifizierenKriterien } from '../../../services/verificationService.js';
 import { logger } from '../../../utils/logger.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
-import autoVerifyDashboard from './autoVerifyDashboard.js';
+import autoVerifizierenDashboard from './autoVerifizierenDashboard.js';
 
-const autoVerifyDefaults = botConfig.verification?.autoVerify || {};
-const minAccountAgeDays = autoVerifyDefaults.minAccountAge ?? 1;
-const maxAccountAgeDays = autoVerifyDefaults.maxAccountAge ?? 365;
-const defaultAccountAgeDays = autoVerifyDefaults.defaultAccountAgeDays ?? 7;
+const autoVerifizierenDefaults = botConfig.verification?.autoVerifizieren || {};
+const minAccountAgeDays = autoVerifizierenDefaults.minAccountAge ?? 1;
+const maxAccountAgeDays = autoVerifizierenDefaults.maxAccountAge ?? 365;
+const defaultAccountAgeDays = autoVerifizierenDefaults.defaultAccountAgeDays ?? 7;
 
 export default {
     data: new SlashCommandBuilder()
@@ -26,8 +26,8 @@ export default {
                 .addRoleOption(option =>
                     option
                         .setName("role")
-                        .setDescription("Rolle, die Benutzer erhalten, wenn sie die Auto-Verify-Kriterien erfüllen")
-                        .setRequired(true)
+                        .setDescription("Rolle, die Benutzer erhalten, wenn sie die Auto-Verifizieren-Kriterien erfüllen")
+                        .setErforderlich(true)
                 )
                 .addStringOption(option =>
                     option
@@ -37,7 +37,7 @@ export default {
                             { name: "Account-Alter", value: "account_age" },
                             { name: "Keine Kriterien", value: "none" }
                         )
-                        .setRequired(true)
+                        .setErforderlich(true)
                 )
                 .addIntegerOption(option =>
                     option
@@ -45,29 +45,29 @@ export default {
                         .setDescription("Mindestalter des Accounts in Tagen (erforderlich für das Kriterium Account-Alter)")
                         .setMinValue(minAccountAgeDays)
                         .setMaxValue(maxAccountAgeDays)
-                        .setRequired(false)
+                        .setErforderlich(false)
                 )
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName("dashboard")
-                .setDescription("Öffne das Auto-Verify-Dashboard zur Anpassung")
+                .setDescription("Öffne das Auto-Verifizieren-Dashboard zur Anpassung")
         ),
 
     async execute(interaction, config, client) {
-        const wrappedExecute = withErrorHandling(async () => {
+        const wrappedExecute = withFehlerHandling(async () => {
             const subcommand = interaction.options.getSubcommand();
             const guild = interaction.guild;
 
             switch (subcommand) {
                 case "setup":
-                    return await handleSetup(interaction, guild, client);
+                    return await handleEinrichtung(interaction, guild, client);
                 case "dashboard":
-                    return await autoVerifyDashboard.execute(interaction, config, client);
+                    return await autoVerifizierenDashboard.execute(interaction, config, client);
                 default:
-                    throw createError(
+                    throw createFehler(
                         `Unknown subcommand: ${subcommand}`,
-                        ErrorTypes.VALIDATION,
+                        FehlerTypes.VALIDATION,
                         "Ungültiger Unterbefehl ausgewählt.",
                         { subcommand }
                     );
@@ -78,7 +78,7 @@ export default {
     }
 };
 
-async function handleSetup(interaction, guild, client) {
+async function handleEinrichtung(interaction, guild, client) {
     const criteria = interaction.options.getString("criteria");
     const accountAgeDays = interaction.options.getInteger("account_age_days") || defaultAccountAgeDays;
     const targetRole = interaction.options.getRole("role");
@@ -92,64 +92,64 @@ async function handleSetup(interaction, guild, client) {
         const hasAutoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
         if (verificationAktiviert || hasAutoRoleConfigured) {
-            throw createError(
+            throw createFehler(
                 'Auto-verify enable blocked by conflicting onboarding system',
-                ErrorTypes.CONFIGURATION,
-                'Du kannst **AutoVerify** nicht aktivieren, solange das Verifizierungssystem oder AutoRole eingerichtet ist. Deaktiviere diese zuerst.',
+                FehlerTypes.CONFIGURATION,
+                'Du kannst **AutoVerifizieren** nicht aktivieren, solange das Verifizierungssystem oder AutoRole eingerichtet ist. Deaktiviere diese zuerst.',
                 {
                     guildId: guild.id,
                     verificationAktiviert,
                     hasAutoRoleConfigured,
                     expected: true,
-                    suppressErrorLog: true
+                    suppressFehlerLog: true
                 }
             );
         }
 
         const botMember = guild.members.me;
         if (!botMember) {
-            throw createError(
+            throw createFehler(
                 'Bot member not found in guild cache',
-                ErrorTypes.CONFIGURATION,
+                FehlerTypes.CONFIGURATION,
                 'Ich konnte meine Berechtigungen auf diesem Server nicht überprüfen. Bitte versuche es gleich erneut.',
                 { guildId: guild.id }
             );
         }
 
         if (!botMember.permissions.has(PermissionFlagsBits.ManageRoles)) {
-            throw createError(
+            throw createFehler(
                 'Missing ManageRoles permission',
-                ErrorTypes.PERMISSION,
-                "Ich benötige die Berechtigung 'Rollen verwalten', um Auto-Verify-Rollen zu vergeben.",
+                FehlerTypes.PERMISSION,
+                "Ich benötige die Berechtigung 'Rollen verwalten', um Auto-Verifizieren-Rollen zu vergeben.",
                 { guildId: guild.id }
             );
         }
 
         if (targetRole.id === guild.id || targetRole.managed) {
-            throw createError(
+            throw createFehler(
                 'Invalid auto-verify role selected',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Bitte wähle eine normale zuweisbare Rolle aus (nicht @everyone und keine von einer Integration verwaltete Rolle).',
                 { guildId: guild.id, roleId: targetRole.id, managed: targetRole.managed }
             );
         }
 
         if (targetRole.position >= botMember.roles.highest.position) {
-            throw createError(
+            throw createFehler(
                 'Role hierarchy error for auto-verify setup',
-                ErrorTypes.PERMISSION,
-                'Die ausgewählte Auto-Verify-Rolle muss in der Server-Rollenhierarchie unter meiner höchsten Rolle liegen.',
+                FehlerTypes.PERMISSION,
+                'Die ausgewählte Auto-Verifizieren-Rolle muss in der Server-Rollenhierarchie unter meiner höchsten Rolle liegen.',
                 { guildId: guild.id, roleId: targetRole.id, rolePosition: targetRole.position, botRolePosition: botMember.roles.highest.position }
             );
         }
 
-        validateAutoVerifyKriterien(criteria, criteria === 'account_age' ? accountAgeDays : 1);
+        validateAutoVerifizierenKriterien(criteria, criteria === 'account_age' ? accountAgeDays : 1);
         
         if (!guildConfig.verification) {
             guildConfig.verification = {};
         }
 
-        guildConfig.verification.autoVerify = {
+        guildConfig.verification.autoVerifizieren = {
             enabled: true,
             criteria: criteria,
             accountAgeDays: criteria === "account_age" ? accountAgeDays : null,

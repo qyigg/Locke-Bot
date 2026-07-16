@@ -9,7 +9,7 @@ import { getServerCounters, saveServerCounters } from '../services/serverstatsSe
 import { logger } from '../utils/logger.js';
 
 export default {
-    name: 'channelDelete',
+    name: 'channelLöschen',
     async execute(channel, client) {
         
         if (channel.type === 0 && channel.guild) {
@@ -44,7 +44,7 @@ if (channel.type !== 2 && channel.type !== 4) {
                 const success = await saveServerCounters(client, guildId, updatedCounters);
                 
                 if (success) {
-                    logger.info(`Successfully removed orphaned counter ${orphanedCounter.id} (type: ${orphanedCounter.type}) from guild ${guildId}`);
+                    logger.info(`Erfolgfully removed orphaned counter ${orphanedCounter.id} (type: ${orphanedCounter.type}) from guild ${guildId}`);
                 } else {
                     logger.warn(`Failed to remove orphaned counter ${orphanedCounter.id} from guild ${guildId}`);
                 }
@@ -61,7 +61,7 @@ if (channel.type !== 2 && channel.type !== 4) {
                 
                 const success = await removeJoinToCreateTrigger(client, guildId, channel.id);
                 if (success) {
-                    logger.info(`Successfully removed trigger channel ${channel.id} from Join to Create configuration`);
+                    logger.info(`Erfolgfully removed trigger channel ${channel.id} from Join to Create configuration`);
                 } else {
                     logger.warn(`Failed to remove trigger channel ${channel.id} from Join to Create configuration`);
                 }
@@ -72,7 +72,7 @@ if (channel.type !== 2 && channel.type !== 4) {
                 
                 const success = await unregisterTemporaryChannel(client, guildId, channel.id);
                 if (success) {
-                    logger.info(`Successfully cleaned up temporary channel ${channel.id} from database`);
+                    logger.info(`Erfolgfully cleaned up temporary channel ${channel.id} from database`);
                 } else {
                     logger.warn(`Failed to cleanup temporary channel ${channel.id} from database`);
                 }
@@ -93,7 +93,7 @@ if (channel.type !== 2 && channel.type !== 4) {
             }
 
         } catch (error) {
-            logger.error(`Error in channelDelete event for guild ${guildId}:`, error);
+            logger.error(`Fehler in channelLöschen event for guild ${guildId}:`, error);
         }
     }
 };

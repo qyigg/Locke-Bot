@@ -11,8 +11,8 @@ export default {
     category: "Utility",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`FirstMsg interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,

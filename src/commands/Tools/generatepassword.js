@@ -3,7 +3,7 @@ import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
@@ -14,26 +14,26 @@ export default {
                 .setDescription('Password length (default: 16, max: 50)')
                 .setMinValue(8)
                 .setMaxValue(50)
-                .setRequired(false))
+                .setErforderlich(false))
         .addBooleanOption(option =>
             option.setName('uppercase')
                 .setDescription('Include uppercase letters (A-Z)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addBooleanOption(option =>
             option.setName('numbers')
                 .setDescription('Include numbers (0-9)')
-                .setRequired(false))
+                .setErforderlich(false))
         .addBooleanOption(option =>
             option.setName('symbols')
                 .setDescription('Include symbols (!@#$%^&*)')
-                .setRequired(false)),
+                .setErforderlich(false)),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, {
+        const deferErfolg = await InteractionHelper.safeDefer(interaction, {
             flags: MessageFlags.Ephemeral
         });
 
-        if (!deferSuccess) {
+        if (!deferErfolg) {
             logger.warn('GeneratePassword interaction defer failed', {
                 userId: interaction.user?.id,
                 guildId: interaction.guildId,
@@ -48,7 +48,7 @@ export default {
         const includeSymbols = interaction.options.getBoolean('symbols') ?? true;
 
         if (length < 8 || length > 50) {
-            await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Password must be 8-50 characters. You provided: ${length}` });
+            await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: `Password must be 8-50 characters. You provided: ${length}` });
             return;
         }
 

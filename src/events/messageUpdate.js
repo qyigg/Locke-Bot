@@ -49,7 +49,7 @@ export default {
       });
 
     } catch (error) {
-      logger.error('Error in messageUpdate event:', error);
+      logger.error('Fehler in messageUpdate event:', error);
     }
   }
 };

@@ -3,16 +3,16 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getColor } from '../config/bot.js';
 
-export function getConfirmationButtons(customIdPrefix = 'confirm') {
+export function getBestätigenationButtons(customIdPrefix = 'confirm') {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_yes`)
-            .setLabel('Confirm')
-            .setStyle(ButtonStyle.Success)
+            .setLabel('Bestätigen')
+            .setStyle(ButtonStyle.Erfolg)
             .setEmoji('✅'),
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_no`)
-            .setLabel('Cancel')
+            .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('❌')
     );
@@ -62,10 +62,10 @@ export function createSelectMenu(customId, placeholder, options = [], min = 1, m
 export function createButton(customId, label, style = 'primary', emoji = null, disabled = false) {
     
     if (!customId || typeof customId !== 'string' || customId.length === 0) {
-        throw new Error('customId must be a non-empty string');
+        throw new Fehler('customId must be a non-empty string');
     }
     if (!label || typeof label !== 'string' || label.length === 0) {
-        throw new Error('label must be a non-empty string');
+        throw new Fehler('label must be a non-empty string');
     }
 
     const validCustomId = customId.substring(0, 100);
@@ -94,10 +94,10 @@ export function createButton(customId, label, style = 'primary', emoji = null, d
 export function createLinkButton(label, url, emoji = null) {
     
     if (!label || typeof label !== 'string') {
-        throw new Error('label must be a non-empty string');
+        throw new Fehler('label must be a non-empty string');
     }
     if (!url || typeof url !== 'string') {
-        throw new Error('url must be a non-empty string');
+        throw new Fehler('url must be a non-empty string');
     }
     
     const validLabel = label.substring(0, 80);

@@ -2,7 +2,7 @@ import {
     canonicalizeKey,
     getEconomyPrefix,
     getUserLevelPrefix,
-    getWarningsPrefix,
+    getWarnungsPrefix,
     getReactionRolesPrefix,
     getApplicationsPrefix,
     getTicketCounterKey,
@@ -32,7 +32,7 @@ const TEMP_BACKED_TYPES = new Set([
     'ticket_counter',
 ]);
 
-export function isTempBackedType(type) {
+export function isTempZurückedType(type) {
     return type === 'temp' || TEMP_BACKED_TYPES.has(type);
 }
 
@@ -245,13 +245,13 @@ export function getStructuredListPlan(prefix, tables) {
 
     match = normalizedPrefix.match(/^moderation:warnings:([^:]+):$/);
     if (match) {
-        plan.tempPrefixes = [normalizedPrefix, getWarningsPrefix(match[1])];
+        plan.tempPrefixes = [normalizedPrefix, getWarnungsPrefix(match[1])];
         return plan;
     }
 
     match = normalizedPrefix.match(/^guild:([^:]+):warnings:$/);
     if (match) {
-        plan.tempPrefixes = [getWarningsPrefix(match[1]), `moderation:warnings:${match[1]}:`];
+        plan.tempPrefixes = [getWarnungsPrefix(match[1]), `moderation:warnings:${match[1]}:`];
         return plan;
     }
 
@@ -278,7 +278,7 @@ export function getStructuredListPlan(prefix, tables) {
         addGuildScopedSingletons(match[1]);
         plan.tempPrefixes = [
             getApplicationsPrefix(match[1]),
-            getWarningsPrefix(match[1]),
+            getWarnungsPrefix(match[1]),
             `moderation:warnings:${match[1]}:`,
             getReactionRolesPrefix(match[1]),
             `reaction_roles:${match[1]}:`,

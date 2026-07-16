@@ -2,7 +2,7 @@ import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getTicketPermissionContext } from '../../utils/ticket/ticketPermissions.js';
 import { updateTicketPriority } from '../../services/ticket.js';
@@ -15,7 +15,7 @@ export default {
             option
                 .setName("level")
                 .setDescription("Die Prioritätsstufe für das Ticket.")
-                .setRequired(true)
+                .setErforderlich(true)
                 .addChoices(
                     { name: "Dringend", value: "urgent" },
                     { name: "Hoch", value: "high" },
@@ -35,11 +35,11 @@ export default {
 
         const permissionContext = await getTicketPermissionContext({ client, interaction });
         if (!permissionContext.ticketData) {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.' });
         }
 
         if (!permissionContext.canManageTicket) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten` oder die konfigurierte `Ticket-Staff-Rolle`, um die Ticket-Priorität zu ändern.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten` oder die konfigurierte `Ticket-Staff-Rolle`, um die Ticket-Priorität zu ändern.' });
         }
 
         const priorityLevel = interaction.options.getString("level");

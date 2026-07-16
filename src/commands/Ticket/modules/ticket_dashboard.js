@@ -19,7 +19,7 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed, infoEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
 import { getGuildTicketStats } from '../../../utils/database/tickets.js';
 import { getUserTicketCount } from '../../../services/ticket.js';
@@ -31,7 +31,7 @@ import {
 import { startDashboardSession } from '../../../utils/dashboardSession.js';
 
 function buildButtonRow(guildConfig, guildId, disabled = false, panelStatus = null) {
-    const dmAktiviert = guildConfig.dmOnClose !== false;
+    const dmAktiviert = guildConfig.dmAnSchließen !== false;
     const showRepost = panelStatus?.exists === false && panelStatus?.reason === 'panel_deleted';
 
     const buttons = [];
@@ -51,7 +51,7 @@ function buildButtonRow(guildConfig, guildId, disabled = false, panelStatus = nu
         new ButtonBuilder()
             .setCustomId(`ticket_cfg_dm_toggle_${guildId}`)
             .setLabel('DM beim Schließen')
-            .setStyle(dmAktiviert ? ButtonStyle.Success : ButtonStyle.Danger)
+            .setStyle(dmAktiviert ? ButtonStyle.Erfolg : ButtonStyle.Danger)
             .setEmoji(dmAktiviert ? '📬' : '📭')
             .setDeaktiviert(disabled),
         new ButtonBuilder()
@@ -99,9 +99,9 @@ function buildPanelButtonRow(config) {
 async function repostTicketPanel(client, guild, guildConfig, guildId) {
     const channel = await guild.channels.fetch(guildConfig.ticketPanelChannelId).catch(() => null);
     if (!channel) {
-        throw new TitanBotError(
+        throw new TitanBotFehler(
             'Panel-Kanal fehlt',
-            ErrorTypes.CONFIGURATION,
+            FehlerTypes.CONFIGURATION,
             'Der konfigurierte Ticket-Panel-Kanal existiert nicht mehr. Lege im Dashboard einen neuen Panel-Kanal fest.',
         );
     }
@@ -115,7 +115,7 @@ async function repostTicketPanel(client, guild, guildConfig, guildId) {
     return sentPanel;
 }
 
-function formatCloseDuration(ms) {
+function formatSchließenDuration(ms) {
     if (ms == null) return '`N/V`';
     const hours = Math.floor(ms / 3_600_000);
     const minutes = Math.floor((ms % 3_600_000) / 60_000);
@@ -132,7 +132,7 @@ function buildDashboardEmbed(config, guild, panelStatus = null, ticketStats = nu
     const openCategoryChannel = config.ticketCategoryId ? guild.channels.cache.get(config.ticketCategoryId) : null;
     const openCategory = openCategoryChannel ? openCategoryChannel.toString() : '`Nicht gesetzt`';
     
-    const closedCategoryChannel = config.ticketClosedCategoryId ? guild.channels.cache.get(config.ticketClosedCategoryId) : null;
+    const closedCategoryChannel = config.ticketSchließendCategoryId ? guild.channels.cache.get(config.ticketSchließendCategoryId) : null;
     const closedCategory = closedCategoryChannel ? closedCategoryChannel.toString() : '`Nicht gesetzt`';
 
     const rawMsg = config.ticketPanelMessage || 'Klicke auf den Button unten, um ein Support-Ticket zu erstellen.';
@@ -142,7 +142,7 @@ function buildDashboardEmbed(config, guild, panelStatus = null, ticketStats = nu
     let panelStatusValue = formatPanelStatusField(panelStatus);
 
     const openTickets = ticketStats ? String(ticketStats.openCount) : '`—`';
-    const avgCloseTime = ticketStats ? formatCloseDuration(ticketStats.avgCloseTimeMs) : '`—`';
+    const avgSchließenTime = ticketStats ? formatSchließenDuration(ticketStats.avgSchließenTimeMs) : '`—`';
     const feedbackSummary = ticketStats?.feedbackCount
         ? `${ticketStats.avgRating}/5 (${ticketStats.feedbackCount} Bewertung${ticketStats.feedbackCount !== 1 ? 'en' : ''})`
         : '`Noch keine Bewertungen`';
@@ -162,12 +162,12 @@ function buildDashboardEmbed(config, guild, panelStatus = null, ticketStats = nu
             { name: 'Panel-Nachricht', value: panelMsg, inline: false },
             { name: 'Button-Beschriftung', value: btnLabel, inline: true },
             { name: 'Max. Tickets/Benutzer', value: String(config.maxTicketsPerUser || 3), inline: true },
-            { name: 'DM beim Schließen', value: config.dmOnClose !== false ? 'Aktiviert' : 'Deaktiviert', inline: true },
+            { name: 'DM beim Schließen', value: config.dmAnSchließen !== false ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Ticket-Logs-Kanal', value: ticketLogsChannel, inline: true },
             { name: 'Transkript-Kanal', value: transcriptChannel, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
-            { name: 'Offene Tickets', value: openTickets, inline: true },
-            { name: 'Durchschn. Schließzeit', value: avgCloseTime, inline: true },
+            { name: 'Ausene Tickets', value: openTickets, inline: true },
+            { name: 'Durchschn. Schließzeit', value: avgSchließenTime, inline: true },
             { name: 'Feedback-Bewertung', value: feedbackSummary, inline: true },
         )
         .setFooter({ text: 'Wähle unten eine Option aus • Dashboard schließt nach 10 Minuten Inaktivität' })
@@ -260,7 +260,7 @@ async function updateLivePanel(client, guild, guildConfig, guildId) {
 }
 
 export default {
-    prefixOnly: false,
+    prefixAnly: false,
     async execute(interaction, config, client) {
         try {
             const guildId = interaction.guild.id;
@@ -306,7 +306,7 @@ export default {
                             await handleOpenCategory(selectInteraction, interaction, guildConfig, guildId, client);
                             break;
                         case 'closed_category':
-                            await handleClosedCategory(selectInteraction, interaction, guildConfig, guildId, client);
+                            await handleSchließendCategory(selectInteraction, interaction, guildConfig, guildId, client);
                             break;
                         case 'max_tickets':
                             await handleMaxTickets(selectInteraction, interaction, guildConfig, guildId, client);
@@ -327,14 +327,14 @@ export default {
 
                     if (btnInteraction.customId === `ticket_cfg_dm_toggle_${guildId}`) {
                         await btnInteraction.deferUpdate();
-                        guildConfig.dmOnClose = guildConfig.dmOnClose === false;
+                        guildConfig.dmAnSchließen = guildConfig.dmAnSchließen === false;
                         await setGuildConfig(client, guildId, guildConfig);
 
                         await btnInteraction.followUp({
                             embeds: [
                                 successEmbed(
                                     'DM-Einstellung aktualisiert',
-                                    `DM beim Schließen ist jetzt **${guildConfig.dmOnClose !== false ? 'aktiviert' : 'deaktiviert'}**.`,
+                                    `DM beim Schließen ist jetzt **${guildConfig.dmAnSchließen !== false ? 'aktiviert' : 'deaktiviert'}**.`,
                                 ),
                             ],
                             flags: MessageFlags.Ephemeral,
@@ -350,7 +350,7 @@ export default {
                     }
 
                     if (btnInteraction.customId === `ticket_cfg_delete_${guildId}`) {
-                        await handleDeleteSystem(btnInteraction, interaction, guildConfig, guildId, client);
+                        await handleLöschenSystem(btnInteraction, interaction, guildConfig, guildId, client);
                         return;
                     }
                 },
@@ -368,11 +368,11 @@ export default {
                 },
             });
         } catch (error) {
-            if (error instanceof TitanBotError) throw error;
+            if (error instanceof TitanBotFehler) throw error;
             logger.error('Unerwarteter Fehler in ticket_dashboard:', error);
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Ticket-Dashboard fehlgeschlagen: ${error.message}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Ticket-Dashboard konnte nicht geöffnet werden.',
             );
         }
@@ -392,7 +392,7 @@ async function handlePanelMessage(selectInteraction, rootInteraction, guildConfi
                     .setValue(guildConfig.ticketPanelMessage || 'Klicke auf den Button unten, um ein Support-Ticket zu erstellen.')
                     .setMaxLength(2000)
                     .setMinLength(1)
-                    .setRequired(true)
+                    .setErforderlich(true)
                     .setPlaceholder('Klicke auf den Button unten, um ein Support-Ticket zu erstellen.'),
             ),
         );
@@ -400,7 +400,7 @@ async function handlePanelMessage(selectInteraction, rootInteraction, guildConfi
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'ticket_cfg_panel_msg' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -445,7 +445,7 @@ async function handleButtonLabel(selectInteraction, rootInteraction, guildConfig
                     .setValue(guildConfig.ticketButtonLabel || 'Ticket erstellen')
                     .setMaxLength(80)
                     .setMinLength(1)
-                    .setRequired(true)
+                    .setErforderlich(true)
                     .setPlaceholder('Ticket erstellen'),
             ),
         );
@@ -453,7 +453,7 @@ async function handleButtonLabel(selectInteraction, rootInteraction, guildConfig
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'ticket_cfg_btn_label' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -520,7 +520,7 @@ async function handleStaffRole(selectInteraction, rootInteraction, guildConfig, 
         await roleInteraction.deferUpdate();
         const role = roleInteraction.roles.first();
 
-        guildConfig.ticketStaffRoleId = role.id;
+        guildConfig.ticketStaffRoleId = Rolle zu bekommen.id;
         await setGuildConfig(client, guildId, guildConfig);
 
         await roleInteraction.followUp({
@@ -533,8 +533,8 @@ async function handleStaffRole(selectInteraction, rootInteraction, guildConfig, 
 
     roleCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde keine Rolle ausgewählt. Die Staff-Rolle wurde nicht geändert.',
             }).catch(() => {});
         }
@@ -593,15 +593,15 @@ async function handleOpenCategory(selectInteraction, rootInteraction, guildConfi
 
     catCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde keine Kategorie ausgewählt. Die Einstellung wurde nicht geändert.',
             }).catch(() => {});
         }
     });
 }
 
-async function handleClosedCategory(selectInteraction, rootInteraction, guildConfig, guildId, client) {
+async function handleSchließendCategory(selectInteraction, rootInteraction, guildConfig, guildId, client) {
     await selectInteraction.deferUpdate();
 
     const channelSelect = new ChannelSelectMenuBuilder()
@@ -615,7 +615,7 @@ async function handleClosedCategory(selectInteraction, rootInteraction, guildCon
             new EmbedBuilder()
                 .setTitle('📂 Kategorie für geschlossene Tickets ändern')
                 .setDescription(
-                    `**Aktuell:** ${guildConfig.ticketClosedCategoryId ? `<#${guildConfig.ticketClosedCategoryId}>` : '`Nicht gesetzt`'}\n\nWähle die Kategorie aus, in die geschlossene Tickets verschoben werden.`,
+                    `**Aktuell:** ${guildConfig.ticketSchließendCategoryId ? `<#${guildConfig.ticketSchließendCategoryId}>` : '`Nicht gesetzt`'}\n\nWähle die Kategorie aus, in die geschlossene Tickets verschoben werden.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -635,7 +635,7 @@ async function handleClosedCategory(selectInteraction, rootInteraction, guildCon
         await catInteraction.deferUpdate();
         const category = catInteraction.channels.first();
 
-        guildConfig.ticketClosedCategoryId = category.id;
+        guildConfig.ticketSchließendCategoryId = category.id;
         await setGuildConfig(client, guildId, guildConfig);
 
         await catInteraction.followUp({
@@ -653,8 +653,8 @@ async function handleClosedCategory(selectInteraction, rootInteraction, guildCon
 
     catCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde keine Kategorie ausgewählt. Die Einstellung wurde nicht geändert.',
             }).catch(() => {});
         }
@@ -672,7 +672,7 @@ async function handleMaxTickets(selectInteraction, rootInteraction, guildConfig,
                     .setLabel('Maximale Anzahl gleichzeitiger offener Tickets')
                     .setStyle(TextInputStyle.Short)
                     .setValue(String(guildConfig.maxTicketsPerUser || 3))
-                    .setRequired(true)
+                    .setErforderlich(true)
                     .setPlaceholder('3'),
             ),
         );
@@ -680,7 +680,7 @@ async function handleMaxTickets(selectInteraction, rootInteraction, guildConfig,
     await selectInteraction.showModal(modal);
 
     const submitted = await selectInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'ticket_cfg_max_tickets' && i.user.id === selectInteraction.user.id,
             time: 120_000,
@@ -693,8 +693,8 @@ async function handleMaxTickets(selectInteraction, rootInteraction, guildConfig,
     const parsedValue = Number(rawValue);
 
     if (!Number.isInteger(parsedValue) || parsedValue < 1 || parsedValue > 25) {
-        await replyUserError(submitted, {
-            type: ErrorTypes.VALIDATION,
+        await replyUserFehler(submitted, {
+            type: FehlerTypes.VALIDATION,
             message: 'Bitte gib eine ganze Zahl zwischen 1 und 25 ein.',
         });
         return;
@@ -755,8 +755,8 @@ async function handleLogsChannel(selectInteraction, rootInteraction, guildConfig
 
     collector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde kein Kanal ausgewählt. Es wurden keine Änderungen vorgenommen.',
             }).catch(() => {});
         }
@@ -807,8 +807,8 @@ async function handleTranscriptChannel(selectInteraction, rootInteraction, guild
 
     collector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde kein Kanal ausgewählt. Es wurden keine Änderungen vorgenommen.',
             }).catch(() => {});
         }
@@ -856,7 +856,7 @@ async function handleCheckUser(selectInteraction, rootInteraction, guildConfig, 
                 new EmbedBuilder()
                     .setTitle(`Ticket-Prüfung — ${targetUser.username}`)
                     .setDescription(
-                        `**Offene Tickets:** ${openCount} / ${maxTickets}\n` +
+                        `**Ausene Tickets:** ${openCount} / ${maxTickets}\n` +
                             `**Verbleibend:** ${Math.max(0, maxTickets - openCount)}\n\n` +
                             (atLimit
                                 ? '⚠️ Dieser Benutzer hat sein Ticket-Limit erreicht.'
@@ -872,8 +872,8 @@ async function handleCheckUser(selectInteraction, rootInteraction, guildConfig, 
 
     userCollector.on('end', (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-            replyUserError(selectInteraction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(selectInteraction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'Es wurde kein Benutzer ausgewählt.',
             }).catch(() => {});
         }
@@ -910,7 +910,7 @@ async function handleRepostPanel(btnInteraction, rootInteraction, guildConfig, g
     await refreshDashboard(rootInteraction, guildConfig, guildId, client);
 }
 
-async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, guildId, client) {
+async function handleLöschenSystem(btnInteraction, rootInteraction, guildConfig, guildId, client) {
     const deleteModal = new ModalBuilder()
         .setCustomId('ticket_delete_confirm_modal')
         .setTitle('Ticket-System löschen')
@@ -923,14 +923,14 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
                     .setPlaceholder('DELETE')
                     .setMaxLength(6)
                     .setMinLength(6)
-                    .setRequired(true)
+                    .setErforderlich(true)
             )
         );
 
     await btnInteraction.showModal(deleteModal);
 
     const submitted = await btnInteraction
-        .awaitModalSubmit({
+        .awaitModalAbsenden({
             filter: i => i.customId === 'ticket_delete_confirm_modal' && i.user.id === btnInteraction.user.id,
             time: 120_000,
         })
@@ -944,23 +944,23 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
     const confirmation = submitted.fields.getTextInputValue('delete_confirmation').trim();
 
     if (confirmation !== 'DELETE') {
-        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Du musst zur Bestätigung exakt „DELETE“ eingeben.' });
+        await replyUserFehler(submitted, { type: FehlerTypes.UNKNOWN, message: 'Du musst zur Bestätigung exakt „DELETE“ eingeben.' });
         await refreshDashboard(rootInteraction, guildConfig, guildId, client);
         return;
     }
 
     await submitted.deferUpdate();
 
-    const keysToDelete = [
+    const keysToLöschen = [
         'ticketPanelChannelId',
         'ticketPanelMessageId',
         'ticketStaffRoleId',
         'ticketCategoryId',
-        'ticketClosedCategoryId',
+        'ticketSchließendCategoryId',
         'ticketPanelMessage',
         'ticketButtonLabel',
         'maxTicketsPerUser',
-        'dmOnClose',
+        'dmAnSchließen',
     ];
 
     if (guildConfig.ticketPanelChannelId) {
@@ -981,8 +981,8 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
                     }
                 }
             }
-        } catch (panelDeleteError) {
-            logger.warn('Ticket-Panel-Nachricht konnte nicht gelöscht werden:', panelDeleteError.message);
+        } catch (panelLöschenFehler) {
+            logger.warn('Ticket-Panel-Nachricht konnte nicht gelöscht werden:', panelLöschenFehler.message);
         }
     }
 
@@ -994,11 +994,11 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
                 [guildId]
             );
         }
-    } catch (ticketDeleteError) {
-        logger.warn('Ticket-Datensätze konnten nicht aus der Datenbank gelöscht werden:', ticketDeleteError.message);
+    } catch (ticketLöschenFehler) {
+        logger.warn('Ticket-Datensätze konnten nicht aus der Datenbank gelöscht werden:', ticketLöschenFehler.message);
     }
 
-    for (const key of keysToDelete) {
+    for (const key of keysToLöschen) {
         delete guildConfig[key];
     }
     await setGuildConfig(client, guildId, guildConfig);

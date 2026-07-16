@@ -234,12 +234,12 @@ export function buildCategoryComponents(guildId, category) {
         .setCustomId(customId(DASHBOARD_TOGGLE_CATEGORY, guildId, category.key))
         .setLabel(category.categoryDeaktiviert ? 'Kategorie aktivieren' : 'Kategorie deaktivieren')
         .setEmoji(category.categoryDeaktiviert ? '🟢' : '🔴')
-        .setStyle(category.categoryDeaktiviert ? ButtonStyle.Success : ButtonStyle.Danger),
+        .setStyle(category.categoryDeaktiviert ? ButtonStyle.Erfolg : ButtonStyle.Danger),
       new ButtonBuilder()
         .setCustomId(customId(DASHBOARD_ENABLE_ALL, guildId, category.key))
         .setLabel('Alle aktivieren')
         .setEmoji('✅')
-        .setStyle(ButtonStyle.Success),
+        .setStyle(ButtonStyle.Erfolg),
       new ButtonBuilder()
         .setCustomId(customId(DASHBOARD_DISABLE_ALL, guildId, category.key))
         .setLabel('Alle deaktivieren')

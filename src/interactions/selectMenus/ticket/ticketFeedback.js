@@ -57,7 +57,7 @@ export default {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('❌ Not Allowed')
-                        .setDescription('Only the ticket creator can submit feedback for this ticket.')
+                        .setDescription('Anly the ticket creator can submit feedback for this ticket.')
                         .setColor(getColor('error')),
                 ],
                 ephemeral: true,
@@ -69,7 +69,7 @@ export default {
             await interaction.update({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('✅ Already Submitted')
+                        .setTitle('✅ Already Absendented')
                         .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for your feedback!`)
                         .setColor(getColor('success')),
                 ],

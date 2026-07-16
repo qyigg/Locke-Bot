@@ -13,7 +13,7 @@ import {
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
 import { 
     getJoinToCreateConfig, 
     updateJoinToCreateConfig,
@@ -30,9 +30,9 @@ export default {
         const currentConfig = await getJoinToCreateConfig(client, guildId);
 
         if (!currentConfig.triggerChannels.includes(triggerChannel.id)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Channel ${triggerChannel.id} is not a Join to Create trigger`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 `${triggerChannel} is not configured as a Join to Create trigger channel.`
             );
         }
@@ -82,7 +82,7 @@ export default {
                     .setDescription('Remove this channel from the Join to Create system')
                     .setValue('remove_trigger'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('View Current Settings')
+                    .setLabel('View Current Einstellungen')
                     .setDescription('Show all current configuration details')
                     .setValue('view_settings')
             );
@@ -122,22 +122,22 @@ time: 60000
                         await handleRemoveTrigger(selectInteraction, triggerChannel, currentConfig, client);
                         break;
                     case 'view_settings':
-                        await handleViewSettings(selectInteraction, triggerChannel, currentConfig, client);
+                        await handleViewEinstellungen(selectInteraction, triggerChannel, currentConfig, client);
                         break;
                 }
             } catch (error) {
-                if (error instanceof TitanBotError) {
+                if (error instanceof TitanBotFehler) {
                     logger.debug(`Configuration validation error: ${error.message}`, error.context || {});
                 } else {
                     logger.error('Unexpected configuration menu error:', error);
                 }
                 
-                const errorMessage = error instanceof TitanBotError 
+                const errorMessage = error instanceof TitanBotFehler 
                     ? error.userMessage || 'An error occurred while processing your selection.'
                     : 'An error occurred while processing your selection.';
                     
-                await replyUserError(selectInteraction, {
-                    type: ErrorTypes.CONFIGURATION,
+                await replyUserFehler(selectInteraction, {
+                    type: FehlerTypes.CONFIGURATION,
                     message: errorMessage
                 }).catch(() => {});
             }
@@ -155,13 +155,13 @@ time: 60000
             }
         });
             } catch (error) {
-            if (error instanceof TitanBotError) {
+            if (error instanceof TitanBotFehler) {
                 throw error;
             }
             logger.error('Unexpected error in config_setup:', error);
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Config setup failed: ${error.message}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Failed to configure Join to Create system.'
             );
         }
@@ -200,8 +200,8 @@ time: 600_000,
             const newTemplate = message.content.trim();
             
             if (!newTemplate || newTemplate.length > 100) {
-                await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+                await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: 'Template must be between 1 and 100 characters.'
                 });
                 return;
@@ -224,18 +224,18 @@ time: 600_000,
 
             await message.delete().catch(() => {});
         } catch (error) {
-            if (error instanceof TitanBotError) {
+            if (error instanceof TitanBotFehler) {
                 logger.debug(`Template validation error: ${error.message}`);
             } else {
                 logger.error('Template update error:', error);
             }
             
-            const errorMessage = error instanceof TitanBotError
+            const errorMessage = error instanceof TitanBotFehler
                 ? error.userMessage || 'Could not update the channel name template.'
                 : 'Could not update the channel name template.';
                 
-            await replyUserError(interaction, {
-                type: ErrorTypes.CONFIGURATION,
+            await replyUserFehler(interaction, {
+                type: FehlerTypes.CONFIGURATION,
                 message: errorMessage
             }).catch(() => {});
         }
@@ -243,8 +243,8 @@ time: 600_000,
 
     collector.on('end', (collected, reason) => {
         if (reason === 'time') {
-            replyUserError(interaction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(interaction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'No response received. Template update cancelled.'
             }).catch(() => {});
         }
@@ -278,8 +278,8 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
             const newLimit = parseInt(message.content.trim());
             
             if (newLimit < 0 || newLimit > 99) {
-                await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+                await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: 'User limit must be between 0 and 99.'
                 });
                 return;
@@ -302,18 +302,18 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
 
             await message.delete().catch(() => {});
         } catch (error) {
-            if (error instanceof TitanBotError) {
+            if (error instanceof TitanBotFehler) {
                 logger.debug(`User limit validation error: ${error.message}`);
             } else {
                 logger.error('User limit update error:', error);
             }
             
-            const errorMessage = error instanceof TitanBotError
+            const errorMessage = error instanceof TitanBotFehler
                 ? error.userMessage || 'Could not update the user limit.'
                 : 'Could not update the user limit.';
                 
-            await replyUserError(interaction, {
-                type: ErrorTypes.CONFIGURATION,
+            await replyUserFehler(interaction, {
+                type: FehlerTypes.CONFIGURATION,
                 message: errorMessage
             }).catch(() => {});
         }
@@ -321,8 +321,8 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
 
     collector.on('end', (collected, reason) => {
         if (reason === 'time') {
-            replyUserError(interaction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(interaction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'No valid response received. Update cancelled.'
             }).catch(() => {});
         }
@@ -361,8 +361,8 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
             const newBitrate = parseInt(message.content.trim());
             
             if (newBitrate < 8 || newBitrate > 384) {
-                await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+                await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: 'Bitrate must be between 8 and 384 kbps.'
                 });
                 return;
@@ -385,18 +385,18 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
 
             await message.delete().catch(() => {});
         } catch (error) {
-            if (error instanceof TitanBotError) {
+            if (error instanceof TitanBotFehler) {
                 logger.debug(`Bitrate validation error: ${error.message}`);
             } else {
                 logger.error('Bitrate update error:', error);
             }
             
-            const errorMessage = error instanceof TitanBotError
+            const errorMessage = error instanceof TitanBotFehler
                 ? error.userMessage || 'Could not update the bitrate.'
                 : 'Could not update the bitrate.';
                 
-            await replyUserError(interaction, {
-                type: ErrorTypes.CONFIGURATION,
+            await replyUserFehler(interaction, {
+                type: FehlerTypes.CONFIGURATION,
                 message: errorMessage
             }).catch(() => {});
         }
@@ -404,8 +404,8 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
 
     collector.on('end', (collected, reason) => {
         if (reason === 'time') {
-            replyUserError(interaction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(interaction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'No valid response received. Update cancelled.'
             }).catch(() => {});
         }
@@ -426,7 +426,7 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`cancel_remove_${triggerChannel.id}`)
-            .setLabel('Cancel')
+            .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -457,30 +457,30 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
                         flags: MessageFlags.Ephemeral,
                     });
                 } else {
-                    await replyUserError(buttonInteraction, {
-                        type: ErrorTypes.CONFIGURATION,
+                    await replyUserFehler(buttonInteraction, {
+                        type: FehlerTypes.CONFIGURATION,
                         message: 'Could not remove the trigger channel.'
                     });
                 }
             } catch (error) {
-                if (error instanceof TitanBotError) {
+                if (error instanceof TitanBotFehler) {
                     logger.debug(`Trigger removal validation error: ${error.message}`);
                 } else {
                     logger.error('Remove trigger error:', error);
                 }
                 
-                const errorMessage = error instanceof TitanBotError
+                const errorMessage = error instanceof TitanBotFehler
                     ? error.userMessage || 'An error occurred while removing the trigger channel.'
                     : 'An error occurred while removing the trigger channel.';
                     
-                await replyUserError(buttonInteraction, {
-                    type: ErrorTypes.CONFIGURATION,
+                await replyUserFehler(buttonInteraction, {
+                    type: FehlerTypes.CONFIGURATION,
                     message: errorMessage
                 }).catch(() => {});
             }
         } else {
             await buttonInteraction.followUp({
-                embeds: [successEmbed('Cancelled', 'Channel removal has been cancelled.')],
+                embeds: [successEmbed('Abbrechenled', 'Channel removal has been cancelled.')],
                 flags: MessageFlags.Ephemeral,
             });
         }
@@ -488,19 +488,19 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
 
     collector.on('end', (collected, reason) => {
         if (reason === 'time') {
-            replyUserError(interaction, {
-                type: ErrorTypes.RATE_LIMIT,
+            replyUserFehler(interaction, {
+                type: FehlerTypes.RATE_LIMIT,
                 message: 'No response received. Removal cancelled.'
             }).catch(() => {});
         }
     });
 }
 
-async function handleViewSettings(interaction, triggerChannel, currentConfig, client) {
+async function handleViewEinstellungen(interaction, triggerChannel, currentConfig, client) {
     const channelConfig = currentConfig.channelOptions?.[triggerChannel.id] || {};
     
     const embed = new EmbedBuilder()
-        .setTitle('Current Settings')
+        .setTitle('Current Einstellungen')
         .setDescription(`Configuration for ${triggerChannel}`)
         .setColor(getColor('info'))
         .addFields(

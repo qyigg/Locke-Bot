@@ -3,7 +3,7 @@ import { successEmbed } from '../../../utils/embeds.js';
 import ConfigService from '../../../services/config/configService.js';
 import { MessageFlags } from 'discord.js';
 import { logger } from '../../../utils/logger.js';
-import { ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { FehlerTypes, replyUserFehler } from '../../../utils/errorHandler.js';
 
 function extractId(value) {
     if (!value || typeof value !== 'string') return null;
@@ -29,24 +29,24 @@ function parseValue(key, rawValue) {
         }
         const id = extractId(value);
         if (!id) {
-            throw new Error('Please provide a valid mention or ID.');
+            throw new Fehler('Please provide a valid mention or ID.');
         }
         return id;
     }
 
-    if (key === 'dmOnClose') {
+    if (key === 'dmAnSchließen') {
         if (['yes', 'true', 'enabled', 'enable'].includes(value.toLowerCase())) {
             return true;
         }
         if (['no', 'false', 'disabled', 'disable'].includes(value.toLowerCase())) {
             return false;
         }
-        throw new Error('Please enter either yes or no.');
+        throw new Fehler('Please enter either yes or no.');
     }
 
     if (key === 'prefix') {
         if (value.length < 1 || value.length > 10 || /\s/.test(value)) {
-            throw new Error('Prefix must be 1-10 characters with no spaces.');
+            throw new Fehler('Prefix must be 1-10 characters with no spaces.');
         }
         return value;
     }
@@ -58,7 +58,7 @@ function resolveModalValue(key, interaction) {
     if (key === 'logChannelId') {
         const channelId = interaction.fields.getField('log_channel')?.values?.[0];
         if (!channelId) {
-            throw new Error('Please select a log channel.');
+            throw new Fehler('Please select a log channel.');
         }
         return channelId;
     }
@@ -66,7 +66,7 @@ function resolveModalValue(key, interaction) {
     if (key === 'modRole') {
         const roleId = interaction.fields.getField('mod_role')?.values?.[0];
         if (!roleId) {
-            throw new Error('Please select a moderator role.');
+            throw new Fehler('Please select a moderator Rolle zu bekommen.');
         }
         return roleId;
     }
@@ -75,7 +75,7 @@ function resolveModalValue(key, interaction) {
     return parseValue(key, rawValue);
 }
 
-function buildSuccessMessage(key, value, guild) {
+function buildErfolgMessage(key, value, guild) {
     if (key === 'logChannelId') {
         const channel = guild?.channels?.cache?.get(value);
         return `Log channel set to ${channel ?? `<#${value}>`}.`;
@@ -99,12 +99,12 @@ export default {
             await ConfigService.updateSetting(interaction.client, guildId, key, value, interaction.user.id);
 
             await interaction.reply({
-                embeds: [successEmbed('Configuration Updated', buildSuccessMessage(key, value, interaction.guild))],
+                embeds: [successEmbed('Configuration Updated', buildErfolgMessage(key, value, interaction.guild))],
                 flags: MessageFlags.Ephemeral,
             });
         } catch (error) {
             logger.error('Config modal handler error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: error.message || 'Please try again.' });
+            await replyUserFehler(interaction, { type: FehlerTypes.CONFIGURATION, message: error.message || 'Please try again.' });
         }
     },
 };

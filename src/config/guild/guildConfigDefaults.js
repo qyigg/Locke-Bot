@@ -9,7 +9,7 @@ export const GUILD_CONFIG_DEFAULTS = {
     ...DEFAULT_GUILD_CONFIG,
     prefix: getCommandPrefix(),
     welcomeMessage: BotConfig.welcome?.defaultWelcomeMessage || 'Welcome {user} to {server}!',
-    dmOnClose: true,
+    dmAnSchließen: true,
     disabledCommands: {},
     disabledCategories: {},
 };
