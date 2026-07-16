@@ -6,10 +6,9 @@ const ROOT = process.argv[2] ? path.resolve(process.argv[2]) : process.cwd();
 const SRC = path.join(ROOT, 'src');
 const JS_EXTS = new Set(['.js', '.mjs', '.cjs']);
 
-// Wir lassen Slash-Command-Namen und technische Identifiers in Ruhe.
-// Wir übersetzen nur UI-Texte innerhalb von Anführungszeichen.
-
-const uiExact = [
+// Englisch->Deutsch Mapping für sichtbare UI-Texte (nicht für Slash-Command-Namen oder technische Keys)
+const uiMap = [
+  // Verifizierung
   ['Verification Successful!', 'Verifizierung erfolgreich!'],
   ['Verification Successful', 'Verifizierung erfolgreich'],
   ['You have been verified and given the Mitglied role!', 'Du wurdest verifiziert und hast die Mitglied-Rolle erhalten!'],
@@ -19,6 +18,8 @@ const uiExact = [
   ['You now have access to all server channels and features.', 'Du hast jetzt Zugriff auf alle Serverkanäle und Funktionen.'],
   ['You now have access to all channels and features. Welcome!', 'Du hast jetzt Zugriff auf alle Kanäle und Funktionen. Willkommen!'],
   ['You now have access to all channels and features.', 'Du hast jetzt Zugriff auf alle Kanäle und Funktionen.'],
+
+  // Standard-UI
   ['This command has been disabled for this server.', 'Dieser Befehl wurde für diesen Server deaktiviert.'],
   ['This command is disabled on this server.', 'Dieser Befehl ist auf diesem Server deaktiviert.'],
   ['Configuration Error', 'Konfigurationsfehler'],
@@ -37,6 +38,8 @@ const uiExact = [
   ['Click here to verify!', 'Hier klicken zum Verifizieren!'],
   ['Verify Now', 'Jetzt verifizieren'],
   ['Verify', 'Verifizieren'],
+
+  // UI-Status, Buttons, Labels
   ['Success', 'Erfolg'],
   ['Error', 'Fehler'],
   ['Warning', 'Warnung'],
@@ -53,6 +56,8 @@ const uiExact = [
   ['Disabled', 'Deaktiviert'],
   ['Required', 'Erforderlich'],
   ['Optional', 'Optional'],
+
+  // Fehlermeldungen & Hinweise
   ['Loading...', 'Lade...'],
   ['Please wait...', 'Bitte warten...'],
   ['Are you sure you want to delete this?', 'Bist du sicher, dass du dies löschen möchtest?'],
@@ -67,6 +72,8 @@ const uiExact = [
   ['An error occurred while executing this command.', 'Beim Ausführen dieses Befehls ist ein Fehler aufgetreten.'],
   ['An unexpected error occurred.', 'Ein unerwarteter Fehler ist aufgetreten.'],
   ['Internal Error', 'Interner Fehler'],
+
+  // Panel-/Systemtexte
   ['Panel Status', 'Panelstatus'],
   ['System Status', 'Systemstatus'],
   ['Online', 'Online'],
@@ -115,21 +122,21 @@ function walk(dir, files = []) {
   return files;
 }
 
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function translateUi(content) {
   let updated = content;
 
-  // Nur Stringliterale anfassen: einfache Heuristik über bekannte englische Texte
-  for (const [from, to] of uiExact) {
-    if (from.includes('"') || from.includes("'")) {
-      updated = updated.split(from).join(to);
-    } else {
-      updated = updated.replace(new RegExp(
-        `(["'\`])` + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + `(["'\`])`,
-        'g'
-      ), `$1${to}$2`);
-    }
+  // Exakte Texte zuerst
+  for (const [from, to] of uiMap) {
+    if (!from) continue;
+    const pattern = new RegExp(`(["'\`])` + escapeRegExp(from) + `(["'\`])`, 'g');
+    updated = updated.replace(pattern, `$1${to}$2`);
   }
 
+  // Regex-Muster für flexible Sätze
   for (const [pattern, to] of uiRegex) {
     updated = updated.replace(pattern, to);
   }
@@ -148,13 +155,13 @@ for (const file of files) {
     fs.writeFileSync(file, updated, 'utf8');
     changedFiles++;
     console.log(path.relative(ROOT, file));
-    // grobe Trefferzählung
-    uiExact.forEach(([from, to]) => {
-      const hits = (original.match(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+    uiMap.forEach(([from]) => {
+      if (!from) return;
+      const hits = (original.match(new RegExp(escapeRegExp(from), 'g')) || []).length;
       totalHits += hits;
     });
   }
 }
 
 console.log(`\nFertig. ${changedFiles} Dateien geändert, grob ${totalHits} Text-Treffer.`);
-console.log('Slash-Command-Namen und technische Identifiers wurden nicht angefasst; nur UI-Texte in String-Literalen wurden übersetzt.');
+console.log('Nur UI-Strings in Anführungszeichen wurden übersetzt; Slash-Command-Namen und technische Identifiers bleiben unverändert.');
