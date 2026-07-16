@@ -1,20 +1,22 @@
-// errorHandler.js — the single entry point for all error handling.
+// errorHandler.js — der zentrale Einstiegspunkt für alle Fehlerbehandlung.
 //
-// Rules:
-// 1. Commands/handlers: throw TitanBotError (via createError) or let errors propagate;
-//    interactionCreate routes them through handleInteractionError. For expected user-facing
-//    failures (validation, cooldowns), use replyUserError.
-//    Do NOT wrap a command's execute() body in a try/catch whose only purpose is to call
-//    handleInteractionError — that is redundant because interactionCreate already catches
-//    command.execute errors and calls handleInteractionError with COMMAND_ERROR_SUBTYPES.
-//    Only keep a local try/catch when the catch does something more (custom recovery,
-//    typed re-throw, status-code branching) or when it lives in a standalone handler
-//    (collector callbacks, modal/component handlers) not reached via the command path.
-// 2. Services: throw, never return { success: false }. Wrap exports with wrapServiceBoundary
-//    (re-exported here) so unknown errors get typed with service/operation context.
-// 3. Background tasks (cron, timers): wrap with handleTaskError / runSafeTask.
-// 4. Set a specific userMessage when you know the cause; use ErrorTypes, don't invent titles.
-// 5. Success/info/warning replies use successEmbed / infoEmbed / warningEmbed.
+// Regeln:
+// 1. Commands/Handler: TitanBotError werfen (über createError) oder Fehler durchreichen;
+//    interactionCreate führt sie dann über handleInteractionError zusammen. Für erwartbare,
+//    benutzerseitige Fehler (Validierung, Cooldowns) replyUserError verwenden.
+//    Packe den execute()-Body eines Commands NICHT in ein try/catch, dessen einziger Zweck
+//    handleInteractionError ist — das ist überflüssig, weil interactionCreate bereits
+//    command.execute-Fehler abfängt und handleInteractionError mit COMMAND_ERROR_SUBTYPES aufruft.
+//    Ein lokales try/catch nur dort behalten, wo der catch wirklich mehr tut (eigene Recovery,
+//    typisiertes Re-Throwing, Verzweigung nach Statuscode) oder wenn er in einem separaten Handler
+//    sitzt (Collector-Callbacks, Modal-/Component-Handler), der nicht über den Command-Pfad läuft.
+// 2. Services: Fehler werfen, niemals { success: false } zurückgeben. Exporte mit
+//    wrapServiceBoundary (hier re-exportiert) umschließen, damit unbekannte Fehler
+//    mit Service-/Operations-Kontext typisiert werden.
+// 3. Hintergrundjobs (Cron, Timer): mit handleTaskError / runSafeTask umschließen.
+// 4. Eine konkrete userMessage setzen, wenn die Ursache klar ist; ErrorTypes verwenden,
+//    keine eigenen „Fehlertitel“ erfinden.
+// 5. Erfolgs-/Info-/Warn-Antworten über successEmbed / infoEmbed / warningEmbed schicken.
 
 import { logger } from './logger.js';
 import { buildUserErrorEmbed } from './embeds.js';
@@ -22,7 +24,7 @@ import { MessageFlags } from 'discord.js';
 import { getErrorMetadata, getDefaultErrorCodeByType, resolveErrorCode, ErrorCodes } from './errorRegistry.js';
 import { InteractionHelper } from './interactionHelper.js';
 
-// Re-export so consumers only ever need to import from errorHandler.js
+// Re-Export, damit andere Module nur aus errorHandler.js importieren müssen
 export { ErrorCodes, getErrorMetadata, resolveErrorCode, getDefaultErrorCodeByType } from './errorRegistry.js';
 export { ensureTypedServiceError, wrapServiceBoundary, wrapServiceClassMethods } from './serviceErrorBoundary.js';
 
@@ -50,21 +52,21 @@ export class TitanBotError extends Error {
     }
 }
 
-// Discord API error codes that indicate a permission problem rather than a bug.
+// Discord-API-Fehlercodes, die eher auf fehlende Berechtigungen als auf einen Bug hindeuten.
 const DISCORD_PERMISSION_CODES = new Set([
     50001, // Missing Access
     50013, // Missing Permissions
-    50007, // Cannot send messages to this user (DMs closed)
-    160002, // Cannot reply without permission to read message history
+    50007, // Kann diesem User keine Nachrichten senden (DMs zu)
+    160002, // Antwort nicht möglich ohne Berechtigung zum Lesen des Nachrichtenverlaufs
 ]);
 
-// PostgreSQL / node-postgres error codes and errno values that indicate database trouble.
+// PostgreSQL-/node-postgres-Fehlercodes und errno-Werte, die auf DB-Probleme hindeuten.
 const DATABASE_ERROR_CODES = new Set([
     'ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT',
-    '57014', // query_canceled (statement timeout)
+    '57014', // query_canceled (Statement-Timeout)
     '53300', // too_many_connections
-    '08006', '08001', '08003', // connection failures
-    '40001', '40P01', // serialization failure / deadlock
+    '08006', '08001', '08003', // Verbindungsfehler
+    '40001', '40P01', // Serialisierungsfehler / Deadlock
 ]);
 
 export function categorizeError(error) {
@@ -87,7 +89,7 @@ export function categorizeError(error) {
         return ErrorTypes.PERMISSION;
     }
 
-    // Remaining numeric codes in Discord's ranges (unknown entity 10xxx, request-level 5xxxx, etc.)
+    // Übrige numerische Codes in Discord-Ranges (unbekannte Entität 10xxx, Request-Level 5xxxx, etc.)
     if (typeof code === 'number' && code >= 10000) {
         return ErrorTypes.DISCORD_API;
     }
@@ -117,54 +119,54 @@ export function categorizeError(error) {
 
 const UserMessages = {
     [ErrorTypes.VALIDATION]: {
-        default: 'Please check your input and try again.',
-        missing_required: "You're missing some required information. Check the command options and try again.",
-        invalid_format: 'The format you provided is incorrect. Check the command usage and try again.'
+        default: 'Bitte prüfe deine Eingaben und versuch es nochmal.',
+        missing_required: 'Es fehlen noch benötigte Angaben. Schau dir die Befehlsoptionen an und versuch es nochmal.',
+        invalid_format: 'Das angegebene Format passt nicht. Sieh dir die Befehlsverwendung an und versuch es erneut.'
     },
     [ErrorTypes.PERMISSION]: {
-        default: "You don't have permission to do that.",
-        user_permission: "You don't have permission to use this command.",
-        bot_permission: "I don't have the permissions needed to do that in this channel."
+        default: 'Du hast keine Berechtigung für diese Aktion.',
+        user_permission: 'Du darfst diesen Befehl nicht benutzen.',
+        bot_permission: 'Ich habe in diesem Kanal nicht die nötigen Berechtigungen dafür.'
     },
     [ErrorTypes.CONFIGURATION]: {
-        default: 'This feature is not set up yet. Ask a server administrator to configure it.',
-        missing_config: 'This feature has not been configured yet. Ask a server administrator to set it up.',
-        invalid_config: 'The server configuration for this feature is invalid. Ask a server administrator to review it.'
+        default: 'Diese Funktion ist noch nicht eingerichtet. Bitte einen Server-Administrator, sie zu konfigurieren.',
+        missing_config: 'Diese Funktion wurde noch nicht konfiguriert. Bitte einen Server-Administrator, sie einzurichten.',
+        invalid_config: 'Die Serverkonfiguration für diese Funktion ist fehlerhaft. Bitte einen Server-Administrator, sie zu prüfen.'
     },
     [ErrorTypes.DATABASE]: {
-        default: 'Something went wrong while saving data. Please try again in a moment.',
-        connection_failed: 'I could not reach the database. Please try again later.',
-        timeout: 'That took too long to complete. Please try again.'
+        default: 'Beim Speichern ist etwas schiefgelaufen. Versuch es gleich nochmal.',
+        connection_failed: 'Ich kann gerade nicht auf die Datenbank zugreifen. Versuch es später noch einmal.',
+        timeout: 'Das hat zu lange gedauert. Versuch es bitte noch einmal.'
     },
     [ErrorTypes.NETWORK]: {
-        default: 'I could not reach an external service. Please try again in a moment.',
-        timeout: 'The request timed out. Please try again.',
-        unreachable: 'The service is unavailable right now. Please try again later.'
+        default: 'Ich konnte einen externen Dienst nicht erreichen. Versuch es gleich nochmal.',
+        timeout: 'Die Anfrage ist abgelaufen. Versuch es bitte noch einmal.',
+        unreachable: 'Der Dienst ist im Moment nicht erreichbar. Versuch es später erneut.'
     },
     [ErrorTypes.DISCORD_API]: {
-        default: 'Discord rejected that request. Please try again in a moment.',
-        rate_limit: "You're doing that too quickly. Wait a moment and try again.",
-        forbidden: "I'm not allowed to do that here. Check my role permissions."
+        default: 'Discord hat diese Anfrage abgelehnt. Versuch es gleich nochmal.',
+        rate_limit: 'Du machst das gerade zu schnell. Warte kurz und versuch es erneut.',
+        forbidden: 'Ich darf das hier nicht ausführen. Überprüfe meine Rollen und Berechtigungen.'
     },
     [ErrorTypes.USER_INPUT]: {
-        default: 'There was a problem with your request. Check your input and try again.',
-        invalid_user: 'I could not find that user. Check the mention or ID and try again.',
-        invalid_channel: 'I could not find that channel. Check the mention or ID and try again.'
+        default: 'Mit deiner Anfrage stimmt etwas nicht. Überprüfe deine Eingaben und versuch es erneut.',
+        invalid_user: 'Ich konnte diesen Nutzer nicht finden. Prüfe Mention oder ID und versuch es nochmal.',
+        invalid_channel: 'Ich konnte diesen Kanal nicht finden. Prüfe Mention oder ID und versuch es nochmal.'
     },
     [ErrorTypes.RATE_LIMIT]: {
-        default: "You're doing that too quickly. Wait a moment and try again.",
-        command_cooldown: 'This command is on cooldown. Wait before using it again.',
-        global_rate_limit: 'Discord is rate limiting requests. Wait a moment and try again.'
+        default: 'Du machst das gerade zu schnell. Warte kurz und versuch es erneut.',
+        command_cooldown: 'Dieser Befehl hat gerade Abklingzeit. Warte kurz, bevor du ihn erneut benutzt.',
+        global_rate_limit: 'Discord bremst Anfragen im Moment. Warte kurz und versuch es nochmal.'
     },
     [ErrorTypes.UNKNOWN]: {
-        default: 'Something went wrong. Please try again in a moment.',
-        unexpected: 'An unexpected error occurred. Please try again later.',
-        warn_failed: 'I could not warn that member. Check my permissions and role hierarchy, then try again.',
-        kick_failed: 'I could not kick that member. Check my permissions and role hierarchy, then try again.',
-        ban_failed: 'I could not ban that member. Check my permissions and role hierarchy, then try again.',
-        unban_failed: 'I could not unban that user. Check my permissions and try again.',
-        timeout_failed: 'I could not timeout that member. Check my permissions and role hierarchy, then try again.',
-        untimeout_failed: 'I could not remove the timeout. Check my permissions and try again.'
+        default: 'Es ist ein unerwarteter Fehler aufgetreten. Versuch es gleich nochmal.',
+        unexpected: 'Da ist etwas Unerwartetes schiefgelaufen. Versuch es später noch einmal.',
+        warn_failed: 'Ich konnte dieses Mitglied nicht verwarnen. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
+        kick_failed: 'Ich konnte dieses Mitglied nicht kicken. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
+        ban_failed: 'Ich konnte dieses Mitglied nicht bannen. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
+        unban_failed: 'Ich konnte diesen Nutzer nicht entbannen. Prüfe meine Berechtigungen und versuch es erneut.',
+        timeout_failed: 'Ich konnte dieses Mitglied nicht timeouten. Prüfe meine Berechtigungen und die Rollenhierarchie und versuch es erneut.',
+        untimeout_failed: 'Ich konnte den Timeout nicht entfernen. Prüfe meine Berechtigungen und versuch es erneut.'
     }
 };
 
@@ -227,10 +229,10 @@ function logInteractionError(error, errorType, logData) {
 
     if (isUserError || isExpectedError) {
         if (errorType !== ErrorTypes.RATE_LIMIT) {
-            logger.debug(`User Error [${errorType.toUpperCase()}]: ${error.userMessage || error.message}`, logData);
+            logger.debug(`Benutzerfehler [${errorType.toUpperCase()}]: ${error.userMessage || error.message}`, logData);
         }
     } else {
-        logger.error(`System Error [${errorType.toUpperCase()}]`, {
+        logger.error(`Systemfehler [${errorType.toUpperCase()}]`, {
             ...logData,
             stack: error.stack
         });
@@ -240,7 +242,7 @@ function logInteractionError(error, errorType, logData) {
 async function sendErrorResponse(interaction, embed, context = {}) {
     try {
         if (!interaction || !interaction.id) {
-            logger.warn('Interaction was null or invalid when handling error', {
+            logger.warn('Interaction war null oder ungültig, als der Fehler behandelt werden sollte', {
                 event: 'interaction.error.invalid_interaction',
                 errorCode: ErrorCodes.INTERACTION_INVALID,
                 remediationHint: getErrorMetadata(ErrorCodes.INTERACTION_INVALID).remediation,
@@ -255,7 +257,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
         }
 
         if (interaction.createdTimestamp && (Date.now() - interaction.createdTimestamp) > 14 * 60 * 1000) {
-            logger.warn('Interaction expired before error handler could send response', {
+            logger.warn('Interaction ist abgelaufen, bevor der Error-Handler antworten konnte', {
                 event: 'interaction.error.expired',
                 errorCode: ErrorCodes.INTERACTION_EXPIRED,
                 remediationHint: getErrorMetadata(ErrorCodes.INTERACTION_EXPIRED).remediation,
@@ -281,7 +283,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
         const useEphemeral = context.ephemeral !== false;
 
         if (interaction.replied) {
-            // A visible reply already exists; don't overwrite it — follow up ephemerally.
+            // Es existiert bereits eine sichtbare Antwort; nicht überschreiben — stattdessen ephemer nachfassen.
             await interaction.followUp({ ...errorMessage, flags: MessageFlags.Ephemeral });
         } else if (interaction.deferred) {
             await interaction.editReply(errorMessage);
@@ -295,7 +297,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
         return true;
     } catch (replyError) {
         if (replyError.code === 40060 || replyError.code === 10062 || replyError.code === 50027) {
-            logger.warn('Interaction already acknowledged, expired, or token invalid; cannot send error response:', {
+            logger.warn('Interaction bereits bestätigt, abgelaufen oder Token ungültig; Fehlerantwort kann nicht gesendet werden:', {
                 event: 'interaction.error.response_unavailable',
                 errorCode: String(replyError.code),
                 traceId: context.traceId,
@@ -307,7 +309,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
             return false;
         }
 
-        logger.error('Failed to send error response:', {
+        logger.error('Fehler beim Senden der Fehlerantwort:', {
             event: 'interaction.error.response_failed',
             errorCode: String(replyError.code || ErrorCodes.INTERACTION_RESPONSE_FAILED),
             remediationHint: getErrorMetadata(ErrorCodes.INTERACTION_RESPONSE_FAILED).remediation,
@@ -322,7 +324,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
 }
 
 /**
- * Reply with a typed user-facing error (early-return validation, permission checks, etc.).
+ * Antwortet mit einem typisierten, benutzerfreundlichen Fehler (frühe Rückgabe bei Validierung, Berechtigungen usw.).
  */
 export async function replyUserError(interaction, {
     type = ErrorTypes.UNKNOWN,
@@ -333,8 +335,8 @@ export async function replyUserError(interaction, {
 } = {}) {
     const errorType = type || ErrorTypes.UNKNOWN;
     const syntheticError = message
-        ? createError('User error', errorType, message, { expected: true, ...context })
-        : createError('User error', errorType, null, { expected: true, ...context });
+        ? createError('Benutzerfehler', errorType, message, { expected: true, ...context })
+        : createError('Benutzerfehler', errorType, null, { expected: true, ...context });
 
     const userMessage = getUserMessage(syntheticError, { subtype, ...context });
     const { logData, traceId } = buildErrorLogData(interaction, syntheticError, errorType, {
@@ -368,7 +370,7 @@ export async function handleInteractionError(interaction, error, context = {}) {
 
     logInteractionError(error, errorType, logData);
 
-    // System errors get a reference code so users can report them and we can grep logs.
+    // Systemfehler bekommen einen Referenzcode, damit User sie melden können und wir sie im Log finden.
     const isUserError = USER_ERROR_TYPES.has(errorType) || error?.context?.expected === true;
     const description = isUserError
         ? userMessage
@@ -379,15 +381,15 @@ export async function handleInteractionError(interaction, error, context = {}) {
 }
 
 /**
- * Central error handler for non-interaction contexts (cron jobs, timers, event
- * side-effects). Logs with the same structured fields as interaction errors.
+ * Zentraler Error-Handler für Kontexte ohne Interaction (Cronjobs, Timer, Nebenwirkungen von Events).
+ * Loggt mit denselben strukturierten Feldern wie Interaction-Fehler.
  */
 export function handleTaskError(taskName, error, context = {}) {
     const errorType = categorizeError(error);
     const resolvedErrorCode = resolveErrorCode({ error, errorType, context });
     const errorMetadata = getErrorMetadata(resolvedErrorCode);
 
-    logger.error(`Task Error [${taskName}] [${errorType.toUpperCase()}]`, {
+    logger.error(`Task-Fehler [${taskName}] [${errorType.toUpperCase()}]`, {
         event: 'task.error',
         task: taskName,
         errorCode: resolvedErrorCode || ErrorCodes.TASK_ERROR,
@@ -402,8 +404,8 @@ export function handleTaskError(taskName, error, context = {}) {
 }
 
 /**
- * Wrap a background task so it can never produce an unhandled rejection.
- * Usage: cron.schedule('* * * * *', runSafeTask('giveaways', () => checkGiveaways(client)))
+ * Verpackt einen Hintergrundtask so, dass er niemals eine unhandled rejection erzeugt.
+ * Beispiel: cron.schedule('* * * * *', runSafeTask('giveaways', () => checkGiveaways(client)))
  */
 export function runSafeTask(taskName, fn, context = {}) {
     return async (...args) => {
@@ -426,8 +428,8 @@ export function withErrorHandling(fn, context = {}) {
                 (arg.isCommand || arg.isButton || arg.isModalSubmit || arg.isStringSelectMenu || arg.isChatInputCommand || arg._isPrefixCommand)
             );
 
-            // Slash commands are handled by interactionCreate — re-throw so the
-            // central handler can attach trace context and command subtypes.
+            // Slash-Commands werden von interactionCreate behandelt — erneut werfen,
+            // damit der zentrale Handler Trace-Kontext und Command-Subtypen anhängen kann.
             if (interaction?.isChatInputCommand?.()) {
                 throw error;
             }
@@ -435,7 +437,7 @@ export function withErrorHandling(fn, context = {}) {
             if (interaction) {
                 await handleInteractionError(interaction, error, context);
             } else {
-                logger.error('Error in non-interaction context:', error);
+                logger.error('Fehler in einem Kontext ohne Interaction:', error);
             }
 
             return null;
