@@ -37,7 +37,7 @@ async function updateLivePanel(guild, cfg) {
         if (!msg) return;
 
         const verifyEmbed = new EmbedBuilder()
-            .setTitle('Server Verification')
+            .setTitle('Server-Verifizierung')
             .setDescription(cfg.message || botConfig.verification.defaultMessage)
             .setColor(getColor('success'));
 
@@ -51,7 +51,7 @@ async function updateLivePanel(guild, cfg) {
 
         await msg.edit({ embeds: [verifyEmbed], components: [verifyButton] });
     } catch (error) {
-        logger.warn('Could not update live verification panel:', error.message);
+        logger.warn('Could not update live Verifizierungs-Panel:', error.message);
     }
 }
 
@@ -68,14 +68,14 @@ function buildDashboardEmbed(cfg, guild, verifiedUserCount = 0, conflictSummary 
         .setDescription(`Manage verification settings for **${guild.name}**.\nSelect an option below to modify a setting.`)
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Panel Status', value: panelStatusValue, inline: false },
-            { name: 'Verification Channel', value: channel, inline: true },
-            { name: 'Verified Role', value: role, inline: true },
-            { name: 'System Status', value: cfg.enabled !== false ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Panelstatus', value: panelStatusValue, inline: false },
+            { name: 'Verifizierungskanal', value: channel, inline: true },
+            { name: 'Verifizierte Rolle', value: role, inline: true },
+            { name: 'Systemstatus', value: cfg.enabled !== false ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Button Text', value: `\`${buttonText}\``, inline: true },
             { name: 'Verified Users', value: `${verifiedUserCount} users`, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
-            { name: 'Verification Message', value: msgPreview, inline: false },
+            { name: 'Verifizierungsnachricht', value: msgPreview, inline: false },
         );
 
     if (conflictSummary) {
@@ -94,7 +94,7 @@ function buildSelectMenu(guildId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Change Verification Channel')
-                .setDescription('Set the channel where the verification panel is posted')
+                .setDescription('Set the channel where the Verifizierungs-Panel is posted')
                 .setValue('channel')
                 .setEmoji('📢'),
             new StringSelectMenuOptionBuilder()
@@ -104,7 +104,7 @@ function buildSelectMenu(guildId) {
                 .setEmoji('🏷️'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Edit Verification Message')
-                .setDescription('Customise the message shown on the verification panel embed')
+                .setDescription('Customise the message shown on the Verifizierungs-Panel embed')
                 .setValue('message')
                 .setEmoji('💬'),
             new StringSelectMenuOptionBuilder()
@@ -156,7 +156,7 @@ async function repostVerificationPanel(guild, cfg) {
     }
 
     const verifyEmbed = new EmbedBuilder()
-        .setTitle('Server Verification')
+        .setTitle('Server-Verifizierung')
         .setDescription(cfg.message || botConfig.verification.defaultMessage)
         .setColor(getColor('success'));
 
@@ -315,7 +315,7 @@ export default {
                         latestConfig.verification = cfg;
                         await setGuildConfig(client, guildId, latestConfig);
                         await btnInteraction.followUp({
-                            embeds: [successEmbed('Panel Reposted', `Verification panel restored in ${newMsg.channel}.`)],
+                            embeds: [successEmbed('Panel erneut gepostet', `Verifizierungs-Panel restored in ${newMsg.channel}.`)],
                             flags: MessageFlags.Ephemeral,
                         });
                         await refreshDashboard(interaction, cfg, guildId, client);
@@ -350,7 +350,7 @@ export default {
                             const newMsg = await repostVerificationPanel(interaction.guild, cfg);
                             cfg.messageId = newMsg.id;
                         } catch (error) {
-                            logger.warn('Could not re-post verification panel on re-enable:', error.message);
+                            logger.warn('Could not re-post Verifizierungs-Panel on re-enable:', error.message);
                         }
                     }
 
@@ -409,7 +409,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
             new EmbedBuilder()
                 .setTitle('Change Verification Channel')
                 .setDescription(
-                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect the channel where the verification panel will be posted.\n\n> ⚠️ The existing panel will be deleted and re-posted in the new channel.`,
+                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect the channel where the Verifizierungs-Panel will be posted.\n\n> ⚠️ The existing panel will be deleted and re-posted in the new channel.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -452,7 +452,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
         if (cfg.enabled !== false) {
             try {
                 const verifyEmbed = new EmbedBuilder()
-                    .setTitle('Server Verification')
+                    .setTitle('Server-Verifizierung')
                     .setDescription(cfg.message || botConfig.verification.defaultMessage)
                     .setColor(getColor('success'));
 
@@ -467,7 +467,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
                 const newMsg = await newChannel.send({ embeds: [verifyEmbed], components: [verifyButton] });
                 cfg.messageId = newMsg.id;
             } catch (error) {
-                logger.warn('Could not post verification panel in new channel:', error.message);
+                logger.warn('Could not post Verifizierungs-Panel in new channel:', error.message);
             }
         }
 
@@ -477,7 +477,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
         await setGuildConfig(client, guildId, latestConfig);
 
         await chanInteraction.followUp({
-            embeds: [successEmbed('Channel Updated', `Verification panel moved to ${newChannel}.`)],
+            embeds: [successEmbed('Channel Updated', `Verifizierungs-Panel moved to ${newChannel}.`)],
             flags: MessageFlags.Ephemeral,
         });
 
@@ -488,7 +488,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No channel was selected. The setting was not changed.',
+                message: 'Es wurde kein Kanal ausgewählt. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -562,7 +562,7 @@ async function handleRole(selectInteraction, rootInteraction, cfg, guildId, clie
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No role was selected. The setting was not changed.',
+                message: 'Es wurde keine Rolle ausgewählt. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -577,7 +577,7 @@ async function handleMessage(selectInteraction, rootInteraction, cfg, guildId, c
                 new ActionRowBuilder().addComponents(
                     new TextInputBuilder()
                         .setCustomId('message_input')
-                        .setLabel('Message shown on the verification panel embed')
+                        .setLabel('Message shown on the Verifizierungs-Panel embed')
                         .setStyle(TextInputStyle.Paragraph)
                         .setValue(cfg.message || botConfig.verification.defaultMessage)
                         .setMaxLength(2000)
@@ -607,7 +607,7 @@ async function handleMessage(selectInteraction, rootInteraction, cfg, guildId, c
         await updateLivePanel(rootInteraction.guild, cfg);
 
         await submitted.reply({
-            embeds: [successEmbed('Message Updated', 'The verification panel has been updated with the new message.')],
+            embeds: [successEmbed('Message Updated', 'The Verifizierungs-Panel has been updated with the new message.')],
             flags: MessageFlags.Ephemeral,
         });
 

@@ -146,7 +146,7 @@ export default {
                 throw createError(
                   `Command ${accessKey} is disabled in this guild`,
                   ErrorTypes.CONFIGURATION,
-                  'This command has been disabled for this server.',
+                  'Dieser Befehl wurde für diesen Server deaktiviert.',
                   withTraceContext({ commandName: accessKey, guildId: interaction.guild.id }, interactionTraceContext)
                 );
               }

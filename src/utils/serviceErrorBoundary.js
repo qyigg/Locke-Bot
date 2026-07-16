@@ -42,7 +42,7 @@ export function ensureTypedServiceError(error, options = {}) {
     severity: errorMetadata.severity,
     retryable: errorMetadata.retryable,
     originalErrorMessage: error?.message || String(error),
-    originalErrorName: error?.name || 'Error',
+    originalErrorName: error?.name || 'Fehler',
     expected: false
   });
 }

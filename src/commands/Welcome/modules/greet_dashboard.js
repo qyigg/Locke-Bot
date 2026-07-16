@@ -66,10 +66,10 @@ function buildDashboardEmbed(cfg, guild) {
         .setColor(getColor('info'))
         .addFields(
             { name: 'Welcome Channel', value: welcomeChannel, inline: true },
-            { name: 'Welcome Status', value: cfg.enabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Welcome Status', value: cfg.enabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Welcome Ping', value: cfg.welcomePing ? 'On' : 'Off', inline: true },
             { name: 'Goodbye Channel', value: goodbyeChannel, inline: true },
-            { name: 'Goodbye Status', value: cfg.goodbyeEnabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Goodbye Status', value: cfg.goodbyeEnabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Goodbye Ping', value: cfg.goodbyePing ? 'On' : 'Off', inline: true },
             { name: 'Welcome Message', value: welcomePreview, inline: false },
             { name: 'Goodbye Message', value: goodbyePreview, inline: false },
@@ -412,7 +412,7 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No channel was selected. The setting was not changed.',
+                message: 'Es wurde kein Kanal ausgewählt. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -615,7 +615,7 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No channel was selected. The setting was not changed.',
+                message: 'Es wurde kein Kanal ausgewählt. The setting was not changed.',
             }).catch(() => {});
         }
     });

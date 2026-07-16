@@ -209,7 +209,7 @@ export async function skipTrack(client, interaction) {
         throw new TitanBotError('No player', ErrorTypes.USER_INPUT, 'Nothing is playing right now.');
     }
     assertCanControl(interaction.member, player);
-    const title = player.current.info?.title || 'Unknown';
+    const title = player.current.info?.title || 'Unbekannt';
     // Under track-loop, stop() would replay the same track. Clear it so the skip
     // advances; trackStart re-applies the stored loop mode to the next track.
     if (player.loop === 'track') {

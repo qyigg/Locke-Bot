@@ -127,7 +127,7 @@ export function formatChannelName(template, variables) {
         const sanitized = {};
         for (const [key, value] of Object.entries(variables)) {
             if (value === null || value === undefined) {
-                sanitized[key] = 'Unknown';
+                sanitized[key] = 'Unbekannt';
             } else {
                 
                 sanitized[key] = String(value)

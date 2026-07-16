@@ -62,7 +62,7 @@ export default {
             await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'This subcommand is not recognised.' });
         } catch (error) {
             logger.error('logging command error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An unexpected error occurred.' }).catch(() => {});
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein unerwarteter Fehler ist aufgetreten.' }).catch(() => {});
         }
     },
 };

@@ -122,7 +122,7 @@ export async function checkModerationPermissions(
   interaction,
   guildConfig,
   requiredPermissions,
-  errorMessage = 'You do not have permission to use this command.'
+  errorMessage = 'Du hast keine Berechtigung, diesen Befehl zu verwenden.'
 ) {
   if (memberHasModerationCommandAccess(interaction.member, guildConfig, requiredPermissions)) {
     return true;
@@ -218,7 +218,7 @@ export function botHasPermission(channel, permissions) {
 export async function checkUserPermissions(
   interaction,
   requiredPermissions,
-  errorMessage = 'You do not have permission to use this command.'
+  errorMessage = 'Du hast keine Berechtigung, diesen Befehl zu verwenden.'
 ) {
   const member = interaction.member;
 

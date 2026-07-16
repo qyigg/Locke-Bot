@@ -252,7 +252,7 @@ export default {
     if (isDisable) {
       await disableCommand(client, interaction.guildId, commandName);
       return InteractionHelper.safeEditReply(interaction, {
-        embeds: [successEmbed('Command Disabled', `\`/${commandName}\` is now disabled in this server.`)],
+        embeds: [successEmbed('Befehl deaktiviert', `\`/${commandName}\` is now disabled in this server.`)],
       });
     }
 

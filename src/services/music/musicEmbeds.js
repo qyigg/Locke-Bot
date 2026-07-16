@@ -52,8 +52,8 @@ function getLoopLabel(loop) {
 export function buildNowPlayingEmbed(track, player, guildData) {
     const requester = track?.info?.requester;
     const requesterLabel = requester
-        ? (requester.username || requester.tag || 'Unknown')
-        : 'Unknown';
+        ? (requester.username || requester.tag || 'Unbekannt')
+        : 'Unbekannt';
 
     const position = formatDuration(player?.position || 0);
     const duration = formatDuration(track?.info?.length || 0);
@@ -63,7 +63,7 @@ export function buildNowPlayingEmbed(track, player, guildData) {
         description: track?.info?.title || 'Unknown track',
         color: 'primary',
         fields: [
-            { name: 'Artist', value: track?.info?.author || 'Unknown', inline: true },
+            { name: 'Artist', value: track?.info?.author || 'Unbekannt', inline: true },
             { name: 'Requester', value: requesterLabel, inline: true },
             { name: 'Progress', value: `${position} / ${duration}`, inline: true },
             { name: 'Volume', value: `${guildData?.volume ?? 75}%`, inline: true },
@@ -84,7 +84,7 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
 
     let description = '';
     if (currentTrack) {
-        description += `**Now Playing**\n${currentTrack.info?.title || 'Unknown'} — ${currentTrack.info?.author || 'Unknown'}\n\n`;
+        description += `**Now Playing**\n${currentTrack.info?.title || 'Unbekannt'} — ${currentTrack.info?.author || 'Unbekannt'}\n\n`;
     }
 
     if (slice.length === 0) {
@@ -93,7 +93,7 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
         description += slice
             .map((track, index) => {
                 const num = start + index + 1;
-                return `${num}. ${track.info?.title || 'Unknown'} — ${track.info?.author || 'Unknown'}`;
+                return `${num}. ${track.info?.title || 'Unbekannt'} — ${track.info?.author || 'Unbekannt'}`;
             })
             .join('\n');
     }

@@ -108,7 +108,7 @@ function buildDashboardEmbed(state) {
         `**Footer** › ${state.footer?.text ?`\`${trunc(state.footer.text, 30)}\`` : '`Not set`'}`,
         `**Thumbnail** › ${state.thumbnail ? '✅ Set' : '`Not set`'}`,
         `**Image** › ${state.image ? '✅ Set' : '`Not set`'}`,
-        `**Timestamp** › ${state.timestamp ? '✅ Enabled' : '`Disabled`'}`,
+        `**Timestamp** › ${state.timestamp ? '✅ Enabled' : '`Deaktiviert`'}`,
         `**Fields** › ${state.fields.length} / ${MAX_FIELDS}`,
     ];
 
@@ -892,7 +892,7 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
 
         const cancelBtn = new ButtonBuilder()
             .setCustomId('eb_reorder_cancel')
-            .setLabel('Cancel')
+            .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Secondary);
 
         await pickInter.followUp({
@@ -1146,7 +1146,7 @@ export default {
                     const msg =
                         error instanceof TitanBotError
                             ? error.userMessage || 'An error occurred.'
-                            : 'An unexpected error occurred.';
+                            : 'Ein unerwarteter Fehler ist aufgetreten.';
                     if (!ci.replied && !ci.deferred) await ci.deferUpdate().catch(() => {});
                     await replyUserError(ci, {
                         type: ErrorTypes.UNKNOWN,

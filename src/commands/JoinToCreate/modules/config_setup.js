@@ -426,7 +426,7 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`cancel_remove_${triggerChannel.id}`)
-            .setLabel('Cancel')
+            .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -530,7 +530,7 @@ async function handleViewSettings(interaction, triggerChannel, currentConfig, cl
                 inline: true
             },
             {
-                name: 'System Status',
+                name: 'Systemstatus',
                 value: currentConfig.enabled ? '✅ Enabled' : '❌ Disabled',
                 inline: true
             },

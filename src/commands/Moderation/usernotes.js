@@ -32,7 +32,7 @@ export default {
                         .setName("type")
                         .setDescription("Type of note")
                         .addChoices(
-                            { name: "Warning", value: "warning" },
+                            { name: "Warnung", value: "warning" },
                             { name: "Positive", value: "positive" },
                             { name: "Neutral", value: "neutral" },
                             { name: "Alert", value: "alert" }

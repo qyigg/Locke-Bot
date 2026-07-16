@@ -111,7 +111,7 @@ const TICKET_EVENT_STYLES = {
 async function createTicketLogEmbed(guild, event) {
   const style = TICKET_EVENT_STYLES[event.type] || { color: 0x95a5a6, title: 'Ticket Event' };
   const ticketNumber = event.ticketNumber || event.ticketId;
-  const ticketRef = ticketNumber ? `#${ticketNumber}` : 'Unknown';
+  const ticketRef = ticketNumber ? `#${ticketNumber}` : 'Unbekannt';
   const channelMention = event.ticketId ? `<#${event.ticketId}>` : null;
   const executorMention = event.executorId ? `<@${event.executorId}>` : null;
   const userMention = event.userId ? `<@${event.userId}>` : null;
@@ -126,7 +126,7 @@ async function createTicketLogEmbed(guild, event) {
       author = await resolveUserAuthor(guild.client, event.userId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
-        { name: 'Creator', value: userMention || 'Unknown', inline: true },
+        { name: 'Creator', value: userMention || 'Unbekannt', inline: true },
       ];
       if (channelMention) {
         inlineFields.push({ name: 'Channel', value: channelMention, inline: true });
@@ -140,7 +140,7 @@ async function createTicketLogEmbed(guild, event) {
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
-        { name: 'Schließend by', value: executorMention || 'Unknown', inline: true },
+        { name: 'Schließend by', value: executorMention || 'Unbekannt', inline: true },
       ];
       if (channelMention) {
         inlineFields.push({ name: 'Channel', value: channelMention, inline: true });
@@ -154,7 +154,7 @@ async function createTicketLogEmbed(guild, event) {
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
-        { name: 'Löschend by', value: executorMention || 'Unknown', inline: true },
+        { name: 'Löschend by', value: executorMention || 'Unbekannt', inline: true },
       ];
       break;
 
@@ -165,7 +165,7 @@ async function createTicketLogEmbed(guild, event) {
         { name: 'Ticket', value: ticketRef, inline: true },
         {
           name: event.type === 'claim' ? 'Claimed by' : 'Unclaimed by',
-          value: executorMention || 'Unknown',
+          value: executorMention || 'Unbekannt',
           inline: true,
         },
       ];
@@ -175,12 +175,12 @@ async function createTicketLogEmbed(guild, event) {
       const priorityEmojis = { none: '⚪', low: '🔵', medium: '🟢', high: '🟡', urgent: '🔴' };
       const priorityLabel = event.priority
         ? `${priorityEmojis[event.priority] || '⚪'} ${event.priority.charAt(0).toUpperCase()}${event.priority.slice(1)}`
-        : 'Unknown';
+        : 'Unbekannt';
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
         { name: 'Priority', value: priorityLabel, inline: true },
-        { name: 'Updated by', value: executorMention || 'Unknown', inline: true },
+        { name: 'Updated by', value: executorMention || 'Unbekannt', inline: true },
       ];
       break;
     }
@@ -188,7 +188,7 @@ async function createTicketLogEmbed(guild, event) {
     case 'transcript':
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
-        { name: 'Creator', value: userMention || 'Unknown', inline: true },
+        { name: 'Creator', value: userMention || 'Unbekannt', inline: true },
       ];
       if (event.metadata?.messageCount) {
         inlineFields.push({ name: 'Messages', value: String(event.metadata.messageCount), inline: true });

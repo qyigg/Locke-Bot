@@ -7,12 +7,12 @@ export function getConfirmationButtons(customIdPrefix = 'confirm') {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_yes`)
-            .setLabel('Confirm')
+            .setLabel('Bestätigen')
             .setStyle(ButtonStyle.Success)
             .setEmoji('✅'),
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_no`)
-            .setLabel('Cancel')
+            .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('❌')
     );

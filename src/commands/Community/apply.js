@@ -24,7 +24,7 @@ function getApplicationStatusPresentation(statusValue) {
         normalized === 'pending' ? 'In Progress' :
         normalized === 'approved' ? 'Accepted' :
         normalized === 'denied' ? 'Denied' :
-        'Unknown';
+        'Unbekannt';
     const statusEmoji =
         normalized === 'pending' ? '🟡' :
         normalized === 'approved' ? '🟢' :

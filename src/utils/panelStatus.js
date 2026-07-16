@@ -43,7 +43,7 @@ export function messageHasPanelMarker(message, { buttonCustomId, selectCustomId 
 }
 
 export function formatPanelStatusField(panelStatus, { repostHint = 'Repost Panel' } = {}) {
-    if (!panelStatus) return '`Unknown`';
+    if (!panelStatus) return '`Unbekannt`';
 
     if (panelStatus.exists) {
         return panelStatus.message?.url
@@ -63,7 +63,7 @@ export function formatPanelStatusField(panelStatus, { repostHint = 'Repost Panel
         return '⚠️ No panel channel configured';
     }
 
-    return '`Unknown`';
+    return '`Unbekannt`';
 }
 
 export async function getBotPanelStatus(client, guild, {

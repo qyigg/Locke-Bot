@@ -114,7 +114,7 @@ export default {
 
       if (subcommand === 'status') {
         const fields = [
-          { name: 'Enabled', value: config.enabled ? 'Yes' : 'No', inline: true },
+          { name: 'Aktiviert', value: config.enabled ? 'Yes' : 'No', inline: true },
           { name: 'Channel', value: config.channelId ? `<#${config.channelId}>` : 'Not configured', inline: true },
           { name: 'System', value: getCountingSystemLabel(config.system), inline: true },
           { name: 'Next count', value: getExpectedCountValue(config), inline: true },

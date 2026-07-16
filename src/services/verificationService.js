@@ -571,7 +571,7 @@ async function sendAutoVerifyNotification(member, role, guild) {
                 },
                 {
                     name: "📖 What's Next?",
-                    value: "You now have access to all server channels and features. Welcome!",
+                    value: "Du hast jetzt Zugriff auf alle Serverkanäle und Funktionen. Willkommen!",
                     inline: false
                 }
             ],

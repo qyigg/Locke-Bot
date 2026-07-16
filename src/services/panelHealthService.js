@@ -53,16 +53,16 @@ export async function reconcileTicketPanels(client) {
                 summary.healthyPanels += 1;
             } else if (panelStatus.reason === 'channel_missing') {
                 summary.missingChannels += 1;
-                logger.warn(`Ticket panel channel missing for guild ${guild.id} (${guild.name})`);
+                logger.warn(`Ticket-Panel channel missing for guild ${guild.id} (${guild.name})`);
             } else if (panelStatus.reason === 'panel_deleted') {
                 summary.deletedPanels += 1;
                 logger.warn(
-                    `Ticket panel message deleted for guild ${guild.id} (${guild.name}) — admins can repost from /ticket dashboard`,
+                    `Ticket-Panel message deleted for guild ${guild.id} (${guild.name}) — admins can repost from /ticket dashboard`,
                 );
             }
         } catch (error) {
             summary.errors += 1;
-            logger.warn(`Ticket panel health check failed for guild ${guild.id}:`, error.message);
+            logger.warn(`Ticket-Panel health check failed for guild ${guild.id}:`, error.message);
         }
     }
 
@@ -98,16 +98,16 @@ export async function reconcileVerificationPanels(client) {
                 summary.healthyPanels += 1;
             } else if (panelStatus.reason === 'channel_missing') {
                 summary.missingChannels += 1;
-                logger.warn(`Verification panel channel missing for guild ${guild.id} (${guild.name})`);
+                logger.warn(`Verifizierungs-Panel channel missing for guild ${guild.id} (${guild.name})`);
             } else if (panelStatus.reason === 'panel_deleted') {
                 summary.deletedPanels += 1;
                 logger.warn(
-                    `Verification panel deleted for guild ${guild.id} (${guild.name}) — repost from /verification dashboard`,
+                    `Verifizierungs-Panel deleted for guild ${guild.id} (${guild.name}) — repost from /verification dashboard`,
                 );
             }
         } catch (error) {
             summary.errors += 1;
-            logger.warn(`Verification panel health check failed for guild ${guild.id}:`, error.message);
+            logger.warn(`Verifizierungs-Panel health check failed for guild ${guild.id}:`, error.message);
         }
     }
 

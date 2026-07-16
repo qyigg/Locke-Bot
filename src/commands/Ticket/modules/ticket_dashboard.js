@@ -102,7 +102,7 @@ async function repostTicketPanel(client, guild, guildConfig, guildId) {
         throw new TitanBotError(
             'Panel channel missing',
             ErrorTypes.CONFIGURATION,
-            'The configured ticket panel channel no longer exists. Set a new panel channel from the dashboard.',
+            'The configured Ticket-Panel channel no longer exists. Set a new panel channel from the dashboard.',
         );
     }
 
@@ -152,7 +152,7 @@ function buildDashboardEmbed(config, guild, panelStatus = null, ticketStats = nu
         .setDescription(`Manage ticket system settings for **${guild.name}**.\nSelect an option below to modify a setting.`)
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Panel Status', value: panelStatusValue, inline: false },
+            { name: 'Panelstatus', value: panelStatusValue, inline: false },
             { name: 'Panel Channel', value: panelChannel, inline: true },
             { name: 'Staff Role', value: staffRole, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
@@ -162,7 +162,7 @@ function buildDashboardEmbed(config, guild, panelStatus = null, ticketStats = nu
             { name: 'Panel Message', value: panelMsg, inline: false },
             { name: 'Button Label', value: btnLabel, inline: true },
             { name: 'Max Tickets/User', value: String(config.maxTicketsPerUser || 3), inline: true },
-            { name: 'DM on Close', value: config.dmOnClose !== false ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'DM on Close', value: config.dmOnClose !== false ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Ticket Logs Channel', value: ticketLogsChannel, inline: true },
             { name: 'Transcript Channel', value: transcriptChannel, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
@@ -250,7 +250,7 @@ async function updateLivePanel(client, guild, config, guildId) {
         });
         return true;
     } catch (error) {
-        logger.warn('Failed to update live ticket panel:', error.message);
+        logger.warn('Failed to update live Ticket-Panel:', error.message);
         return false;
     }
 }
@@ -388,7 +388,7 @@ async function handlePanelMessage(selectInteraction, rootInteraction, guildConfi
                 '✅ Panel Message Updated',
                 `The panel message has been updated.${
                     panelUpdated
-                        ? '\nThe live ticket panel has also been refreshed.'
+                        ? '\nThe live Ticket-Panel has also been refreshed.'
                         : '\n> **Note:** The live panel could not be located. Use **Repost Panel** on the dashboard to restore it.'
                 }`,
             ),
@@ -441,7 +441,7 @@ async function handleButtonLabel(selectInteraction, rootInteraction, guildConfig
                 '✅ Button Label Updated',
                 `Button label changed to \`${newLabel}\`.${
                     panelUpdated
-                        ? '\nThe live ticket panel button has also been updated.'
+                        ? '\nThe live Ticket-Panel button has also been updated.'
                         : '\n> **Note:** The live panel could not be located. Use **Repost Panel** on the dashboard to restore it.'
                 }`,
             ),
@@ -502,7 +502,7 @@ async function handleStaffRole(selectInteraction, rootInteraction, guildConfig, 
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No role was selected. The staff role was not changed.',
+                message: 'Es wurde keine Rolle ausgewählt. The staff role was not changed.',
             }).catch(() => {});
         }
     });
@@ -562,7 +562,7 @@ async function handleOpenCategory(selectInteraction, rootInteraction, guildConfi
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No category was selected. The setting was not changed.',
+                message: 'Es wurde keine Kategorie ausgewählt. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -622,7 +622,7 @@ async function handleClosedCategory(selectInteraction, rootInteraction, guildCon
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No category was selected. The setting was not changed.',
+                message: 'Es wurde keine Kategorie ausgewählt. The setting was not changed.',
             }).catch(() => {});
         }
     });
@@ -868,7 +868,7 @@ async function handleCheckUser(selectInteraction, rootInteraction, guildConfig, 
         if (reason === 'time' && collected.size === 0) {
             replyUserError(selectInteraction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No user was selected.',
+                message: 'Es wurde kein Benutzer ausgewählt.',
             }).catch(() => {});
         }
     });
@@ -880,7 +880,7 @@ async function handleRepostPanel(btnInteraction, rootInteraction, guildConfig, g
     const panelStatus = await getTicketPanelStatus(client, rootInteraction.guild, guildConfig);
     if (panelStatus.exists) {
         await btnInteraction.followUp({
-            embeds: [infoEmbed('Panel Already Active', 'The ticket panel is already posted in the configured channel.')],
+            embeds: [infoEmbed('Panel bereits aktiv', 'The Ticket-Panel is already posted in the configured channel.')],
             flags: MessageFlags.Ephemeral,
         }).catch(() => {});
         await refreshDashboard(rootInteraction, guildConfig, guildId, client);
@@ -892,8 +892,8 @@ async function handleRepostPanel(btnInteraction, rootInteraction, guildConfig, g
     await btnInteraction.followUp({
         embeds: [
             successEmbed(
-                'Panel Reposted',
-                `A new ticket panel was posted in <#${guildConfig.ticketPanelChannelId}>.${
+                'Panel erneut gepostet',
+                `A new Ticket-Panel was posted in <#${guildConfig.ticketPanelChannelId}>.${
                     sentPanel.url ? `\n[Open panel message](${sentPanel.url})` : ''
                 }`,
             ),
@@ -976,7 +976,7 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
                 }
             }
         } catch (panelDeleteError) {
-            logger.warn('Could not delete ticket panel message:', panelDeleteError.message);
+            logger.warn('Could not delete Ticket-Panel message:', panelDeleteError.message);
         }
     }
 

@@ -51,7 +51,7 @@ export async function handleDelete(interaction, client) {
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId(`counter-delete:cancel:${counterToDelete.id}:${interaction.user.id}`)
-                .setLabel("Cancel")
+                .setLabel("Abbrechen")
                 .setStyle(ButtonStyle.Secondary)
         );
 

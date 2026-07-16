@@ -16,9 +16,9 @@ export default {
       if (oldMessage.content === newMessage.content) return;
 
       const metaLines = [
-        formatLogLine('Channel', newMessage.channel ? `${newMessage.channel.name} ${newMessage.channel.toString()}` : 'Unknown'),
+        formatLogLine('Channel', newMessage.channel ? `${newMessage.channel.name} ${newMessage.channel.toString()}` : 'Unbekannt'),
         formatLogLine('Message ID', `\`${newMessage.id}\``),
-        formatLogLine('Message author', newMessage.author ? newMessage.author.toString() : 'Unknown'),
+        formatLogLine('Message author', newMessage.author ? newMessage.author.toString() : 'Unbekannt'),
         formatLogLine('Message created', `<t:${Math.floor(newMessage.createdTimestamp / 1000)}:R>`),
       ];
 

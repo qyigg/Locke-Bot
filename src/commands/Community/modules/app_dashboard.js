@@ -60,7 +60,7 @@ async function buildDashboardEmbed(settings, roles, guild, client) {
         .setDescription(`Manage application settings for **${guild.name}**.\nSelect an option below to modify a setting.`)
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Application Status', value: settings.enabled ? 'Enabled' : 'Disabled', inline: true },
+            { name: 'Application Status', value: settings.enabled ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Log Channel', value: logChannel, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
             { name: 'Manager Roles', value: managerRoleList, inline: false },

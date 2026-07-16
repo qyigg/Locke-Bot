@@ -585,14 +585,14 @@ class ConfigService {
                 const channel = guild.channels.cache.get(value);
                 summary[key] = {
                     id: value,
-                    name: channel?.name || 'Unknown',
+                    name: channel?.name || 'Unbekannt',
                     status: channel ? 'Valid' : 'Missing'
                 };
             } else if (rule.type === 'role' && value) {
                 const role = guild.roles.cache.get(value);
                 summary[key] = {
                     id: value,
-                    name: role?.name || 'Unknown',
+                    name: role?.name || 'Unbekannt',
                     status: role ? 'Valid' : 'Missing'
                 };
             } else {

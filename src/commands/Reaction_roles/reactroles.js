@@ -348,7 +348,7 @@ async function handleSetup(interaction) {
     }
 
     await InteractionHelper.safeEditReply(interaction, {
-        embeds: [successEmbed('Success', `✅ Reaction role panel created in ${channel}!\n\n${message.url}`)]
+        embeds: [successEmbed('Erfolg', `✅ Reaction role panel created in ${channel}!\n\n${message.url}`)]
     });
 }
 
@@ -439,7 +439,7 @@ function buildReactionRoleDashboardPayload(panelData, discordMsg, guildId, guild
         )
         .setColor(getColor('info'))
         .addFields(
-            { name: 'Panel Status', value: formatPanelStatusField(panelStatus), inline: false },
+            { name: 'Panelstatus', value: formatPanelStatusField(panelStatus), inline: false },
             { name: 'Channel', value: channel ? `<#${channel.id}>` : '`Not found`', inline: true },
             { name: 'Roles', value: `\`${panelData.roles.length} / 25\``, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
@@ -630,7 +630,7 @@ async function handleDashboard(interaction, selectedPanelId) {
                     fallbackEmbed,
                 );
                 await btnInteraction.followUp({
-                    embeds: [successEmbed('Panel Reposted', `Reaction role panel restored in ${newMsg.channel}.`)],
+                    embeds: [successEmbed('Panel erneut gepostet', `Reaction role panel restored in ${newMsg.channel}.`)],
                     flags: MessageFlags.Ephemeral,
                 });
                 await showPanelDashboard(
@@ -1052,7 +1052,7 @@ async function handleDeletePanel(btnInteraction, rootInteraction, panelData, pan
                 channelId: panelData.channelId,
                 fields: [
                     { name: 'Panel', value: title, inline: true },
-                    { name: 'Channel', value: channel ? channel.toString() : 'Unknown', inline: true },
+                    { name: 'Channel', value: channel ? channel.toString() : 'Unbekannt', inline: true },
                 ],
             },
         });

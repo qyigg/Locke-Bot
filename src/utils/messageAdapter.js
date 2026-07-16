@@ -88,7 +88,7 @@ export function createMockInteraction(message, commandData, args) {
 
         return {
           id,
-          username: 'Unknown',
+          username: 'Unbekannt',
           bot: false,
           tag: 'Unknown#0000',
         };

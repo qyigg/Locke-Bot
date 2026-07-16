@@ -52,7 +52,7 @@ const VerificationConfigSchema = z
     messageId: z.string().nullable().optional(),
     roleId: z.string().optional(),
     message: z.string().optional(),
-    buttonText: z.string().default('Verify'),
+    buttonText: z.string().default('Verifizieren'),
     autoVerify: AutoVerifyConfigSchema
   })
   .optional();

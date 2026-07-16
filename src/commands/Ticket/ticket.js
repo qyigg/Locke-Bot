@@ -23,7 +23,7 @@ export default {
                     option
 .setName("panel_channel")
                         .setDescription(
-                            "The channel where the ticket panel will be sent.",
+                            "The channel where the Ticket-Panel will be sent.",
                         )
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true),
@@ -33,7 +33,7 @@ export default {
                     option
                         .setName("panel_message")
                         .setDescription(
-                            "The main message/description for the ticket panel.",
+                            "The main message/description for the Ticket-Panel.",
                         )
                         .setRequired(true),
                 )
@@ -199,18 +199,18 @@ description: panelMessage,
                     successMessage += `**${staffRole.name}** role will have access to tickets.`;
                 }
                 
-                successMessage += `\n\n**Max Tickets Per User:** ${maxTicketsPerUser}\n**DM on Close:** ${dmOnClose ? 'Enabled' : 'Disabled'}`;
+                successMessage += `\n\n**Max Tickets Per User:** ${maxTicketsPerUser}\n**DM on Close:** ${dmOnClose ? 'Aktiviert' : 'Deaktiviert'}`;
 
                 await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
                         successEmbed(
-                            "Ticket Panel Set Up",
+                            "Ticket-Panel Set Up",
                             successMessage,
                         ),
                     ],
                 });
 
-                logger.info('Ticket panel setup completed', {
+                logger.info('Ticket-Panel setup completed', {
                     userId: interaction.user.id,
                     userTag: interaction.user.tag,
                     guildId: interaction.guildId,
@@ -225,7 +225,7 @@ description: panelMessage,
 
                 const logEmbed = createEmbed({
                     title: "Ticket System Setup (Configuration Log)",
-                    description: `The ticket panel was set up in ${panelChannel} by ${interaction.user}.`,
+                    description: `The Ticket-Panel was set up in ${panelChannel} by ${interaction.user}.`,
                     color: getColor('warning')
                 })
                     .addFields(
@@ -262,7 +262,7 @@ description: panelMessage,
                         },
                         {
                             name: "DM on Close",
-                            value: dmOnClose ? 'Enabled' : 'Disabled',
+                            value: dmOnClose ? 'Aktiviert' : 'Deaktiviert',
                             inline: true,
                         },
                         {
@@ -281,7 +281,7 @@ description: panelMessage,
                     commandName: 'ticket_setup'
                 });
                 if (interaction.deferred || interaction.replied) {
-                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not send the ticket panel or save configuration. Check the bot\'s permissions (especially the ability to send messages in the target channel) and database connection.' }).catch(err => {
+                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not send the Ticket-Panel or save configuration. Check the bot\'s permissions (especially the ability to send messages in the target channel) and database connection.' }).catch(err => {
                         logger.error('Failed to send error reply', {
                             error: err.message,
                             guildId: interaction.guildId

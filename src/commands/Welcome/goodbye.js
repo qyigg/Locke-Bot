@@ -107,7 +107,7 @@ export default {
                     .addFields(
                         { name: 'Message Preview', value: truncateForEmbedField(previewMessage) },
                         { name: 'Ping User', value: ping ? 'Yes' : 'No' },
-                        { name: 'Status', value: 'Enabled' }
+                        { name: 'Status', value: 'Aktiviert' }
                     )
                     .setFooter({ text: 'Tip: Use /greet dashboard to customize goodbye settings' });
 

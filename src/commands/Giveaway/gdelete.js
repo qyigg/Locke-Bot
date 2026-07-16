@@ -161,7 +161,7 @@ export default {
                     fields: [
                         {
                             name: 'Prize',
-                            value: giveaway.prize || 'Unknown',
+                            value: giveaway.prize || 'Unbekannt',
                             inline: true
                         },
                         {

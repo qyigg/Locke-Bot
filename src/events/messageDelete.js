@@ -28,7 +28,7 @@ export default {
               data: {
                 title: 'Reaction Role Removed',
                 lines: [
-                  formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unknown'),
+                  formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unbekannt'),
                   formatLogLine('Message ID', `\`${message.id}\``),
                   formatLogLine('Cleanup', 'Database entry removed automatically'),
                 ],
@@ -46,9 +46,9 @@ export default {
       if (message.author?.bot) return;
 
       const metaLines = [
-        formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unknown'),
+        formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unbekannt'),
         formatLogLine('Message ID', `\`${message.id}\``),
-        formatLogLine('Message author', message.author ? message.author.toString() : 'Unknown'),
+        formatLogLine('Message author', message.author ? message.author.toString() : 'Unbekannt'),
         formatLogLine('Message created', `<t:${Math.floor(message.createdTimestamp / 1000)}:R>`),
       ];
 

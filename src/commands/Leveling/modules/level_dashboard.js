@@ -49,7 +49,7 @@ function buildDashboardEmbed(cfg, guild) {
         .setColor(getColor('info'))
         .addFields(
             { name: 'Level-up Channel', value: channel, inline: true },
-            { name: 'System Status', value: cfg.enabled ? '**Enabled**' : '**Disabled**', inline: true },
+            { name: 'Systemstatus', value: cfg.enabled ? '**Enabled**' : '**Disabled**', inline: true },
             { name: 'Announcements', value: cfg.announceLevelUp !== false ? '**Enabled**' : '**Disabled**', inline: true },
             { name: 'XP per Message', value: `\`${xpMin} – ${xpMax}\``, inline: true },
             { name: 'XP Cooldown', value: `\`${cooldown}s\``, inline: true },

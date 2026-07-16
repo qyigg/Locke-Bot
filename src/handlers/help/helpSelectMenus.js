@@ -224,7 +224,7 @@ async function createCategoryCommandsMenu(category, client) {
 
     const backButton = createButton(
         BACK_BUTTON_ID,
-        "Back",
+        "Zurück",
         "primary",
         "⬅️",
         false,
@@ -354,7 +354,7 @@ export async function createAllCommandsMenu(page = 1, client) {
 
     const backButton = createButton(
         BACK_BUTTON_ID,
-        "Back",
+        "Zurück",
         "primary",
         "⬅️",
         false,

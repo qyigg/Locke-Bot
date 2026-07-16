@@ -301,11 +301,11 @@ export const botConfig = {
   // VERIFICATION SETTINGS
   // =========================
   verification: {
-    // Message shown when posting the verification panel.
+    // Message shown when posting the Verifizierungs-Panel.
     defaultMessage: "Click the button below to verify yourself and gain access to the server!",
 
     // Text on the verification button.
-    defaultButtonText: "Verify",
+    defaultButtonText: "Verifizieren",
 
     // Automatic verification behavior.
     autoVerify: {
@@ -434,9 +434,9 @@ export const botConfig = {
   // GENERIC BOT MESSAGES
   // =========================
   messages: {
-    noPermission: "You do not have permission to use this command.",
+    noPermission: "Du hast keine Berechtigung, diesen Befehl zu verwenden.",
     cooldownActive: "Please wait {time} before using this command again.",
-    errorOccurred: "An error occurred while executing this command.",
+    errorOccurred: "Beim Ausführen dieses Befehls ist ein Fehler aufgetreten.",
     missingPermissions:
       "I am missing required permissions to perform this action.",
     commandDisabled: "This command has been disabled.",

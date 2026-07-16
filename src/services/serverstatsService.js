@@ -26,7 +26,7 @@ export const COUNTER_TYPE_CONFIG = {
 
 function getCounterConfig(type) {
   return COUNTER_TYPE_CONFIG[type] || {
-    label: 'Unknown',
+    label: 'Unbekannt',
     baseName: 'Counter',
     emoji: '❓'
   };

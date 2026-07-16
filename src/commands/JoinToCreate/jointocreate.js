@@ -98,7 +98,7 @@ export default {
 
         } catch (error) {
             try {
-                let errorMessage = 'An error occurred while executing this command.';
+                let errorMessage = 'Beim Ausführen dieses Befehls ist ein Fehler aufgetreten.';
                 
                 if (error instanceof TitanBotError) {
                     errorMessage = error.userMessage || 'An error occurred. Please try again.';

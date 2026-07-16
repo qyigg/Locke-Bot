@@ -227,17 +227,17 @@ export function createEmbed({
 }
 
 const NOTIFICATION_DEFAULT_TITLES = {
-  success: 'Success',
-  error: 'Error',
+  success: 'Erfolg',
+  error: 'Fehler',
   info: 'Information',
-  warning: 'Warning',
+  warning: 'Warnung',
   primary: 'Notice',
 };
 
 export const USER_ERROR_TITLES = {
   validation: 'Invalid Input',
   permission: 'Permission Denied',
-  configuration: 'Configuration Error',
+  configuration: 'Konfigurationsfehler',
   database: 'Database Error',
   network: 'Network Error',
   discord_api: 'Discord API Error',
@@ -303,7 +303,7 @@ export function errorEmbed(title, detail = null, options = {}) {
   }
 
   const description = body ? String(body).trim() : '';
-  const titleOverride = title && title !== 'Error' ? title : undefined;
+  const titleOverride = title && title !== 'Fehler' ? title : undefined;
 
   return buildUserErrorEmbed('unknown', description, { titleOverride });
 }
@@ -311,10 +311,10 @@ export function errorEmbed(title, detail = null, options = {}) {
 /** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
 export function successEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Success', title, 'success');
+    return buildNotificationEmbed('Erfolg', title, 'success');
   }
 
-  return buildNotificationEmbed(title || 'Success', body, 'success');
+  return buildNotificationEmbed(title || 'Erfolg', body, 'success');
 }
 
 /** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
@@ -329,10 +329,10 @@ export function infoEmbed(title, body = '') {
 /** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
 export function warningEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Warning', title, 'warning');
+    return buildNotificationEmbed('Warnung', title, 'warning');
   }
 
-  return buildNotificationEmbed(title || 'Warning', body, 'warning');
+  return buildNotificationEmbed(title || 'Warnung', body, 'warning');
 }
 
 export function formatUser(user) {
