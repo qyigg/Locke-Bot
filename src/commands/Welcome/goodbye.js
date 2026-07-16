@@ -9,34 +9,34 @@ import { ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('goodbye')
-        .setDescription('Configure the goodbye message system')
+        .setDescription('Konfiguriere das Abschiedsnachrichtensystem')
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('setup')
-                .setDescription('Set up the goodbye message')
+                .setDescription('Richte die Abschiedsnachricht ein')
                 .addChannelOption(option =>
                     option.setName('channel')
-                        .setDescription('The channel to send goodbye messages to')
+                        .setDescription('Der Kanal, in den Abschiedsnachrichten gesendet werden')
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true))
                 .addStringOption(option =>
                     option.setName('message')
-                        .setDescription('Goodbye message. Variables: {user}, {username}, {server}, {memberCount}')
+                        .setDescription('Abschiedsnachricht. Variablen: {user}, {username}, {server}, {memberCount}')
                         .setRequired(true))
                 .addStringOption(option =>
                     option.setName('image')
-                        .setDescription('URL of the image to include in the goodbye message')
+                        .setDescription('URL des Bildes, das in die Abschiedsnachricht eingefügt wird')
                         .setRequired(false))
                 .addBooleanOption(option =>
                     option.setName('ping')
-                        .setDescription('Whether to ping the user in the goodbye message')
+                        .setDescription('Ob der Benutzer in der Abschiedsnachricht erwähnt werden soll')
                         .setRequired(false))),
 
     async execute(interaction) {
         const deferSuccess = await InteractionHelper.safeDefer(interaction);
         if (!deferSuccess) {
-            logger.warn(`Goodbye interaction defer failed`, {
+            logger.warn(`Goodbye-Interaction defer fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'goodbye'
@@ -47,7 +47,7 @@ export default {
         const { options, guild, client } = interaction;
 
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the **Manage Server** permission to use `/goodbye`.' });
+            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung **Server verwalten**, um `/goodbye` zu verwenden.' });
         }
 
         const subcommand = options.getSubcommand();
@@ -60,21 +60,21 @@ export default {
 
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.goodbyeChannelId) {
-                logger.info(`[Goodbye] Setup blocked because config already exists in channel ${existingConfig.goodbyeChannelId} for guild ${guild.id}`);
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Goodbye is already configured for <#${existingConfig.goodbyeChannelId}>. Use **/greet dashboard** to customize channel, message, ping, or image.` });
+                logger.info(`[Goodbye] Einrichtung blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.goodbyeChannelId} für Guild ${guild.id} existiert`);
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Goodbye ist bereits für <#${existingConfig.goodbyeChannelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
             }
 
             if (!message || message.trim().length === 0) {
-                logger.warn(`[Goodbye] Empty message provided by ${interaction.user.tag} in ${guild.name}`);
-                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Goodbye message cannot be empty' });
+                logger.warn(`[Goodbye] Leere Nachricht von ${interaction.user.tag} in ${guild.name} angegeben`);
+                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Die Abschiedsnachricht darf nicht leer sein' });
             }
 
             if (image) {
                 try {
                     new URL(image);
                 } catch (e) {
-                    logger.warn(`[Goodbye] Invalid image URL provided by ${interaction.user.tag}: ${image}`);
-                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid image URL (must start with http:// or https://' });
+                    logger.warn(`[Goodbye] Ungültige Bild-URL von ${interaction.user.tag} angegeben: ${image}`);
+                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte gib eine gültige Bild-URL an (muss mit http:// oder https:// beginnen)' });
                 }
             }
 
@@ -88,12 +88,12 @@ export default {
                         title: "Goodbye {user.tag}",
                         description: message,
                         color: getColor('error'),
-                        footer: `Goodbye from ${guild.name}!`,
+                        footer: `Goodbye von ${guild.name}!`,
                         ...(image && { image: { url: image } })
                     }
                 });
 
-                logger.info(`[Goodbye] Setup configured by ${interaction.user.tag} for guild ${guild.name} (${guild.id})`);
+                logger.info(`[Goodbye] Einrichtung von ${interaction.user.tag} für Guild ${guild.name} (${guild.id}) konfiguriert`);
 
                 const previewMessage = formatWelcomeMessage(message, {
                     user: interaction.user,
@@ -102,14 +102,14 @@ export default {
 
                 const embed = new EmbedBuilder()
                     .setColor(getColor('success'))
-                    .setTitle('Goodbye System Configured')
-                    .setDescription(`Goodbye messages will now be sent to ${channel}`)
+                    .setTitle('Abschiedssystem konfiguriert')
+                    .setDescription(`Abschiedsnachrichten werden jetzt in ${channel} gesendet`)
                     .addFields(
-                        { name: 'Message Preview', value: truncateForEmbedField(previewMessage) },
-                        { name: 'Ping User', value: ping ? 'Yes' : 'No' },
-                        { name: 'Status', value: 'Enabled' }
+                        { name: 'Nachrichtenvorschau', value: truncateForEmbedField(previewMessage) },
+                        { name: 'Benutzer anpingen', value: ping ? 'Ja' : 'Nein' },
+                        { name: 'Status', value: 'Aktiviert' }
                     )
-                    .setFooter({ text: 'Tip: Use /greet dashboard to customize goodbye settings' });
+                    .setFooter({ text: 'Tipp: Verwende /greet dashboard, um die Goodbye-Einstellungen anzupassen' });
 
                 if (image) {
                     embed.setImage(image);
@@ -117,8 +117,8 @@ export default {
 
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             } catch (error) {
-                logger.error(`[Goodbye] Failed to setup goodbye system for guild ${guild.id}:`, error);
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while configuring the goodbye system. Please try again.' });
+                logger.error(`[Goodbye] Fehler beim Einrichten des Abschiedssystems für Guild ${guild.id}:`, error);
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Beim Konfigurieren des Abschiedssystems ist ein Fehler aufgetreten. Bitte versuche es erneut.' });
             }
         }
     },
