@@ -9,12 +9,12 @@ import { closeTicket } from '../../services/ticket.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("close")
-        .setDescription("Closes the current ticket.")
+        .setDescription("Schließt das aktuelle Ticket.")
         .setDMPermission(false)
         .addStringOption((option) =>
             option
                 .setName("reason")
-                .setDescription("The reason for closing the ticket.")
+                .setDescription("Der Grund für das Schließen des Tickets.")
                 .setRequired(false),
         ),
 
@@ -26,29 +26,29 @@ export default {
 
         const permissionContext = await getTicketPermissionContext({ client, interaction });
         if (!permissionContext.ticketData) {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'This command can only be used in a valid ticket channel.' });
+            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.' });
         }
 
         if (!permissionContext.canCloseTicket) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the `Manage Channels` permission, the configured `Ticket Staff Role`, or be the ticket creator to close this ticket.' });
+            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die Berechtigung `Kanäle verwalten`, die konfigurierte `Ticket-Staff-Rolle` oder musst der Ersteller des Tickets sein, um dieses Ticket zu schließen.' });
         }
 
         const reason =
             interaction.options?.getString("reason") ||
-            "Closed via command without a specific reason.";
+            "Über Befehl ohne konkreten Grund geschlossen.";
 
         await closeTicket(interaction.channel, interaction.user, reason);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    "Ticket Closed!",
-                    "This ticket has been closed successfully.",
+                    "Ticket geschlossen!",
+                    "Dieses Ticket wurde erfolgreich geschlossen.",
                 ),
             ],
         });
 
-        logger.info('Ticket closed successfully', {
+        logger.info('Ticket erfolgreich geschlossen', {
             userId: interaction.user.id,
             userTag: interaction.user.tag,
             channelId: interaction.channel.id,
