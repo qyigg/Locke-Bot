@@ -79,7 +79,7 @@ function buildDashboardEmbed(cfg, guild, verifiedUserCount = 0, conflictSummary 
         );
 
     if (conflictSummary) {
-        embed.addFields({ name: 'Einrichtungskonflikte', value: conflictSummary, inline: false });
+        embed.addFields({ name: 'Setupskonflikte', value: conflictSummary, inline: false });
     }
 
     return embed

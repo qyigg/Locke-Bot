@@ -31,14 +31,14 @@ const DM_DISABLED_HELP = [
     '1. Rechtsklicke auf den Namen dieses Servers (mobil: tippe oben auf den Servernamen).',
     '2. Öffne **Datenschutzeinstellungen**.',
     '3. Aktiviere **Direktnachrichten von Servermitgliedern zulassen**.',
-    '4. Klicke erneut auf **Einrichtung-Assistent starten**.',
+    '4. Klicke erneut auf **Setup-Assistent starten**.',
 ].join('\n');
 
 async function notifyWizardStarted(buttonInteraction) {
     await buttonInteraction.followUp({
         embeds: [infoEmbed(
-            'Einrichtung-Assistent gestartet',
-            'Schau in deine DMs — ich habe dir dort die erste Einrichtung-Frage geschickt.\n\nBeantworte jede Frage in dieser DM. Schreibe `skip`, um den aktuellen Wert beizubehalten.',
+            'Setup-Assistent gestartet',
+            'Schau in deine DMs — ich habe dir dort die erste Setup-Frage geschickt.\n\nBeantworte jede Frage in dieser DM. Schreibe `skip`, um den aktuellen Wert beizubehalten.',
         )],
         flags: MessageFlags.Ephemeral,
     }).catch(() => {});
@@ -95,7 +95,7 @@ function buildDashboardEmbed(config, guild) {
 
     return createEmbed({
         title: '⚙️ Server-Konfiguration',
-        description: `Zentrale Einstellungen für **${guild.name}**. Wähle unten eine Option oder starte den Einrichtung-Assistenten.`,
+        description: `Zentrale Einstellungen für **${guild.name}**. Wähle unten eine Option oder starte den Setup-Assistenten.`,
         color: 'info',
         fields: [
             {
@@ -129,10 +129,10 @@ function buildDashboardEmbed(config, guild) {
                 inline: false,
             },
             {
-                name: `${setupDone ? '✅' : '📝'} Einrichtung`,
+                name: `${setupDone ? '✅' : '📝'} Setup`,
                 value: setupDone
-                    ? 'Der Einrichtung-Assistent wurde abgeschlossen — starte ihn jederzeit erneut, um Einstellungen zu ändern.'
-                    : 'Starte den Einrichtung-Assistenten, um deinen Server schnell zu konfigurieren.',
+                    ? 'Der Setup-Assistent wurde abgeschlossen — starte ihn jederzeit erneut, um Einstellungen zu ändern.'
+                    : 'Starte den Setup-Assistenten, um deinen Server schnell zu konfigurieren.',
                 inline: false,
             },
         ],
@@ -169,7 +169,7 @@ function buildButtonRow(config, guildId) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`${WIZARD_BUTTON_ID}:${guildId}`)
-            .setLabel(config.setupWizardCompleted ? 'Einrichtung-Assistent erneut starten' : 'Einrichtung-Assistent starten')
+            .setLabel(config.setupWizardCompleted ? 'Setup-Assistent erneut starten' : 'Setup-Assistent starten')
             .setEmoji('📝')
             .setStyle(config.setupWizardCompleted ? ButtonStyle.Secondary : ButtonStyle.Erfolg),
     );
@@ -193,7 +193,7 @@ function extractId(value) {
 async function askQuestion(dmChannel, userId, prompt, stepNumber, totalSteps) {
     await dmChannel.send({
         embeds: [createEmbed({
-            title: `Einrichtung-Frage ${stepNumber}/${totalSteps}`,
+            title: `Setup-Frage ${stepNumber}/${totalSteps}`,
             description: prompt,
             color: 'primary',
         })],
@@ -207,7 +207,7 @@ async function askQuestion(dmChannel, userId, prompt, stepNumber, totalSteps) {
 
     if (!collected || !collected.size) {
         await dmChannel.send({
-            embeds: [buildUserFehlerEmbed(FehlerTypes.RATE_LIMIT, 'Du hast nicht rechtzeitig geantwortet. Starte den Einrichtung-Assistenten erneut, wenn du bereit bist.')],
+            embeds: [buildUserFehlerEmbed(FehlerTypes.RATE_LIMIT, 'Du hast nicht rechtzeitig geantwortet. Starte den Setup-Assistenten erneut, wenn du bereit bist.')],
         });
         return null;
     }
@@ -215,7 +215,7 @@ async function askQuestion(dmChannel, userId, prompt, stepNumber, totalSteps) {
     const answer = collected.first().content.trim();
     if (answer.toLowerCase() === 'cancel') {
         await dmChannel.send({
-            embeds: [infoEmbed('Einrichtung abgebrochen', 'Der Einrichtung-Assistent wurde beendet. Deine bereits gespeicherten Antworten bleiben erhalten.')],
+            embeds: [infoEmbed('Setup abgebrochen', 'Der Setup-Assistent wurde beendet. Deine bereits gespeicherten Antworten bleiben erhalten.')],
         });
         return { cancelled: true };
     }
@@ -277,12 +277,12 @@ async function refreshDashboard(rootInteraction, config, guild) {
     await InteractionHelper.safeEditReply(rootInteraction, { embeds: [embed], components }).catch(() => {});
 }
 
-async function runEinrichtungWizard(buttonInteraction, config, guild, client, rootInteraction) {
+async function runSetupWizard(buttonInteraction, config, guild, client, rootInteraction) {
     const user = buttonInteraction.user;
 
     if (activeWizardSessions.has(user.id)) {
         await buttonInteraction.followUp({
-            embeds: [warningEmbed('Einrichtung läuft bereits', 'Du hast bereits einen Einrichtung-Assistenten in deinen DMs offen. Antworte dort, um fortzufahren, oder schreibe `cancel`, um ihn zu beenden.')],
+            embeds: [warningEmbed('Setup läuft bereits', 'Du hast bereits einen Setup-Assistenten in deinen DMs offen. Antworte dort, um fortzufahren, oder schreibe `cancel`, um ihn zu beenden.')],
             flags: MessageFlags.Ephemeral,
         }).catch(() => {});
         return;
@@ -295,7 +295,7 @@ async function runEinrichtungWizard(buttonInteraction, config, guild, client, ro
     try {
         dmChannel = await user.createDM();
     } catch (error) {
-        logger.warn('DM-Kanal für den Einrichtung-Assistenten konnte nicht erstellt werden', { userId: user.id, error: error.message });
+        logger.warn('DM-Kanal für den Setup-Assistenten konnte nicht erstellt werden', { userId: user.id, error: error.message });
         await notifyWizardDmBlocked(buttonInteraction);
         return;
     } finally {
@@ -354,13 +354,13 @@ async function runEinrichtungWizard(buttonInteraction, config, guild, client, ro
         try {
             await dmChannel.send({
                 embeds: [createEmbed({
-                    title: '📝 Einrichtung-Assistent',
+                    title: '📝 Setup-Assistent',
                     description: 'Beantworte jede Frage in dieser DM.\n\n• Schreibe `skip`, um den aktuellen Wert zu behalten\n• Schreibe `cancel`, um den Assistenten zu beenden',
                     color: 'info',
                 })],
             });
         } catch (error) {
-            logger.warn('DM für den Einrichtung-Assistenten konnte nicht gesendet werden', { userId: user.id, error: error.message });
+            logger.warn('DM für den Setup-Assistenten konnte nicht gesendet werden', { userId: user.id, error: error.message });
             await notifyWizardDmBlocked(buttonInteraction);
             return;
         }
@@ -410,7 +410,7 @@ async function runEinrichtungWizard(buttonInteraction, config, guild, client, ro
                             const updatedConfig = await getGuildConfig(client, guild.id);
                             await refreshDashboard(rootInteraction, updatedConfig, guild);
                         } catch (refreshFehler) {
-                            logger.debug('Dashboard während des Einrichtung-Assistenten konnte nicht aktualisiert werden', { error: refreshFehler.message });
+                            logger.debug('Dashboard während des Setup-Assistenten konnte nicht aktualisiert werden', { error: refreshFehler.message });
                         }
                     }
 
@@ -437,13 +437,13 @@ async function runEinrichtungWizard(buttonInteraction, config, guild, client, ro
         }
 
         const summaryTitle = wizardAbbrechenled
-            ? (Object.keys(changes).length > 0 ? 'Einrichtung gestoppt' : 'Einrichtung abgebrochen')
-            : (errors.length > 0 ? 'Einrichtung abgeschlossen' : 'Einrichtung abgeschlossen');
+            ? (Object.keys(changes).length > 0 ? 'Setup gestoppt' : 'Setup abgebrochen')
+            : (errors.length > 0 ? 'Setup abgeschlossen' : 'Setup abgeschlossen');
 
         const summaryBody = wizardAbbrechenled
             ? (Object.keys(changes).length > 0
-                ? `Das Einrichtung wurde vorzeitig beendet. Vor dem Abbruch wurden **${Object.keys(changes).length}** Einstellung(en) gespeichert.`
-                : 'Der Einrichtung-Assistent wurde beendet, bevor Änderungen gespeichert wurden.')
+                ? `Das Setup wurde vorzeitig beendet. Vor dem Abbruch wurden **${Object.keys(changes).length}** Einstellung(en) gespeichert.`
+                : 'Der Setup-Assistent wurde beendet, bevor Änderungen gespeichert wurden.')
             : (Object.keys(changes).length > 0
                 ? `**${Object.keys(changes).length}** Einstellung(en) wurden aktualisiert.${errors.length > 0 ? ' Einige Antworten mussten erneut eingegeben werden.' : ''}`
                 : 'Es wurden keine Änderungen übernommen.');
@@ -613,7 +613,7 @@ export default {
     slashAnly: true,
     data: new SlashCommandBuilder()
         .setName('configwizard')
-        .setDescription('Öffnet das Server-Konfigurations-Dashboard und den Einrichtung-Assistenten')
+        .setDescription('Öffnet das Server-Konfigurations-Dashboard und den Setup-Assistenten')
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .setDMPermission(false),
     category: 'Core',
@@ -659,7 +659,7 @@ export default {
 
                         if (componentInteraction.customId.startsWith(`${WIZARD_BUTTON_ID}:`)) {
                             const latestConfig = await getGuildConfig(interaction.client, interaction.guildId);
-                            await runEinrichtungWizard(componentInteraction, latestConfig, interaction.guild, interaction.client, interaction);
+                            await runSetupWizard(componentInteraction, latestConfig, interaction.guild, interaction.client, interaction);
                         }
                         return;
                     }

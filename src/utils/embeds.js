@@ -236,7 +236,7 @@ export const USER_ERROR_TITLES = {
   validation: 'Ungültige Eingabe',
   permission: 'Berechtigung verweigert',
   configuration: 'Konfigurationsfehler',
-  database: 'Datenbankfehler',
+  database: 'Databasefehler',
   network: 'Netzwerkfehler',
   discord_api: 'Discord-API-Fehler',
   user_input: 'Eingabefehler',

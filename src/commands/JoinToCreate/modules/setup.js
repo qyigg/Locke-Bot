@@ -36,7 +36,7 @@ export default {
             });
 
             const embed = successEmbed(
-                '✅ Join to Create Einrichtung Complete',
+                '✅ Join to Create Setup Complete',
                 `Created trigger channel: ${triggerChannel}\n\n` +
                 `**Einstellungen:**\n` +
                 `• Temporary Channel Name Template: \`${nameTemplate}\`\n` +
@@ -69,7 +69,7 @@ export default {
             }
             logger.error('Fehler in JoinToCreate setup:', error);
             throw new TitanBotFehler(
-                `Einrichtung failed: ${error.message}`,
+                `Setup failed: ${error.message}`,
                 FehlerTypes.DISCORD_API,
                 'Failed to set up Join to Create system.'
             );

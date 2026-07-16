@@ -4,7 +4,7 @@ import config from "../config/application.js";
 import { reconcileReactionRoleMessages } from "../services/reactionRoleService.js";
 import { reconcileTicketPanels, reconcileVerificationPanels, reconcileReactionRolePanelHealth } from "../services/panelHealthService.js";
 import { reconcileLevelRoles } from "../services/leveling/levelRoleSyncService.js";
-import { initRiffyAfterReady } from "../services/music/riffyEinrichtung.js";
+import { initRiffyAfterReady } from "../services/music/riffySetup.js";
 
 export default {
   name: Events.ClientReady,

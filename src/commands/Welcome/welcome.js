@@ -65,7 +65,7 @@ export default {
 
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.channelId) {
-                logger.info(`[Welcome] Einrichtung blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.channelId} für Guild ${guild.id} existiert`);
+                logger.info(`[Welcome] Setup blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.channelId} für Guild ${guild.id} existiert`);
                 return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Welcome ist bereits für <#${existingConfig.channelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
             }
             
@@ -92,7 +92,7 @@ export default {
                     welcomePing: ping
                 });
 
-                logger.info(`[Welcome] Einrichtung von ${interaction.user.tag} für Guild ${guild.name} (${guild.id}) konfiguriert`);
+                logger.info(`[Welcome] Setup von ${interaction.user.tag} für Guild ${guild.name} (${guild.id}) konfiguriert`);
 
                 const previewMessage = formatWelcomeMessage(message, {
                     user: interaction.user,

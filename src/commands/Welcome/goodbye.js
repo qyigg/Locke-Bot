@@ -60,7 +60,7 @@ export default {
 
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.goodbyeChannelId) {
-                logger.info(`[Goodbye] Einrichtung blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.goodbyeChannelId} für Guild ${guild.id} existiert`);
+                logger.info(`[Goodbye] Setup blockiert, weil bereits eine Konfiguration in Kanal ${existingConfig.goodbyeChannelId} für Guild ${guild.id} existiert`);
                 return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Goodbye ist bereits für <#${existingConfig.goodbyeChannelId}> konfiguriert. Verwende **/greet dashboard**, um Kanal, Nachricht, Ping oder Bild anzupassen.` });
             }
 
@@ -93,7 +93,7 @@ export default {
                     }
                 });
 
-                logger.info(`[Goodbye] Einrichtung von ${interaction.user.tag} für Guild ${guild.name} (${guild.id}) konfiguriert`);
+                logger.info(`[Goodbye] Setup von ${interaction.user.tag} für Guild ${guild.name} (${guild.id}) konfiguriert`);
 
                 const previewMessage = formatWelcomeMessage(message, {
                     user: interaction.user,

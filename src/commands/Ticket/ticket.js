@@ -121,7 +121,7 @@ export default {
         if (subcommand === "setup") {
             const existingConfig = await getGuildConfig(client, interaction.guildId);
             if (existingConfig?.ticketPanelChannelId) {
-                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Dieser Server hat bereits ein eingerichtetes Ticketsystem (Panel in <#${existingConfig.ticketPanelChannelId}>).\n\nPro Server wird nur ein Ticketsystem unterstützt. Nutze \`/ticket dashboard\`, um die bestehende Einrichtung zu bearbeiten oder zu aktualisieren, oder wähle **System löschen** im Dashboard, um es zu entfernen und neu zu beginnen.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Dieser Server hat bereits ein eingerichtetes Ticketsystem (Panel in <#${existingConfig.ticketPanelChannelId}>).\n\nPro Server wird nur ein Ticketsystem unterstützt. Nutze \`/ticket dashboard\`, um die bestehende Setup zu bearbeiten oder zu aktualisieren, oder wähle **System löschen** im Dashboard, um es zu entfernen und neu zu beginnen.` });
             }
 
             const panelChannel =
@@ -178,7 +178,7 @@ description: panelMessage,
                         dmAnSchließen: dmAnSchließen,
                     });
                 } else {
-                    logger.error('Ticket-Einrichtung: Datenbank nicht verfügbar, Panel wurde gesendet, aber die Konfiguration wurde NICHT gespeichert', {
+                    logger.error('Ticket-Setup: Database nicht verfügbar, Panel wurde gesendet, aber die Konfiguration wurde NICHT gespeichert', {
                         guildId: interaction.guildId,
                     });
                 }
@@ -210,7 +210,7 @@ description: panelMessage,
                     ],
                 });
 
-                logger.info('Einrichtung des Ticket-Panels abgeschlossen', {
+                logger.info('Setup des Ticket-Panels abgeschlossen', {
                     userId: interaction.user.id,
                     guildId: interaction.guildId,
                     panelChannelId: panelChannel.id,
@@ -272,7 +272,7 @@ description: panelMessage,
                     );
 
             } catch (error) {
-                logger.error('Fehler beim Ticket-Einrichtung', {
+                logger.error('Fehler beim Ticket-Setup', {
                     error: error.message,
                     stack: error.stack,
                     userId: interaction.user.id,
@@ -280,7 +280,7 @@ description: panelMessage,
                     commandName: 'ticket_setup'
                 });
                 if (interaction.deferred || interaction.replied) {
-                    await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Das Ticket-Panel konnte nicht gesendet oder die Konfiguration nicht gespeichert werden. Überprüfe die Berechtigungen des Bots (insbesondere das Senden von Nachrichten im Zielkanal) und die Datenbankverbindung.' }).catch(err => {
+                    await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Das Ticket-Panel konnte nicht gesendet oder die Konfiguration nicht gespeichert werden. Überprüfe die Berechtigungen des Bots (insbesondere das Senden von Nachrichten im Zielkanal) und die Databaseverbindung.' }).catch(err => {
                         logger.error('Fehlerantwort konnte nicht gesendet werden', {
                             error: err.message,
                             guildId: interaction.guildId

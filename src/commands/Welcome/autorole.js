@@ -154,7 +154,7 @@ export default {
 
                 if (singleRoleIds.length === 0) {
                     return InteractionHelper.safeEditReply(interaction, {
-                        embeds: [createAutoroleInfoEmbed(`ℹ️ Es ist keine Rolle für die automatische Zuweisung festgelegt.${conflictSummary ?`\n\n⚠️ Einrichtungsblocker:\n${conflictSummary}`: ''}`)],
+                        embeds: [createAutoroleInfoEmbed(`ℹ️ Es ist keine Rolle für die automatische Zuweisung festgelegt.${conflictSummary ?`\n\n⚠️ Setupsblocker:\n${conflictSummary}`: ''}`)],
                         flags: MessageFlags.Ephemeral
                     });
                 }
@@ -182,7 +182,7 @@ export default {
 
                 if (validRoles.length === 0) {
                     return InteractionHelper.safeEditReply(interaction, {
-                        embeds: [createAutoroleInfoEmbed(`ℹ️ Keine gültige Auto-Rolle gefunden. Ungültige Rollen wurden entfernt.${conflictSummary ?`\n\n⚠️ Einrichtungsblocker:\n${conflictSummary}`: ''}`)],
+                        embeds: [createAutoroleInfoEmbed(`ℹ️ Keine gültige Auto-Rolle gefunden. Ungültige Rollen wurden entfernt.${conflictSummary ?`\n\n⚠️ Setupsblocker:\n${conflictSummary}`: ''}`)],
                         flags: MessageFlags.Ephemeral
                     });
                 }
@@ -190,7 +190,7 @@ export default {
                 const embed = new EmbedBuilder()
                     .setColor(getColor('info'))
                     .setTitle('Automatisch zugewiesene Rolle')
-                    .setDescription(`${validRoles[0]}${conflictSummary ?`\n\n⚠️ Einrichtungsblocker:\n${conflictSummary}`: ''}`)
+                    .setDescription(`${validRoles[0]}${conflictSummary ?`\n\n⚠️ Setupsblocker:\n${conflictSummary}`: ''}`)
                     .setFooter({ text: 'Es kann nur eine Auto-Rolle konfiguriert werden.' });
 
                 await InteractionHelper.safeEditReply(interaction, {

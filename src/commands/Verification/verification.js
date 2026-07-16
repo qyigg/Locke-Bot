@@ -78,7 +78,7 @@ export default {
 
             switch (subcommand) {
                 case "setup":
-                    return await handleEinrichtung(interaction, guild, client);
+                    return await handleSetup(interaction, guild, client);
                 case "remove":
                     return await handleRemove(interaction, guild, client);
                 case "dashboard":
@@ -97,7 +97,7 @@ export default {
     }
 };
 
-async function handleEinrichtung(interaction, guild, client) {
+async function handleSetup(interaction, guild, client) {
     const verificationChannel = interaction.options.getChannel("verification_channel");
     const verifiedRole = interaction.options.getRole("verified_role");
     const message = interaction.options.getString("message") || botConfig.verification.defaultMessage;

@@ -995,7 +995,7 @@ async function handleLöschenSystem(btnInteraction, rootInteraction, guildConfig
             );
         }
     } catch (ticketLöschenFehler) {
-        logger.warn('Ticket-Datensätze konnten nicht aus der Datenbank gelöscht werden:', ticketLöschenFehler.message);
+        logger.warn('Ticket-Datensätze konnten nicht aus der Database gelöscht werden:', ticketLöschenFehler.message);
     }
 
     for (const key of keysToLöschen) {

@@ -122,7 +122,7 @@ export default {
         await ApplicationService.checkManagerPermission(interaction.client, guild.id, member);
 
         if (subcommand === "setup") {
-            await handleEinrichtung(interaction);
+            await handleSetup(interaction);
         } else if (subcommand === "review") {
             await handleReview(interaction);
         } else if (subcommand === "list") {
@@ -134,7 +134,7 @@ export default {
     }, { type: 'command', commandName: 'app-admin' })
 };
 
-async function handleEinrichtung(interaction) {
+async function handleSetup(interaction) {
     
     if (interaction.deferred || interaction.replied) {
         return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This interaction has already been processed. Please try the command again.' });

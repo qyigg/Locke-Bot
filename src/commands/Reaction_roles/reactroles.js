@@ -90,7 +90,7 @@ export default {
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === 'setup') {
-            await handleEinrichtung(interaction);
+            await handleSetup(interaction);
         } else if (subcommand === 'dashboard') {
             const selectedPanelId = interaction.options.getString('panel');
             await handleDashboard(interaction, selectedPanelId);
@@ -145,7 +145,7 @@ export default {
     }
 };
 
-async function handleEinrichtung(interaction) {
+async function handleSetup(interaction) {
     const deferErfolg = await InteractionHelper.safeDefer(interaction);
     if (!deferErfolg) return;
     

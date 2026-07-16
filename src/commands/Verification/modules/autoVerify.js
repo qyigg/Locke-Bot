@@ -61,7 +61,7 @@ export default {
 
             switch (subcommand) {
                 case "setup":
-                    return await handleEinrichtung(interaction, guild, client);
+                    return await handleSetup(interaction, guild, client);
                 case "dashboard":
                     return await autoVerifizierenDashboard.execute(interaction, config, client);
                 default:
@@ -78,7 +78,7 @@ export default {
     }
 };
 
-async function handleEinrichtung(interaction, guild, client) {
+async function handleSetup(interaction, guild, client) {
     const criteria = interaction.options.getString("criteria");
     const accountAgeDays = interaction.options.getInteger("account_age_days") || defaultAccountAgeDays;
     const targetRole = interaction.options.getRole("role");

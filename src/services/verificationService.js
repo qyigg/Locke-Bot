@@ -66,7 +66,7 @@ export async function verifyUser(client, guildId, userId, options = {}) {
             );
         }
 
-        await validateVerificationEinrichtung(guild, guildConfig.verification);
+        await validateVerificationSetup(guild, guildConfig.verification);
 
         const verifiedRole = guild.roles.cache.get(guildConfig.verification.roleId);
         const canAssignRole = await validateBotCanAssignRole(guild, verifiedRole.id);
@@ -197,7 +197,7 @@ export async function autoVerifizierenAnJoin(client, guild, member, verification
             roleId: autoVerifizierenRoleId
         };
 
-        await validateVerificationEinrichtung(guild, effectiveVerificationConfig);
+        await validateVerificationSetup(guild, effectiveVerificationConfig);
 
         const shouldVerifizieren = evaluateAutoVerifizierenKriterien(
             member,
@@ -397,7 +397,7 @@ export async function removeVerification(client, guildId, userId, options = {}) 
     }
 }
 
-export async function validateVerificationEinrichtung(guild, verificationConfig) {
+export async function validateVerificationSetup(guild, verificationConfig) {
     const botMember = guild.members.me;
     if (!botMember) {
         throw createFehler(
@@ -678,7 +678,7 @@ export default {
     verifyUser,
     autoVerifizierenAnJoin,
     removeVerification,
-    validateVerificationEinrichtung,
+    validateVerificationSetup,
     validateBotCanAssignRole,
     checkVerificationCooldown,
     trackVerificationAttempt,

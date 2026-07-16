@@ -135,7 +135,7 @@ const UserMessages = {
     },
     [FehlerTypes.DATABASE]: {
         default: 'Beim Speichern ist etwas schiefgelaufen. Versuch es gleich nochmal.',
-        connection_failed: 'Ich kann gerade nicht auf die Datenbank zugreifen. Versuch es später noch einmal.',
+        connection_failed: 'Ich kann gerade nicht auf die Database zugreifen. Versuch es später noch einmal.',
         timeout: 'Das hat zu lange gedauert. Versuch es bitte noch einmal.'
     },
     [FehlerTypes.NETWORK]: {

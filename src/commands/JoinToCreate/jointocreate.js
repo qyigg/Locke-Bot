@@ -89,7 +89,7 @@ export default {
             let responseEmbed;
 
             if (subcommand === "setup") {
-                await handleEinrichtungSubcommand(interaction, client);
+                await handleSetupSubcommand(interaction, client);
                 return;
             } else if (subcommand === "dashboard") {
                 await handleConfigSubcommand(interaction, client);
@@ -116,7 +116,7 @@ export default {
     }
 };
 
-async function handleEinrichtungSubcommand(interaction, client) {
+async function handleSetupSubcommand(interaction, client) {
     try {
         const category = interaction.options.getChannel('category');
         const nameTemplate = interaction.options.getString('channel_name') || "{username}'s Room";
@@ -200,7 +200,7 @@ async function handleEinrichtungSubcommand(interaction, client) {
         logger.info(`Erfolgfully created Join to Create system in guild ${guildId}`);
 
         const responseEmbed = successEmbed(
-            '✅ Einrichtung Complete',
+            '✅ Setup Complete',
             `Created Join to Create channel: ${triggerChannel}\n\n` +
             `**Einstellungen:**\n` +
             `• Template: \`${nameTemplate}\`\n` +
@@ -212,12 +212,12 @@ async function handleEinrichtungSubcommand(interaction, client) {
         return await InteractionHelper.safeEditReply(interaction, { embeds: [responseEmbed] });
 
     } catch (error) {
-        logger.error('Fehler in handleEinrichtungSubcommand:', error);
+        logger.error('Fehler in handleSetupSubcommand:', error);
         if (error instanceof TitanBotFehler) {
             throw error;
         }
         throw new TitanBotFehler(
-            `Einrichtung failed: ${error.message}`,
+            `Setup failed: ${error.message}`,
             FehlerTypes.DISCORD_API,
             'Failed to set up Join to Create system. Please check bot permissions.'
         );
