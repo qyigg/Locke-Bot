@@ -22,6 +22,24 @@ function truncateText(value, maxLength) {
     return text.length > maxLength ? text.substring(0, maxLength) : text;
 }
 
+function normalizePanelRoleIds(panelData) {
+    const rawRoles = panelData?.roles;
+    const extractedRoleIds = Array.isArray(rawRoles)
+        ? rawRoles
+        : (rawRoles && typeof rawRoles === 'object' ? Object.values(rawRoles) : []);
+
+    const normalizedRoleIds = [...new Set(
+        extractedRoleIds.filter(roleId => typeof roleId === 'string' && /^\d{17,19}$/.test(roleId)),
+    )];
+
+    const needsMigration = !Array.isArray(rawRoles)
+        || rawRoles.length !== normalizedRoleIds.length
+        || rawRoles.some((roleId, index) => roleId !== normalizedRoleIds[index]);
+
+    panelData.roles = normalizedRoleIds;
+    return { normalizedRoleIds, needsMigration };
+}
+
 export default {
     data: new SlashCommandBuilder()
         .setName('reactroles')
@@ -590,6 +608,11 @@ async function handleDashboard(interaction, selectedPanelId) {
                 'Es gibt mehrere Panels. Wähle eines über die Option **panel**.',
             );
         }
+    }
+
+    const { needsMigration } = normalizePanelRoleIds(panelData);
+    if (needsMigration) {
+        await interaction.client.db.set(getReactionRoleKey(guildId, panelData.messageId), panelData);
     }
 
     let panelStatus = await getReactionRolePanelStatus(client, guild, panelData);
