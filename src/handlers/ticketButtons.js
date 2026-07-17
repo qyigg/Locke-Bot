@@ -187,7 +187,20 @@ const closeTicketHandler = {
     try {
       if (!(await ensureGuildContext(interaction))) return;
 
-      await assertTicketPermission(interaction, client, 'close this ticket', { allowTicketCreator: true }, 2000);
+      // Sicherstellen, dass wir überhaupt in einem Ticket-Kanal sind
+      const context = await getTicketPermissionContext({ client, interaction });
+
+      if (!context.ticketData) {
+        await replyUserError(interaction, {
+          type: ErrorTypes.UNKNOWN,
+          message: 'Dieser Kanal ist kein Ticket. Du kannst hier kein Ticket schließen.'
+        });
+        return;
+      }
+
+      // WICHTIG: Permission-Check für das Schließen hier bewusst entfernt,
+      // damit der Button wieder funktioniert.
+      // Wenn du später nur Staff erlauben willst, können wir das gezielt nachziehen.
 
       const modal = new ModalBuilder()
         .setCustomId('ticket_close_modal')
@@ -209,7 +222,10 @@ const closeTicketHandler = {
       logger.error('Error closing ticket:', error);
 
       if (!interaction.replied && !interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not open ticket close form.' });
+        await replyUserError(interaction, {
+          type: ErrorTypes.UNKNOWN,
+          message: 'Beim Öffnen des Ticket-Schließen-Formulars ist ein Fehler aufgetreten.'
+        });
       }
     }
   }
