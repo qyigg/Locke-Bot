@@ -7,11 +7,11 @@ function createControlButtons(countdownId, isPaused = false) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`countdown_pause:${countdownId}`)
-            .setLabel(isPaused ? "▶️ Resume" : "⏸️ Pause")
+            .setLabel(isPaused ? "▶️ Fortsetzen" : "⏸️ Pausieren")
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(`countdown_cancel:${countdownId}`)
-            .setLabel("❌ Cancel")
+            .setLabel("❌ Abbrechen")
             .setStyle(ButtonStyle.Danger),
     );
 }
@@ -73,8 +73,8 @@ function startCountdown(countdownId, countdownData, activeCountdowns) {
                 clearInterval(countdownData.interval);
 
                 const finishedEmbed = successEmbed(
-                    `⏱️ ${countdownData.title} (Finished!)`,
-                    "⏰ Time's up!",
+                    `⏱️ ${countdownData.title} (Beendet!)`,
+                    "⏰ Zeit abgelaufen!",
                 );
 
                 await countdownData.message.edit({
@@ -108,14 +108,14 @@ async function countdownButtonHandler(interaction, client, args) {
         const countdownData = activeCountdowns.get(countdownId);
         if (!countdownData) {
             return await interaction.reply({
-                content: "This countdown has expired or was cancelled.",
+                content: "Dieser Countdown ist abgelaufen oder wurde abgebrochen.",
                 flags: ["Ephemeral"],
             });
         }
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
             return await interaction.reply({
-                content: 'You need the "Manage Messages" permission to control countdowns.',
+                content: 'Du brauchst die Berechtigung "Nachrichten verwalten" um Countdowns zu steuern.',
                 flags: ["Ephemeral"],
             });
         }
