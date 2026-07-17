@@ -1,4 +1,4 @@
-import {
+﻿import {
     canonicalizeKey,
     getEconomyPrefix,
     getUserLevelPrefix,
@@ -13,7 +13,7 @@ import {
     getLevelingKey,
 } from './keys.js';
 
-const TEMP_BACKED_TYPES = new Set([
+const TEMP_ZurückED_TYPES = new Set([
     'warnings',
     'usernotes',
     'usernotes_list',
@@ -22,8 +22,8 @@ const TEMP_BACKED_TYPES = new Set([
     'application_roles',
     'application_settings',
     'application_users',
-    'jointocreate_config',
-    'jointocreate_channels',
+    'jointoErstellen_config',
+    'jointoErstellen_channels',
     'birthday_left',
     'birthday_tracking',
     'invite_data',
@@ -32,8 +32,8 @@ const TEMP_BACKED_TYPES = new Set([
     'ticket_counter',
 ]);
 
-export function isTempBackedType(type) {
-    return type === 'temp' || TEMP_BACKED_TYPES.has(type);
+export function isTempZurückedType(type) {
+    return type === 'temp' || TEMP_ZurückED_TYPES.has(type);
 }
 
 /**
@@ -126,11 +126,11 @@ export function parseKey(key) {
                 return { type: 'application', guildId, applicationId: parts[3], fullKey };
             }
         }
-        if (parts[2] === 'jointocreate') {
+        if (parts[2] === 'jointoErstellen') {
             if (parts[3] === 'channels') {
-                return { type: 'jointocreate_channels', guildId, fullKey };
+                return { type: 'jointoErstellen_channels', guildId, fullKey };
             }
-            return { type: 'jointocreate_config', guildId, fullKey };
+            return { type: 'jointoErstellen_config', guildId, fullKey };
         }
         if (parts[2] === 'invite_uses' && parts[3]) {
             return { type: 'invite_uses', guildId, inviteCode: parts[3], fullKey };
@@ -201,8 +201,8 @@ export function getStructuredListPlan(prefix, tables) {
             getServerCountersKey(guildId),
             `guild:${guildId}:applications:roles`,
             `guild:${guildId}:applications:settings`,
-            `guild:${guildId}:jointocreate`,
-            `guild:${guildId}:jointocreate:channels`,
+            `guild:${guildId}:jointoErstellen`,
+            `guild:${guildId}:jointoErstellen:channels`,
             `guild:${guildId}:invites`,
             `guild:${guildId}:usernotes:list`,
             `guild:${guildId}:birthdays:left`,
@@ -292,3 +292,4 @@ export function getStructuredListPlan(prefix, tables) {
 
     return plan;
 }
+

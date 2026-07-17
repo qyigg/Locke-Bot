@@ -17,7 +17,7 @@ export default {
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
 
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeEditReply(interaction, {
+      await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
@@ -49,7 +49,7 @@ export default {
         try {
           const member = await interaction.guild.members.fetch(user.userId).catch(() => null);
           const userMention = member?.user.toString() || `<@${user.userId}>`;
-          const xpForNextLevel = getXpForLevel(user.level + 1);
+          const xpForNächsteLevel = getXpForLevel(user.level + 1);
 
           let rankPrefix = `${index + 1}.`;
           if (index === 0) rankPrefix = '🥇';
@@ -57,7 +57,7 @@ export default {
           else if (index === 2) rankPrefix = '🥉';
           else rankPrefix = `**${index + 1}.**`;
 
-          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNextLevel} XP)`;
+          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNächsteLevel} XP)`;
         } catch {
           return `**${index + 1}.** Error loading user ${user.userId}`;
         }
@@ -69,7 +69,8 @@ export default {
       value: leaderboardText.join('\n')
     });
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Leaderboard displayed for guild ${interaction.guildId}`);
   }
 };
+

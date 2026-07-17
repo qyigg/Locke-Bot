@@ -1,10 +1,10 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import {
     skipTrack,
-    stopPlayback,
-    pausePlayback,
-    resumePlayback,
+    stopPlayZurück,
+    PausierenPlayZurück,
+    FortsetzenPlayZurück,
     shuffleQueue,
     setLoopMode,
     setVolume,
@@ -22,18 +22,18 @@ export default {
     category: 'Music',
     data: new SlashCommandBuilder()
         .setName('music')
-        .setDescription('Manage playback, queue, and voice session settings')
+        .setDescription('Manage playZurück, queue, and voice session settings')
         .addSubcommand((sub) =>
-            sub.setName('pause').setDescription('Pause playback'),
+            sub.setName('Pausieren').setDescription('Pausieren playZurück'),
         )
         .addSubcommand((sub) =>
-            sub.setName('resume').setDescription('Resume playback'),
+            sub.setName('Fortsetzen').setDescription('Fortsetzen playZurück'),
         )
         .addSubcommand((sub) =>
             sub.setName('skip').setDescription('Skip the current track'),
         )
         .addSubcommand((sub) =>
-            sub.setName('stop').setDescription('Stop playback and clear the queue'),
+            sub.setName('stop').setDescription('Stop playZurück and clear the queue'),
         )
         .addSubcommand((sub) =>
             sub.setName('shuffle').setDescription('Shuffle the queue'),
@@ -57,7 +57,7 @@ export default {
         .addSubcommand((sub) =>
             sub
                 .setName('volume')
-                .setDescription('Set playback volume')
+                .setDescription('Set playZurück volume')
                 .addIntegerOption((opt) =>
                     opt.setName('level').setDescription('Volume (0-100)').setRequired(true).setMinValue(0).setMaxValue(100),
                 ),
@@ -109,13 +109,13 @@ export default {
         const subcommand = interaction.options.getSubcommand();
 
         switch (subcommand) {
-            case 'pause': {
-                const embed = await pausePlayback(client, interaction);
+            case 'Pausieren': {
+                const embed = await PausierenPlayZurück(client, interaction);
                 await replyMusicSuccess(interaction, embed);
                 break;
             }
-            case 'resume': {
-                const embed = await resumePlayback(client, interaction);
+            case 'Fortsetzen': {
+                const embed = await FortsetzenPlayZurück(client, interaction);
                 await replyMusicSuccess(interaction, embed);
                 break;
             }
@@ -125,7 +125,7 @@ export default {
                 break;
             }
             case 'stop': {
-                const embed = await stopPlayback(client, interaction);
+                const embed = await stopPlayZurück(client, interaction);
                 await replyMusicSuccess(interaction, embed);
                 break;
             }
@@ -180,9 +180,10 @@ export default {
                 break;
             }
             default:
-                await InteractionHelper.safeEditReply(interaction, {
+                await InteractionHelper.safeBearbeitenReply(interaction, {
                     content: 'Unknown music subcommand.',
                 });
         }
     },
 };
+

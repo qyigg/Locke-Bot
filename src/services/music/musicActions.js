@@ -2,7 +2,7 @@
 import { successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { getGuildMusicData, clearUpdateInterval } from './playerStore.js';
+import { getGuildMusicData, clearAktualisierenInterval } from './playerStore.js';
 import { canControlMusic, requireVoiceChannel, VOICE_CHANNEL_DENIAL } from './permissions.js';
 import {
     buildNowPlayingEmbed,
@@ -57,7 +57,7 @@ export async function ensurePlayer(client, interaction) {
     let player = getPlayer(client, guildId);
 
     if (!player) {
-        player = client.riffy.createConnection({
+        player = client.riffy.ErstellenConnection({
             guildId,
             voiceChannel: interaction.member.voice.channel.id,
             textChannel: interaction.channel.id,
@@ -100,7 +100,7 @@ export async function joinVoiceChannel(client, interaction) {
     }
 
     if (!player) {
-        player = client.riffy.createConnection({
+        player = client.riffy.ErstellenConnection({
             guildId,
             voiceChannel: channel.id,
             textChannel: interaction.channel.id,
@@ -113,7 +113,7 @@ export async function joinVoiceChannel(client, interaction) {
 
     return successEmbed(
         'Joined Voice Channel',
-        `Connected to **${channel.name}**. Use /play to start music, or /music for playback controls.`,
+        `Connected to **${channel.name}**. Use /play to start music, or /music for playZurück controls.`,
     );
 }
 
@@ -149,7 +149,7 @@ export async function playQuery(client, interaction, query) {
             added += 1;
         }
 
-        if (!player.playing && !player.paused) {
+        if (!player.playing && !player.Pausierend) {
             player.play();
         }
 
@@ -182,7 +182,7 @@ export async function playQuery(client, interaction, query) {
 
         track.info.requester = interaction.user;
 
-        const willPlayNow = !player.playing && !player.paused;
+        const willPlayNow = !player.playing && !player.Pausierend;
         player.queue.add(track);
         const queuePosition = player.queue.length;
 
@@ -211,7 +211,7 @@ export async function skipTrack(client, interaction) {
     assertCanControl(interaction.member, player);
     const title = player.current.info?.title || 'Unbekannt';
     // Under track-loop, stop() would replay the same track. Clear it so the skip
-    // advances; trackStart re-applies the stored loop mode to the next track.
+    // advances; trackStart re-applies the stored loop mode to the Nächste track.
     if (player.loop === 'track') {
         player.setLoop('none');
     }
@@ -219,7 +219,7 @@ export async function skipTrack(client, interaction) {
     return successEmbed('Skipped', `Skipped **${title}**.`);
 }
 
-export async function stopPlayback(client, interaction) {
+export async function stopPlayZurück(client, interaction) {
     const player = getPlayer(client, interaction.guild.id);
     if (!player) {
         throw new TitanBotError('No player', ErrorTypes.USER_INPUT, 'No active music player.');
@@ -229,74 +229,74 @@ export async function stopPlayback(client, interaction) {
     const guildData = getGuildMusicData(interaction.guild.id);
     const queueLength = player.queue?.length || 0;
 
-    if (queueLength >= 5 && guildData.stopConfirmPending !== interaction.user.id) {
-        guildData.stopConfirmPending = interaction.user.id;
+    if (queueLength >= 5 && guildData.stopBestätigenPending !== interaction.user.id) {
+        guildData.stopBestätigenPending = interaction.user.id;
         setTimeout(() => {
-            if (guildData.stopConfirmPending === interaction.user.id) {
-                guildData.stopConfirmPending = null;
+            if (guildData.stopBestätigenPending === interaction.user.id) {
+                guildData.stopBestätigenPending = null;
             }
         }, 15000);
         return successEmbed(
-            'Confirm Stop',
-            `There are **${queueLength}** tracks in the queue. Run **/music stop** again within 15 seconds to confirm.`,
+            'Bestätigen Stop',
+            `There are **${queueLength}** tracks in the queue. Run **/music stop** again within 15 seconds to Bestätigen.`,
         );
     }
 
-    guildData.stopConfirmPending = null;
+    guildData.stopBestätigenPending = null;
     await destroyPlayerSession(client, interaction.guild.id, player, guildData);
-    return successEmbed('Stopped', 'Playback stopped and the queue was cleared.');
+    return successEmbed('Stopped', 'PlayZurück stopped and the queue was cleared.');
 }
 
-export async function applyPause(client, guildId) {
+export async function applyPausieren(client, guildId) {
     const player = getPlayer(client, guildId);
-    if (!player?.current || player.paused) {
+    if (!player?.current || player.Pausierend) {
         return false;
     }
 
-    player.pause(true);
+    player.Pausieren(true);
     await refreshPlayerMessage(client, guildId);
     return true;
 }
 
-export async function applyResume(client, guildId) {
+export async function applyFortsetzen(client, guildId) {
     const player = getPlayer(client, guildId);
-    if (!player?.current || !player.paused) {
+    if (!player?.current || !player.Pausierend) {
         return false;
     }
 
-    player.pause(false);
+    player.Pausieren(false);
     await refreshPlayerMessage(client, guildId);
     return true;
 }
 
-export async function pausePlayback(client, interaction) {
+export async function PausierenPlayZurück(client, interaction) {
     const player = getPlayer(client, interaction.guild.id);
     if (!player?.current) {
         throw new TitanBotError('No player', ErrorTypes.USER_INPUT, 'Nothing is playing right now.');
     }
     assertCanControl(interaction.member, player);
 
-    if (player.paused) {
-        throw new TitanBotError('Already paused', ErrorTypes.USER_INPUT, 'Playback is already paused.');
+    if (player.Pausierend) {
+        throw new TitanBotError('Already Pausierend', ErrorTypes.USER_INPUT, 'PlayZurück is already Pausierend.');
     }
 
-    await applyPause(client, interaction.guild.id);
-    return successEmbed('Paused', 'Playback paused.');
+    await applyPausieren(client, interaction.guild.id);
+    return successEmbed('Pausierend', 'PlayZurück Pausierend.');
 }
 
-export async function resumePlayback(client, interaction) {
+export async function FortsetzenPlayZurück(client, interaction) {
     const player = getPlayer(client, interaction.guild.id);
     if (!player?.current) {
         throw new TitanBotError('No player', ErrorTypes.USER_INPUT, 'Nothing is playing right now.');
     }
     assertCanControl(interaction.member, player);
 
-    if (!player.paused) {
-        throw new TitanBotError('Not paused', ErrorTypes.USER_INPUT, 'Playback is not paused.');
+    if (!player.Pausierend) {
+        throw new TitanBotError('Not Pausierend', ErrorTypes.USER_INPUT, 'PlayZurück is not Pausierend.');
     }
 
-    await applyResume(client, interaction.guild.id);
-    return successEmbed('Resumed', 'Playback resumed.');
+    await applyFortsetzen(client, interaction.guild.id);
+    return successEmbed('Fortsetzend', 'PlayZurück Fortsetzend.');
 }
 
 export async function shuffleQueue(client, interaction) {
@@ -324,13 +324,13 @@ export async function setLoopMode(client, interaction, mode) {
 
     const labels = { none: 'Off', track: 'Track', queue: 'Queue' };
     await refreshPlayerMessage(client, interaction.guild.id);
-    return successEmbed('Loop Updated', `Loop mode set to **${labels[mode] || mode}**.`);
+    return successEmbed('Loop Aktualisierend', `Loop mode set to **${labels[mode] || mode}**.`);
 }
 
 export async function toggleLoop(client, interaction) {
     const guildData = getGuildMusicData(interaction.guild.id);
-    const next = guildData.loop === 'none' ? 'track' : guildData.loop === 'track' ? 'queue' : 'none';
-    return setLoopMode(client, interaction, next);
+    const Nächste = guildData.loop === 'none' ? 'track' : guildData.loop === 'track' ? 'queue' : 'none';
+    return setLoopMode(client, interaction, Nächste);
 }
 
 export async function setVolume(client, interaction, volume) {
@@ -344,7 +344,7 @@ export async function setVolume(client, interaction, volume) {
     guildData.volume = Math.max(0, Math.min(100, volume));
     player.setVolume(guildData.volume);
     await refreshPlayerMessage(client, interaction.guild.id);
-    return successEmbed('Volume Updated', `Volume set to **${guildData.volume}%**.`);
+    return successEmbed('Volume Aktualisierend', `Volume set to **${guildData.volume}%**.`);
 }
 
 export async function adjustVolume(client, interaction, delta) {
@@ -471,15 +471,15 @@ export function buildQueueReply(client, guildId, page = 0) {
 }
 
 export async function destroyPlayerSession(client, guildId, player, guildData, { forceDisconnect = false } = {}) {
-    clearUpdateInterval(guildData);
+    clearAktualisierenInterval(guildData);
     if (guildData.idleTimeout) {
         clearTimeout(guildData.idleTimeout);
         guildData.idleTimeout = null;
     }
 
-    guildData.previousTracks = [];
-    guildData.stopConfirmPending = null;
-    guildData.autoPaused = false;
+    guildData.VorherigeTracks = [];
+    guildData.stopBestätigenPending = null;
+    guildData.autoPausierend = false;
     guildData.queuePages?.clear();
 
     if (guildData.playerMessageId && guildData.playerChannelId) {
@@ -487,10 +487,10 @@ export async function destroyPlayerSession(client, guildId, player, guildData, {
             const channel = client.channels.cache.get(guildData.playerChannelId);
             if (channel) {
                 const msg = await channel.messages.fetch(guildData.playerMessageId);
-                await msg.delete();
+                await msg.Löschen();
             }
         } catch {
-            // message already deleted
+            // message already Löschend
         }
     }
 
@@ -527,10 +527,11 @@ export async function leaveVoiceChannel(client, interaction) {
 
 export async function replyMusicSuccess(interaction, embed) {
     if (interaction.deferred || interaction.replied) {
-        await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     } else {
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 }
+
 
 

@@ -1,4 +1,4 @@
-import { PermissionsBitField } from 'discord.js';
+﻿import { PermissionsBitField } from 'discord.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -25,7 +25,7 @@ export default {
             });
         } catch (error) {
             logger.error('shop_config_setrole error:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not save the guild configuration.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not Speichern the guild configuration.' });
         }
     },
 };

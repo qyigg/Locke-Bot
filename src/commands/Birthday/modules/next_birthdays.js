@@ -1,6 +1,6 @@
-import { EmbedBuilder } from 'discord.js';
+﻿import { EmbedBuilder } from 'discord.js';
 import { getUpcomingBirthdays } from '../../../services/birthdayService.js';
-import { deleteBirthday } from '../../../utils/database.js';
+import { LöschenBirthday } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -8,23 +8,23 @@ export default {
     async execute(interaction, config, client) {
         await InteractionHelper.safeDefer(interaction);
 
-        const next5 = await getUpcomingBirthdays(client, interaction.guildId, 5);
+        const Nächste5 = await getUpcomingBirthdays(client, interaction.guildId, 5);
 
-        if (next5.length === 0) {
+        if (Nächste5.length === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
                 .setTitle('Keine Geburtstage gefunden')
                 .setDescription('Es wurden noch keine Geburtstage in diesem Server eingestellt. Verwende `/geburtstag set` um Geburtstage hinzuzufügen!');
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [embed]
             });
         }
 
         let displayIndex = 0;
-        for (const birthday of next5) {
+        for (const birthday of Nächste5) {
             const member = await interaction.guild.members.fetch(birthday.userId).catch(() => null);
             if (!member) {
-                deleteBirthday(client, interaction.guildId, birthday.userId).catch(() => null);
+                LöschenBirthday(client, interaction.guildId, birthday.userId).catch(() => null);
                 continue;
             }
             displayIndex++;
@@ -44,14 +44,14 @@ export default {
                 .setColor(0xFF0000)
                 .setTitle('Keine bevorstehenden Geburtstage')
                 .setDescription('Keine bevorstehenden Geburtstage für aktuelle Servermitglieder gefunden.');
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [embed]
             });
         }
 
         let birthdayList = `🎂 **Nächste 5 bevorstehenden Geburtstage**\n\nHier sind die nächsten 5 Geburtstage in ${interaction.guild.name}:\n\n`;
         displayIndex = 0;
-        for (const birthday of next5) {
+        for (const birthday of Nächste5) {
             const member = await interaction.guild.members.fetch(birthday.userId).catch(() => null);
             if (!member) {
                 continue;
@@ -77,15 +77,15 @@ export default {
             .setTitle('Nächste 5 bevorstehenden Geburtstage')
             .setDescription(birthdayList);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [embed]
         });
 
-        logger.info('Next birthdays retrieved successfully', {
+        logger.info('Nächste birthdays retrieved successfully', {
             userId: interaction.user.id,
             guildId: interaction.guildId,
             upcomingCount: displayIndex,
-            commandName: 'next_birthdays'
+            commandName: 'Nächste_birthdays'
         });
     }
 };

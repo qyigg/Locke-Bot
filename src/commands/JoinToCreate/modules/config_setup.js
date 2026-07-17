@@ -15,10 +15,10 @@ import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
 import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
 import { 
-    getJoinToCreateConfig, 
-    updateJoinToCreateConfig,
-    removeJoinToCreateTrigger,
-    addJoinToCreateTrigger
+    getJoinToErstellenConfig, 
+    AktualisierenJoinToErstellenConfig,
+    removeJoinToErstellenTrigger,
+    addJoinToErstellenTrigger
 } from '../../../utils/database.js';
 
 export default {
@@ -27,18 +27,18 @@ export default {
             const triggerChannel = interaction.options.getChannel('trigger_channel');
         const guildId = interaction.guild.id;
 
-        const currentConfig = await getJoinToCreateConfig(client, guildId);
+        const currentConfig = await getJoinToErstellenConfig(client, guildId);
 
         if (!currentConfig.triggerChannels.includes(triggerChannel.id)) {
             throw new TitanBotError(
-                `Channel ${triggerChannel.id} is not a Join to Create trigger`,
+                `Channel ${triggerChannel.id} is not a Join to Erstellen trigger`,
                 ErrorTypes.VALIDATION,
-                `${triggerChannel} is not configured as a Join to Create trigger channel.`
+                `${triggerChannel} is not configured as a Join to Erstellen trigger channel.`
             );
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('Join to Create Configuration')
+            .setTitle('Join to Erstellen Configuration')
             .setDescription(`Configure settings for ${triggerChannel}`)
             .setColor(getColor('info'))
             .addFields(
@@ -62,7 +62,7 @@ export default {
             .setTimestamp();
 
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId(`jointocreate_config_${triggerChannel.id}`)
+            .setCustomId(`jointoErstellen_config_${triggerChannel.id}`)
             .setPlaceholder('Select a configuration option')
             .addOptions(
                 new StringSelectMenuOptionBuilder()
@@ -79,7 +79,7 @@ export default {
                     .setValue('bitrate'),
                 new StringSelectMenuOptionBuilder()
                     .setLabel('Remove This Trigger Channel')
-                    .setDescription('Remove this channel from the Join to Create system')
+                    .setDescription('Remove this channel from the Join to Erstellen system')
                     .setValue('remove_trigger'),
                 new StringSelectMenuOptionBuilder()
                     .setLabel('View Current Settings')
@@ -89,21 +89,21 @@ export default {
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [embed],
             components: [row],
         }).catch(error => {
-            logger.error('Failed to edit reply in config_setup:', error);
+            logger.error('Failed to Bearbeiten reply in config_setup:', error);
         });
 
-        const collector = interaction.channel.createMessageComponentCollector({
+        const collector = interaction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.StringSelect,
-            filter: (i) => i.user.id === interaction.user.id && i.customId === `jointocreate_config_${triggerChannel.id}`,
+            filter: (i) => i.user.id === interaction.user.id && i.customId === `jointoErstellen_config_${triggerChannel.id}`,
 time: 60000
         });
 
         collector.on('collect', async (selectInteraction) => {
-            await selectInteraction.deferUpdate();
+            await selectInteraction.deferAktualisieren();
 
             const selectedOption = selectInteraction.values[0];
 
@@ -149,7 +149,7 @@ time: 60000
                     selectMenu.setDisabled(true)
                 );
                 
-                await InteractionHelper.safeEditReply(interaction, {
+                await InteractionHelper.safeBearbeitenReply(interaction, {
                     components: [disabledRow],
                 }).catch(() => {});
             }
@@ -162,7 +162,7 @@ time: 60000
             throw new TitanBotError(
                 `Config setup failed: ${error.message}`,
                 ErrorTypes.UNKNOWN,
-                'Failed to configure Join to Create system.'
+                'Failed to configure Join to Erstellen system.'
             );
         }
     }
@@ -189,7 +189,7 @@ async function handleNameTemplateChange(interaction, triggerChannel, currentConf
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
-    const collector = interaction.channel.createMessageCollector({
+    const collector = interaction.channel.ErstellenMessageCollector({
         filter: (m) => m.author.id === interaction.user.id,
 time: 600_000,
         max: 1
@@ -213,26 +213,26 @@ time: 600_000,
                 nameTemplate: newTemplate
             };
 
-            await updateJoinToCreateConfig(client, interaction.guild.id, {
+            await AktualisierenJoinToErstellenConfig(client, interaction.guild.id, {
                 channelOptions: channelOptions
             });
 
             await interaction.followUp({
-                embeds: [successEmbed('Template Updated', `Channel name template changed to \`${newTemplate}\``)],
+                embeds: [successEmbed('Template Aktualisierend', `Channel name template changed to \`${newTemplate}\``)],
                 flags: MessageFlags.Ephemeral,
             });
 
-            await message.delete().catch(() => {});
+            await message.Löschen().catch(() => {});
         } catch (error) {
             if (error instanceof TitanBotError) {
                 logger.debug(`Template validation error: ${error.message}`);
             } else {
-                logger.error('Template update error:', error);
+                logger.error('Template Aktualisieren error:', error);
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update Der Kanal name template.'
-                : 'Could not update Der Kanal name template.';
+                ? error.userMessage || 'Could not Aktualisieren Der Kanal name template.'
+                : 'Could not Aktualisieren Der Kanal name template.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -245,7 +245,7 @@ time: 600_000,
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No response received. Template update cancelled.'
+                message: 'No response received. Template Aktualisieren Abbrechenled.'
             }).catch(() => {});
         }
     });
@@ -267,7 +267,7 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
-    const collector = interaction.channel.createMessageCollector({
+    const collector = interaction.channel.ErstellenMessageCollector({
         filter: (m) => m.author.id === interaction.user.id && /^\d+$/.test(m.content.trim()),
         time: 600_000,
         max: 1
@@ -291,26 +291,26 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
                 userLimit: newLimit
             };
 
-            await updateJoinToCreateConfig(client, interaction.guild.id, {
+            await AktualisierenJoinToErstellenConfig(client, interaction.guild.id, {
                 channelOptions: channelOptions
             });
 
             await interaction.followUp({
-                embeds: [successEmbed('Limit Updated', `User limit changed to ${newLimit === 0 ? 'No limit' : newLimit + ' users'}`)],
+                embeds: [successEmbed('Limit Aktualisierend', `User limit changed to ${newLimit === 0 ? 'No limit' : newLimit + ' users'}`)],
                 flags: MessageFlags.Ephemeral,
             });
 
-            await message.delete().catch(() => {});
+            await message.Löschen().catch(() => {});
         } catch (error) {
             if (error instanceof TitanBotError) {
                 logger.debug(`User limit validation error: ${error.message}`);
             } else {
-                logger.error('User limit update error:', error);
+                logger.error('User limit Aktualisieren error:', error);
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update Der Benutzer limit.'
-                : 'Could not update Der Benutzer limit.';
+                ? error.userMessage || 'Could not Aktualisieren Der Benutzer limit.'
+                : 'Could not Aktualisieren Der Benutzer limit.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -323,7 +323,7 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No valid response received. Update cancelled.'
+                message: 'No valid response received. Aktualisieren Abbrechenled.'
             }).catch(() => {});
         }
     });
@@ -350,7 +350,7 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
-    const collector = interaction.channel.createMessageCollector({
+    const collector = interaction.channel.ErstellenMessageCollector({
         filter: (m) => m.author.id === interaction.user.id && /^\d+$/.test(m.content.trim()),
         time: 600_000,
         max: 1
@@ -374,26 +374,26 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
                 bitrate: newBitrate * 1000
             };
 
-            await updateJoinToCreateConfig(client, interaction.guild.id, {
+            await AktualisierenJoinToErstellenConfig(client, interaction.guild.id, {
                 channelOptions: channelOptions
             });
 
             await interaction.followUp({
-                embeds: [successEmbed('Bitrate Updated', `Bitrate changed to ${newBitrate} kbps`)],
+                embeds: [successEmbed('Bitrate Aktualisierend', `Bitrate changed to ${newBitrate} kbps`)],
                 flags: MessageFlags.Ephemeral,
             });
 
-            await message.delete().catch(() => {});
+            await message.Löschen().catch(() => {});
         } catch (error) {
             if (error instanceof TitanBotError) {
                 logger.debug(`Bitrate validation error: ${error.message}`);
             } else {
-                logger.error('Bitrate update error:', error);
+                logger.error('Bitrate Aktualisieren error:', error);
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update the bitrate.'
-                : 'Could not update the bitrate.';
+                ? error.userMessage || 'Could not Aktualisieren the bitrate.'
+                : 'Could not Aktualisieren the bitrate.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -406,7 +406,7 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No valid response received. Update cancelled.'
+                message: 'No valid response received. Aktualisieren Abbrechenled.'
             }).catch(() => {});
         }
     });
@@ -415,17 +415,17 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
 async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, client) {
     const embed = new EmbedBuilder()
         .setTitle('Remove Trigger Channel')
-        .setDescription(`Are you sure you want to remove ${triggerChannel} from the Join to Create system?`)
+        .setDescription(`Are you sure you want to remove ${triggerChannel} from the Join to Erstellen system?`)
         .setColor('#ff6600')
-        .setFooter({ text: 'This action cannot be undone' });
+        .setFooter({ text: 'This action cannot be unFertig' });
 
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`confirm_remove_${triggerChannel.id}`)
+            .setCustomId(`Bestätigen_remove_${triggerChannel.id}`)
             .setLabel('Remove Channel')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
-            .setCustomId(`cancel_remove_${triggerChannel.id}`)
+            .setCustomId(`Abbrechen_remove_${triggerChannel.id}`)
             .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Secondary)
     );
@@ -436,24 +436,24 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
         flags: MessageFlags.Ephemeral 
     });
 
-    const collector = interaction.channel.createMessageComponentCollector({
+    const collector = interaction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.Button,
         filter: (i) => i.user.id === interaction.user.id && 
-                     (i.customId === `confirm_remove_${triggerChannel.id}` || i.customId === `cancel_remove_${triggerChannel.id}`),
+                     (i.customId === `Bestätigen_remove_${triggerChannel.id}` || i.customId === `Abbrechen_remove_${triggerChannel.id}`),
         time: 600_000,
         max: 1
     });
 
     collector.on('collect', async (buttonInteraction) => {
-        await buttonInteraction.deferUpdate();
+        await buttonInteraction.deferAktualisieren();
 
-        if (buttonInteraction.customId === `confirm_remove_${triggerChannel.id}`) {
+        if (buttonInteraction.customId === `Bestätigen_remove_${triggerChannel.id}`) {
             try {
-                const success = await removeJoinToCreateTrigger(client, interaction.guild.id, triggerChannel.id);
+                const success = await removeJoinToErstellenTrigger(client, interaction.guild.id, triggerChannel.id);
                 
                 if (success) {
                     await buttonInteraction.followUp({
-                        embeds: [successEmbed('Channel Removed', `${triggerChannel} has been removed from the Join to Create system.`)],
+                        embeds: [successEmbed('Channel Removed', `${triggerChannel} has been removed from the Join to Erstellen system.`)],
                         flags: MessageFlags.Ephemeral,
                     });
                 } else {
@@ -480,7 +480,7 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
             }
         } else {
             await buttonInteraction.followUp({
-                embeds: [successEmbed('Cancelled', 'Channel removal has been cancelled.')],
+                embeds: [successEmbed('Abbrechenled', 'Channel removal has been Abbrechenled.')],
                 flags: MessageFlags.Ephemeral,
             });
         }
@@ -490,7 +490,7 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No response received. Removal cancelled.'
+                message: 'No response received. Removal Abbrechenled.'
             }).catch(() => {});
         }
     });
@@ -547,4 +547,5 @@ async function handleViewSettings(interaction, triggerChannel, currentConfig, cl
         flags: MessageFlags.Ephemeral 
     });
 }
+
 

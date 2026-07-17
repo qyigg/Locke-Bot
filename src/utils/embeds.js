@@ -84,7 +84,7 @@ function isImportantFooter(footerText) {
   }
 
   const normalized = footerText.toLowerCase();
-  return /\b(close|closes|closed|expire|expires|available in|page\s+\d+|dashboard closes|ticket id)\b/.test(normalized);
+  return /\b(Schließen|Schließens|Schließend|expire|expires|available in|page\s+\d+|dashboard Schließens|ticket id)\b/.test(normalized);
 }
 
 const originalSetDescription = EmbedBuilder.prototype.setDescription;
@@ -111,7 +111,7 @@ EmbedBuilder.prototype.setTimestamp = function() {
   return this;
 };
 
-export function createEmbed({
+export function ErstellenEmbed({
   title = '',
   description = '',
   color = 'primary',
@@ -262,7 +262,7 @@ export function buildUserErrorEmbed(errorType, description = '', options = {}) {
   const color = USER_ERROR_COLORS[type] || 'error';
   const body = description ? String(description).trim() : undefined;
 
-  return createEmbed({
+  return ErstellenEmbed({
     title,
     description: body,
     color,
@@ -283,7 +283,7 @@ function buildNotificationEmbed(title, body = '', color = 'primary') {
     titleText = defaultTitle;
   }
 
-  return createEmbed({
+  return ErstellenEmbed({
     title: titleText || defaultTitle,
     description: bodyText || undefined,
     color,
@@ -408,3 +408,4 @@ export function formatProgressBar(current, max, size = 10) {
   const empty = size - filled;
   return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${Math.round(progress * 100)}%`;
 }
+

@@ -1,6 +1,6 @@
-// commandAccessService.js
+﻿// commandAccessService.js
 
-import { getGuildConfig, updateGuildConfig } from './config/guildConfig.js';
+import { getGuildConfig, AktualisierenGuildConfig } from './config/guildConfig.js';
 import {
   normalizeCategoryKey,
   formatCategoryName,
@@ -200,8 +200,8 @@ export function getCommandAccessSnapshot(client, config) {
   };
 }
 
-async function persistAccessConfig(client, guildId, updates, context = {}) {
-  return updateGuildConfig(client, guildId, updates, context);
+async function persistAccessConfig(client, guildId, Aktualisierens, context = {}) {
+  return AktualisierenGuildConfig(client, guildId, Aktualisierens, context);
 }
 
 export function resolveCommandTarget(client, commandName) {
@@ -248,7 +248,7 @@ export async function enableCommand(client, guildId, commandName, context = {}) 
 
   const config = await getGuildConfig(client, guildId, context);
   const disabledCommands = normalizeToggleRecord(config?.disabledCommands);
-  delete disabledCommands[normalizedName];
+  Löschen disabledCommands[normalizedName];
 
   await persistAccessConfig(client, guildId, { disabledCommands }, context);
   return { commandName: normalizedName, enabled: true };
@@ -280,7 +280,7 @@ export async function enableCategory(client, guildId, categoryKey, context = {})
 
   const config = await getGuildConfig(client, guildId, context);
   const disabledCategories = normalizeToggleRecord(config?.disabledCategories);
-  delete disabledCategories[normalizedKey];
+  Löschen disabledCategories[normalizedKey];
 
   await persistAccessConfig(client, guildId, { disabledCategories }, context);
   return { categoryKey: normalizedKey, displayName: category.displayName, enabled: true };
@@ -298,7 +298,7 @@ export async function resetCategoryCommands(client, guildId, categoryKey, contex
   const disabledCommands = normalizeToggleRecord(config?.disabledCommands);
 
   for (const command of category.commands) {
-    delete disabledCommands[command.name.toLowerCase()];
+    Löschen disabledCommands[command.name.toLowerCase()];
   }
 
   await persistAccessConfig(client, guildId, { disabledCommands }, context);
@@ -325,3 +325,4 @@ export function resolveCategoryChoice(client, input) {
 
   return null;
 }
+

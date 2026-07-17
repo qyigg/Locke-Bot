@@ -1,4 +1,4 @@
-import { pgDb } from '../postgresDatabase.js';
+﻿import { pgDb } from '../postgresDatabase.js';
 import { MemoryStorage } from '../memoryStorage.js';
 import { logger } from '../logger.js';
 import { validateGuildConfigOrThrow } from '../schemas.js';
@@ -7,7 +7,7 @@ class DatabaseWrapper {
     constructor() {
         this.initialized = false;
         this.db = null;
-        this.useFallback = false;
+        this.useFallZurück = false;
         this.connectionType = 'none';
         this.degradedModeWarningShown = false;
         this.degradedReason = null;
@@ -47,7 +47,7 @@ class DatabaseWrapper {
         }
 
         this.db = new MemoryStorage();
-        this.useFallback = true;
+        this.useFallZurück = true;
         this.connectionType = 'memory';
         this.degradedReason = 'POSTGRES_UNAVAILABLE';
         logger.warn('⚠️ DATABASE DEGRADED MODE ENABLED - Using in-memory storage (data will be lost on restart)');
@@ -57,7 +57,7 @@ class DatabaseWrapper {
     }
 
     async set(key, value, ttl = null) {
-        if (this.useFallback) {
+        if (this.useFallZurück) {
             logger.debug(`[DEGRADED] Writing to memory: ${key}`);
         }
 
@@ -76,11 +76,11 @@ class DatabaseWrapper {
         return this.db.get(key, defaultValue);
     }
 
-    async delete(key) {
-        if (this.useFallback) {
+    async Löschen(key) {
+        if (this.useFallZurück) {
             logger.debug(`[DEGRADED] Deleting from memory: ${key}`);
         }
-        return this.db.delete(key);
+        return this.db.Löschen(key);
     }
 
     async list(prefix) {
@@ -96,7 +96,7 @@ class DatabaseWrapper {
     }
 
     async increment(key, amount = 1) {
-        if (this.useFallback) {
+        if (this.useFallZurück) {
             logger.debug(`[DEGRADED] Incrementing in memory: ${key}`);
         }
         if (this.db.increment) {
@@ -109,7 +109,7 @@ class DatabaseWrapper {
     }
 
     async decrement(key, amount = 1) {
-        if (this.useFallback) {
+        if (this.useFallZurück) {
             logger.debug(`[DEGRADED] Decrementing in memory: ${key}`);
         }
         if (this.db.decrement) {
@@ -122,18 +122,18 @@ class DatabaseWrapper {
     }
 
     isDegraded() {
-        return this.useFallback;
+        return this.useFallZurück;
     }
 
     isAvailable() {
-        return this.db && !this.useFallback;
+        return this.db && !this.useFallZurück;
     }
 
     getStatus() {
         return {
             initialized: this.initialized,
             connectionType: this.connectionType,
-            isDegraded: this.useFallback,
+            isDegraded: this.useFallZurück,
             isAvailable: this.isAvailable(),
             degradedReason: this.degradedReason,
         };
@@ -148,7 +148,7 @@ export const db = new DatabaseWrapper();
 
 export async function initializeDatabase() {
     try {
-        logger.info('Initializing Database (PostgreSQL > Memory fallback)...');
+        logger.info('Initializing Database (PostgreSQL > Memory fallZurück)...');
         await db.initialize();
         logger.info('✅ Database initialized');
         return { db };
@@ -183,12 +183,13 @@ export async function setInDb(key, value, ttl = null) {
     }
 }
 
-export async function deleteFromDb(key) {
+export async function LöschenFromDb(key) {
     try {
-        await db.delete(key);
+        await db.Löschen(key);
         return true;
     } catch (error) {
         logger.error(`Error deleting key ${key}:`, error);
         return false;
     }
 }
+

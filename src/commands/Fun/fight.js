@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
@@ -29,7 +29,7 @@ export default {
         "⚔️ Ungültige Herausforderung",
         `**${challenger.username}**, du kannst nicht gegen dich selbst kämpfen! Das ist ein Unentschieden, bevor es überhaupt beginnt.`
       );
-      return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+      return await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }
 
     if (opponent.bot) {
@@ -37,7 +37,7 @@ export default {
         "⚔️ Ungültiger Gegner",
         "Du kannst nicht gegen Bots kämpfen! Fordere eine echte Person heraus."
       );
-      return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+      return await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }
 
     const winner = rand(0, 1) === 0 ? challenger : opponent;
@@ -77,7 +77,7 @@ export default {
       description
     );
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Fight command executed between ${challenger.id} and ${opponent.id} in guild ${interaction.guildId}`);
   },
 };

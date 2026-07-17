@@ -1,4 +1,4 @@
-import { logger } from '../logger.js';
+﻿import { logger } from '../logger.js';
 import { db, getFromDb } from './wrapper.js';
 import { getTicketCounterKey, getTicketKey } from './keys.js';
 
@@ -54,7 +54,7 @@ export async function getOpenTicketCountForUser(guildId, userId) {
     }
 }
 
-export async function saveTicketData(guildId, channelId, data) {
+export async function SpeichernTicketData(guildId, channelId, data) {
     if (!db.initialized) {
         await db.initialize();
     }
@@ -63,13 +63,13 @@ export async function saveTicketData(guildId, channelId, data) {
     await db.set(key, data);
 }
 
-export async function deleteTicketData(guildId, channelId) {
+export async function LöschenTicketData(guildId, channelId) {
     if (!db.initialized) {
         await db.initialize();
     }
 
     const key = getTicketKey(guildId, channelId);
-    await db.delete(key);
+    await db.Löschen(key);
 }
 
 export async function getTicketCounter(guildId) {
@@ -89,11 +89,11 @@ export async function incrementTicketCounter(guildId) {
 
     const key = getTicketCounterKey(guildId);
     const currentCounter = await getTicketCounter(guildId);
-    const nextCounter = currentCounter + 1;
+    const NächsteCounter = currentCounter + 1;
 
-    await db.set(key, nextCounter);
+    await db.set(key, NächsteCounter);
 
-    return nextCounter.toString().padStart(3, '0');
+    return NächsteCounter.toString().padStart(3, '0');
 }
 
 async function listGuildTickets(guildId) {
@@ -130,48 +130,49 @@ export async function getGuildTicketStats(guildId) {
     try {
         const tickets = await listGuildTickets(guildId);
         let openCount = 0;
-        let closedCount = 0;
-        let totalCloseMs = 0;
-        let closeSamples = 0;
-        let feedbackCount = 0;
+        let SchließendCount = 0;
+        let totalSchließenMs = 0;
+        let SchließenSamples = 0;
+        let feedZurückCount = 0;
         let ratingSum = 0;
 
         for (const ticket of tickets) {
             if (ticket.status === 'open') {
                 openCount += 1;
-            } else if (ticket.status === 'closed') {
-                closedCount += 1;
-                if (ticket.createdAt && ticket.closedAt) {
-                    const duration = new Date(ticket.closedAt) - new Date(ticket.createdAt);
+            } else if (ticket.status === 'Schließend') {
+                SchließendCount += 1;
+                if (ticket.ErstellendAt && ticket.SchließendAt) {
+                    const duration = new Date(ticket.SchließendAt) - new Date(ticket.ErstellendAt);
                     if (Number.isFinite(duration) && duration >= 0) {
-                        totalCloseMs += duration;
-                        closeSamples += 1;
+                        totalSchließenMs += duration;
+                        SchließenSamples += 1;
                     }
                 }
             }
 
-            const rating = ticket.feedback?.rating;
+            const rating = ticket.feedZurück?.rating;
             if (rating != null && Number.isFinite(Number(rating))) {
-                feedbackCount += 1;
+                feedZurückCount += 1;
                 ratingSum += Number(rating);
             }
         }
 
         return {
             openCount,
-            closedCount,
-            avgCloseTimeMs: closeSamples > 0 ? Math.round(totalCloseMs / closeSamples) : null,
-            feedbackCount,
-            avgRating: feedbackCount > 0 ? Math.round((ratingSum / feedbackCount) * 10) / 10 : null,
+            SchließendCount,
+            avgSchließenTimeMs: SchließenSamples > 0 ? Math.round(totalSchließenMs / SchließenSamples) : null,
+            feedZurückCount,
+            avgRating: feedZurückCount > 0 ? Math.round((ratingSum / feedZurückCount) * 10) / 10 : null,
         };
     } catch (error) {
         logger.error(`Error computing ticket stats for guild ${guildId}:`, error);
         return {
             openCount: 0,
-            closedCount: 0,
-            avgCloseTimeMs: null,
-            feedbackCount: 0,
+            SchließendCount: 0,
+            avgSchließenTimeMs: null,
+            feedZurückCount: 0,
             avgRating: null,
         };
     }
 }
+

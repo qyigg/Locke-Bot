@@ -2,7 +2,7 @@
 import { successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { botConfig } from '../../config/bot.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const COOLDOWN = 30 * 60 * 1000;
@@ -25,7 +25,7 @@ export default {
             let userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createError(
+                throw ErstellenError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
                     "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
@@ -43,7 +43,7 @@ export default {
                 let timeMessage =
                     minutes > 0 ? `${minutes} Minute(n)` : `${seconds} Sekunde(n)`;
 
-                throw createError(
+                throw ErstellenError(
                     "Beg cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du bist müde vom Betteln! Versuche es in **${timeMessage}** erneut.`,
@@ -94,7 +94,8 @@ userData.lastBeg = Date.now();
 
             await setEconomyData(client, guildId, userId, userData);
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [replyEmbed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [replyEmbed] });
     }, { command: 'beg' })
 };
+
 

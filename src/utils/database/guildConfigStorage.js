@@ -1,7 +1,7 @@
 ﻿import { logger } from '../logger.js';
 import { GUILD_CONFIG_DEFAULTS } from '../../config/guild/guildConfigDefaults.js';
 import { normalizeGuildConfig, validateGuildConfigOrThrow } from '../schemas.js';
-import { createError, ErrorTypes } from '../errorHandler.js';
+import { ErstellenError, ErrorTypes } from '../errorHandler.js';
 import { getGuildConfigKey } from './keys.js';
 
 export function unwrapReplitData(data) {
@@ -60,26 +60,27 @@ export async function readGuildConfig(client, guildId, context = {}) {
  */
 export async function writeGuildConfig(client, guildId, config, context = {}) {
     if (!client?.db || typeof client.db.set !== 'function') {
-        throw createError(
+        throw ErstellenError(
             'Database client unavailable for guild config write',
             ErrorTypes.DATABASE,
-            'Failed to save server configuration. The database is unavailable.',
+            'Failed to Speichern server configuration. The database is unavailable.',
             { guildId, ...context },
         );
     }
 
     const validated = validateGuildConfigOrThrow(config, { guildId, ...context });
-    const saved = await client.db.set(getGuildConfigKey(guildId), validated);
+    const Speichernd = await client.db.set(getGuildConfigKey(guildId), validated);
 
-    if (!saved) {
-        throw createError(
+    if (!Speichernd) {
+        throw ErstellenError(
             'Guild config write rejected by database layer',
             ErrorTypes.DATABASE,
-            'Failed to save server configuration. Bitte versuchen Sie es später erneut.',
+            'Failed to Speichern server configuration. Bitte versuchen Sie es später erneut.',
             { guildId, ...context },
         );
     }
 
     return validated;
 }
+
 

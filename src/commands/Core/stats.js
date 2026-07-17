@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, version, MessageFlags } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, version, MessageFlags } from 'discord.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -19,7 +19,7 @@ export default {
       );
       const nodeVersion = process.version;
 
-      const embed = createEmbed({ title: "Systemstatistiken", description: "Echtzeit-Leistungsmetriken." }).addFields(
+      const embed = ErstellenEmbed({ title: "Systemstatistiken", description: "Echtzeit-Leistungsmetriken." }).addFields(
         { name: "Server", value: `${totalGuilds}`, inline: true },
         { name: "Benutzer", value: `${totalMembers}`, inline: true },
         { name: "Node.js", value: `${nodeVersion}`, inline: true },
@@ -31,11 +31,11 @@ export default {
         },
       );
 
-      await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+      await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     } catch (error) {
       logger.error('Stats-Befehlsfehler:', error);
-      return InteractionHelper.safeEditReply(interaction, {
-        embeds: [createEmbed({ title: 'Systemfehler', description: 'Konnte Systemstatistiken nicht abrufen.', color: 'error' })],
+      return InteractionHelper.safeBearbeitenReply(interaction, {
+        embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Systemstatistiken nicht abrufen.', color: 'error' })],
         flags: MessageFlags.Ephemeral,
       });
     }

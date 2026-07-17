@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 
@@ -62,7 +62,7 @@ export default {
                     embed.setFooter({ text: 'Randomly generated color' });
                 }
 
-                await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
             },
             'Failed to generate color information. Bitte versuchen Sie es später erneut.',
             {
@@ -123,7 +123,7 @@ function getColorName(hex) {
     }
     
     const hexValue = parseInt(hex.replace('#', ''), 16);
-    let closestColor = '';
+    let SchließenstColor = '';
     let minDistance = Infinity;
     
     for (const [colorHex, name] of Object.entries(colors)) {
@@ -132,9 +132,10 @@ function getColorName(hex) {
         
         if (distance < minDistance) {
             minDistance = distance;
-            closestColor = name;
+            SchließenstColor = name;
         }
     }
     
-    return minDistance < 1000000 ? `Close to ${closestColor}` : null;
+    return minDistance < 1000000 ? `Schließen to ${SchließenstColor}` : null;
 }
+

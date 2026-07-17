@@ -1,9 +1,9 @@
-import musicButtonHandler from '../../../handlers/musicButtons.js';
+﻿import musicButtonHandler from '../../../handlers/musicButtons.js';
 import { MUSIC_BUTTON_IDS } from '../../../services/music/musicEmbeds.js';
 
 const buttonIds = [
-    MUSIC_BUTTON_IDS.PAUSE,
-    MUSIC_BUTTON_IDS.RESUME,
+    MUSIC_BUTTON_IDS.Pausieren,
+    MUSIC_BUTTON_IDS.Fortsetzen,
     MUSIC_BUTTON_IDS.SKIP,
     MUSIC_BUTTON_IDS.STOP,
     MUSIC_BUTTON_IDS.SHUFFLE,
@@ -13,7 +13,7 @@ const buttonIds = [
     MUSIC_BUTTON_IDS.QUEUE,
     MUSIC_BUTTON_IDS.QUEUE_FIRST,
     MUSIC_BUTTON_IDS.QUEUE_PREV,
-    MUSIC_BUTTON_IDS.QUEUE_NEXT,
+    MUSIC_BUTTON_IDS.QUEUE_Nächste,
     MUSIC_BUTTON_IDS.QUEUE_LAST,
 ];
 
@@ -21,3 +21,4 @@ export default buttonIds.map((name) => ({
     name,
     execute: musicButtonHandler.execute,
 }));
+

@@ -137,7 +137,7 @@ export class ModerationService {
     user,
     moderator,
     reason = 'Kein Grund angegeben',
-    deleteDays = 0
+    LöschenDays = 0
   }) {
     try {
       if (!guild || !user || !moderator) {
@@ -188,7 +188,7 @@ export class ModerationService {
             userId: user.id,
             moderatorId: moderator.id,
             permanent: true,
-            deleteDays
+            LöschenDays
           }
         }
       });
@@ -444,5 +444,6 @@ export class ModerationService {
     }
   }
 }
+
 
 

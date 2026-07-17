@@ -1,12 +1,12 @@
-import countdownButtonHandler from '../../../handlers/countdownButtons.js';
+﻿import countdownButtonHandler from '../../../handlers/countdownButtons.js';
 
 export default [
   {
-    name: 'countdown_pause',
+    name: 'countdown_Pausieren',
     execute: countdownButtonHandler,
   },
   {
-    name: 'countdown_cancel',
+    name: 'countdown_Abbrechen',
     execute: countdownButtonHandler,
   },
 ];

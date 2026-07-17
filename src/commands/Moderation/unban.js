@@ -61,7 +61,7 @@ export default {
             reason,
         });
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
                     "✅ User Unbanned",
@@ -71,6 +71,7 @@ export default {
         });
     },
 };
+
 
 
 

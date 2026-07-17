@@ -1,5 +1,5 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -22,9 +22,9 @@ export default {
     const guild = interaction.guild;
     const owner = await guild.fetchOwner();
 
-    const createdTimestamp = Math.floor(guild.createdAt.getTime() / 1000);
+    const ErstellendTimestamp = Math.floor(guild.ErstellendAt.getTime() / 1000);
 
-    const embed = createEmbed({ title: `Server Info: ${guild.name}`, description: `Server ID: ${guild.id}` })
+    const embed = ErstellenEmbed({ title: `Server Info: ${guild.name}`, description: `Server ID: ${guild.id}` })
       .setThumbnail(guild.iconURL({ size: 256 }))
       .addFields(
         { name: "Owner", value: owner.user.tag, inline: true },
@@ -42,12 +42,12 @@ export default {
         },
         {
           name: "Creation Date",
-          value: `<t:${createdTimestamp}:R>`,
+          value: `<t:${ErstellendTimestamp}:R>`,
           inline: true,
         },
       );
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.info(`ServerInfo command executed`, {
       userId: interaction.user.id,
       guildId: guild.id,

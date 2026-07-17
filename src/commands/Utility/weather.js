@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -72,7 +72,7 @@ export default {
 
         const condition = getWeatherDescription(weatherCode);
 
-        const embed = createEmbed({ title: `Weather in ${cityDisplay}, ${country}`, description: condition.description })
+        const embed = ErstellenEmbed({ title: `Weather in ${cityDisplay}, ${country}`, description: condition.description })
             .addFields(
                 {
                     name: "Temperature",
@@ -94,7 +94,7 @@ export default {
                 text: `Latitude: ${latitude.toFixed(2)} | Longitude: ${longitude.toFixed(2)}`,
             });
 
-        await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
         logger.info(`Weather command executed`, {
             userId: interaction.user.id,
             city: cityDisplay,
@@ -121,3 +121,4 @@ function getWeatherDescription(code) {
     }
     return { description: "Unknown conditions.", emoji: "" };
 }
+

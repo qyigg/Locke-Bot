@@ -1,12 +1,12 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
 import { formatLogLine } from '../utils/logging/logEmbeds.js';
 
-const MAX_LOGGED_EDIT_CONTENT_LENGTH = 512;
+const MAX_LOGGED_Bearbeiten_CONTENT_LENGTH = 512;
 
 export default {
-  name: Events.MessageUpdate,
+  name: Events.MessageAktualisieren,
   once: false,
 
   async execute(oldMessage, newMessage) {
@@ -19,24 +19,24 @@ export default {
         formatLogLine('Channel', newMessage.channel ? `${newMessage.channel.name} ${newMessage.channel.toString()}` : 'Unbekannt'),
         formatLogLine('Message ID', `\`${newMessage.id}\``),
         formatLogLine('Message author', newMessage.author ? newMessage.author.toString() : 'Unbekannt'),
-        formatLogLine('Message created', `<t:${Math.floor(newMessage.createdTimestamp / 1000)}:R>`),
+        formatLogLine('Message Erstellend', `<t:${Math.floor(newMessage.ErstellendTimestamp / 1000)}:R>`),
       ];
 
       const oldContent = oldMessage.content || '*(empty message)*';
       const newContent = newMessage.content || '*(empty message)*';
-      const oldContentTruncated = oldContent.length > MAX_LOGGED_EDIT_CONTENT_LENGTH
-        ? `${oldContent.substring(0, MAX_LOGGED_EDIT_CONTENT_LENGTH - 3)}...`
+      const oldContentTruncated = oldContent.length > MAX_LOGGED_Bearbeiten_CONTENT_LENGTH
+        ? `${oldContent.substring(0, MAX_LOGGED_Bearbeiten_CONTENT_LENGTH - 3)}...`
         : oldContent;
-      const newContentTruncated = newContent.length > MAX_LOGGED_EDIT_CONTENT_LENGTH
-        ? `${newContent.substring(0, MAX_LOGGED_EDIT_CONTENT_LENGTH - 3)}...`
+      const newContentTruncated = newContent.length > MAX_LOGGED_Bearbeiten_CONTENT_LENGTH
+        ? `${newContent.substring(0, MAX_LOGGED_Bearbeiten_CONTENT_LENGTH - 3)}...`
         : newContent;
 
       await logEvent({
         client: newMessage.client,
         guildId: newMessage.guild.id,
-        eventType: EVENT_TYPES.MESSAGE_EDIT,
+        eventType: EVENT_TYPES.MESSAGE_Bearbeiten,
         data: {
-          title: 'Message edited',
+          title: 'Message Bearbeitened',
           lines: metaLines,
           quoted: true,
           fields: [
@@ -49,7 +49,8 @@ export default {
       });
 
     } catch (error) {
-      logger.error('Error in messageUpdate event:', error);
+      logger.error('Error in messageAktualisieren event:', error);
     }
   }
 };
+

@@ -1,4 +1,4 @@
-// mutex.js
+﻿// mutex.js
 
 const locks = new Map();
 
@@ -8,7 +8,7 @@ export const Mutex = {
         
         const currentLock = locks.get(key) || Promise.resolve();
         
-        const nextLock = (async () => {
+        const NächsteLock = (async () => {
             try {
                 await currentLock;
             } catch (error) {
@@ -17,16 +17,16 @@ export const Mutex = {
             return await task();
         })();
 
-        locks.set(key, nextLock);
+        locks.set(key, NächsteLock);
 
         const cleanup = () => {
-            if (locks.get(key) === nextLock) {
-                locks.delete(key);
+            if (locks.get(key) === NächsteLock) {
+                locks.Löschen(key);
             }
         };
         
-        nextLock.then(cleanup, cleanup);
+        NächsteLock.then(cleanup, cleanup);
 
-        return nextLock;
+        return NächsteLock;
     }
 };

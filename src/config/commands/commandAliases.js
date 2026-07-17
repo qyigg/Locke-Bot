@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Command Aliases Configuration
  * Maps shortened command names to their full command names
  */
@@ -62,11 +62,11 @@ export const commandAliases = {
     'dice': 'roll',
     'fight': 'fight',
 
-    'gcreate': 'gcreate',
-    'gstart': 'gcreate',
+    'gErstellen': 'gErstellen',
+    'gstart': 'gErstellen',
     'gend': 'gend',
     'gstop': 'gend',
-    'gdelete': 'gdelete',
+    'gLöschen': 'gLöschen',
     'greroll': 'greroll',
     'groll': 'greroll',
 
@@ -74,9 +74,9 @@ export const commandAliases = {
     't': 'ticket',
     'new': 'ticket',
 
-    'ver': 'verify',
+    'ver': 'Verifizieren',
     'vadmin': 'verification',
-    'av': 'autoverify',
+    'av': 'autoVerifizieren',
 
     'welcome': 'welcome',
     'greet': 'greet',
@@ -99,8 +99,8 @@ export const commandAliases = {
     'rr': 'reactroles',
     'reactionroles': 'reactroles',
 
-    'jtc': 'jointocreate',
-    'jointocreate': 'jointocreate',
+    'jtc': 'jointoErstellen',
+    'jointoErstellen': 'jointoErstellen',
 
     'np': 'nowplaying',
     'now': 'nowplaying',
@@ -114,15 +114,15 @@ export const subcommandAliases = {
     'r': 'remove',
     'rm': 'remove',
     'del': 'remove',
-    'n': 'next',
+    'n': 'Nächste',
     'sc': 'setchannel',
 
     'a': 'add',
     'c': 'complete',
-    'done': 'complete',
+    'Fertig': 'complete',
     'd': 'complete',
 
-    'start': 'create',
+    'start': 'Erstellen',
     'stop': 'end',
     'roll': 'reroll',
 
@@ -150,3 +150,4 @@ export function resolveSubcommandAlias(subcommandName) {
     const normalized = subcommandName.toLowerCase();
     return subcommandAliases[normalized] || subcommandName;
 }
+

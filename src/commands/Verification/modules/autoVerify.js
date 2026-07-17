@@ -1,22 +1,22 @@
 ﻿import { botConfig, getColor } from '../../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed } from '../../../utils/embeds.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../../utils/errorHandler.js';
-import { validateAutoVerifyCriteria } from '../../../services/verificationService.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { validateAutoVerifizierenCriteria } from '../../../services/verificationService.js';
 import { logger } from '../../../utils/logger.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
-import autoVerifyDashboard from './autoVerifyDashboard.js';
+import autoVerifizierenDashboard from './autoVerifizierenDashboard.js';
 
-const autoVerifyDefaults = botConfig.verification?.autoVerify || {};
-const minAccountAgeDays = autoVerifyDefaults.minAccountAge ?? 1;
-const maxAccountAgeDays = autoVerifyDefaults.maxAccountAge ?? 365;
-const defaultAccountAgeDays = autoVerifyDefaults.defaultAccountAgeDays ?? 7;
+const autoVerifizierenDefaults = botConfig.verification?.autoVerifizieren || {};
+const minAccountAgeDays = autoVerifizierenDefaults.minAccountAge ?? 1;
+const maxAccountAgeDays = autoVerifizierenDefaults.maxAccountAge ?? 365;
+const defaultAccountAgeDays = autoVerifizierenDefaults.defaultAccountAgeDays ?? 7;
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("autoverify")
+        .setName("autoVerifizieren")
         .setDescription("Configure automatic verification settings")
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addSubcommand(subcommand =>
@@ -26,7 +26,7 @@ export default {
                 .addRoleOption(option =>
                     option
                         .setName("role")
-                        .setDescription("Role to assign to users who meet auto-verify criteria")
+                        .setDescription("Role to assign to users who meet auto-Verifizieren criteria")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
@@ -63,16 +63,16 @@ export default {
                 case "setup":
                     return await handleSetup(interaction, guild, client);
                 case "dashboard":
-                    return await autoVerifyDashboard.execute(interaction, config, client);
+                    return await autoVerifizierenDashboard.execute(interaction, config, client);
                 default:
-                    throw createError(
+                    throw ErstellenError(
                         `Unknown subcommand: ${subcommand}`,
                         ErrorTypes.VALIDATION,
                         "Invalid subcommand selected.",
                         { subcommand }
                     );
             }
-        }, { command: 'autoverify', subcommand: interaction.options.getSubcommand() });
+        }, { command: 'autoVerifizieren', subcommand: interaction.options.getSubcommand() });
 
         return await wrappedExecute(interaction, config, client);
     }
@@ -92,10 +92,10 @@ async function handleSetup(interaction, guild, client) {
         const hasAutoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
         if (verificationEnabled || hasAutoRoleConfigured) {
-            throw createError(
-                'Auto-verify enable blocked by conflicting onboarding system',
+            throw ErstellenError(
+                'Auto-Verifizieren enable blocked by conflicting onboarding system',
                 ErrorTypes.CONFIGURATION,
-                'Du kannst nicht enable **AutoVerify** while the verification system or AutoRole is configured. Disable those first.',
+                'Du kannst nicht enable **AutoVerifizieren** while the verification system or AutoRole is configured. Disable those first.',
                 {
                     guildId: guild.id,
                     verificationEnabled,
@@ -108,26 +108,26 @@ async function handleSetup(interaction, guild, client) {
 
         const botMember = guild.members.me;
         if (!botMember) {
-            throw createError(
+            throw ErstellenError(
                 'Bot member Nicht gefunden in guild cache',
                 ErrorTypes.CONFIGURATION,
-                'I could not verify my permissions in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
+                'I could not Verifizieren my permissions in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
                 { guildId: guild.id }
             );
         }
 
         if (!botMember.permissions.has(PermissionFlagsBits.ManageRoles)) {
-            throw createError(
+            throw ErstellenError(
                 'Missing ManageRoles permission',
                 ErrorTypes.PERMISSION,
-                "I need the 'Manage Roles' permission to assign auto-verify roles.",
+                "I need the 'Manage Roles' permission to assign auto-Verifizieren roles.",
                 { guildId: guild.id }
             );
         }
 
         if (targetRole.id === guild.id || targetRole.managed) {
-            throw createError(
-                'Invalid auto-verify role selected',
+            throw ErstellenError(
+                'Invalid auto-Verifizieren role selected',
                 ErrorTypes.VALIDATION,
                 'Please choose a normal assignable role (not @everyone or an integration-managed role).',
                 { guildId: guild.id, roleId: targetRole.id, managed: targetRole.managed }
@@ -135,21 +135,21 @@ async function handleSetup(interaction, guild, client) {
         }
 
         if (targetRole.position >= botMember.roles.highest.position) {
-            throw createError(
-                'Role hierarchy error for auto-verify setup',
+            throw ErstellenError(
+                'Role hierarchy error for auto-Verifizieren setup',
                 ErrorTypes.PERMISSION,
-                'The selected auto-verify role must be below my highest role in the server role hierarchy.',
+                'The selected auto-Verifizieren role must be below my highest role in the server role hierarchy.',
                 { guildId: guild.id, roleId: targetRole.id, rolePosition: targetRole.position, botRolePosition: botMember.roles.highest.position }
             );
         }
 
-        validateAutoVerifyCriteria(criteria, criteria === 'account_age' ? accountAgeDays : 1);
+        validateAutoVerifizierenCriteria(criteria, criteria === 'account_age' ? accountAgeDays : 1);
         
         if (!guildConfig.verification) {
             guildConfig.verification = {};
         }
 
-        guildConfig.verification.autoVerify = {
+        guildConfig.verification.autoVerifizieren = {
             enabled: true,
             criteria: criteria,
             accountAgeDays: criteria === "account_age" ? accountAgeDays : null,
@@ -169,14 +169,14 @@ async function handleSetup(interaction, guild, client) {
                 break;
         }
 
-        logger.info('Auto-verify enabled', {
+        logger.info('Auto-Verifizieren enabled', {
             guildId: guild.id,
             criteria,
             accountAgeDays: criteria === 'account_age' ? accountAgeDays : null,
             roleId: targetRole.id
         });
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [successEmbed(
                 "Auto-Verification Configured",
                 `Automatic verification has been configured!\n\n**Role:** ${targetRole}\n**Criteria:** ${criteriaDescription}\n\nUsers who meet these criteria will receive this role when they join the server.`
@@ -188,5 +188,6 @@ async function handleSetup(interaction, guild, client) {
         throw error;
     }
 }
+
 
 

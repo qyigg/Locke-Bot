@@ -3,7 +3,7 @@
 import { logger } from '../../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from './guildConfig.js';
 import { PermissionFlagsBits } from 'discord.js';
-import { createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { wrapServiceClassMethods } from '../../utils/serviceErrorBoundary.js';
 import { z } from 'zod';
 import { LogIgnoreSchema, LoggingConfigSchema } from '../../utils/schemas.js';
@@ -19,7 +19,7 @@ const CONFIG_VALIDATION_RULES = {
     modRole: { type: 'role', required: false },
     adminRole: { type: 'role', required: false },
     prefix: { type: 'string', required: false, maxLength: 10, minLength: 1 },
-    dmOnClose: { type: 'boolean', required: false },
+    dmOnSchließen: { type: 'boolean', required: false },
     maxTicketsPerUser: { type: 'number', required: false, min: 1, max: 50 },
     birthdayChannelId: { type: 'channel', required: false },
     logIgnore: { type: 'object', required: false },
@@ -44,7 +44,7 @@ const ConfigValueSchemas = Object.freeze({
     modRole: z.union([z.string().min(1), z.object({ id: z.string().min(1) })]),
     adminRole: z.union([z.string().min(1), z.object({ id: z.string().min(1) })]),
     prefix: z.string().min(1).max(10),
-    dmOnClose: z.boolean(),
+    dmOnSchließen: z.boolean(),
     maxTicketsPerUser: z.number().int().min(1).max(50),
     birthdayChannelId: z.union([z.string().min(1), z.object({ id: z.string().min(1) })]),
     logIgnore: LogIgnoreSchema,
@@ -56,18 +56,18 @@ class ConfigService {
     static MAX_CHANNEL_IDS = 10;
     static MAX_ROLE_IDS = 20;
     static MAX_PREFIX_LENGTH = 10;
-    static PROTECTED_SETTINGS = ['_id', 'guildId', 'createdAt']; 
+    static PROTECTED_SETTINGS = ['_id', 'guildId', 'ErstellendAt']; 
     static UNSAFE_KEYS = ['__proto__', 'prototype', 'constructor'];
 
-    static applyLoggingLegacyKey(config, key, value, previousConfig = {}) {
+    static applyLoggingLegacyKey(config, key, value, VorherigeConfig = {}) {
         if (key === 'logIgnore') {
             const logging = {
-                ...(previousConfig.logging || config.logging || {}),
+                ...(VorherigeConfig.logging || config.logging || {}),
                 ignore: value,
             };
-            const next = { ...config, logging };
-            delete next.logIgnore;
-            return next;
+            const Nächste = { ...config, logging };
+            Löschen Nächste.logIgnore;
+            return Nächste;
         }
 
         const destination = LEGACY_LOGGING_KEY_MAP[key];
@@ -77,28 +77,28 @@ class ConfigService {
 
         const channelId = value && typeof value === 'object' ? value.id : value;
         const logging = {
-            ...(previousConfig.logging || config.logging || {}),
+            ...(VorherigeConfig.logging || config.logging || {}),
             channels: {
-                ...((previousConfig.logging || config.logging || {}).channels || {}),
+                ...((VorherigeConfig.logging || config.logging || {}).channels || {}),
                 [destination]: channelId ?? null,
             },
-            enabled: channelId ? true : (previousConfig.logging?.enabled ?? config.logging?.enabled ?? false),
+            enabled: channelId ? true : (VorherigeConfig.logging?.enabled ?? config.logging?.enabled ?? false),
         };
 
-        const next = { ...config, logging };
-        delete next[key];
+        const Nächste = { ...config, logging };
+        Löschen Nächste[key];
         if (key === 'logChannelId') {
-            delete next.enableLogging;
+            Löschen Nächste.enableLogging;
         }
         if (key === 'reportChannelId') {
-            delete next.reportChannelId;
+            Löschen Nächste.reportChannelId;
         }
-        return next;
+        return Nächste;
     }
 
     static validateConfigKeySafety(key) {
         if (typeof key !== 'string' || key.trim().length === 0) {
-            throw createError(
+            throw ErstellenError(
                 'Invalid setting key',
                 ErrorTypes.VALIDATION,
                 'Setting key must be a non-empty string.',
@@ -107,7 +107,7 @@ class ConfigService {
         }
 
         if (this.UNSAFE_KEYS.includes(key)) {
-            throw createError(
+            throw ErstellenError(
                 'Unsafe setting key',
                 ErrorTypes.VALIDATION,
                 'This setting key is not allowed for security reasons.',
@@ -134,7 +134,7 @@ class ConfigService {
         if (zodSchema) {
             const parsed = zodSchema.safeParse(value);
             if (!parsed.success) {
-                throw createError(
+                throw ErstellenError(
                     'Invalid configuration value',
                     ErrorTypes.VALIDATION,
                     'Provided configuration value is invalid.',
@@ -153,7 +153,7 @@ class ConfigService {
 
         if (rule.type === 'channel') {
             if (typeof value !== 'string' && typeof value !== 'object') {
-                throw createError(
+                throw ErstellenError(
                     'Invalid channel',
                     ErrorTypes.VALIDATION,
                     'Channel ID must be a string.',
@@ -165,7 +165,7 @@ class ConfigService {
             const channel = guild.channels.cache.get(channelId);
 
             if (!channel) {
-                throw createError(
+                throw ErstellenError(
                     'Kanal nicht gefunden',
                     ErrorTypes.VALIDATION,
                     'The specified channel does not exist.',
@@ -174,7 +174,7 @@ class ConfigService {
             }
 
             if (!channel.isTextBased?.()) {
-                throw createError(
+                throw ErstellenError(
                     'Invalid channel type',
                     ErrorTypes.VALIDATION,
                     'Only text channels are allowed.',
@@ -187,7 +187,7 @@ class ConfigService {
 
         if (rule.type === 'role') {
             if (typeof value !== 'string' && typeof value !== 'object') {
-                throw createError(
+                throw ErstellenError(
                     'Invalid role',
                     ErrorTypes.VALIDATION,
                     'Role ID must be a string.',
@@ -199,7 +199,7 @@ class ConfigService {
             const role = guild.roles.cache.get(roleId);
 
             if (!role) {
-                throw createError(
+                throw ErstellenError(
                     'Rolle nicht gefunden',
                     ErrorTypes.VALIDATION,
                     'The specified role does not exist.',
@@ -209,7 +209,7 @@ class ConfigService {
 
             const botHighestRole = guild.members.me?.roles.highest;
             if (role.position >= botHighestRole?.position) {
-                throw createError(
+                throw ErstellenError(
                     'Role too high',
                     ErrorTypes.VALIDATION,
                     "Can't set roles higher than my highest role.",
@@ -222,7 +222,7 @@ class ConfigService {
 
         if (rule.type === 'string') {
             if (typeof value !== 'string') {
-                throw createError(
+                throw ErstellenError(
                     'Invalid value type',
                     ErrorTypes.VALIDATION,
                     'Value must be a string.',
@@ -232,7 +232,7 @@ class ConfigService {
 
             const length = value.length;
             if (rule.maxLength && length > rule.maxLength) {
-                throw createError(
+                throw ErstellenError(
                     'Value too long',
                     ErrorTypes.VALIDATION,
                     `Value cannot exceed **${rule.maxLength}** characters.`,
@@ -241,7 +241,7 @@ class ConfigService {
             }
 
             if (rule.minLength && length < rule.minLength) {
-                throw createError(
+                throw ErstellenError(
                     'Value too short',
                     ErrorTypes.VALIDATION,
                     `Value must be at least **${rule.minLength}** character(s).`,
@@ -254,7 +254,7 @@ class ConfigService {
 
         if (rule.type === 'number') {
             if (typeof value !== 'number') {
-                throw createError(
+                throw ErstellenError(
                     'Invalid value type',
                     ErrorTypes.VALIDATION,
                     'Value must be a number.',
@@ -263,7 +263,7 @@ class ConfigService {
             }
 
             if (rule.min !== undefined && value < rule.min) {
-                throw createError(
+                throw ErstellenError(
                     'Value too low',
                     ErrorTypes.VALIDATION,
                     `Value must be at least **${rule.min}**.`,
@@ -272,7 +272,7 @@ class ConfigService {
             }
 
             if (rule.max !== undefined && value > rule.max) {
-                throw createError(
+                throw ErstellenError(
                     'Value too high',
                     ErrorTypes.VALIDATION,
                     `Value cannot exceed **${rule.max}**.`,
@@ -285,7 +285,7 @@ class ConfigService {
 
         if (rule.type === 'boolean') {
             if (typeof value !== 'boolean') {
-                throw createError(
+                throw ErstellenError(
                     'Invalid value type',
                     ErrorTypes.VALIDATION,
                     'Value must be true or false.',
@@ -298,7 +298,7 @@ class ConfigService {
 
         if (rule.type === 'object') {
             if (typeof value !== 'object' || value === null) {
-                throw createError(
+                throw ErstellenError(
                     'Invalid value type',
                     ErrorTypes.VALIDATION,
                     'Value must be an object.',
@@ -332,7 +332,7 @@ class ConfigService {
         return conflicts;
     }
 
-    static async updateSetting(client, guildId, key, value, adminId) {
+    static async AktualisierenSetting(client, guildId, key, value, adminId) {
         logger.info(`[CONFIG_SERVICE] Updating setting`, {
             guildId,
             key,
@@ -348,7 +348,7 @@ class ConfigService {
                 guildId,
                 adminId
             });
-            throw createError(
+            throw ErstellenError(
                 'Protected setting',
                 ErrorTypes.VALIDATION,
                 `The setting **${key}** cannot be modified.`,
@@ -358,7 +358,7 @@ class ConfigService {
 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            throw createError(
+            throw ErstellenError(
                 'Guild Nicht gefunden',
                 ErrorTypes.VALIDATION,
                 'Guild does not exist.',
@@ -382,10 +382,10 @@ class ConfigService {
 
         const oldValue = currentConfig[key];
 
-        let updatedConfig = { ...currentConfig, [key]: value };
-        updatedConfig = this.applyLoggingLegacyKey(updatedConfig, key, value, currentConfig);
+        let AktualisierendConfig = { ...currentConfig, [key]: value };
+        AktualisierendConfig = this.applyLoggingLegacyKey(AktualisierendConfig, key, value, currentConfig);
 
-        await setGuildConfig(client, guildId, updatedConfig);
+        await setGuildConfig(client, guildId, AktualisierendConfig);
 
         this.recordChange(guildId, {
             key,
@@ -414,16 +414,16 @@ class ConfigService {
         };
     }
 
-    static async bulkUpdate(client, guildId, updates, adminId) {
+    static async bulkAktualisieren(client, guildId, Aktualisierens, adminId) {
         logger.info(`[CONFIG_SERVICE] Bulk updating settings`, {
             guildId,
-            updateCount: Object.keys(updates).length,
+            AktualisierenCount: Object.keys(Aktualisierens).length,
             adminId
         });
 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            throw createError(
+            throw ErstellenError(
                 'Guild Nicht gefunden',
                 ErrorTypes.VALIDATION,
                 'Guild does not exist.',
@@ -431,10 +431,10 @@ class ConfigService {
             );
         }
 
-        const validatedUpdates = {};
+        const validatedAktualisierens = {};
         const validationErrors = [];
 
-        for (const [key, value] of Object.entries(updates)) {
+        for (const [key, value] of Object.entries(Aktualisierens)) {
             try {
                 this.validateConfigKeySafety(key);
 
@@ -444,18 +444,18 @@ class ConfigService {
                 }
 
                 await this.validateConfigValue(key, value, guild);
-                validatedUpdates[key] = value;
+                validatedAktualisierens[key] = value;
             } catch (error) {
                 validationErrors.push(`${key}: ${error.details?.message || error.message}`);
             }
         }
 
         if (validationErrors.length > 0) {
-            logger.warn(`[CONFIG_SERVICE] Bulk update validation failed`, {
+            logger.warn(`[CONFIG_SERVICE] Bulk Aktualisieren validation failed`, {
                 guildId,
                 errors: validationErrors
             });
-            throw createError(
+            throw ErstellenError(
                 'Validation failed',
                 ErrorTypes.VALIDATION,
                 `Some settings failed validation:\n• ${validationErrors.join('\n• ')}`,
@@ -465,32 +465,32 @@ class ConfigService {
 
         const currentConfig = await getGuildConfig(client, guildId);
 
-        const updatedConfig = { ...currentConfig, ...validatedUpdates };
-        await setGuildConfig(client, guildId, updatedConfig);
+        const AktualisierendConfig = { ...currentConfig, ...validatedAktualisierens };
+        await setGuildConfig(client, guildId, AktualisierendConfig);
 
-        for (const [key, value] of Object.entries(validatedUpdates)) {
+        for (const [key, value] of Object.entries(validatedAktualisierens)) {
             this.recordChange(guildId, {
                 key,
                 oldValue: currentConfig[key],
                 newValue: value,
                 changedBy: adminId,
-                isBulkUpdate: true,
+                isBulkAktualisieren: true,
                 timestamp: new Date().toISOString()
             });
         }
 
-        logger.info(`[CONFIG_SERVICE] Bulk update completed`, {
+        logger.info(`[CONFIG_SERVICE] Bulk Aktualisieren completed`, {
             guildId,
             adminId,
-            appliedCount: Object.keys(validatedUpdates).length,
+            appliedCount: Object.keys(validatedAktualisierens).length,
             failedCount: validationErrors.length,
             timestamp: new Date().toISOString()
         });
 
         return {
-            applied: Object.keys(validatedUpdates),
+            applied: Object.keys(validatedAktualisierens),
             failed: validationErrors,
-            appliedCount: Object.keys(validatedUpdates).length,
+            appliedCount: Object.keys(validatedAktualisierens).length,
             failedCount: validationErrors.length
         };
     }
@@ -531,8 +531,8 @@ class ConfigService {
 
         const defaultValue = null;
 
-        const updatedConfig = { ...currentConfig, [key]: defaultValue };
-        await setGuildConfig(client, guildId, updatedConfig);
+        const AktualisierendConfig = { ...currentConfig, [key]: defaultValue };
+        await setGuildConfig(client, guildId, AktualisierendConfig);
 
         this.recordChange(guildId, {
             key,
@@ -565,7 +565,7 @@ class ConfigService {
         const guild = client.guilds.cache.get(guildId);
 
         if (!guild) {
-            throw createError(
+            throw ErstellenError(
                 'Guild Nicht gefunden',
                 ErrorTypes.VALIDATION,
                 'Guild does not exist.',
@@ -607,7 +607,7 @@ class ConfigService {
         };
     }
 
-    static verifyPermission(member) {
+    static VerifizierenPermission(member) {
         return member.permissions.has([
             PermissionFlagsBits.Administrator,
             PermissionFlagsBits.ManageGuild
@@ -623,4 +623,5 @@ wrapServiceClassMethods(ConfigService, (methodName) => ({
 }));
 
 export default ConfigService;
+
 

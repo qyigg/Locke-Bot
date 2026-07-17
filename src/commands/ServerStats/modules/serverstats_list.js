@@ -1,7 +1,7 @@
 ﻿import { getColor } from '../../../config/bot.js';
 import { PermissionFlagsBits } from 'discord.js';
-import { createEmbed } from '../../../utils/embeds.js';
-import { getServerCounters, saveServerCounters, getCounterEmoji as getCounterTypeEmoji, getCounterTypeLabel, getGuildCounterStats } from '../../../services/serverstatsService.js';
+import { ErstellenEmbed } from '../../../utils/embeds.js';
+import { getServerCounters, SpeichernServerCounters, getCounterEmoji as getCounterTypeEmoji, getCounterTypeLabel, getGuildCounterStats } from '../../../services/serverstatsService.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -34,19 +34,19 @@ export async function handleList(interaction, client) {
                 validCounters.push(counter);
             } else {
                 orphanedCounters.push(counter);
-                logger.info(`Removing orphaned counter ${counter.id} (type: ${counter.type}, deleted channel: ${counter.channelId}) from guild ${guild.id}`);
+                logger.info(`Removing orphaned counter ${counter.id} (type: ${counter.type}, Löschend channel: ${counter.channelId}) from guild ${guild.id}`);
             }
         }
 
         if (orphanedCounters.length > 0) {
-            await saveServerCounters(client, guild.id, validCounters);
+            await SpeichernServerCounters(client, guild.id, validCounters);
             logger.info(`Cleaned up ${orphanedCounters.length} orphaned counter(s) from guild ${guild.id}`);
         }
 
         if (validCounters.length === 0) {
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: "Server Counters",
-                description: "No counters have been set up for Dieser Server yet.\n\nUse `/serverstats create` to set up Dein first counter!",
+                description: "No counters have been set up for Dieser Server yet.\n\nUse `/serverstats Erstellen` to set up Dein first counter!",
                 color: getColor('warning')
             });
 
@@ -58,21 +58,21 @@ export async function handleList(interaction, client) {
 
             embed.addFields({
                 name: "**Usage Examples**",
-                value: "`/serverstats create type:members channel_type:voice category:Stats`\n`/serverstats create type:bots channel_type:text category:Server Info`\n`/serverstats list`",
+                value: "`/serverstats Erstellen type:members channel_type:voice category:Stats`\n`/serverstats Erstellen type:bots channel_type:text category:Server Info`\n`/serverstats list`",
                 inline: false
             });
 
             embed.setFooter({ 
-                text: "Counter System • Automatic updates every 15 minutes" 
+                text: "Counter System • Automatic Aktualisierens every 15 minutes" 
             });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] }).catch(logger.error);
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] }).catch(logger.error);
             return;
         }
 
-        const embed = createEmbed({
+        const embed = ErstellenEmbed({
             title: `Server Counters (${validCounters.length})`,
-            description: "Here are all the active counters for Dieser Server.\n\nCounters automatically update every 15 minutes.",
+            description: "Here are all the active counters for Dieser Server.\n\nCounters automatically Aktualisieren every 15 minutes.",
             color: getColor('info')
         });
 
@@ -87,11 +87,11 @@ export async function handleList(interaction, client) {
             }
 
             const currentCount = getCurrentCount(stats, counter.type);
-            const status = channel.name.includes(':') ? '✅ Active' : '⚠️ Not Updated';
+            const status = channel.name.includes(':') ? '✅ Active' : '⚠️ Not Aktualisierend';
             
             embed.addFields({
                 name: `${getCounterTypeEmoji(counter.type)} Counter #${i + 1} - ${channel.name}`,
-                value: `**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}\n**Channel:** ${channel}\n**Current Count:** ${currentCount}\n**Status:** ${status}\n**Created:** ${new Date(counter.createdAt).toLocaleDateString()}`,
+                value: `**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}\n**Channel:** ${channel}\n**Current Count:** ${currentCount}\n**Status:** ${status}\n**Erstellend:** ${new Date(counter.ErstellendAt).toLocaleDateString()}`,
                 inline: false
             });
         }
@@ -101,22 +101,22 @@ export async function handleList(interaction, client) {
             value: `**Total Counters:** ${validCounters.length}\n**Active Counters:** ${validCounters.filter(c => {
                 const channel = guild.channels.cache.get(c.channelId);
                 return channel && channel.name.includes(':');
-            }).length}\n**Next Update:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
+            }).length}\n**Nächste Aktualisieren:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
             inline: false
         });
 
         embed.addFields({
             name: "**Management Commands**",
-            value: "`/serverstats create` - Create new counter\n`/serverstats update` - Update existing counter\n`/serverstats delete` - Delete counter",
+            value: "`/serverstats Erstellen` - Erstellen new counter\n`/serverstats Aktualisieren` - Aktualisieren existing counter\n`/serverstats Löschen` - Löschen counter",
             inline: false
         });
 
         embed.setFooter({ 
-            text: "Counter System • Automatic updates every 15 minutes" 
+            text: "Counter System • Automatic Aktualisierens every 15 minutes" 
         });
         embed.setTimestamp();
 
-        await InteractionHelper.safeEditReply(interaction, { embeds: [embed] }).catch(logger.error);
+        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] }).catch(logger.error);
 
     } catch (error) {
         logger.error("Error displaying counters:", error);
@@ -144,4 +144,5 @@ function getCurrentCount(stats, type) {
             return 0;
     }
 }
+
 

@@ -1,4 +1,4 @@
-// responseCoordinator.js — single respond-once gate for prefix and slash commands
+﻿// responseCoordinator.js — single respond-once gate for prefix and slash commands
 
 import { buildUserErrorEmbed } from './embeds.js';
 import { logger } from './logger.js';
@@ -103,7 +103,7 @@ export class ResponseCoordinator {
 
     const existing = this.getReplyMessage();
     if (existing) {
-      return this.edit(payload);
+      return this.Bearbeiten(payload);
     }
 
     this.interaction.replied = true;
@@ -118,7 +118,7 @@ export class ResponseCoordinator {
       if (this.isPrefixInteraction()) {
         return this.sendPrefixPayload(payload);
       }
-      await this.interaction.editReply(payload);
+      await this.interaction.BearbeitenReply(payload);
       return null;
     }
 
@@ -138,7 +138,7 @@ export class ResponseCoordinator {
     return null;
   }
 
-  async edit(payload) {
+  async Bearbeiten(payload) {
     if (this.isUsageFinalized()) {
       return this.getReplyMessage();
     }
@@ -146,9 +146,9 @@ export class ResponseCoordinator {
     const existing = this.getReplyMessage();
     if (existing) {
       try {
-        return await existing.edit(payload);
+        return await existing.Bearbeiten(payload);
       } catch (error) {
-        logger.debug(`ResponseCoordinator edit failed: ${error.message}`);
+        logger.debug(`ResponseCoordinator Bearbeiten failed: ${error.message}`);
         if (this.message?.channel) {
           const sentMessage = await this.message.channel.send(payload);
           this.setReplyMessage(sentMessage);
@@ -163,7 +163,7 @@ export class ResponseCoordinator {
     }
 
     if (this.interaction.deferred || this.interaction.replied) {
-      await this.interaction.editReply(payload);
+      await this.interaction.BearbeitenReply(payload);
       return null;
     }
 
@@ -195,3 +195,4 @@ export class ResponseCoordinator {
     return this.respondUsage(usageLine);
   }
 }
+

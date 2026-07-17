@@ -1,5 +1,5 @@
-import {
-  helpBackButton,
+﻿import {
+  helpZurückButton,
   helpBugReportButton,
   helpPaginationButton,
 } from '../../../handlers/help/helpButtons.js';
@@ -7,7 +7,7 @@ import {
 const paginationIds = [
   'help-page_first',
   'help-page_prev',
-  'help-page_next',
+  'help-page_Nächste',
   'help-page_last',
 ];
 
@@ -16,4 +16,4 @@ const paginationInteractions = paginationIds.map((name) => ({
   execute: helpPaginationButton.execute,
 }));
 
-export default [helpBackButton, helpBugReportButton, ...paginationInteractions];
+export default [helpZurückButton, helpBugReportButton, ...paginationInteractions];

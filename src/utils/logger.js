@@ -1,4 +1,4 @@
-// logger.js
+﻿// logger.js
 
 import winston from 'winston';
 import 'winston-daily-rotate-file';
@@ -14,20 +14,20 @@ function sanitizeCommandName(interaction) {
     return interaction.commandName;
   }
 
-  if (interaction?.isButton?.() || interaction?.isModalSubmit?.() || interaction?.isStringSelectMenu?.()) {
+  if (interaction?.isButton?.() || interaction?.isModalAbsenden?.() || interaction?.isStringSelectMenu?.()) {
     return interaction.customId || null;
   }
 
   return null;
 }
 
-export function createTraceId(prefix = 'trc') {
+export function ErstellenTraceId(prefix = 'trc') {
   return `${prefix}_${crypto.randomUUID().replace(/-/g, '')}`;
 }
 
-export function createInteractionTraceContext(interaction, overrides = {}) {
+export function ErstellenInteractionTraceContext(interaction, overrides = {}) {
   return {
-    traceId: createTraceId(),
+    traceId: ErstellenTraceId(),
     interactionId: interaction?.id || null,
     interactionType: interaction?.type || null,
     guildId: interaction?.guildId || null,
@@ -38,8 +38,8 @@ export function createInteractionTraceContext(interaction, overrides = {}) {
   };
 }
 
-export function runWithTraceContext(traceContext, callback) {
-  return traceStorage.run(traceContext, callback);
+export function runWithTraceContext(traceContext, callZurück) {
+  return traceStorage.run(traceContext, callZurück);
 }
 
 export function getTraceContext() {
@@ -50,7 +50,7 @@ export function getTraceId() {
   return getTraceContext()?.traceId || null;
 }
 
-const { createLogger, format, transports } = winston;
+const { ErstellenLogger, format, transports } = winston;
 const { combine, timestamp, printf, colorize, errors, json } = format;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -72,7 +72,7 @@ const resolvedLogLevel = validLogLevels.has(requestedLogLevel)
   : defaultLogLevel;
 
 const pendingInvalidLevelWarning = requestedLogLevel && !validLogLevels.has(requestedLogLevel)
-  ? `[logger] Invalid LOG_LEVEL "${process.env.LOG_LEVEL}". Falling back to "${defaultLogLevel}".`
+  ? `[logger] Invalid LOG_LEVEL "${process.env.LOG_LEVEL}". Falling Zurück to "${defaultLogLevel}".`
   : null;
 
 const shouldPromoteUserFacingLogs = process.env.NODE_ENV === 'production' && resolvedLogLevel === 'warn';
@@ -154,7 +154,7 @@ const enforceLogSchema = format((info) => {
   return info;
 });
 
-const logger = createLogger({
+const logger = ErstellenLogger({
   level: resolvedLogLevel,
   format: combine(
     attachTraceContext(),

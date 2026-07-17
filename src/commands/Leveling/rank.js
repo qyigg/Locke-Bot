@@ -22,7 +22,7 @@ export default {
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeEditReply(interaction, {
+      await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
@@ -56,7 +56,7 @@ export default {
 
     const xpNeeded = getXpForLevel(safeUserData.level + 1);
     const progress = xpNeeded > 0 ? Math.floor((safeUserData.xp / xpNeeded) * 100) : 0;
-    const progressBar = createProgressBar(progress, 20);
+    const progressBar = ErstellenProgressBar(progress, 20);
 
     const embed = new EmbedBuilder()
       .setTitle(`${member.displayName}'s Rank`)
@@ -85,16 +85,17 @@ export default {
       .setColor('#2ecc71')
       .setTimestamp();
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Rank checked for user ${targetUser.id} in guild ${interaction.guildId}`);
   }
 };
 
-function createProgressBar(percentage, length = 10) {
+function ErstellenProgressBar(percentage, length = 10) {
   if (percentage < 0 || percentage > 100) {
     percentage = Math.max(0, Math.min(100, percentage));
   }
   const filled = Math.round((percentage / 100) * length);
   return '█'.repeat(filled) + '░'.repeat(length - filled);
 }
+
 

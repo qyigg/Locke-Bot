@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -50,7 +50,7 @@ export default {
                     `**ISO String:** \`${now.toISOString()}\``
                 );
 
-                await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
             },
             'Failed to get current time. Bitte versuchen Sie es später erneut.',
             {
@@ -60,4 +60,5 @@ export default {
         );
     },
 };
+
 

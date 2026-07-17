@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -16,17 +16,17 @@ export default {
             const latency = Date.now() - startTime;
             const apiLatency = Math.max(0, Math.round(interaction.client.ws.ping));
 
-            const embed = createEmbed({ title: 'Pong!', description: null }).addFields(
+            const embed = ErstellenEmbed({ title: 'Pong!', description: null }).addFields(
                 { name: 'Bot-Latenz', value: `${latency}ms`, inline: true },
                 { name: 'API-Latenz', value: `${apiLatency}ms`, inline: true },
             );
 
-            await pingingMessage.edit({ content: null, embeds: [embed] });
+            await pingingMessage.Bearbeiten({ content: null, embeds: [embed] });
         } catch (error) {
             logger.error('Ping-Präfix-Befehlsfehler:', error);
             if (!interaction.replied && !interaction._replyMessage) {
                 await interaction.channel.send({
-                    embeds: [createEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'error' })],
+                    embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'error' })],
                 }).catch(() => {});
             }
         }
@@ -34,7 +34,7 @@ export default {
 
     async execute(interaction) {
         logger.info('execute aufgerufen - überprüfe ob Slash-Befehl oder Präfix-Befehl');
-        logger.info(`execute - hat _commandStartTime: ${!!interaction._commandStartTime}, createdTimestamp: ${interaction.createdTimestamp}`);
+        logger.info(`execute - hat _commandStartTime: ${!!interaction._commandStartTime}, ErstellendTimestamp: ${interaction.ErstellendTimestamp}`);
         
         const deferSuccess = await InteractionHelper.safeDefer(interaction);
         if (!deferSuccess) {
@@ -47,22 +47,22 @@ export default {
         }
 
         try {
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 content: "Wird gepingt...",
             });
 
-            const startTime = interaction._commandStartTime || interaction.createdTimestamp;
+            const startTime = interaction._commandStartTime || interaction.ErstellendTimestamp;
             logger.info(`execute - verwende startTime: ${startTime}, Typ: ${interaction._commandStartTime ? 'Präfix' : 'Slash'}`);
             const latency = Math.max(0, Date.now() - startTime);
             const apiLatency = Math.max(0, Math.round(interaction.client.ws.ping));
             logger.info(`execute - berechnete Latenz: ${latency}ms, apiLatenz: ${apiLatency}ms`);
 
-            const embed = createEmbed({ title: "Pong!", description: null }).addFields(
+            const embed = ErstellenEmbed({ title: "Pong!", description: null }).addFields(
                 { name: "Bot-Latenz", value: `${latency}ms`, inline: true },
                 { name: "API-Latenz", value: `${apiLatency}ms`, inline: true },
             );
 
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 content: null,
                 embeds: [embed],
             });
@@ -70,7 +70,7 @@ export default {
             logger.error('Ping-Befehlsfehler:', error);
             try {
                 return await InteractionHelper.safeReply(interaction, {
-                    embeds: [createEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'error' })],
+                    embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'error' })],
                     flags: MessageFlags.Ephemeral,
                 });
             } catch (replyError) {

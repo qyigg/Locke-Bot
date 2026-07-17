@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { getFromDb, setInDb, deleteFromDb, getUserNotesKey, getUserNotesListKey } from '../../utils/database.js';
+import { getFromDb, setInDb, LöschenFromDb, getUserNotesKey, getUserNotesListKey } from '../../utils/database.js';
 import { sanitizeInput } from '../../utils/validation.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -207,7 +207,7 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
     }
 
     // The view command displays notes sorted newest-first, so resolve the index
-    // against the same ordering to delete the note Der Benutzer actually sees.
+    // against the same ordering to Löschen the note Der Benutzer actually sees.
     const sortedNotes = [...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const removedNote = sortedNotes[index];
     const originalIndex = notes.indexOf(removedNote);
@@ -269,4 +269,5 @@ function getNoteTypeInfo(type) {
     
     return types[type] || types.neutral;
 }
+
 

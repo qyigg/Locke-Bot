@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
@@ -23,8 +23,8 @@ export default {
         )
         .addIntegerOption(option =>
             option
-                .setName("delete_days")
-                .setDescription("Number of days of messages to delete (0-7)")
+                .setName("Löschen_days")
+                .setDescription("Number of days of messages to Löschen (0-7)")
                 .setMinValue(0)
                 .setMaxValue(7)
                 .setRequired(false)
@@ -46,7 +46,7 @@ export default {
 
         const usersInput = interaction.options.getString("users");
         const reason = interaction.options.getString("reason") || "Mass ban - Kein Grund angegeben";
-        const deleteDays = interaction.options.getInteger("delete_days") || 0;
+        const LöschenDays = interaction.options.getInteger("Löschen_days") || 0;
 
         try {
             const userIds = usersInput
@@ -108,7 +108,7 @@ export default {
 
                     await interaction.guild.members.ban(userId, {
                         reason: reason,
-                        deleteMessageSeconds: deleteDays * 24 * 60 * 60
+                        LöschenMessageSeconds: LöschenDays * 24 * 60 * 60
                     });
 
                     results.successful.push({
@@ -172,7 +172,7 @@ export default {
 
             const embed = results.successful.length > 0 ? successEmbed : warningEmbed;
             
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [
                     embed(
                         `🔨 Mass Ban Completed`,
@@ -187,4 +187,5 @@ export default {
         }
     }
 };
+
 

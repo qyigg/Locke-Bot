@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
@@ -108,7 +108,7 @@ export default {
                     .setStyle(ButtonStyle.Primary)
             );
 
-        const response = await interaction.editReply({
+        const response = await interaction.BearbeitenReply({
             content: shouldMention ? `${selectedMember}, you've been chosen!` : null,
             embeds: [embed],
             components: [row],
@@ -116,7 +116,7 @@ export default {
         });
 
         const filter = (i) => i.customId === `randomuser_${interaction.user.id}_again` && i.user.id === interaction.user.id;
-        const collector = response.createMessageComponentCollector({ filter, time: 300000 });
+        const collector = response.ErstellenMessageComponentCollector({ filter, time: 300000 });
 
         collector.on('collect', async (i) => {
             try {
@@ -166,7 +166,7 @@ export default {
                 )
                 .setColor(newSelectedMember.displayHexColor || '#3498db');
 
-                await i.update({
+                await i.Aktualisieren({
                     content: shouldMention ? `${newSelectedMember}, you've been chosen!` : null,
                     embeds: [newEmbed],
                     components: [row],
@@ -187,8 +187,9 @@ export default {
                 ButtonBuilder.from(row.components[0]).setDisabled(true)
             );
 
-            interaction.editReply({ components: [disabledRow] }).catch(console.error);
+            interaction.BearbeitenReply({ components: [disabledRow] }).catch(console.error);
         });
     },
 };
+
 

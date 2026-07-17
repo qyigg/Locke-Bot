@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+﻿import { logger } from '../utils/logger.js';
 
 const COUNTING_GAME_KEY_PREFIX = 'countingGame:';
 
@@ -112,7 +112,7 @@ const COUNTING_SYSTEMS = {
   },
   math: {
     label: 'Math Expressions',
-    description: 'Use a math expression that equals the next number, like 4*4=16',
+    description: 'Use a math expression that equals the Nächste number, like 4*4=16',
     toString: (n) => `${n}`,
     parse: (value) => {
       const expression = value.replace(/\s+/g, '');
@@ -123,7 +123,7 @@ const COUNTING_SYSTEMS = {
       try {
         const evaluate = (expr) => {
           if (!expr || /[^0-9+\-*/().]/.test(expr)) return null;
-          // eslint-disable-next-line no-new-func
+          // eslint-disable-Nächste-line no-new-func
           return Function(`"use strict"; return (${expr});`)();
         };
 
@@ -173,7 +173,7 @@ const DEFAULT_COUNTING_GAME = {
   enabled: false,
   channelId: null,
   system: 'decimal',
-  nextNumber: 1,
+  NächsteNumber: 1,
   lastUserId: null,
   currentStreak: 0,
   bestStreak: 0,
@@ -208,7 +208,7 @@ export async function getCountingGameConfig(client, guildId) {
   }
 }
 
-export async function saveCountingGameConfig(client, guildId, state) {
+export async function SpeichernCountingGameConfig(client, guildId, state) {
   const normalized = normalizeCountingGame(state);
   await client.db.set(getStorageKey(guildId), normalized);
   return normalized;
@@ -216,14 +216,14 @@ export async function saveCountingGameConfig(client, guildId, state) {
 
 export async function disableCountingGame(client, guildId) {
   const config = await getCountingGameConfig(client, guildId);
-  return saveCountingGameConfig(client, guildId, { ...config, enabled: false });
+  return SpeichernCountingGameConfig(client, guildId, { ...config, enabled: false });
 }
 
 export async function resetCountingGame(client, guildId, startNumber = 1) {
   const config = await getCountingGameConfig(client, guildId);
-  return saveCountingGameConfig(client, guildId, {
+  return SpeichernCountingGameConfig(client, guildId, {
     ...config,
-    nextNumber: startNumber,
+    NächsteNumber: startNumber,
     lastUserId: null,
     currentStreak: 0,
   });
@@ -234,16 +234,16 @@ export async function recordCorrectCount(client, guildId, userId) {
   const leaderboard = { ...config.leaderboard };
   leaderboard[userId] = (leaderboard[userId] || 0) + 1;
 
-  const updatedConfig = {
+  const AktualisierendConfig = {
     ...config,
     leaderboard,
     lastUserId: userId,
     currentStreak: (config.currentStreak || 0) + 1,
     bestStreak: Math.max(config.bestStreak || 0, (config.currentStreak || 0) + 1),
-    nextNumber: (config.nextNumber || 1) + 1,
+    NächsteNumber: (config.NächsteNumber || 1) + 1,
   };
 
-  return saveCountingGameConfig(client, guildId, updatedConfig);
+  return SpeichernCountingGameConfig(client, guildId, AktualisierendConfig);
 }
 
 export function getCountingSystemChoices() {
@@ -259,7 +259,7 @@ export function getCountingSystemLabel(systemKey) {
 
 export function getExpectedCountValue(config) {
   const system = COUNTING_SYSTEMS[config.system] ? config.system : 'decimal';
-  return COUNTING_SYSTEMS[system].toString(config.nextNumber || 1);
+  return COUNTING_SYSTEMS[system].toString(config.NächsteNumber || 1);
 }
 
 export function isValidCountingMessage(content, config) {
@@ -268,10 +268,10 @@ export function isValidCountingMessage(content, config) {
   const current = COUNTING_SYSTEMS[system];
   if (system === 'math') {
     const parsedValue = current.parse(trimmed);
-    return parsedValue === config.nextNumber;
+    return parsedValue === config.NächsteNumber;
   }
 
-  const expected = current.toString(config.nextNumber || 1);
+  const expected = current.toString(config.NächsteNumber || 1);
   if (system === 'alphabet' || system === 'roman') {
     return trimmed.toUpperCase() === expected.toUpperCase();
   }
@@ -284,14 +284,14 @@ export async function activateCountingGame(client, guildId, channelId, system = 
     enabled: true,
     channelId,
     system: normalizedSystem,
-    nextNumber: 1,
+    NächsteNumber: 1,
     lastUserId: null,
     currentStreak: 0,
     bestStreak: 0,
     leaderboard: {},
   });
 
-  return saveCountingGameConfig(client, guildId, config);
+  return SpeichernCountingGameConfig(client, guildId, config);
 }
 
 export function buildCountingLeaderboard(config, guild) {
@@ -309,3 +309,4 @@ export function buildCountingLeaderboard(config, guild) {
       return `**${index + 1}.** ${username} — ${count} ${count === 1 ? 'count' : 'counts'}`;
     });
 }
+

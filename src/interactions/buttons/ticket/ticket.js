@@ -1,20 +1,20 @@
-import createTicketHandler, {
-  closeTicketHandler,
+﻿import ErstellenTicketHandler, {
+  SchließenTicketHandler,
   claimTicketHandler,
   priorityTicketHandler,
   pinTicketHandler,
   unclaimTicketHandler,
   reopenTicketHandler,
-  deleteTicketHandler,
+  LöschenTicketHandler,
 } from '../../../handlers/ticketButtons.js';
 
 export default [
-  createTicketHandler,
-  closeTicketHandler,
+  ErstellenTicketHandler,
+  SchließenTicketHandler,
   claimTicketHandler,
   priorityTicketHandler,
   pinTicketHandler,
   unclaimTicketHandler,
   reopenTicketHandler,
-  deleteTicketHandler,
+  LöschenTicketHandler,
 ];

@@ -1,13 +1,13 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logger } from '../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from '../services/config/guildConfig.js';
 
 export default {
-  name: Events.GuildCreate,
+  name: Events.GuildErstellen,
   async execute(guild, client) {
     try {
       logger.info('Bot joined guild', {
-        event: 'guild.create',
+        event: 'guild.Erstellen',
         guildId: guild.id,
         guildName: guild.name,
         memberCount: guild.memberCount,
@@ -20,3 +20,4 @@ export default {
     }
   },
 };
+

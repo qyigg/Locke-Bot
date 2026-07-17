@@ -1,4 +1,4 @@
-import { createEmbed } from '../../../utils/embeds.js';
+﻿import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 
@@ -7,7 +7,7 @@ export default {
         const query = interaction.options.getString('query');
         const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 
-        const embed = createEmbed({
+        const embed = ErstellenEmbed({
             title: 'Google Search',
             description: `[Search for "${query}"](${searchUrl})`,
             color: 'info'
@@ -24,3 +24,4 @@ export default {
         });
     },
 };
+

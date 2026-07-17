@@ -1,9 +1,9 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
 
 export default {
-  name: Events.UserUpdate,
+  name: Events.UserAktualisieren,
   once: false,
 
   async execute(oldUser, newUser) {
@@ -52,7 +52,7 @@ export default {
           guildId: guild.id,
           eventType: EVENT_TYPES.MEMBER_NAME_CHANGE,
           data: {
-            description: `${newUser.tag} updated their username`,
+            description: `${newUser.tag} Aktualisierend their username`,
             userId: newUser.id,
             fields: [
               {
@@ -66,9 +66,9 @@ export default {
         });
       }
 
-      logger.debug(`Processed userUpdate for ${newUser.id} across ${guilds.length} guild(s)`);
+      logger.debug(`Processed userAktualisieren for ${newUser.id} across ${guilds.length} guild(s)`);
     } catch (error) {
-      logger.error('Error in userUpdate event:', error);
+      logger.error('Error in userAktualisieren event:', error);
     }
   }
 };

@@ -49,7 +49,7 @@ function buildSharedTodoViewPayload(listData, listId, guild) {
   const taskList = tasks
     .map(task =>
       `${task.completed ? '✅' : '📝'} #${task.id} ${task.text} ` +
-      `\`[${new Date(task.createdAt).toLocaleDateString()}]` +
+      `\`[${new Date(task.ErstellendAt).toLocaleDateString()}]` +
       (task.completed ? ` • Completed by <@${task.completedBy}>` : '') + '`'
     )
     .join('\n');
@@ -100,8 +100,8 @@ async function refreshSharedTodoMessage(interaction, listId, messageId) {
       return;
     }
 
-    const updatedPayload = buildSharedTodoViewPayload(listData, listId, interaction.guild);
-    await targetMessage.edit(updatedPayload);
+    const AktualisierendPayload = buildSharedTodoViewPayload(listData, listId, interaction.guild);
+    await targetMessage.Bearbeiten(AktualisierendPayload);
   } catch (error) {
     logger.warn('Unable to refresh shared todo view message', {
       listId,
@@ -234,14 +234,14 @@ const sharedTodoAddModalHandler = {
       }
 
       if (!listData.tasks) listData.tasks = [];
-      if (!listData.nextId) listData.nextId = 1;
+      if (!listData.NächsteId) listData.NächsteId = 1;
 
       const newTask = {
-        id: listData.nextId++,
+        id: listData.NächsteId++,
         text: taskText,
         completed: false,
-        createdAt: new Date().toISOString(),
-        createdBy: userId
+        ErstellendAt: new Date().toISOString(),
+        ErstellendBy: userId
       };
       
       listData.tasks.push(newTask);
@@ -386,4 +386,5 @@ const sharedTodoRemoveModalHandler = {
 
 export default sharedTodoAddHandler;
 export { sharedTodoCompleteHandler, sharedTodoRemoveHandler, sharedTodoAddModalHandler, sharedTodoCompleteModalHandler, sharedTodoRemoveModalHandler };
+
 

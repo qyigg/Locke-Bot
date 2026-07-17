@@ -1,10 +1,10 @@
-﻿import { createRequire } from 'module';
+﻿import { ErstellenRequire } from 'module';
 import { GatewayDispatchEvents } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import lavalinkConfig from '../../config/music/lavalink.js';
 import { setupPlayerHandler } from './playerHandler.js';
 
-const require = createRequire(import.meta.url);
+const require = ErstellenRequire(import.meta.url);
 const { Riffy } = require('riffy');
 
 export function initializeMusic(client) {
@@ -32,13 +32,13 @@ export function initializeMusic(client) {
     client.on('raw', (packet) => {
         if (
             ![
-                GatewayDispatchEvents.VoiceStateUpdate,
-                GatewayDispatchEvents.VoiceServerUpdate,
+                GatewayDispatchEvents.VoiceStateAktualisieren,
+                GatewayDispatchEvents.VoiceServerAktualisieren,
             ].includes(packet.t)
         ) {
             return;
         }
-        client.riffy.updateVoiceState(packet);
+        client.riffy.AktualisierenVoiceState(packet);
     });
 
     client.riffy.on('playerError', (player, error) => {
@@ -54,4 +54,5 @@ export function initRiffyAfterReady(client) {
         logger.info('Riffy voice connection manager initialized.');
     }
 }
+
 

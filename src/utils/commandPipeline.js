@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Standard slash-command export shape.
  *
  * Usage:
@@ -6,9 +6,9 @@
  *     data: new SlashCommandBuilder()...,
  *     category: 'economy',
  *     async execute(interaction, config, client) {
- *       // throw TitanBotError / createError on failure
+ *       // throw TitanBotError / ErstellenError on failure
  *       // use replyUserError for early validation returns
- *       // do NOT wrap in try/catch — interactionCreate handles errors
+ *       // do NOT wrap in try/catch — interactionErstellen handles errors
  *     },
  *   });
  */
@@ -19,3 +19,4 @@ export function defineSlashCommand(command) {
     }
     return command;
 }
+

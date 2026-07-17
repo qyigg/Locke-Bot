@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType } from 'discord.js';
+import { ErstellenEmbed, errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
 export default {
@@ -35,14 +35,14 @@ export default {
                 channelId: interaction.channelId,
                 guildId: interaction.guildId
             });
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [successEmbed('First Message', "No messages found in this channel!")],
             });
         }
 
         const messageLink = `https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${firstMessage.id}`;
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
                     "First Message in #" + interaction.channel.name,

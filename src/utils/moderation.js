@@ -1,4 +1,4 @@
-// moderation.js
+﻿// moderation.js
 
 import { logEvent as logAuditEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { formatLogLine } from './logging/logEmbeds.js';
@@ -19,9 +19,9 @@ const ACTION_TO_EVENT_TYPE = {
   'DM Sent': EVENT_TYPES.MODERATION_DM,
   'Bot Message Sent': EVENT_TYPES.MODERATION_CONFIG,
   'Log Channel Activated': EVENT_TYPES.MODERATION_CONFIG,
-  'Log Filter Updated': EVENT_TYPES.MODERATION_CONFIG,
-  'Case Created': EVENT_TYPES.MODERATION_CONFIG,
-  'Case Updated': EVENT_TYPES.MODERATION_CONFIG,
+  'Log Filter Aktualisierend': EVENT_TYPES.MODERATION_CONFIG,
+  'Case Erstellend': EVENT_TYPES.MODERATION_CONFIG,
+  'Case Aktualisierend': EVENT_TYPES.MODERATION_CONFIG,
 };
 
 function buildModerationLogData(event) {
@@ -100,9 +100,9 @@ export async function generateCaseId(client, guildId) {
   try {
     const caseKey = `moderation_cases_${guildId}`;
     const currentCase = await getFromDb(caseKey, 0);
-    const nextCase = currentCase + 1;
-    await setInDb(caseKey, nextCase);
-    return nextCase;
+    const NächsteCase = currentCase + 1;
+    await setInDb(caseKey, NächsteCase);
+    return NächsteCase;
   } catch (error) {
     logger.error("Error generating case ID:", error);
 return Date.now();
@@ -114,7 +114,7 @@ export async function storeModerationCase({ guildId, caseId, caseData }) {
     const caseKey = `moderation_case_${guildId}_${caseId}`;
     const caseDataWithTimestamp = {
       ...caseData,
-      createdAt: new Date().toISOString(),
+      ErstellendAt: new Date().toISOString(),
       caseId
     };
     
@@ -159,7 +159,7 @@ export async function getModerationCases(guildId, filters = {}) {
       filteredCases = filteredCases.filter(case_ => case_.action === action);
     }
     
-    filteredCases.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    filteredCases.sort((a, b) => new Date(b.ErstellendAt) - new Date(a.ErstellendAt));
     
     return filteredCases.slice(offset, offset + limit);
   } catch (error) {

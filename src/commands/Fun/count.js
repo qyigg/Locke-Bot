@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import {
   getCountingGameConfig,
@@ -89,7 +89,7 @@ export default {
         }
 
         await activateCountingGame(interaction.client, guildId, channel.id, system);
-        return await InteractionHelper.safeEditReply(interaction, {
+        return await InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [
             successEmbed(
               'Zählspiel aktiviert',
@@ -101,13 +101,13 @@ export default {
 
       if (subcommand === 'disable') {
         if (!config.enabled) {
-          return await InteractionHelper.safeEditReply(interaction, {
+          return await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [infoEmbed('Zählspiel deaktiviert', 'Das Zählspiel ist für diesen Server bereits deaktiviert.')],
           });
         }
 
         await disableCountingGame(interaction.client, guildId);
-        return await InteractionHelper.safeEditReply(interaction, {
+        return await InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [successEmbed('Zählspiel deaktiviert', 'Das Zählspiel wurde deaktiviert.')],
         });
       }
@@ -123,9 +123,9 @@ export default {
           { name: 'Letzter Zähler', value: config.lastUserId ? `<@${config.lastUserId}>` : 'Keiner', inline: true },
         ];
 
-        return await InteractionHelper.safeEditReply(interaction, {
+        return await InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [
-            createEmbed({
+            ErstellenEmbed({
               title: 'Status des Zählspiels',
               description: 'Überblick über das aktuell konfigurierte Zählspiel.',
               fields,
@@ -143,7 +143,7 @@ export default {
         const startNumber = interaction.options.getInteger('start') || 1;
         await resetCountingGame(interaction.client, guildId, startNumber);
 
-        return await InteractionHelper.safeEditReply(interaction, {
+        return await InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [
             successEmbed(
               'Zählspiel zurückgesetzt',
@@ -156,9 +156,9 @@ export default {
       if (subcommand === 'leaderboard') {
         const leaderboard = buildCountingLeaderboard(config, interaction.guild);
 
-        return await InteractionHelper.safeEditReply(interaction, {
+        return await InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [
-            createEmbed({
+            ErstellenEmbed({
               title: 'Bestenliste des Zählspiels',
               description: leaderboard.length > 0 ? leaderboard.join('\n') : 'Es wurden noch keine Zählungen aufgezeichnet.',
               color: 'primary',
@@ -174,4 +174,5 @@ export default {
     }
   },
 };
+
 

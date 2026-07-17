@@ -1,11 +1,11 @@
-import {
+﻿import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
 } from 'discord.js';
-import { createEmbed } from '../../../utils/embeds.js';
+import { ErstellenEmbed } from '../../../utils/embeds.js';
 import {
   getCommandAccessSnapshot,
   disableCategory,
@@ -57,12 +57,12 @@ function chunkLines(lines, maxLength = 980) {
   let current = '';
 
   for (const line of lines) {
-    const next = current ? `${current}\n${line}` : line;
-    if (next.length > maxLength && current) {
+    const Nächste = current ? `${current}\n${line}` : line;
+    if (Nächste.length > maxLength && current) {
       chunks.push(current);
       current = line;
     } else {
-      current = next;
+      current = Nächste;
     }
   }
 
@@ -114,11 +114,11 @@ export function buildOverviewEmbed(snapshot, guild) {
     value: [
       '• Select a category below to manage commands and subcommands',
       '• `/commands disable` — turn off a category or specific command',
-      '• `/commands enable` — turn something back on',
+      '• `/commands enable` — turn something Zurück on',
     ].join('\n'),
   });
 
-  return createEmbed({
+  return ErstellenEmbed({
     title: '⚙️ Command Access',
     description: `Manage slash and prefix commands for **${guild.name}**. Subcommands (e.g. \`birthday list\`) are listed separately.`,
     color: 'info',
@@ -173,7 +173,7 @@ export function buildCategoryEmbed(category, guild) {
     ].join('\n'),
   });
 
-  return createEmbed({
+  return ErstellenEmbed({
     title: `${category.icon} ${category.displayName}`,
     description: `Command access for **${guild.name}**.`,
     color: category.categoryDisabled ? 'error' : category.disabledCount > 0 ? 'warning' : 'success',
@@ -321,20 +321,20 @@ export async function handleDashboardComponent(interaction, client) {
     }
 
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', categoryKey);
-    return interaction.update({ embeds: [view.embed], components: view.components });
+    return interaction.Aktualisieren({ embeds: [view.embed], components: view.components });
   }
 
   if (action === DASHBOARD_CATEGORY_SELECT) {
     const categoryKey = interaction.values[0];
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', categoryKey);
-    return interaction.update({ embeds: [view.embed], components: view.components });
+    return interaction.Aktualisieren({ embeds: [view.embed], components: view.components });
   }
 
-  await interaction.deferUpdate();
+  await interaction.deferAktualisieren();
 
   if (action === DASHBOARD_REFRESH || action === DASHBOARD_HOME) {
     const view = await buildDashboardView(client, guildId, interaction.guild, 'overview');
-    return interaction.editReply({ embeds: [view.embed], components: view.components });
+    return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
 
   if (action === DASHBOARD_TOGGLE_CATEGORY) {
@@ -350,38 +350,39 @@ export async function handleDashboardComponent(interaction, client) {
     }
 
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', categoryKey);
-    return interaction.editReply({ embeds: [view.embed], components: view.components });
+    return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
 
   if (action === DASHBOARD_ENABLE_ALL) {
     await enableCategory(client, guildId, suffix);
     await resetCategoryCommands(client, guildId, suffix);
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', suffix);
-    return interaction.editReply({ embeds: [view.embed], components: view.components });
+    return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
 
   if (action === DASHBOARD_DISABLE_ALL) {
     await disableCategory(client, guildId, suffix);
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', suffix);
-    return interaction.editReply({ embeds: [view.embed], components: view.components });
+    return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
 
   if (action === DASHBOARD_RESET_COMMANDS) {
     await enableCategory(client, guildId, suffix);
     await resetCategoryCommands(client, guildId, suffix);
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', suffix);
-    return interaction.editReply({ embeds: [view.embed], components: view.components });
+    return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
 
-  return interaction.editReply({ content: 'Unknown dashboard action.', embeds: [], components: [] });
+  return interaction.BearbeitenReply({ content: 'Unknown dashboard action.', embeds: [], components: [] });
 }
 
 export function isCommandAccessCustomId(customIdValue) {
   return customIdValue.startsWith('cmdaccess_');
 }
 
-export function createDashboardCollectorFilter(userId, guildId) {
+export function ErstellenDashboardCollectorFilter(userId, guildId) {
   return (componentInteraction) =>
     componentInteraction.user.id === userId &&
     componentInteraction.customId.includes(`:${guildId}`);
 }
+

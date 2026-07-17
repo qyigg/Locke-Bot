@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { sanitizeMarkdown } from '../../utils/validation.js';
@@ -59,7 +59,7 @@ export default {
 
             const sanitized = sanitizeMarkdown(message);
 
-            const dmChannel = await targetUser.createDM();
+            const dmChannel = await targetUser.ErstellenDM();
             
             await dmChannel.send({
                 embeds: [
@@ -89,7 +89,7 @@ export default {
                 }
             });
 
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [
                     successEmbed(
                         "DM Sent",
@@ -108,3 +108,4 @@ if (error.code === 50007) {
         }
     }
 };
+

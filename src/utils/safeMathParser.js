@@ -1,4 +1,4 @@
-// safeMathParser.js
+﻿// safeMathParser.js
 
 const SUPPORTED_FUNCTIONS = Object.freeze({
   sin: Math.sin,
@@ -137,25 +137,25 @@ function tokenize(expression) {
 function toRpn(tokens) {
   const output = [];
   const stack = [];
-  let previousTokenType = null;
+  let VorherigeTokenType = null;
 
   for (const token of tokens) {
     if (token.type === 'number') {
       output.push(token);
-      previousTokenType = 'number';
+      VorherigeTokenType = 'number';
       continue;
     }
 
     if (token.type === 'function') {
       stack.push(token);
-      previousTokenType = 'function';
+      VorherigeTokenType = 'function';
       continue;
     }
 
     if (token.type === 'operator') {
       let operatorValue = token.value;
 
-      if (operatorValue === '-' && (previousTokenType === null || previousTokenType === 'operator' || previousTokenType === 'leftParen' || previousTokenType === 'function')) {
+      if (operatorValue === '-' && (VorherigeTokenType === null || VorherigeTokenType === 'operator' || VorherigeTokenType === 'leftParen' || VorherigeTokenType === 'function')) {
         operatorValue = 'u-';
       }
 
@@ -177,13 +177,13 @@ function toRpn(tokens) {
       }
 
       stack.push({ type: 'operator', value: operatorValue });
-      previousTokenType = 'operator';
+      VorherigeTokenType = 'operator';
       continue;
     }
 
     if (token.type === 'leftParen') {
       stack.push(token);
-      previousTokenType = 'leftParen';
+      VorherigeTokenType = 'leftParen';
       continue;
     }
 
@@ -208,7 +208,7 @@ function toRpn(tokens) {
         output.push(stack.pop());
       }
 
-      previousTokenType = 'rightParen';
+      VorherigeTokenType = 'rightParen';
     }
   }
 

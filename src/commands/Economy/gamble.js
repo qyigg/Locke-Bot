@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const BASE_WIN_CHANCE = 0.4;
@@ -41,7 +41,7 @@ export default {
                 const minutes = Math.floor(remaining / (1000 * 60));
                 const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
-                throw createError(
+                throw ErstellenError(
                     "Gamble cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du musst dich abkühlen, bevor du wieder spielst. Warte **${minutes}m ${seconds}s**.`,
@@ -50,7 +50,7 @@ export default {
             }
 
             if (userData.wallet < betAmount) {
-                throw createError(
+                throw ErstellenError(
                     "Insufficient cash for gamble",
                     ErrorTypes.VALIDATION,
                     `Du hast nur $${userData.wallet.toLocaleString()} Bargeld, aber du versuchst zu wetten $${betAmount.toLocaleString()}.`,
@@ -122,10 +122,11 @@ userData.lastGamble = now;
                 });
             } else {
                 resultEmbed.setFooter({
-                    text: `Next gamble available in 5 minutes. Base win chance: ${Math.round(BASE_WIN_CHANCE * 100)}%.`,
+                    text: `Nächste gamble available in 5 minutes. Base win chance: ${Math.round(BASE_WIN_CHANCE * 100)}%.`,
                 });
             }
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [resultEmbed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [resultEmbed] });
     }, { command: 'gamble' })
 };
+

@@ -6,7 +6,7 @@ import { normalizeEconomyData } from './schemas.js';
 import { logger } from './logger.js';
 import { validateDiscordId, validateNumber } from './validation.js';
 import { DEFAULT_ECONOMY_DATA } from './constants.js';
-import { createError, ErrorTypes, wrapServiceBoundary } from './errorHandler.js';
+import { ErstellenError, ErrorTypes, wrapServiceBoundary } from './errorHandler.js';
 
 const ECONOMY_CONFIG = BotConfig.economy || {};
 const BASE_BANK_CAPACITY = ECONOMY_CONFIG.baseBankCapacity || 10000;
@@ -92,7 +92,7 @@ export async function setEconomyData(client, guildId, userId, data) {
     }
 }
 
-export async function updateBalance(client, guildId, userId, options = {}) {
+export async function AktualisierenBalance(client, guildId, userId, options = {}) {
     const data = await getEconomyData(client, guildId, userId);
     
     if (options.wallet !== undefined) {
@@ -248,7 +248,7 @@ export function formatShopItem(item, index) {
 export const addMoney = wrapServiceBoundary(async function addMoney(client, guildId, userId, amount, type = 'wallet') {
     const validAmount = validateNumber(amount, 'amount');
     if (validAmount === null || validAmount <= 0) {
-        throw createError(
+        throw ErstellenError(
             'Ungültiger Betrag',
             ErrorTypes.VALIDATION,
             'Der Betrag muss eine positive Zahl sein.',
@@ -257,7 +257,7 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        throw createError(
+        throw ErstellenError(
             'Invalid money type',
             ErrorTypes.VALIDATION,
             'Type must be "wallet" or "bank".',
@@ -270,7 +270,7 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
     if (type === 'bank') {
         const maxBank = getMaxBankCapacity(userData);
         if ((userData.bank || 0) + validAmount > maxBank) {
-            throw createError(
+            throw ErstellenError(
                 'Bankkapazität überschritten',
                 ErrorTypes.VALIDATION,
                 `Bankkapazität überschritten. Current: ${userData.bank || 0}, Max: ${maxBank}.`,
@@ -297,7 +297,7 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
 export const removeMoney = wrapServiceBoundary(async function removeMoney(client, guildId, userId, amount, type = 'wallet') {
     const validAmount = validateNumber(amount, 'amount');
     if (validAmount === null || validAmount <= 0) {
-        throw createError(
+        throw ErstellenError(
             'Ungültiger Betrag',
             ErrorTypes.VALIDATION,
             'Der Betrag muss eine positive Zahl sein.',
@@ -306,7 +306,7 @@ export const removeMoney = wrapServiceBoundary(async function removeMoney(client
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        throw createError(
+        throw ErstellenError(
             'Invalid money type',
             ErrorTypes.VALIDATION,
             'Type must be "wallet" or "bank".',
@@ -318,7 +318,7 @@ export const removeMoney = wrapServiceBoundary(async function removeMoney(client
 
     if (type === 'bank') {
         if ((userData.bank || 0) < validAmount) {
-            throw createError(
+            throw ErstellenError(
                 'Insufficient bank funds',
                 ErrorTypes.VALIDATION,
                 `Insufficient funds in bank. You have ${userData.bank || 0}, need ${validAmount}.`,
@@ -328,7 +328,7 @@ export const removeMoney = wrapServiceBoundary(async function removeMoney(client
         userData.bank = (userData.bank || 0) - validAmount;
     } else {
         if ((userData.wallet || 0) < validAmount) {
-            throw createError(
+            throw ErstellenError(
                 'Insufficient wallet funds',
                 ErrorTypes.VALIDATION,
                 `Insufficient funds in wallet. You have ${userData.wallet || 0}, need ${validAmount}.`,
@@ -397,4 +397,5 @@ export function getShopInventory() {
         }
     ];
 }
+
 

@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -19,7 +19,7 @@ export default {
     const user = interaction.options.getUser("target") || interaction.user;
     const avatarUrl = user.displayAvatarURL({ size: 2048, dynamic: true });
 
-    const embed = createEmbed({ 
+    const embed = ErstellenEmbed({ 
       title: `${user.username}'s Avatar`, 
       description: `[Download Link](${avatarUrl})` 
     })
@@ -33,3 +33,4 @@ export default {
     });
   }
 };
+

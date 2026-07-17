@@ -119,12 +119,12 @@ function normalizeCounter(counter, guildId) {
     type: String(counter.type),
     channelId: String(counter.channelId),
     guildId: String(counter.guildId || guildId),
-    createdAt: counter.createdAt || new Date().toISOString(),
+    ErstellendAt: counter.ErstellendAt || new Date().toISOString(),
     enabled: typeof counter.enabled === 'boolean' ? counter.enabled : true
   };
 
-  if (counter.updatedAt) {
-    normalized.updatedAt = counter.updatedAt;
+  if (counter.AktualisierendAt) {
+    normalized.AktualisierendAt = counter.AktualisierendAt;
   }
 
   return normalized;
@@ -140,10 +140,10 @@ function sanitizeCounters(counters, guildId) {
     .map(counter => normalizeCounter(counter, guildId));
 }
 
-export async function updateCounter(client, guild, counter) {
+export async function AktualisierenCounter(client, guild, counter) {
   try {
     if (!counter || !counter.type || !counter.channelId) {
-      logger.warn('Skipping invalid counter in updateCounter:', counter);
+      logger.warn('Skipping invalid counter in AktualisierenCounter:', counter);
       return false;
     }
     
@@ -157,7 +157,7 @@ export async function updateCounter(client, guild, counter) {
       }
     }
     if (!channel) {
-      logger.warn(`Counter channel ${channelId} Nicht gefunden in guild ${guild.id}, skipping update`);
+      logger.warn(`Counter channel ${channelId} Nicht gefunden in guild ${guild.id}, skipping Aktualisieren`);
       return false;
     }
 
@@ -181,16 +181,16 @@ export async function updateCounter(client, guild, counter) {
       try {
         await channel.setName(newName);
         if (process.env.NODE_ENV !== 'production') {
-          logger.debug(`Updated channel name to: "${newName}"`);
+          logger.debug(`Aktualisierend channel name to: "${newName}"`);
         }
 
         try {
           await logEvent({
             client,
             guildId: guild.id,
-            eventType: EVENT_TYPES.COUNTER_UPDATE,
+            eventType: EVENT_TYPES.COUNTER_Aktualisieren,
             data: {
-              title: 'Counter Updated',
+              title: 'Counter Aktualisierend',
               lines: [
                 formatLogLine('Type', getCounterTypeLabel(type)),
                 formatLogLine('Count', count.toString()),
@@ -200,16 +200,16 @@ export async function updateCounter(client, guild, counter) {
             },
           });
         } catch (error) {
-          logger.debug('Error logging counter update:', error);
+          logger.debug('Error logging counter Aktualisieren:', error);
         }
 
       } catch (error) {
-        logger.error(`Failed to update channel name for ${channel.id}:`, error);
+        logger.error(`Failed to Aktualisieren channel name for ${channel.id}:`, error);
         return false;
       }
     } else {
       if (process.env.NODE_ENV !== 'production') {
-        logger.debug('Channel name already correct, no update needed');
+        logger.debug('Channel name already correct, no Aktualisieren needed');
       }
     }
     return true;
@@ -257,10 +257,10 @@ export async function getServerCounters(client, guildId) {
   }
 }
 
-export async function saveServerCounters(client, guildId, counters) {
+export async function SpeichernServerCounters(client, guildId, counters) {
   try {
     if (!client || !client.db) {
-      logger.warn('Database not available for saveServerCounters');
+      logger.warn('Database not available for SpeichernServerCounters');
       return false;
     }
     
@@ -280,3 +280,4 @@ export async function saveServerCounters(client, guildId, counters) {
     return false;
   }
 }
+

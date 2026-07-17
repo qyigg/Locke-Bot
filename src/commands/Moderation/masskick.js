@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
@@ -164,7 +164,7 @@ export default {
 
             const embed = results.successful.length > 0 ? successEmbed : warningEmbed;
             
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [
                     embed(
                         `👢 Mass Kick Completed`,
@@ -179,4 +179,5 @@ export default {
         }
     }
 };
+
 

@@ -3,9 +3,9 @@ import { getColor } from '../../../config/bot.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
 import { getLoggingStatus } from '../../../services/loggingService.js';
 import {
-  createLoggingDashboardComponents,
-  createLoggingCategoryViewComponents,
-  createLoggingFilterComponents,
+  ErstellenLoggingDashboardComponents,
+  ErstellenLoggingCategoryViewComponents,
+  ErstellenLoggingFilterComponents,
   DASHBOARD_CATEGORIES,
   DASHBOARD_CATEGORY_LABELS,
   EVENT_TYPES_BY_CATEGORY,
@@ -93,7 +93,7 @@ export async function buildLoggingDashboardView(interaction, client) {
     .setFooter({ text: 'Ticket channels: configure via /ticket dashboard' })
     .setTimestamp();
 
-  const components = createLoggingDashboardComponents(loggingStatus.enabledEvents, auditEnabled);
+  const components = ErstellenLoggingDashboardComponents(loggingStatus.enabledEvents, auditEnabled);
   return { embed, components };
 }
 
@@ -119,7 +119,7 @@ export async function buildLoggingCategoriesView(interaction, client) {
     .setFooter({ text: 'Green = logging on · Red = logging off' })
     .setTimestamp();
 
-  const components = createLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditEnabled);
+  const components = ErstellenLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditEnabled);
   return { embed, components };
 }
 
@@ -146,7 +146,7 @@ export async function buildLoggingFilterView(interaction, client) {
     .setFooter({ text: 'Use the buttons below to add or remove filters' })
     .setTimestamp();
 
-  const components = createLoggingFilterComponents();
+  const components = ErstellenLoggingFilterComponents();
   return { embed, components };
 }
 
@@ -168,7 +168,7 @@ export async function refreshDashboardMessage(interaction, client) {
     view = await buildLoggingDashboardView(interaction, client);
   }
 
-  await interaction.message.edit({
+  await interaction.message.Bearbeiten({
     embeds: [view.embed],
     components: view.components,
     content: null,
@@ -185,11 +185,12 @@ export default {
 
       await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
       const { embed, components } = await buildLoggingDashboardView(interaction, client);
-      await InteractionHelper.safeEditReply(interaction, { embeds: [embed], components });
+      await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed], components });
     } catch (error) {
       logger.error('logging_dashboard error:', error);
       await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to load the logging dashboard.' });
     }
   },
 };
+
 

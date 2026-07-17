@@ -1,6 +1,6 @@
-import { EmbedBuilder } from 'discord.js';
+﻿import { EmbedBuilder } from 'discord.js';
 import { getAllBirthdays } from '../../../services/birthdayService.js';
-import { deleteBirthday } from '../../../utils/database.js';
+import { LöschenBirthday } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -17,7 +17,7 @@ export default {
                 .setColor(0xFF0000)
                 .setTitle('Keine Geburtstage')
                 .setDescription('In diesem Server wurden noch keine Geburtstage eingestellt.');
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [embed]
             });
         }
@@ -40,7 +40,7 @@ export default {
 
         if (fetchedMembers && staleUserIds.length > 0) {
             for (const userId of staleUserIds) {
-                deleteBirthday(client, guildId, userId).catch(() => null);
+                LöschenBirthday(client, guildId, userId).catch(() => null);
             }
         }
 
@@ -49,7 +49,7 @@ export default {
                 .setColor(0xFF0000)
                 .setTitle('Keine Geburtstage')
                 .setDescription('Es wurden noch keine Geburtstage von aktuellen Servermitgliedern eingestellt.');
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [embed]
             });
         }
@@ -61,7 +61,7 @@ export default {
             .setTitle('Server-Geburtstage')
             .setDescription(`${birthdayList}\n\nGesamt: ${displayIndex} Geburtstag${displayIndex !== 1 ? 'e' : ''}`);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [embed]
         });
 

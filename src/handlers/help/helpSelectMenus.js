@@ -1,5 +1,5 @@
-import { createEmbed } from '../../utils/embeds.js';
-import { createButton, getPaginationRow } from '../../utils/components.js';
+﻿import { ErstellenEmbed } from '../../utils/embeds.js';
+import { ErstellenButton, getPaginationRow } from '../../utils/components.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,7 +10,7 @@ import { handleInteractionError } from '../../utils/errorHandler.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BACK_BUTTON_ID = "help-back-to-main";
+const Zurück_BUTTON_ID = "help-Zurück-to-main";
 const ALL_COMMANDS_ID = "help-all-commands";
 const PAGINATION_PREFIX = "help-page";
 const CATEGORY_SELECT_ID = "help-category-select";
@@ -35,7 +35,7 @@ const CATEGORY_ICONS = {
     "Reaction Roles": "🎭",
     Community: "👥",
     Birthday: "🎂",
-    "Join To Create": "🔌",
+    "Join To Erstellen": "🔌",
     Verification: "✅",
     Config: "⚙️",
 };
@@ -120,7 +120,7 @@ function normalizeCommandData(command) {
     };
 }
 
-async function createCategoryCommandsMenu(category, client) {
+async function ErstellenCategoryCommandsMenu(category, client) {
     const categoryName = formatCategoryName(category);
     const icon = CATEGORY_ICONS[categoryName] || "🔍";
 
@@ -169,7 +169,7 @@ async function createCategoryCommandsMenu(category, client) {
         logger.error('Error fetching registered commands:', error);
     }
 
-    const embed = createEmbed({
+    const embed = ErstellenEmbed({
         title: `${icon} ${categoryName} Commands`,
         description: categoryCommands.length > 0
             ? `Click any command mention below to use it.`
@@ -222,15 +222,15 @@ async function createCategoryCommandsMenu(category, client) {
     embed.setFooter({ text: FOOTER_TEXT });
     embed.setTimestamp();
 
-    const backButton = createButton(
-        BACK_BUTTON_ID,
+    const ZurückButton = ErstellenButton(
+        Zurück_BUTTON_ID,
         "Zurück",
         "primary",
         "⬅️",
         false,
     );
 
-    const buttonRow = new ActionRowBuilder().addComponents(backButton);
+    const buttonRow = new ActionRowBuilder().addComponents(ZurückButton);
 
     return {
         embeds: [embed],
@@ -238,7 +238,7 @@ async function createCategoryCommandsMenu(category, client) {
     };
 }
 
-export async function createAllCommandsMenu(page = 1, client) {
+export async function ErstellenAllCommandsMenu(page = 1, client) {
     const commandsPerPage = 45;
     const allCommands = [];
 
@@ -306,7 +306,7 @@ export async function createAllCommandsMenu(page = 1, client) {
     const endIndex = startIndex + commandsPerPage;
     const pageCommands = allCommands.slice(startIndex, endIndex);
 
-    const embed = createEmbed({
+    const embed = ErstellenEmbed({
         title: "📋 All Commands",
         description: `Browse every available command in one list. Use the page buttons below to move through the full set.`
     });
@@ -352,15 +352,15 @@ export async function createAllCommandsMenu(page = 1, client) {
         components.push(paginationRow);
     }
 
-    const backButton = createButton(
-        BACK_BUTTON_ID,
+    const ZurückButton = ErstellenButton(
+        Zurück_BUTTON_ID,
         "Zurück",
         "primary",
         "⬅️",
         false,
     );
 
-    const buttonRow = new ActionRowBuilder().addComponents(backButton);
+    const buttonRow = new ActionRowBuilder().addComponents(ZurückButton);
     components.push(buttonRow);
 
     return {
@@ -376,20 +376,20 @@ export const helpCategorySelectMenu = {
     async execute(interaction, client) {
         try {
             if (!interaction.deferred && !interaction.replied) {
-                await interaction.deferUpdate();
+                await interaction.deferAktualisieren();
             }
 
             const selectedCategory = interaction.values[0];
 
             if (selectedCategory === ALL_COMMANDS_ID) {
-                const { embeds, components } = await createAllCommandsMenu(1, client);
-                await interaction.editReply({
+                const { embeds, components } = await ErstellenAllCommandsMenu(1, client);
+                await interaction.BearbeitenReply({
                     embeds,
                     components,
                 });
             } else {
-                const { embeds, components } = await createCategoryCommandsMenu(selectedCategory, client);
-                await interaction.editReply({
+                const { embeds, components } = await ErstellenCategoryCommandsMenu(selectedCategory, client);
+                await interaction.BearbeitenReply({
                     embeds,
                     components,
                 });

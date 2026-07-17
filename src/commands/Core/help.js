@@ -1,13 +1,13 @@
-import {
+﻿import {
     SlashCommandBuilder,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
 } from "discord.js";
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { createEmbed } from "../../utils/embeds.js";
+import { ErstellenEmbed } from "../../utils/embeds.js";
 import {
-    createSelectMenu,
+    ErstellenSelectMenu,
 } from "../../utils/components.js";
 import fs from "fs/promises";
 import path from "path";
@@ -38,7 +38,7 @@ const CATEGORY_ICONS = {
     "Reaction Roles": "🎭",
     Community: "👥",
     Birthday: "🎂",
-    "Join To Create": "🔌",
+    "Join To Erstellen": "🔌",
     Verification: "✅",
 };
 
@@ -49,7 +49,7 @@ function formatCategoryName(rawCategory) {
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export async function createInitialHelpMenu(client) {
+export async function ErstellenInitialHelpMenu(client) {
     const commandsPath = path.join(__dirname, "../../commands");
     const categoryDirs = (
         await fs.readdir(commandsPath, { withFileTypes: true })
@@ -76,7 +76,7 @@ export async function createInitialHelpMenu(client) {
     ];
 
     const botName = client?.user?.username || "Bot";
-    const embed = createEmbed({
+    const embed = ErstellenEmbed({
         title: `📖 ${botName} Hilfe`,
         description: 'Richte deinen Server ein, wähle aus, was aktiviert werden soll, und durchsuche dann die Befehle unten.',
         color: 'primary',
@@ -122,7 +122,7 @@ export async function createInitialHelpMenu(client) {
         .setURL("https://discord.gg/QnWNz2dKCE")
         .setStyle(ButtonStyle.Link);
 
-    const selectRow = createSelectMenu(
+    const selectRow = ErstellenSelectMenu(
         CATEGORY_SELECT_ID,
         "Wähle, um die Befehle anzuzeigen",
         options,
@@ -150,9 +150,9 @@ export default {
         const { MessageFlags } = await import('discord.js');
         await InteractionHelper.safeDefer(interaction);
         
-        const { embeds, components } = await createInitialHelpMenu(client);
+        const { embeds, components } = await ErstellenInitialHelpMenu(client);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds,
             components,
         });
@@ -163,14 +163,14 @@ export default {
                     return;
                 }
 
-                const closedEmbed = createEmbed({
+                const SchließendEmbed = ErstellenEmbed({
                     title: "Hilfemenü geschlossen",
                     description: "Hilfemenü wurde geschlossen, verwende /help erneut.",
                     color: "secondary",
                 });
 
-                await InteractionHelper.safeEditReply(interaction, {
-                    embeds: [closedEmbed],
+                await InteractionHelper.safeBearbeitenReply(interaction, {
+                    embeds: [SchließendEmbed],
                     components: [],
                 });
             } catch (error) {

@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
 import { getModerationCases } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -69,19 +69,19 @@ export default {
             const totalPages = Math.ceil(cases.length / CASES_PER_PAGE);
             let currentPage = 1;
 
-            const createCasesEmbed = (page) => {
+            const ErstellenCasesEmbed = (page) => {
                 const startIndex = (page - 1) * CASES_PER_PAGE;
                 const endIndex = startIndex + CASES_PER_PAGE;
                 const pageCases = cases.slice(startIndex, endIndex);
 
-                const embed = createEmbed({
+                const embed = ErstellenEmbed({
                     title: 'Moderation Cases',
                     description: `Showing moderation cases for **${interaction.guild.name}**\n\n**Page ${page} of ${totalPages}**`
                 });
 
                 pageCases.forEach(case_ => {
-                    const date = new Date(case_.createdAt).toLocaleDateString();
-                    const time = new Date(case_.createdAt).toLocaleTimeString();
+                    const date = new Date(case_.ErstellendAt).toLocaleDateString();
+                    const time = new Date(case_.ErstellendAt).toLocaleTimeString();
                     
                     embed.addFields({
                         name: `Case #${case_.caseId} - ${case_.action}`,
@@ -97,12 +97,12 @@ export default {
                 return embed;
             };
 
-            const createNavigationRow = (page) => {
+            const ErstellenNavigationRow = (page) => {
                 const row = new ActionRowBuilder();
                 
                 const prevButton = new ButtonBuilder()
                     .setCustomId('prev_page')
-                    .setLabel('⬅️ Previous')
+                    .setLabel('⬅️ Vorherige')
                     .setStyle(ButtonStyle.Secondary)
                     .setDisabled(page === 1);
 
@@ -112,28 +112,28 @@ export default {
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true);
 
-                const nextButton = new ButtonBuilder()
-                    .setCustomId('next_page')
-                    .setLabel('Next ➡️')
+                const NächsteButton = new ButtonBuilder()
+                    .setCustomId('Nächste_page')
+                    .setLabel('Nächste ➡️')
                     .setStyle(ButtonStyle.Secondary)
                     .setDisabled(page === totalPages);
 
-                row.addComponents(prevButton, pageInfoButton, nextButton);
+                row.addComponents(prevButton, pageInfoButton, NächsteButton);
                 return row;
             };
 
-            const message = await interaction.editReply({ 
-                embeds: [createCasesEmbed(currentPage)], 
-                components: [createNavigationRow(currentPage)]
+            const message = await interaction.BearbeitenReply({ 
+                embeds: [ErstellenCasesEmbed(currentPage)], 
+                components: [ErstellenNavigationRow(currentPage)]
             });
 
-            const collector = message.createMessageComponentCollector({
+            const collector = message.ErstellenMessageComponentCollector({
                 componentType: ComponentType.Button,
 time: 120000
             });
 
             collector.on('collect', async (buttonInteraction) => {
-                await buttonInteraction.deferUpdate();
+                await buttonInteraction.deferAktualisieren();
 
                 if (buttonInteraction.user.id !== interaction.user.id) {
                     await buttonInteraction.followUp({
@@ -147,22 +147,22 @@ time: 120000
 
                 if (customId === 'prev_page' && currentPage > 1) {
                     currentPage--;
-                } else if (customId === 'next_page' && currentPage < totalPages) {
+                } else if (customId === 'Nächste_page' && currentPage < totalPages) {
                     currentPage++;
                 }
 
-                await interaction.editReply({
-                    embeds: [createCasesEmbed(currentPage)],
-                    components: [createNavigationRow(currentPage)]
+                await interaction.BearbeitenReply({
+                    embeds: [ErstellenCasesEmbed(currentPage)],
+                    components: [ErstellenNavigationRow(currentPage)]
                 });
             });
 
             collector.on('end', async () => {
-                const disabledRow = createNavigationRow(currentPage);
+                const disabledRow = ErstellenNavigationRow(currentPage);
                 disabledRow.components.forEach(button => button.setDisabled(true));
                 
                 try {
-                    await message.edit({
+                    await message.Bearbeiten({
                         components: [disabledRow]
                     });
                 } catch (error) {
@@ -175,4 +175,5 @@ time: 120000
         }
     }
 };
+
 

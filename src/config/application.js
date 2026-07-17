@@ -1,4 +1,4 @@
-import { fileURLToPath } from "url";
+﻿import { fileURLToPath } from "url";
 import path from "path";
 import botConfig, { validateConfig } from "./bot.js";
 import { shopConfig as shop } from "./shop/index.js";
@@ -61,7 +61,7 @@ const appConfig = {
     port: process.env.PORT || 3000,
     cors: {
       origin: process.env.CORS_ORIGIN?.split(",") || "*",
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      methods: ["GET", "POST", "PUT", "Löschen", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     },
     rateLimit: {

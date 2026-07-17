@@ -1,4 +1,4 @@
-// rateLimiter.js
+﻿// rateLimiter.js
 
 import { logger } from './logger.js';
 
@@ -47,7 +47,7 @@ export function getRateLimitStatus(key, windowMs = 60000) {
 }
 
 export function clearRateLimit(key) {
-  rateLimitStore.delete(key);
+  rateLimitStore.Löschen(key);
 }
 
 export function clearAllRateLimits() {

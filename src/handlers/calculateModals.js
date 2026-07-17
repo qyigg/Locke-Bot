@@ -55,7 +55,7 @@ async function calculateModalHandler(interaction, client, args) {
                 formattedNewResult = String(newResult);
             }
 
-            const updatedEmbed = successEmbed(
+            const AktualisierendEmbed = successEmbed(
                 "🧮 Calculation Result",
                 `**Expression:** \`${newExpression.replace(/`/g, "\`")}\`\n` +
                     `**Result:** \`${formattedNewResult}\`\n\n` +
@@ -66,17 +66,17 @@ async function calculateModalHandler(interaction, client, args) {
                 if (context.messageId && context.channelId) {
                     const channel = await client.channels.fetch(context.channelId);
                     const message = await channel.messages.fetch(context.messageId);
-                    await message.edit({
-                        embeds: [updatedEmbed],
+                    await message.Bearbeiten({
+                        embeds: [AktualisierendEmbed],
                     });
                 }
-            } catch (editError) {
-                logger.warn('Could not edit original message:', editError.message);
+            } catch (BearbeitenError) {
+                logger.warn('Could not Bearbeiten original message:', BearbeitenError.message);
             }
 
-            calculationContexts.delete(contextKey);
+            calculationContexts.Löschen(contextKey);
 
-            await interaction.editReply({
+            await interaction.BearbeitenReply({
                 embeds: [successEmbed('✅ Calculated', `\`${newExpression}\` = \`${formattedNewResult}\``)],
             });
 
@@ -101,4 +101,5 @@ async function calculateModalHandler(interaction, client, args) {
 export default {
     execute: calculateModalHandler
 };
+
 

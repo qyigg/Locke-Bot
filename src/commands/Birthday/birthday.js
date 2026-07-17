@@ -1,12 +1,12 @@
-import { SlashCommandBuilder, MessageFlags, ChannelType } from 'discord.js';
-import { createEmbed, successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, MessageFlags, ChannelType } from 'discord.js';
+import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 
 import birthdaySet from './modules/birthday_set.js';
 import birthdayInfo from './modules/birthday_info.js';
 import birthdayList from './modules/birthday_list.js';
 import birthdayRemove from './modules/birthday_remove.js';
-import nextBirthdays from './modules/next_birthdays.js';
+import NächsteBirthdays from './modules/Nächste_birthdays.js';
 import birthdaySetchannel from './modules/birthday_setchannel.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -58,7 +58,7 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName('next')
+                .setName('Nächste')
                 .setDescription('Zeige bevorstehende Geburtstage')
         )
         .addSubcommand(subcommand =>
@@ -86,8 +86,8 @@ export default {
                 return await birthdayList.execute(interaction, config, client);
             case 'remove':
                 return await birthdayRemove.execute(interaction, config, client);
-            case 'next':
-                return await nextBirthdays.execute(interaction, config, client);
+            case 'Nächste':
+                return await NächsteBirthdays.execute(interaction, config, client);
             case 'setchannel':
                 return await birthdaySetchannel.execute(interaction, config, client);
             default:

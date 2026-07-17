@@ -1,4 +1,4 @@
-// interactionValidator.js
+﻿// interactionValidator.js
 
 import { logger } from './logger.js';
 
@@ -14,7 +14,7 @@ export function isInteractionValid(interaction) {
         return true; 
     }
 
-    const ageMs = Date.now() - interaction.createdTimestamp;
+    const ageMs = Date.now() - interaction.ErstellendTimestamp;
     if (ageMs > 2800) { 
         return false;
     }
@@ -28,7 +28,7 @@ export async function safeDeferInteraction(interaction, options = {}) {
             logger.warn('Interaction expired before deferral', {
                 event: 'interaction.expired_before_defer',
                 interactionId: interaction?.id,
-                age: Date.now() - (interaction?.createdTimestamp || 0)
+                age: Date.now() - (interaction?.ErstellendTimestamp || 0)
             });
             return false;
         }
@@ -37,7 +37,7 @@ export async function safeDeferInteraction(interaction, options = {}) {
             return true;
         }
 
-        await interaction.deferUpdate(options);
+        await interaction.deferAktualisieren(options);
         return true;
     } catch (error) {
         if (error.code === EXPIRED_INTERACTION_CODE || error.code === INTERACTION_NOT_REPLIED_CODE) {

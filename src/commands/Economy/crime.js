@@ -1,7 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const CRIME_COOLDOWN = 60 * 60 * 1000;
@@ -47,7 +47,7 @@ export default {
 
             if (isJailed) {
                 const timeLeft = Math.ceil((userData.jailedUntil - now) / (1000 * 60));
-                throw createError(
+                throw ErstellenError(
                     "User is in jail",
                     ErrorTypes.RATE_LIMIT,
                     `Du bist im Gefängnis noch ${timeLeft} Minuten lang!`,
@@ -57,7 +57,7 @@ export default {
 
             if (now < lastCrime + CRIME_COOLDOWN) {
                 const timeLeft = Math.ceil((lastCrime + CRIME_COOLDOWN - now) / (1000 * 60));
-                throw createError(
+                throw ErstellenError(
                     "Crime cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du musst noch ${timeLeft} Minuten warten, bevor du ein weiteres Verbrechen begehst.`,
@@ -71,7 +71,7 @@ export default {
             );
 
             if (!crime) {
-                throw createError(
+                throw ErstellenError(
                     "Invalid crime type",
                     ErrorTypes.VALIDATION,
                     "Please select a valid crime type.",
@@ -97,7 +97,7 @@ export default {
                     `Du hast erfolgreich ${crime.name} begangen und verdienst **${amountEarned}** Münzen!`
                 );
                 
-                await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
             } else {
                 // Fine is based on the potential haul of the attempted crime
                 const potentialHaul = Math.floor((crime.min + crime.max) / 2);
@@ -113,7 +113,7 @@ export default {
                     `Du wurdest mit ${fine.toLocaleString()} Münzen Geldstrafe belegt und wirst 2 Stunden im Gefängnis sein.`
                 );
                 
-                await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
             }
     }, { command: 'crime' })
 };

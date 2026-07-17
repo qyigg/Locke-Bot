@@ -117,7 +117,7 @@ export async function getLeaderboard(client, guildId, limit = 10) {
   }
 }
 
-export function createLeaderboardEmbed(leaderboard, guild) {
+export function ErstellenLeaderboardEmbed(leaderboard, guild) {
   const embed = new EmbedBuilder()
     .setTitle(`🏆 ${guild.name} Leaderboard`)
     .setColor('#2ecc71')
@@ -221,7 +221,7 @@ export async function getUserLevelData(client, guildId, userId) {
   }
 }
 
-export async function saveUserLevelData(client, guildId, userId, data) {
+export async function SpeichernUserLevelData(client, guildId, userId, data) {
   try {
     if (!guildId || !userId) {
       throw new TitanBotError(
@@ -251,14 +251,14 @@ export async function saveUserLevelData(client, guildId, userId, data) {
     logger.error(`Error saving user level data for ${userId}:`, error);
     if (error instanceof TitanBotError) throw error;
     throw new TitanBotError(
-      `Failed to save user data: ${error.message}`,
+      `Failed to Speichern user data: ${error.message}`,
       ErrorTypes.DATABASE,
-      'Could not save level data at this time.'
+      'Could not Speichern level data at this time.'
     );
   }
 }
 
-export async function saveLevelingConfig(client, guildId, config) {
+export async function SpeichernLevelingConfig(client, guildId, config) {
   try {
     if (!guildId || !config) {
       throw new TitanBotError(
@@ -288,14 +288,14 @@ export async function saveLevelingConfig(client, guildId, config) {
     guildConfig.leveling = config;
     await setGuildConfig(client, guildId, guildConfig);
     
-    logger.info(`Leveling config updated for guild ${guildId}`);
+    logger.info(`Leveling config Aktualisierend for guild ${guildId}`);
   } catch (error) {
     logger.error(`Error saving leveling config for guild ${guildId}:`, error);
     if (error instanceof TitanBotError) throw error;
     throw new TitanBotError(
-      `Failed to save config: ${error.message}`,
+      `Failed to Speichern config: ${error.message}`,
       ErrorTypes.DATABASE,
-      'Could not save configuration at this time.'
+      'Could not Speichern configuration at this time.'
     );
   }
 }
@@ -337,7 +337,7 @@ export async function addLevels(client, guildId, userId, levels) {
     userData.xp = newXp;
     userData.totalXp = newTotalXp;
 
-    await saveUserLevelData(client, guildId, userId, userData);
+    await SpeichernUserLevelData(client, guildId, userId, userData);
     
     logger.info(`Added ${levels} levels to user ${userId} in guild ${guildId}`);
     return userData;
@@ -381,7 +381,7 @@ export async function removeLevels(client, guildId, userId, levels) {
     userData.xp = newXp;
     userData.totalXp = newTotalXp;
 
-    await saveUserLevelData(client, guildId, userId, userData);
+    await SpeichernUserLevelData(client, guildId, userId, userData);
     
     logger.info(`Removed ${levels} levels from user ${userId} in guild ${guildId}`);
     return userData;
@@ -424,7 +424,7 @@ export async function setUserLevel(client, guildId, userId, level) {
     userData.xp = newXp;
     userData.totalXp = newTotalXp;
 
-    await saveUserLevelData(client, guildId, userId, userData);
+    await SpeichernUserLevelData(client, guildId, userId, userData);
     
     logger.info(`Set level for user ${userId} to ${level} in guild ${guildId}`);
     return userData;
@@ -439,7 +439,7 @@ export async function setUserLevel(client, guildId, userId, level) {
   }
 }
 
-export async function deleteUserLevelData(client, guildId, userId) {
+export async function LöschenUserLevelData(client, guildId, userId) {
   try {
     if (!guildId || !userId) {
       throw new TitanBotError(
@@ -449,13 +449,14 @@ export async function deleteUserLevelData(client, guildId, userId) {
     }
 
     const key = getUserLevelKey(guildId, userId);
-    await client.db.delete(key);
+    await client.db.Löschen(key);
     
-    logger.debug(`Deleted level data for user ${userId} in guild ${guildId}`);
+    logger.debug(`Löschend level data for user ${userId} in guild ${guildId}`);
   } catch (error) {
     logger.error(`Error deleting level data for user ${userId}:`, error);
     if (error instanceof TitanBotError) throw error;
-    logger.warn(`Could not delete level data for user ${userId} in guild ${guildId}`);
+    logger.warn(`Could not Löschen level data for user ${userId} in guild ${guildId}`);
   }
 }
+
 

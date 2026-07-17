@@ -12,7 +12,7 @@ export default {
             const totalPages = Math.ceil(shopItems.length / ITEMS_PER_PAGE);
             let currentPage = 1;
 
-            const createShopEmbed = (page) => {
+            const ErstellenShopEmbed = (page) => {
                 const startIndex = (page - 1) * ITEMS_PER_PAGE;
                 const pageItems = shopItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
                 const embed = new EmbedBuilder()
@@ -30,18 +30,18 @@ export default {
                 return embed;
             };
 
-            const createShopComponents = (page) => {
+            const ErstellenShopComponents = (page) => {
                 if (totalPages <= 1) return [];
                 return [
                     new ActionRowBuilder().addComponents(
                         new ButtonBuilder()
                             .setCustomId('shop_prev')
-                            .setLabel('⬅️ Previous')
+                            .setLabel('⬅️ Vorherige')
                             .setStyle(ButtonStyle.Secondary)
                             .setDisabled(page === 1),
                         new ButtonBuilder()
-                            .setCustomId('shop_next')
-                            .setLabel('Next ➡️')
+                            .setCustomId('shop_Nächste')
+                            .setLabel('Nächste ➡️')
                             .setStyle(ButtonStyle.Secondary)
                             .setDisabled(page === totalPages),
                     ),
@@ -49,12 +49,12 @@ export default {
             };
 
             const message = await interaction.reply({
-                embeds: [createShopEmbed(currentPage)],
-                components: createShopComponents(currentPage),
+                embeds: [ErstellenShopEmbed(currentPage)],
+                components: ErstellenShopComponents(currentPage),
                 flags: 0,
             });
 
-            const collector = message.createMessageComponentCollector({
+            const collector = message.ErstellenMessageComponentCollector({
                 componentType: ComponentType.Button,
                 time: 300000,
             });
@@ -65,22 +65,22 @@ export default {
                     return;
                 }
                 const { customId } = buttonInteraction;
-                if (customId === 'shop_prev' || customId === 'shop_next') {
-                    await buttonInteraction.deferUpdate();
+                if (customId === 'shop_prev' || customId === 'shop_Nächste') {
+                    await buttonInteraction.deferAktualisieren();
                     if (customId === 'shop_prev' && currentPage > 1) currentPage--;
-                    else if (customId === 'shop_next' && currentPage < totalPages) currentPage++;
-                    await buttonInteraction.editReply({
-                        embeds: [createShopEmbed(currentPage)],
-                        components: createShopComponents(currentPage),
+                    else if (customId === 'shop_Nächste' && currentPage < totalPages) currentPage++;
+                    await buttonInteraction.BearbeitenReply({
+                        embeds: [ErstellenShopEmbed(currentPage)],
+                        components: ErstellenShopComponents(currentPage),
                     });
                 }
             });
 
             collector.on('end', async () => {
                 try {
-                    const disabledComponents = createShopComponents(currentPage);
+                    const disabledComponents = ErstellenShopComponents(currentPage);
                     disabledComponents.forEach(row => row.components.forEach(btn => btn.setDisabled(true)));
-                    await message.edit({ components: disabledComponents });
+                    await message.Bearbeiten({ components: disabledComponents });
                 } catch (error) {
                     logger.debug('shop_browse: could not disable components on collector end', {
                         error: error.message,
@@ -92,3 +92,4 @@ export default {
         }
     },
 };
+

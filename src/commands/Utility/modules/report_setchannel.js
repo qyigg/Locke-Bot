@@ -26,8 +26,9 @@ export default {
             });
         } catch (error) {
             logger.error('report_setchannel error:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not save Der Kanal configuration.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not Speichern Der Kanal configuration.' });
         }
     },
 };
+
 

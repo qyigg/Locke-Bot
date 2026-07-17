@@ -1,10 +1,10 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
 import { buildRoleAuditLines } from '../utils/logging/logEmbeds.js';
 
 export default {
-  name: Events.GuildRoleCreate,
+  name: Events.GuildRoleErstellen,
   once: false,
 
   async execute(role) {
@@ -16,16 +16,16 @@ export default {
       await logEvent({
         client: role.client,
         guildId: role.guild.id,
-        eventType: EVENT_TYPES.ROLE_CREATE,
+        eventType: EVENT_TYPES.ROLE_Erstellen,
         data: {
-          title: 'Role Created',
-          headline: `${role.toString()} was created`,
+          title: 'Role Erstellend',
+          headline: `${role.toString()} was Erstellend`,
           lines,
         },
       });
 
     } catch (error) {
-      logger.error('Error in roleCreate event:', error);
+      logger.error('Error in roleErstellen event:', error);
     }
   }
 };

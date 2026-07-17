@@ -46,14 +46,14 @@ async function keyExists(client, canonicalKey) {
 async function ensureParentRows(client, guildId, userId) {
     if (guildId) {
         await client.query(
-            `INSERT INTO ${pgConfig.tables.guilds} (id, created_at)
+            `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at)
              VALUES ($1, CURRENT_TIMESTAMP) ON CONFLICT (id) DO NOTHING`,
             [guildId],
         );
     }
     if (userId) {
         await client.query(
-            `INSERT INTO ${pgConfig.tables.users} (id, created_at)
+            `INSERT INTO ${pgConfig.tables.users} (id, Erstellend_at)
              VALUES ($1, CURRENT_TIMESTAMP) ON CONFLICT (id) DO NOTHING`,
             [userId],
         );
@@ -68,13 +68,13 @@ async function migrateEconomyFromTemp(client, legacyKey, value) {
 
     await ensureParentRows(client, parsed.guildId, parsed.userId);
     await client.query(
-        `INSERT INTO ${pgConfig.tables.economy} (guild_id, user_id, balance, bank, data, updated_at)
+        `INSERT INTO ${pgConfig.tables.economy} (guild_id, user_id, balance, bank, data, Aktualisierend_at)
          VALUES ($1, $2, $3, $4, $5::jsonb, CURRENT_TIMESTAMP)
-         ON CONFLICT (guild_id, user_id) DO UPDATE SET
+         ON CONFLICT (guild_id, user_id) DO Aktualisieren SET
            balance = EXCLUDED.balance,
            bank = EXCLUDED.bank,
            data = EXCLUDED.data,
-           updated_at = CURRENT_TIMESTAMP`,
+           Aktualisierend_at = CURRENT_TIMESTAMP`,
         [parsed.guildId, parsed.userId, wallet, bank, JSON.stringify(payload ?? {})],
     );
 }
@@ -86,15 +86,15 @@ async function migrateUserLevelFromTemp(client, legacyKey, value) {
     await ensureParentRows(client, parsed.guildId, parsed.userId);
     await client.query(
         `INSERT INTO ${pgConfig.tables.user_levels}
-         (guild_id, user_id, xp, level, total_xp, last_message, rank, updated_at)
+         (guild_id, user_id, xp, level, total_xp, last_message, rank, Aktualisierend_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
-         ON CONFLICT (guild_id, user_id) DO UPDATE SET
+         ON CONFLICT (guild_id, user_id) DO Aktualisieren SET
            xp = EXCLUDED.xp,
            level = EXCLUDED.level,
            total_xp = EXCLUDED.total_xp,
            last_message = EXCLUDED.last_message,
            rank = EXCLUDED.rank,
-           updated_at = CURRENT_TIMESTAMP`,
+           Aktualisierend_at = CURRENT_TIMESTAMP`,
         [
             parsed.guildId,
             parsed.userId,
@@ -114,23 +114,23 @@ async function migrateCountersFromTemp(client, legacyKey, value) {
 
     await ensureParentRows(client, parsed.guildId, null);
     await client.query(
-        `INSERT INTO ${pgConfig.tables.guilds} (id, counters, updated_at)
+        `INSERT INTO ${pgConfig.tables.guilds} (id, counters, Aktualisierend_at)
          VALUES ($1, $2::jsonb, CURRENT_TIMESTAMP)
-         ON CONFLICT (id) DO UPDATE SET counters = EXCLUDED.counters, updated_at = CURRENT_TIMESTAMP`,
+         ON CONFLICT (id) DO Aktualisieren SET counters = EXCLUDED.counters, Aktualisierend_at = CURRENT_TIMESTAMP`,
         [parsed.guildId, JSON.stringify(counters)],
     );
 }
 
 async function migrateTempKeyRename(client, legacyKey, canonicalKey) {
     await client.query(
-        `INSERT INTO ${pgConfig.tables.temp_data} (key, value, expires_at, created_at)
-         SELECT $1, value, expires_at, created_at
+        `INSERT INTO ${pgConfig.tables.temp_data} (key, value, expires_at, Erstellend_at)
+         SELECT $1, value, expires_at, Erstellend_at
          FROM ${pgConfig.tables.temp_data}
          WHERE key = $2
          ON CONFLICT (key) DO NOTHING`,
         [canonicalKey, legacyKey],
     );
-    await client.query(`DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [legacyKey]);
+    await client.query(`Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [legacyKey]);
 }
 
 async function hasCompletedMarker(client) {
@@ -143,9 +143,9 @@ async function hasCompletedMarker(client) {
 
 async function writeCompletedMarker(client, summary) {
     await client.query(
-        `INSERT INTO ${pgConfig.tables.temp_data} (key, value, expires_at, created_at)
+        `INSERT INTO ${pgConfig.tables.temp_data} (key, value, expires_at, Erstellend_at)
          VALUES ($1, $2::jsonb, NULL, CURRENT_TIMESTAMP)
-         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+         ON CONFLICT (key) DO Aktualisieren SET value = EXCLUDED.value`,
         [KEY_MIGRATION_MARKER, JSON.stringify({ completedAt: new Date().toISOString(), ...summary })],
     );
 }
@@ -158,7 +158,7 @@ async function writeCompletedMarker(client, summary) {
  * @param {boolean} [options.dryRun=false] - Log actions without writing.
  * @param {boolean} [options.force=false] - Ignore the completion marker.
  * @param {object} [options.logger=console] - Logger with info/warn/error.
- * @returns {Promise<{migrated:number, skipped:number, errors:number, alreadyDone?:boolean}>}
+ * @returns {Promise<{migrated:number, skipped:number, errors:number, alreadyFertig?:boolean}>}
  */
 export async function runKeyMigration({ pool, dryRun = false, force = false, logger = console } = {}) {
     if (!pool) {
@@ -170,7 +170,7 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
 
     try {
         if (!force && !dryRun && (await hasCompletedMarker(client))) {
-            return { ...summary, alreadyDone: true };
+            return { ...summary, alreadyFertig: true };
         }
 
         logger.info(`Starting key migration${dryRun ? ' (dry run)' : ''}...`);
@@ -192,7 +192,7 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
                     summary.skipped += 1;
                     if (!dryRun) {
                         await client.query(
-                            `DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
+                            `Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
                             [legacyKey],
                         );
                     }
@@ -206,19 +206,19 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
                     if (parsed.type === 'economy') {
                         await migrateEconomyFromTemp(client, legacyKey, row.value);
                         await client.query(
-                            `DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
+                            `Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
                             [legacyKey],
                         );
                     } else if (parsed.type === 'user_level') {
                         await migrateUserLevelFromTemp(client, legacyKey, row.value);
                         await client.query(
-                            `DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
+                            `Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
                             [legacyKey],
                         );
                     } else if (parsed.type === 'counters') {
                         await migrateCountersFromTemp(client, legacyKey, row.value);
                         await client.query(
-                            `DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
+                            `Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`,
                             [legacyKey],
                         );
                     } else {
@@ -243,4 +243,5 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
         client.release();
     }
 }
+
 

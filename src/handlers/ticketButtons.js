@@ -1,12 +1,12 @@
 ﻿import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, AttachmentBuilder, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed } from '../utils/embeds.js';
-import { createTicket, closeTicket, claimTicket, updateTicketPriority } from '../services/ticket.js';
+import { ErstellenEmbed, successEmbed } from '../utils/embeds.js';
+import { ErstellenTicket, SchließenTicket, claimTicket, AktualisierenTicketPriority } from '../services/ticket.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import { logTicketEvent } from '../utils/ticket/ticketLogging.js';
 import { logger } from '../utils/logger.js';
 import { InteractionHelper } from '../utils/interactionHelper.js';
 import { checkRateLimit } from '../utils/rateLimiter.js';
-import { replyUserError, ErrorTypes, handleInteractionError, createError } from '../utils/errorHandler.js';
+import { replyUserError, ErrorTypes, handleInteractionError, ErstellenError } from '../utils/errorHandler.js';
 import { getTicketPermissionContext } from '../utils/ticket/ticketPermissions.js';
 
 function escapeHtml(text) {
@@ -43,13 +43,13 @@ async function assertTicketPermission(interaction, client, actionLabel, options 
     context = await Promise.race([contextPromise, timeoutPromise]);
   } catch (error) {
     if (error.message === 'Timeout') {
-      throw createError(
+      throw ErstellenError(
         'Ticket permission timeout',
         ErrorTypes.RATE_LIMIT,
         'Bitte versuche es später erneut.'
       );
     }
-    throw createError(
+    throw ErstellenError(
       'Ticket permission check failed',
       ErrorTypes.UNKNOWN,
       `Failed to check permissions: ${error.message}`
@@ -57,19 +57,19 @@ async function assertTicketPermission(interaction, client, actionLabel, options 
   }
 
   if (!context.ticketData) {
-    throw createError(
+    throw ErstellenError(
       'Not a ticket channel',
       ErrorTypes.VALIDATION,
       'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.'
     );
   }
 
-  const allowed = allowTicketCreator ? context.canCloseTicket : context.canManageTicket;
+  const allowed = allowTicketCreator ? context.canSchließenTicket : context.canManageTicket;
   if (!allowed) {
     const permissionMessage = allowTicketCreator
       ? 'Du musst **Kanäle verwalten**, die konfigurierte **Ticket-Staff-Rolle** oder der **Ticket-Ersteller** sein.'
       : 'Du musst **Kanäle verwalten** oder die konfigurierte **Ticket-Staff-Rolle** haben.';
-    throw createError(
+    throw ErstellenError(
       'Ticket Berechtigung verweigert',
       ErrorTypes.PERMISSION,
       `${permissionMessage}\n\nDu kannst nicht ${actionLabel}.`
@@ -89,7 +89,7 @@ async function ensureTicketPermission(interaction, client, actionLabel, options 
     return null;
   }
 
-  const allowed = allowTicketCreator ? context.canCloseTicket : context.canManageTicket;
+  const allowed = allowTicketCreator ? context.canSchließenTicket : context.canManageTicket;
   if (!allowed) {
     const permissionMessage = allowTicketCreator
       ? 'Du musst **Kanäle verwalten**, die konfigurierte **Ticket-Staff-Rolle** oder der **Ticket-Ersteller** sein.'
@@ -102,13 +102,13 @@ async function ensureTicketPermission(interaction, client, actionLabel, options 
   return context;
 }
 
-const createTicketHandler = {
-  name: 'create_ticket',
+const ErstellenTicketHandler = {
+  name: 'Erstellen_ticket',
   async execute(interaction, client) {
     try {
       if (!(await ensureGuildContext(interaction))) return;
 
-      const rateLimitKey = `${interaction.user.id}:create_ticket`;
+      const rateLimitKey = `${interaction.user.id}:Erstellen_ticket`;
       const allowed = await checkRateLimit(rateLimitKey, 3, 60000);
       if (!allowed) {
         await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'Du erstellst Tickets zu schnell. Bitte warte eine Minute und versuche es erneut.' });
@@ -126,8 +126,8 @@ const createTicketHandler = {
       }
       
       const modal = new ModalBuilder()
-        .setCustomId('create_ticket_modal')
-        .setTitle('Create a Ticket');
+        .setCustomId('Erstellen_ticket_modal')
+        .setTitle('Erstellen a Ticket');
 
       const reasonInput = new TextInputBuilder()
         .setCustomId('reason')
@@ -150,8 +150,8 @@ const createTicketHandler = {
   }
 };
 
-const createTicketModalHandler = {
-  name: 'create_ticket_modal',
+const ErstellenTicketModalHandler = {
+  name: 'Erstellen_ticket_modal',
   async execute(interaction, client) {
     try {
       if (!(await ensureGuildContext(interaction))) return;
@@ -163,16 +163,16 @@ const createTicketModalHandler = {
       const config = await getGuildConfig(client, interaction.guildId);
       const categoryId = config.ticketCategoryId || null;
       
-      const { channel } = await createTicket(
+      const { channel } = await ErstellenTicket(
         interaction.guild,
         interaction.member,
         categoryId,
         reason
       );
-      await interaction.editReply({
+      await interaction.BearbeitenReply({
         embeds: [successEmbed(
-          'Ticket Created',
-          `Dein ticket has been created in ${channel}!`
+          'Ticket Erstellend',
+          `Dein ticket has been Erstellend in ${channel}!`
         )]
       });
     } catch (error) {
@@ -181,8 +181,8 @@ const createTicketModalHandler = {
   }
 };
 
-const closeTicketHandler = {
-  name: 'ticket_close',
+const SchließenTicketHandler = {
+  name: 'ticket_Schließen',
   async execute(interaction, client) {
     try {
       if (!(await ensureGuildContext(interaction))) return;
@@ -197,8 +197,8 @@ const closeTicketHandler = {
       }
 
       const modal = new ModalBuilder()
-        .setCustomId('ticket_close_modal')
-        .setTitle('Close Ticket');
+        .setCustomId('ticket_Schließen_modal')
+        .setTitle('Schließen Ticket');
 
       const reasonInput = new TextInputBuilder()
         .setCustomId('reason')
@@ -225,8 +225,8 @@ const closeTicketHandler = {
   }
 };
 
-const closeTicketModalHandler = {
-  name: 'ticket_close_modal',
+const SchließenTicketModalHandler = {
+  name: 'ticket_Schließen_modal',
   async execute(interaction, client) {
     try {
       if (!(await ensureGuildContext(interaction))) return;
@@ -246,12 +246,12 @@ const closeTicketModalHandler = {
       const providedReason = interaction.fields.getTextInputValue('reason')?.trim();
       const reason = providedReason || 'Geschlossen ohne Angabe eines Grundes.';
 
-      await closeTicket(interaction.channel, interaction.user, reason);
-      await interaction.editReply({
+      await SchließenTicket(interaction.channel, interaction.user, reason);
+      await interaction.BearbeitenReply({
         embeds: [successEmbed('Ticket Geschlossen', 'Dieses Ticket wurde geschlossen.')]
       });
     } catch (error) {
-      logger.error('Error submitting close ticket modal:', error);
+      logger.error('Error Absendenting Schließen ticket modal:', error);
       if (!interaction.replied && !interaction.deferred) {
         await replyUserError(interaction, {
           type: ErrorTypes.UNKNOWN,
@@ -279,7 +279,7 @@ const claimTicketHandler = {
       if (!deferSuccess) return;
       
       await claimTicket(interaction.channel, interaction.user);
-      await interaction.editReply({ embeds: [successEmbed('Ticket Beansprucht', 'Du hast dieses Ticket beansprucht.')] });
+      await interaction.BearbeitenReply({ embeds: [successEmbed('Ticket Beansprucht', 'Du hast dieses Ticket beansprucht.')] });
     } catch (error) {
       logger.error('Fehler beim Beanspruchen des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
@@ -308,8 +308,8 @@ const priorityTicketHandler = {
         return;
       }
 
-      await updateTicketPriority(interaction.channel, priority, interaction.user);
-      await interaction.editReply({ embeds: [successEmbed('Priorität aktualisiert', `Ticket-Priorität auf **${priority.toUpperCase()}** gesetzt.`)] });
+      await AktualisierenTicketPriority(interaction.channel, priority, interaction.user);
+      await interaction.BearbeitenReply({ embeds: [successEmbed('Priorität aktualisiert', `Ticket-Priorität auf **${priority.toUpperCase()}** gesetzt.`)] });
     } catch (error) {
       logger.error('Fehler beim Aktualisieren der Ticket-Priorität:', error);
       if (!interaction.replied && !interaction.deferred) {
@@ -345,13 +345,13 @@ const pinTicketHandler = {
       if (hasPingEmoji) {
         
         const newName = channel.name.replace(/^📌\s*/, '');
-        await channel.edit({
+        await channel.Bearbeiten({
           name: newName,
           position: 999 
         });
 
-        await interaction.editReply({
-          embeds: [createEmbed({
+        await interaction.BearbeitenReply({
+          embeds: [ErstellenEmbed({
             title: '📌 Ticket Unpinned',
             description: 'Dieses Ticket wurde abgeheftet und zum normalen Standort verschoben.',
             color: 0x95A5A6
@@ -368,13 +368,13 @@ const pinTicketHandler = {
       } else {
         
         const pinnedName = `📌 ${channel.name}`;
-        await channel.edit({
+        await channel.Bearbeiten({
           name: pinnedName,
           position: 0 
         });
 
-        await interaction.editReply({
-          embeds: [createEmbed({
+        await interaction.BearbeitenReply({
+          embeds: [ErstellenEmbed({
             title: '📌 Ticket Pinned',
             description: 'Dieses Ticket wurde an die Spitze der Kategorie gehängt.',
             color: 0x3498db
@@ -430,7 +430,7 @@ const unclaimTicketHandler = {
       
       const { unclaimTicket } = await import('../services/ticket.js');
       await unclaimTicket(interaction.channel, interaction.member);
-      await interaction.editReply({ embeds: [successEmbed('Ticket Unclaimed', 'Dieses Ticket wurde unclaimed.') ] });
+      await interaction.BearbeitenReply({ embeds: [successEmbed('Ticket Unclaimed', 'Dieses Ticket wurde unclaimed.') ] });
     } catch (error) {
       logger.error('Fehler beim Unclaimen des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
@@ -459,7 +459,7 @@ const reopenTicketHandler = {
       if (openCategoryMoveFailed) {
         reopenMessage += ' Hinweis: Konnte den Kanal nicht zurück in die Kategorie der offenen Tickets verschieben.';
       }
-      await interaction.editReply({ embeds: [successEmbed('Ticket erneut geöffnet', reopenMessage)] });
+      await interaction.BearbeitenReply({ embeds: [successEmbed('Ticket erneut geöffnet', reopenMessage)] });
     } catch (error) {
       logger.error('Fehler beim erneuten Öffnen des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
@@ -471,20 +471,20 @@ const reopenTicketHandler = {
   }
 };
 
-const deleteTicketHandler = {
-  name: 'ticket_delete',
+const LöschenTicketHandler = {
+  name: 'ticket_Löschen',
   async execute(interaction, client) {
     try {
       if (!(await ensureGuildContext(interaction))) return;
 
-      await assertTicketPermission(interaction, client, 'delete tickets', {}, 2000);
+      await assertTicketPermission(interaction, client, 'Löschen tickets', {}, 2000);
 
       const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
       if (!deferSuccess) return;
       
-      const { deleteTicket } = await import('../services/ticket.js');
-      await deleteTicket(interaction.channel, interaction.member);
-      await interaction.editReply({ embeds: [successEmbed('Ticket gelöscht', 'Dieses Ticket wird in Kürze gelöscht.') ] });
+      const { LöschenTicket } = await import('../services/ticket.js');
+      await LöschenTicket(interaction.channel, interaction.member);
+      await interaction.BearbeitenReply({ embeds: [successEmbed('Ticket gelöscht', 'Dieses Ticket wird in Kürze gelöscht.') ] });
     } catch (error) {
       logger.error('Fehler beim Löschen des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
@@ -496,16 +496,17 @@ const deleteTicketHandler = {
   }
 };
 
-export default createTicketHandler;
+export default ErstellenTicketHandler;
 export { 
-  createTicketModalHandler, 
-  closeTicketModalHandler,
-  closeTicketHandler, 
+  ErstellenTicketModalHandler, 
+  SchließenTicketModalHandler,
+  SchließenTicketHandler, 
   claimTicketHandler, 
   priorityTicketHandler,
   pinTicketHandler,
   unclaimTicketHandler,
   reopenTicketHandler,
-  deleteTicketHandler 
+  LöschenTicketHandler 
 };
+
 

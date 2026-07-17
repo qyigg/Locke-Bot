@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const FISH_COOLDOWN = 45 * 60 * 1000; 
@@ -53,7 +53,7 @@ export default {
                     (remaining % (1000 * 60 * 60)) / (1000 * 60),
                 );
 
-                throw createError(
+                throw ErstellenError(
                     "Fishing cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du bist zu müde zum Fischen. Ruhe dich **${hours}h ${minutes}m** aus, bevor du wieder fischst.`,
@@ -108,7 +108,7 @@ export default {
                 legendary: '#F1C40F'
             };
 
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: 'Fischen erfolgreich!',
                 description: `${catchMessage}\n\nDu hast einen **${fishCaught.emoji} ${fishCaught.name}** gefangen! Du hast ihn für **$${finalEarned.toLocaleString()}** verkauft!${multiplierMessage}`,
                 color: rarityColors[fishCaught.rarity]
@@ -127,6 +127,7 @@ export default {
                 )
                 .setFooter({ text: `Nächste Angeltour verfügbar in 45 Minuten.` });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'fish' })
 };
+

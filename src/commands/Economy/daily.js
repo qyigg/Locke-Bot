@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { formatDuration } from '../../utils/embeds.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { botConfig } from '../../config/bot.js';
@@ -30,7 +30,7 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createError(
+                throw ErstellenError(
                     "Failed to load economy data for daily",
                     ErrorTypes.DATABASE,
                     "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
@@ -42,7 +42,7 @@ export default {
 
             if (now < lastDaily + DAILY_COOLDOWN) {
                 const timeRemaining = lastDaily + DAILY_COOLDOWN - now;
-                throw createError(
+                throw ErstellenError(
                     "Daily cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du musst warten, bevor du deine tägliche Auszahlung einfordest. Versuche es in **${formatDuration(timeRemaining)}** erneut.`,
@@ -99,7 +99,8 @@ export default {
                         : `Nächster Anspruch in 24 Stunden.`,
                 });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'daily' })
 };
+
 

@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+﻿import { logger } from '../utils/logger.js';
 import { getReactionRoleKey } from '../utils/database/keys.js';
 import { getGuildConfig, setGuildConfig, patchGuildConfig } from './config/guildConfig.js';
 import {
@@ -21,14 +21,14 @@ async function persistReactionRoleMessageId(client, guildId, panelData, messageI
     panelData.messageId = messageId;
     const newKey = getReactionRoleKey(guildId, messageId);
     await client.db.set(newKey, panelData);
-    await client.db.delete(oldKey).catch(() => {});
+    await client.db.Löschen(oldKey).catch(() => {});
 }
 
 export async function reconcileTicketPanels(client) {
     const summary = {
         scannedGuilds: 0,
         healthyPanels: 0,
-        deletedPanels: 0,
+        LöschendPanels: 0,
         missingChannels: 0,
         recoveredIds: 0,
         errors: 0,
@@ -54,10 +54,10 @@ export async function reconcileTicketPanels(client) {
             } else if (panelStatus.reason === 'channel_missing') {
                 summary.missingChannels += 1;
                 logger.warn(`Ticket-Panel channel missing for guild ${guild.id} (${guild.name})`);
-            } else if (panelStatus.reason === 'panel_deleted') {
-                summary.deletedPanels += 1;
+            } else if (panelStatus.reason === 'panel_Löschend') {
+                summary.LöschendPanels += 1;
                 logger.warn(
-                    `Ticket-Panel message deleted for guild ${guild.id} (${guild.name}) — admins can repost from /ticket dashboard`,
+                    `Ticket-Panel message Löschend for guild ${guild.id} (${guild.name}) — admins can repost from /ticket dashboard`,
                 );
             }
         } catch (error) {
@@ -73,7 +73,7 @@ export async function reconcileVerificationPanels(client) {
     const summary = {
         scannedGuilds: 0,
         healthyPanels: 0,
-        deletedPanels: 0,
+        LöschendPanels: 0,
         missingChannels: 0,
         recoveredIds: 0,
         errors: 0,
@@ -99,10 +99,10 @@ export async function reconcileVerificationPanels(client) {
             } else if (panelStatus.reason === 'channel_missing') {
                 summary.missingChannels += 1;
                 logger.warn(`Verifizierungs-Panel channel missing for guild ${guild.id} (${guild.name})`);
-            } else if (panelStatus.reason === 'panel_deleted') {
-                summary.deletedPanels += 1;
+            } else if (panelStatus.reason === 'panel_Löschend') {
+                summary.LöschendPanels += 1;
                 logger.warn(
-                    `Verifizierungs-Panel deleted for guild ${guild.id} (${guild.name}) — repost from /verification dashboard`,
+                    `Verifizierungs-Panel Löschend for guild ${guild.id} (${guild.name}) — repost from /verification dashboard`,
                 );
             }
         } catch (error) {
@@ -119,7 +119,7 @@ export async function reconcileReactionRolePanelHealth(client) {
         scannedGuilds: 0,
         scannedPanels: 0,
         healthyPanels: 0,
-        deletedPanels: 0,
+        LöschendPanels: 0,
         missingChannels: 0,
         recoveredIds: 0,
         errors: 0,
@@ -150,10 +150,10 @@ export async function reconcileReactionRolePanelHealth(client) {
                     logger.warn(
                         `Reaction role panel channel missing for guild ${guild.id}, message ${panelData.messageId}`,
                     );
-                } else if (panelStatus.reason === 'panel_deleted') {
-                    summary.deletedPanels += 1;
+                } else if (panelStatus.reason === 'panel_Löschend') {
+                    summary.LöschendPanels += 1;
                     logger.warn(
-                        `Reaction role panel deleted for guild ${guild.id} — repost from /reactroles dashboard`,
+                        `Reaction role panel Löschend for guild ${guild.id} — repost from /reactroles dashboard`,
                     );
                 }
             }
@@ -165,3 +165,4 @@ export async function reconcileReactionRolePanelHealth(client) {
 
     return summary;
 }
+

@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags } from 'discord.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -20,7 +20,7 @@ export default {
 
       await InteractionHelper.safeReply(interaction, {
         embeds: [
-          createEmbed({ title: "Brauchst du Hilfe?", description: "Tritt unserem offiziellen Support-Server bei für Hilfe, Fehlerberichte oder Funktionsvorschläge. Wenn du diesen Bot anpasst, denke daran, den Link im Code zu ändern!" }),
+          ErstellenEmbed({ title: "Brauchst du Hilfe?", description: "Tritt unserem offiziellen Support-Server bei für Hilfe, Fehlerberichte oder Funktionsvorschläge. Wenn du diesen Bot anpasst, denke daran, den Link im Code zu ändern!" }),
         ],
         components: [actionRow],
         flags: MessageFlags.Ephemeral,
@@ -30,7 +30,7 @@ export default {
       
       try {
         return await InteractionHelper.safeReply(interaction, {
-          embeds: [createEmbed({ title: 'Systemfehler', description: 'Konnte Support-Informationen nicht anzeigen.', color: 'error' })],
+          embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Support-Informationen nicht anzeigen.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
       } catch (replyError) {

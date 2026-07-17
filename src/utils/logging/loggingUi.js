@@ -1,4 +1,4 @@
-// loggingUi.js
+﻿// loggingUi.js
 
 import {
   ActionRowBuilder,
@@ -57,14 +57,14 @@ export const DASHBOARD_CATEGORY_LABELS = {
   report: 'Reports',
 };
 
-function createBackButton() {
+function ErstellenZurückButton() {
   return new ButtonBuilder()
-    .setCustomId('log_dash_back')
-    .setLabel('Back to Dashboard')
+    .setCustomId('log_dash_Zurück')
+    .setLabel('Zurück to Dashboard')
     .setStyle(ButtonStyle.Secondary);
 }
 
-function createCategoryToggleButtons(enabledEvents = {}, loggingEnabled = false) {
+function ErstellenCategoryToggleButtons(enabledEvents = {}, loggingEnabled = false) {
   const buttons = DASHBOARD_CATEGORIES.map((category) => {
     const wildcardDisabled = enabledEvents[`${category}.*`] === false;
     const categoryEvents = EVENT_TYPES_BY_CATEGORY[category] || [];
@@ -88,7 +88,7 @@ function createCategoryToggleButtons(enabledEvents = {}, loggingEnabled = false)
   return rows;
 }
 
-export function createLoggingMainMenuSelect() {
+export function ErstellenLoggingMainMenuSelect() {
   return new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId('log_dash_menu')
@@ -101,7 +101,7 @@ export function createLoggingMainMenuSelect() {
           .setEmoji('🧾'),
         new StringSelectMenuOptionBuilder()
           .setLabel('Set Applications Channel')
-          .setDescription('New applications and review updates')
+          .setDescription('New applications and review Aktualisierens')
           .setValue('set:applications')
           .setEmoji('📝'),
         new StringSelectMenuOptionBuilder()
@@ -135,7 +135,7 @@ export function createLoggingMainMenuSelect() {
   );
 }
 
-export function createLoggingMainActionRow(loggingEnabled = false) {
+export function ErstellenLoggingMainActionRow(loggingEnabled = false) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('log_dash_toggle:audit_enabled')
@@ -148,18 +148,18 @@ export function createLoggingMainActionRow(loggingEnabled = false) {
   );
 }
 
-export function createLoggingDashboardComponents(_enabledEvents, loggingEnabled = false) {
+export function ErstellenLoggingDashboardComponents(_enabledEvents, loggingEnabled = false) {
   return [
-    createLoggingMainMenuSelect(),
-    createLoggingMainActionRow(loggingEnabled),
+    ErstellenLoggingMainMenuSelect(),
+    ErstellenLoggingMainActionRow(loggingEnabled),
   ];
 }
 
-export function createLoggingCategoryViewComponents(enabledEvents, loggingEnabled = false) {
-  const categoryRows = createCategoryToggleButtons(enabledEvents, loggingEnabled);
+export function ErstellenLoggingCategoryViewComponents(enabledEvents, loggingEnabled = false) {
+  const categoryRows = ErstellenCategoryToggleButtons(enabledEvents, loggingEnabled);
 
   const actionRow = new ActionRowBuilder().addComponents(
-    createBackButton(),
+    ErstellenZurückButton(),
     new ButtonBuilder()
       .setCustomId('log_dash_toggle:all')
       .setLabel('Toggle All Categories')
@@ -173,10 +173,10 @@ export function createLoggingCategoryViewComponents(enabledEvents, loggingEnable
   return [...categoryRows, actionRow];
 }
 
-export function createLoggingFilterComponents() {
+export function ErstellenLoggingFilterComponents() {
   return [
     new ActionRowBuilder().addComponents(
-      createBackButton(),
+      ErstellenZurückButton(),
       new ButtonBuilder()
         .setCustomId('log_dash_add_filter:user')
         .setLabel('Add User Filter')
@@ -194,3 +194,4 @@ export function createLoggingFilterComponents() {
 }
 
 export { EVENT_TYPES_BY_CATEGORY };
+

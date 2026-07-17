@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
@@ -29,16 +29,16 @@ export default {
 
         await claimTicket(interaction.channel, interaction.user);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
-                    "Ticket Claimed!",
+                    "Ticket beansprucht!",
                     "You have successfully claimed this ticket.",
                 ),
             ],
         });
 
-        logger.info('Ticket claimed successfully', {
+        logger.info('Ticket beansprucht successfully', {
             userId: interaction.user.id,
             userTag: interaction.user.tag,
             channelId: interaction.channel.id,

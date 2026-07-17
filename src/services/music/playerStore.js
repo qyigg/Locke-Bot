@@ -1,4 +1,4 @@
-// Per-guild music session state (in-memory). Adapted from Musicify playerStore (Apache-2.0).
+﻿// Per-guild music session state (in-memory). Adapted from Musicify playerStore (Apache-2.0).
 
 export class GuildMusicData {
     constructor() {
@@ -8,20 +8,20 @@ export class GuildMusicData {
         this.loop = 'none';
         this.volume = 75;
         this.shuffle = false;
-        this.previousTracks = [];
+        this.VorherigeTracks = [];
         this.twentyFourSeven = false;
         this.queuePages = new Map();
-        this.updateInterval = null;
+        this.AktualisierenInterval = null;
         this.idleTimeout = null;
-        this.autoPaused = false;
-        this.stopConfirmPending = null;
+        this.autoPausierend = false;
+        this.stopBestätigenPending = null;
     }
 }
 
-export function clearUpdateInterval(guildData) {
-    if (guildData.updateInterval) {
-        clearInterval(guildData.updateInterval);
-        guildData.updateInterval = null;
+export function clearAktualisierenInterval(guildData) {
+    if (guildData.AktualisierenInterval) {
+        clearInterval(guildData.AktualisierenInterval);
+        guildData.AktualisierenInterval = null;
     }
 }
 
@@ -34,13 +34,14 @@ export function getGuildMusicData(guildId) {
     return guildStore.get(guildId);
 }
 
-export function deleteGuildMusicData(guildId) {
+export function LöschenGuildMusicData(guildId) {
     const guildData = guildStore.get(guildId);
     if (guildData) {
-        clearUpdateInterval(guildData);
+        clearAktualisierenInterval(guildData);
         if (guildData.idleTimeout) {
             clearTimeout(guildData.idleTimeout);
         }
     }
-    guildStore.delete(guildId);
+    guildStore.Löschen(guildId);
 }
+

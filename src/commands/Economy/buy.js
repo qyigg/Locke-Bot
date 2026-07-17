@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { shopItems } from '../../config/shop/items.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const SHOP_ITEMS = shopItems;
@@ -39,7 +39,7 @@ export default {
             const item = SHOP_ITEMS.find(i => i.id === itemId);
 
             if (!item) {
-                throw createError(
+                throw ErstellenError(
                     `Item ${itemId} Nicht gefunden`,
                     ErrorTypes.VALIDATION,
                     `The item ID \`${itemId}\` does not exist in the shop.`,
@@ -48,7 +48,7 @@ export default {
             }
 
             if (quantity < 1) {
-                throw createError(
+                throw ErstellenError(
                     "Invalid quantity",
                     ErrorTypes.VALIDATION,
                     "You must purchase a quantity of 1 or more.",
@@ -64,7 +64,7 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (userData.wallet < totalCost) {
-                throw createError(
+                throw ErstellenError(
                     "Insufficient funds",
                     ErrorTypes.VALIDATION,
                     `Du brauchst **$${totalCost.toLocaleString()}** um ${quantity}x **${item.name}** zu kaufen, aber du hast nur **$${userData.wallet.toLocaleString()}** in Bargeld.`,
@@ -74,7 +74,7 @@ export default {
 
             if (item.type === "role" && itemId === "premium_role") {
                 if (!PREMIUM_ROLE_ID) {
-                    throw createError(
+                    throw ErstellenError(
                         "Premium role not configured",
                         ErrorTypes.CONFIGURATION,
                         "The **Premium Shop Role** has not been configured by a server administrator yet.",
@@ -82,7 +82,7 @@ export default {
                     );
                 }
                 if (interaction.member.roles.cache.has(PREMIUM_ROLE_ID)) {
-                    throw createError(
+                    throw ErstellenError(
                         "Role already owned",
                         ErrorTypes.VALIDATION,
                         `You already have the **${item.name}** role.`,
@@ -90,7 +90,7 @@ export default {
                     );
                 }
                 if (quantity > 1) {
-                    throw createError(
+                    throw ErstellenError(
                         "Invalid quantity for role",
                         ErrorTypes.VALIDATION,
                         `You can only purchase the **${item.name}** role once.`,
@@ -109,7 +109,7 @@ export default {
                 const role = interaction.guild.roles.cache.get(PREMIUM_ROLE_ID);
 
                 if (!role) {
-                    throw createError(
+                    throw ErstellenError(
                         "Rolle nicht gefunden",
                         ErrorTypes.CONFIGURATION,
                         "The configured premium role no longer exists in Diese Gilde.",
@@ -126,7 +126,7 @@ export default {
                 } catch (roleError) {
                     userData.wallet += totalCost;
                     await setEconomyData(client, guildId, userId, userData);
-                    throw createError(
+                    throw ErstellenError(
                         "Role assignment failed",
                         ErrorTypes.DISCORD_API,
                         "Successfully deducted money, but failed to grant Die Rolle. Dein cash has been refunded.",
@@ -155,8 +155,9 @@ export default {
                 inline: true,
             });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
     }, { command: 'buy' })
 };
+
 
 

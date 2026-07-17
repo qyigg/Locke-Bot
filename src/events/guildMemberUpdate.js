@@ -1,9 +1,9 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
 
 export default {
-  name: Events.GuildMemberUpdate,
+  name: Events.GuildMemberAktualisieren,
   once: false,
 
   async execute(oldMember, newMember) {
@@ -32,7 +32,7 @@ export default {
       }
 
     } catch (error) {
-      logger.error('Error in guildMemberUpdate event:', error);
+      logger.error('Error in guildMemberAktualisieren event:', error);
     }
   }
 };

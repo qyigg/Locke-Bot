@@ -2,13 +2,13 @@
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { saveGiveaway } from '../../utils/giveaways.js';
+import { SpeichernGiveaway } from '../../utils/giveaways.js';
 import { 
     parseDuration, 
     validatePrize, 
     validateWinnerCount,
-    createGiveawayEmbed, 
-    createGiveawayButtons 
+    ErstellenGiveawayEmbed, 
+    ErstellenGiveawayButtons 
 } from '../../services/giveawayService.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -20,7 +20,7 @@ const GIVEAWAY_MAX_WINNERS = botConfig.giveaways?.maximumWinners ?? 10;
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("gcreate")
+        .setName("gErstellen")
         .setDescription("Startet ein neues Gewinnspiel in einem bestimmten Kanal.")
         .addStringOption((option) =>
             option
@@ -109,11 +109,11 @@ export default {
             participants: [],
             isEnded: false,
             ended: false,
-            createdAt: new Date().toISOString()
+            ErstellendAt: new Date().toISOString()
         };
 
-        const embed = createGiveawayEmbed(initialGiveawayData, "active");
-        const row = createGiveawayButtons(false);
+        const embed = ErstellenGiveawayEmbed(initialGiveawayData, "active");
+        const row = ErstellenGiveawayButtons(false);
 
         const giveawayMessage = await targetChannel.send({
             content: "🎉 **NEUES GEWINNSPIEL** 🎉",
@@ -122,23 +122,23 @@ export default {
         });
 
         initialGiveawayData.messageId = giveawayMessage.id;
-        const saved = await saveGiveaway(
+        const Speichernd = await SpeichernGiveaway(
             interaction.client,
             interaction.guildId,
             initialGiveawayData,
         );
 
-        if (!saved) {
-            logger.warn(`Failed to save giveaway to database: ${giveawayMessage.id}`);
+        if (!Speichernd) {
+            logger.warn(`Failed to Speichern giveaway to database: ${giveawayMessage.id}`);
         }
 
         try {
             await logEvent({
                 client: interaction.client,
                 guildId: interaction.guildId,
-                eventType: EVENT_TYPES.GIVEAWAY_CREATE,
+                eventType: EVENT_TYPES.GIVEAWAY_Erstellen,
                 data: {
-                    description: `Giveaway created: ${prizeName}`,
+                    description: `Giveaway Erstellend: ${prizeName}`,
                     channelId: targetChannel.id,
                     userId: interaction.user.id,
                     fields: [
@@ -182,3 +182,4 @@ export default {
         });
     },
 };
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared helpers for detecting bot-posted panel messages (tickets, verification, etc.)
  */
 
@@ -52,11 +52,11 @@ export function formatPanelStatusField(panelStatus, { repostHint = 'Repost Panel
     }
 
     if (panelStatus.reason === 'channel_missing') {
-        return '⚠️ Panel channel missing or deleted';
+        return '⚠️ Panel channel missing or Löschend';
     }
 
-    if (panelStatus.reason === 'panel_deleted') {
-        return `⚠️ Panel message was deleted — use **${repostHint}** below`;
+    if (panelStatus.reason === 'panel_Löschend') {
+        return `⚠️ Panel message was Löschend — use **${repostHint}** below`;
     }
 
     if (panelStatus.reason === 'no_channel') {
@@ -107,14 +107,14 @@ export async function getBotPanelStatus(client, guild, {
         return { exists: true, message: recovered, channel, recoveredId: recovered.id };
     }
 
-    return { exists: false, reason: 'panel_deleted', channel };
+    return { exists: false, reason: 'panel_Löschend', channel };
 }
 
 export async function getTicketPanelStatus(client, guild, config) {
     return getBotPanelStatus(client, guild, {
         channelId: config.ticketPanelChannelId,
         messageId: config.ticketPanelMessageId,
-        buttonCustomId: 'create_ticket',
+        buttonCustomId: 'Erstellen_ticket',
     });
 }
 
@@ -122,7 +122,7 @@ export async function getVerificationPanelStatus(client, guild, config) {
     return getBotPanelStatus(client, guild, {
         channelId: config?.channelId,
         messageId: config?.messageId,
-        buttonCustomId: 'verify_user',
+        buttonCustomId: 'Verifizieren_user',
     });
 }
 
@@ -133,4 +133,5 @@ export async function getReactionRolePanelStatus(client, guild, panelData) {
         selectCustomId: 'reaction_roles',
     });
 }
+
 

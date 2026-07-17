@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { successEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
@@ -26,7 +26,7 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw createError(
+                throw ErstellenError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
                     "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
@@ -43,7 +43,7 @@ export default {
                 depositAmount = parseInt(amountInput);
 
                 if (isNaN(depositAmount) || depositAmount <= 0) {
-                    throw createError(
+                    throw ErstellenError(
                         "Invalid deposit amount",
                         ErrorTypes.VALIDATION,
                         `Please enter a valid number or 'all'. You entered: \`${amountInput}\``,
@@ -53,7 +53,7 @@ export default {
             }
 
             if (depositAmount === 0) {
-                throw createError(
+                throw ErstellenError(
                     "Zero deposit amount",
                     ErrorTypes.VALIDATION,
                     "You have no cash to deposit.",
@@ -77,7 +77,7 @@ export default {
             const availableSpace = maxBank - userData.bank;
 
             if (availableSpace <= 0) {
-                throw createError(
+                throw ErstellenError(
                     "Bank is full",
                     ErrorTypes.VALIDATION,
                     `Dein bank is currently full (Max Capacity: $${maxBank.toLocaleString()}). Purchase a **Bank Upgrade** to increase Dein limit.`,
@@ -103,7 +103,7 @@ export default {
             }
 
             if (depositAmount === 0) {
-                throw createError(
+                throw ErstellenError(
                     "No space or cash for deposit",
                     ErrorTypes.VALIDATION,
                     "The amount you tried to deposit was either 0 or exceeded Dein bank capacity after checking Dein cash balance.",
@@ -133,7 +133,8 @@ export default {
                     },
                 );
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'deposit' })
 };
+
 

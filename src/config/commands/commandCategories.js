@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Command category metadata for the command access manager.
  */
 
@@ -9,7 +9,7 @@ export const CATEGORY_ICONS = {
   Economy: '💰',
   Fun: '🎮',
   Giveaway: '🎉',
-  JoinToCreate: '🔌',
+  JoinToErstellen: '🔌',
   Leveling: '📊',
   Logging: '📝',
   Moderation: '🛡️',
@@ -44,3 +44,4 @@ export function formatCategoryName(rawCategory) {
 export function getCategoryIcon(category) {
   return CATEGORY_ICONS[category] || CATEGORY_ICONS[formatCategoryName(category)] || '📁';
 }
+

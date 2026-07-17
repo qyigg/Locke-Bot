@@ -1,4 +1,4 @@
-import { assertAllowlistedIdentifier } from '../../utils/sqlIdentifiers.js';
+﻿import { assertAllowlistedIdentifier } from '../../utils/sqlIdentifiers.js';
 import { EXPECTED_SCHEMA_LABEL, EXPECTED_SCHEMA_VERSION } from './schemaVersion.js';
 
 const configuredTables = {
@@ -58,7 +58,7 @@ export function resolveSslConfig() {
     }
 
     const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || '';
-    if (/sslmode=(require|verify-ca|verify-full|prefer)/i.test(url)) {
+    if (/sslmode=(require|Verifizieren-ca|Verifizieren-full|prefer)/i.test(url)) {
         return { rejectUnauthorized: false };
     }
 
@@ -125,8 +125,8 @@ export const pgConfig = {
         keepalives_idle: 30,
 
         retries: parseInt(process.env.POSTGRES_RETRIES) || 3,
-        backoffBase: parseInt(process.env.POSTGRES_BACKOFF_BASE) || 100,
-        backoffMultiplier: parseInt(process.env.POSTGRES_BACKOFF_MULTIPLIER) || 2,
+        ZurückoffBase: parseInt(process.env.POSTGRES_ZurückOFF_BASE) || 100,
+        ZurückoffMultiplier: parseInt(process.env.POSTGRES_ZurückOFF_MULTIPLIER) || 2,
     },
     
     tables: validatedTables,
@@ -163,7 +163,7 @@ export const pgConfig = {
         
         debug: process.env.NODE_ENV === 'development',
         
-        autoCreateTables: true,
+        autoErstellenTables: true,
         
         autoMigrate: process.env.AUTO_MIGRATE !== 'false',
     },
@@ -185,7 +185,7 @@ export const pgConfig = {
         
         directory: 'database/migrations',
         
-        rollbackOnFailure: false,
+        rollZurückOnFailure: false,
 
         expectedVersion: EXPECTED_SCHEMA_VERSION,
 

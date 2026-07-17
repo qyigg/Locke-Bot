@@ -2,11 +2,11 @@
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { getGuildGiveaways, saveGiveaway } from '../../utils/giveaways.js';
+import { getGuildGiveaways, SpeichernGiveaway } from '../../utils/giveaways.js';
 import { 
     endGiveaway as endGiveawayService,
-    createGiveawayEmbed, 
-    createGiveawayButtons 
+    ErstellenGiveawayEmbed, 
+    ErstellenGiveawayButtons 
 } from '../../services/giveawayService.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -76,22 +76,22 @@ export default {
             interaction.user.id
         );
 
-        const updatedGiveaway = endResult.giveaway;
+        const AktualisierendGiveaway = endResult.giveaway;
         const winners = endResult.winners;
 
         const channel = await interaction.client.channels.fetch(
-            updatedGiveaway.channelId,
+            AktualisierendGiveaway.channelId,
         ).catch(err => {
-            logger.warn(`Could not fetch channel ${updatedGiveaway.channelId}:`, err.message);
+            logger.warn(`Could not fetch channel ${AktualisierendGiveaway.channelId}:`, err.message);
             return null;
         });
 
         if (!channel || !channel.isTextBased()) {
             throw new TitanBotError(
-                `Kanal nicht gefunden: ${updatedGiveaway.channelId}`,
+                `Kanal nicht gefunden: ${AktualisierendGiveaway.channelId}`,
                 ErrorTypes.VALIDATION,
                 "Der Kanal, auf dem das Gewinnspiel gehostet wurde, konnte nicht gefunden werden. Der Gewinnspiels-Status wurde aktualisiert.",
-                { channelId: updatedGiveaway.channelId, messageId }
+                { channelId: AktualisierendGiveaway.channelId, messageId }
             );
         }
 
@@ -107,20 +107,20 @@ export default {
                 `Message Nicht gefunden: ${messageId}`,
                 ErrorTypes.VALIDATION,
                 "Die Gewinnspielnachricht konnte nicht gefunden werden. Der Gewinnspiels-Status wurde aktualisiert.",
-                { messageId, channelId: updatedGiveaway.channelId }
+                { messageId, channelId: AktualisierendGiveaway.channelId }
             );
         }
 
-        await saveGiveaway(
+        await SpeichernGiveaway(
             interaction.client,
             interaction.guildId,
-            updatedGiveaway,
+            AktualisierendGiveaway,
         );
 
-        const newEmbed = createGiveawayEmbed(updatedGiveaway, "ended", winners);
-        const newRow = createGiveawayButtons(true);
+        const newEmbed = ErstellenGiveawayEmbed(AktualisierendGiveaway, "ended", winners);
+        const newRow = ErstellenGiveawayButtons(true);
 
-        await message.edit({
+        await message.Bearbeiten({
             content: "🎉 **GEWINNSPIEL BEENDET** 🎉",
             embeds: [newEmbed],
             components: [newRow],
@@ -131,10 +131,10 @@ export default {
                 .map((id) => `<@${id}>`)
                 .join(",");
             const winnerPingMsg = await channel.send({
-                content: `🎉 HERZLICHEN GLÜCKWUNSCH ${winnerMentions}! Ihr habt das **${updatedGiveaway.prize}** Gewinnspiel gewonnen! Bitte kontaktiert den Gastgeber <@${updatedGiveaway.hostId}>, um euren Preis zu beanspruchen.`,
+                content: `🎉 HERZLICHEN GLÜCKWUNSCH ${winnerMentions}! Ihr habt das **${AktualisierendGiveaway.prize}** Gewinnspiel gewonnen! Bitte kontaktiert den Gastgeber <@${AktualisierendGiveaway.hostId}>, um euren Preis zu beanspruchen.`,
             });
-            updatedGiveaway.winnerPingMessageId = winnerPingMsg.id;
-            await saveGiveaway(interaction.client, interaction.guildId, updatedGiveaway);
+            AktualisierendGiveaway.winnerPingMessageId = winnerPingMsg.id;
+            await SpeichernGiveaway(interaction.client, interaction.guildId, AktualisierendGiveaway);
 
             logger.info(`Giveaway ended with ${winners.length} winner(s): ${messageId}`);
 
@@ -150,7 +150,7 @@ export default {
                         fields: [
                             {
                                 name: 'Preis',
-                                value: updatedGiveaway.prize || 'Überraschungspreis!',
+                                value: AktualisierendGiveaway.prize || 'Überraschungspreis!',
                                 inline: true
                             },
                             {
@@ -171,7 +171,7 @@ export default {
             }
         } else {
             await channel.send({
-                content: `Das Gewinnspiel für **${updatedGiveaway.prize}** hat mit keinen gültigen Einträgen geendet.`,
+                content: `Das Gewinnspiel für **${AktualisierendGiveaway.prize}** hat mit keinen gültigen Einträgen geendet.`,
             });
             logger.info(`Giveaway ended with no winners: ${messageId}`);
         }
@@ -182,11 +182,12 @@ export default {
             embeds: [
                 successEmbed(
                     "Gewinnspiel beendet ✅",
-                    `Gewinnspiel für **${updatedGiveaway.prize}** in ${channel} erfolgreich beendet. ${winners.length} Gewinner aus ${endResult.participantCount} Einträgen ausgewählt.`,
+                    `Gewinnspiel für **${AktualisierendGiveaway.prize}** in ${channel} erfolgreich beendet. ${winners.length} Gewinner aus ${endResult.participantCount} Einträgen ausgewählt.`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
         });
     },
 };
+
 

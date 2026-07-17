@@ -25,14 +25,14 @@ import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorH
 import { safeDeferInteraction } from '../../../utils/interactionValidator.js';
 import {
     getApplicationSettings,
-    saveApplicationSettings,
+    SpeichernApplicationSettings,
     getApplicationRoles,
-    saveApplicationRoles,
+    SpeichernApplicationRoles,
     getApplicationRoleSettings,
-    saveApplicationRoleSettings,
-    deleteApplicationRoleSettings,
+    SpeichernApplicationRoleSettings,
+    LöschenApplicationRoleSettings,
     getApplications,
-    deleteApplication,
+    LöschenApplication,
 } from '../../../utils/database.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
 import { setLogChannel, resolveApplicationLogChannel, resolveLogChannel } from '../../../services/loggingService.js';
@@ -72,7 +72,7 @@ async function buildDashboardEmbed(settings, roles, guild, client) {
                 inline: false,
             },
         )
-        .setFooter({ text: 'Dashboard closes after 15 minutes of inactivity' })
+        .setFooter({ text: 'Dashboard Schließens after 15 minutes of inactivity' })
         .setTimestamp();
 }
 
@@ -92,7 +92,7 @@ function buildSelectMenu(guildId) {
                 .setValue('manager_role')
                 .setEmoji('🛡️'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Edit Questions')
+                .setLabel('Bearbeiten Questions')
                 .setDescription('Customise the questions shown on the application form')
                 .setValue('questions')
                 .setEmoji('📝'),
@@ -127,7 +127,7 @@ function buildButtonRow(settings, guildId, disabled = false) {
 
 async function refreshDashboard(rootInteraction, settings, roles, guildId, client) {
     const selectMenu = buildSelectMenu(guildId);
-    await InteractionHelper.safeEditReply(rootInteraction, {
+    await InteractionHelper.safeBearbeitenReply(rootInteraction, {
         embeds: [await buildDashboardEmbed(settings, roles, rootInteraction.guild, client)],
         components: [
             buildButtonRow(settings, guildId),
@@ -162,7 +162,7 @@ export default {
                 throw new TitanBotError(
                     'Applications system not set up',
                     ErrorTypes.CONFIGURATION,
-                    'The applications system has not been configured yet. Please run `/app-admin setup` to create Dein first application.',
+                    'The applications system has not been configured yet. Please run `/app-admin setup` to Erstellen Dein first application.',
                 );
             }
 
@@ -214,12 +214,12 @@ async function showApplicationSelector(interaction, roles, settings, guildId, cl
         .setDescription('Choose which application role you want to configure.')
         .setColor(getColor('info'));
 
-    await InteractionHelper.safeEditReply(interaction, {
+    await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [embed],
         components: [new ActionRowBuilder().addComponents(selectMenu)],
     });
 
-    const collector = interaction.channel.createMessageComponentCollector({
+    const collector = interaction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === interaction.user.id && i.customId === `app_select_${guildId}`,
@@ -243,7 +243,7 @@ async function showApplicationSelector(interaction, roles, settings, guildId, cl
         if (reason === 'time' && collected.size === 0) {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No selection was made. The dashboard has closed.',
+                message: 'No selection was made. The dashboard has Schließend.',
             }).catch(() => {});
         }
     });
@@ -252,7 +252,7 @@ async function showApplicationSelector(interaction, roles, settings, guildId, cl
 async function showGlobalDashboard(interaction, settings, roles, guildId, client) {
     const selectMenu = buildSelectMenu(guildId);
 
-    await InteractionHelper.safeEditReply(interaction, {
+    await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [await buildDashboardEmbed(settings, roles, interaction.guild, client)],
         components: [
             buildButtonRow(settings, guildId),
@@ -321,7 +321,7 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
                 inline: false 
             },
         )
-        .setFooter({ text: 'Dashboard closes after 10 minutes of inactivity' })
+        .setFooter({ text: 'Dashboard Schließens after 10 minutes of inactivity' })
         .setTimestamp();
 
     const configMenu = buildApplicationSelectMenu(guildId, selectedRole.roleId);
@@ -332,15 +332,15 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
             .setLabel(isEnabled ? 'Disable Application' : 'Enable Application')
             .setStyle(isEnabled ? ButtonStyle.Danger : ButtonStyle.Success),
         new ButtonBuilder()
-            .setCustomId(`app_delete_${selectedRole.roleId}`)
-            .setLabel('Delete Application')
+            .setCustomId(`app_Löschen_${selectedRole.roleId}`)
+            .setLabel('Löschen Application')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🗑️'),
     );
 
     const menuRow = new ActionRowBuilder().addComponents(configMenu);
 
-    await InteractionHelper.safeEditReply(rootInteraction, {
+    await InteractionHelper.safeBearbeitenReply(rootInteraction, {
         embeds: [embed],
         components: [menuRow, controlButtons],
     });
@@ -351,7 +351,7 @@ async function showApplicationDashboard(rootInteraction, selectedRole, settings,
 function setupCollectors(interaction, settings, roles, guildId, client, selectedRoleId) {
     const customIdPrefix = selectedRoleId ? `app_cfg_${selectedRoleId}` : `app_cfg_${guildId}`;
     
-    const collector = interaction.channel.createMessageComponentCollector({
+    const collector = interaction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === interaction.user.id && 
@@ -415,10 +415,10 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
         if (reason === 'time') {
             const timeoutEmbed = new EmbedBuilder()
                 .setTitle('\u23f0 Dashboard Timed Out')
-                .setDescription('This dashboard has been closed due to inactivity. Please run the command again to continue.')
+                .setDescription('This dashboard has been Schließend due to inactivity. Please run the command again to continue.')
                 .setColor(getColor('error'));
                 
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [timeoutEmbed],
                 components: [],
             }).catch(() => {});
@@ -426,7 +426,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
     });
 
     if (!selectedRoleId) {
-        const globalToggleCollector = interaction.channel.createMessageComponentCollector({
+        const globalToggleCollector = interaction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: i =>
                 i.user.id === interaction.user.id &&
@@ -442,11 +442,11 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 const wasEnabled = settings.enabled === true;
                 settings.enabled = !wasEnabled;
 
-                await saveApplicationSettings(interaction.client, guildId, settings);
+                await SpeichernApplicationSettings(interaction.client, guildId, settings);
 
-                const updatedSettings = await getApplicationSettings(interaction.client, guildId);
-                const updatedRoles = await getApplicationRoles(interaction.client, guildId);
-                await showGlobalDashboard(interaction, updatedSettings, updatedRoles, guildId, interaction.client);
+                const AktualisierendSettings = await getApplicationSettings(interaction.client, guildId);
+                const AktualisierendRoles = await getApplicationRoles(interaction.client, guildId);
+                await showGlobalDashboard(interaction, AktualisierendSettings, AktualisierendRoles, guildId, interaction.client);
 
                 await toggleInteraction.followUp({
                     embeds: [successEmbed(
@@ -476,7 +476,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                     .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring Dein applications, please run the command again.')
                     .setColor(getColor('warning'));
                     
-                await InteractionHelper.safeEditReply(interaction, {
+                await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [timeoutEmbed],
                     components: [],
                 }).catch(() => {});
@@ -485,76 +485,76 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
     }
 
     if (selectedRoleId) {
-        const btnCollector = interaction.channel.createMessageComponentCollector({
+        const btnCollector = interaction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: i =>
                 i.user.id === interaction.user.id &&
-                i.customId === `app_delete_${selectedRoleId}`,
+                i.customId === `app_Löschen_${selectedRoleId}`,
             time: 600_000,
         });
 
         btnCollector.on('collect', async btnInteraction => {
             
-            const appRoleForDelete = roles.find(r => r.roleId === selectedRoleId);
-            const appNameForDelete = appRoleForDelete?.name ?? 'this application';
+            const appRoleForLöschen = roles.find(r => r.roleId === selectedRoleId);
+            const appNameForLöschen = appRoleForLöschen?.name ?? 'this application';
 
-            const confirmModal = new ModalBuilder()
-                .setCustomId('app_delete_confirm')
-                .setTitle('Confirm Application Deletion');
+            const BestätigenModal = new ModalBuilder()
+                .setCustomId('app_Löschen_Bestätigen')
+                .setTitle('Bestätigen Application Deletion');
 
-            const deleteWarningText = new TextDisplayBuilder()
-                .setContent(`⚠️ You are about to permanently delete **${appNameForDelete}**. All stored applications and settings for this role will be removed and cannot be recovered.`);
+            const LöschenWarningText = new TextDisplayBuilder()
+                .setContent(`⚠️ You are about to permanently Löschen **${appNameForLöschen}**. All stored applications and settings for this role will be removed and cannot be recovered.`);
 
-            const deleteCheckbox = new CheckboxBuilder()
-                .setCustomId('confirm_delete')
+            const LöschenCheckbox = new CheckboxBuilder()
+                .setCustomId('Bestätigen_Löschen')
                 .setDefault(false);
 
-            const deleteCheckboxLabel = new LabelBuilder()
-                .setLabel('I confirm — this cannot be undone')
-                .setCheckboxComponent(deleteCheckbox);
+            const LöschenCheckboxLabel = new LabelBuilder()
+                .setLabel('I Bestätigen — this cannot be unFertig')
+                .setCheckboxComponent(LöschenCheckbox);
 
-            confirmModal
-                .addTextDisplayComponents(deleteWarningText)
-                .addLabelComponents(deleteCheckboxLabel);
+            BestätigenModal
+                .addTextDisplayComponents(LöschenWarningText)
+                .addLabelComponents(LöschenCheckboxLabel);
 
             try {
-                await btnInteraction.showModal(confirmModal);
+                await btnInteraction.showModal(BestätigenModal);
             } catch (error) {
-                logger.error('Error showing delete confirmation modal:', error);
+                logger.error('Error showing Löschen Bestätigenation modal:', error);
                 await replyUserError(btnInteraction, {
                     type: ErrorTypes.UNKNOWN,
-                    message: 'Failed to show confirmation modal. Bitte versuchen Sie es später erneut.',
+                    message: 'Failed to show Bestätigenation modal. Bitte versuchen Sie es später erneut.',
                 }).catch(() => {});
                 return;
             }
 
             try {
-                const confirmSubmit = await btnInteraction.awaitModalSubmit({
+                const BestätigenAbsenden = await btnInteraction.awaitModalAbsenden({
                     time: 60_000,
                     filter: i =>
-                        i.customId === 'app_delete_confirm' && i.user.id === btnInteraction.user.id,
+                        i.customId === 'app_Löschen_Bestätigen' && i.user.id === btnInteraction.user.id,
                 }).catch(() => null);
 
-                if (!confirmSubmit) {
+                if (!BestätigenAbsenden) {
                     await replyUserError(btnInteraction, {
                         type: ErrorTypes.VALIDATION,
-                        message: 'Application deletion was cancelled.',
+                        message: 'Application deletion was Abbrechenled.',
                     });
                     return;
                 }
 
-                const confirmed = confirmSubmit.fields.getCheckbox('confirm_delete');
-                if (!confirmed) {
-                    await replyUserError(confirmSubmit, { type: ErrorTypes.VALIDATION, message: 'You must tick the confirmation checkbox to delete the application.' });
+                const Bestätigened = BestätigenAbsenden.fields.getCheckbox('Bestätigen_Löschen');
+                if (!Bestätigened) {
+                    await replyUserError(BestätigenAbsenden, { type: ErrorTypes.VALIDATION, message: 'You must tick the Bestätigenation checkbox to Löschen the application.' });
                     return;
                 }
 
-                await handleDeleteApplication(confirmSubmit, selectedRoleId, guildId, roles, client);
+                await handleLöschenApplication(BestätigenAbsenden, selectedRoleId, guildId, roles, client);
                 collector.stop();
                 btnCollector.stop();
 
             } catch (error) {
-                logger.error('Error confirming application deletion:', error);
+                logger.error('Error Bestätigening application deletion:', error);
                 await replyUserError(btnInteraction, {
                     type: ErrorTypes.UNKNOWN,
                     message: 'Ein Fehler ist aufgetreten while deleting the application.',
@@ -569,14 +569,14 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                     .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring Dein applications, please run the command again.')
                     .setColor(getColor('warning'));
                     
-                await InteractionHelper.safeEditReply(interaction, {
+                await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [timeoutEmbed],
                     components: [],
                 }).catch(() => {});
             }
         });
 
-        const toggleCollector = interaction.channel.createMessageComponentCollector({
+        const toggleCollector = interaction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: i =>
                 i.user.id === interaction.user.id &&
@@ -602,19 +602,19 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 const wasEnabled = roles[roleIndex].enabled !== false;
                 roles[roleIndex].enabled = !wasEnabled;
 
-                await saveApplicationRoles(interaction.client, guildId, roles);
+                await SpeichernApplicationRoles(interaction.client, guildId, roles);
 
-                const updatedRole = roles[roleIndex];
-                const updatedSettings = await getApplicationSettings(interaction.client, guildId);
-                await showApplicationDashboard(interaction, updatedRole, updatedSettings, roles, guildId, interaction.client);
+                const AktualisierendRole = roles[roleIndex];
+                const AktualisierendSettings = await getApplicationSettings(interaction.client, guildId);
+                await showApplicationDashboard(interaction, AktualisierendRole, AktualisierendSettings, roles, guildId, interaction.client);
 
                 await toggleInteraction.followUp({
                     embeds: [successEmbed(
                         wasEnabled ? '🔴 Application Disabled' : '🟢 Application Enabled',
-                        `The **${updatedRole.name}** application is now **${wasEnabled ? 'disabled' : 'enabled'}**.\n\n${
+                        `The **${AktualisierendRole.name}** application is now **${wasEnabled ? 'disabled' : 'enabled'}**.\n\n${
                             wasEnabled 
-                                ? 'This application will no longer appear in `/apply submit` options.' 
-                                : 'This application will now appear in `/apply submit` options.'
+                                ? 'This application will no longer appear in `/apply Absenden` options.' 
+                                : 'This application will now appear in `/apply Absenden` options.'
                         }`,
                     )],
                     flags: MessageFlags.Ephemeral,
@@ -636,7 +636,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                     .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring Dein applications, please run the command again.')
                     .setColor(getColor('warning'));
                     
-                await InteractionHelper.safeEditReply(interaction, {
+                await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [timeoutEmbed],
                     components: [],
                 }).catch(() => {});
@@ -661,7 +661,7 @@ function buildApplicationSelectMenu(guildId, roleId) {
                 .setValue('manager_role')
                 .setEmoji('🛡️'),
             new StringSelectMenuOptionBuilder()
-                .setLabel('Edit Questions')
+                .setLabel('Bearbeiten Questions')
                 .setDescription('Customise the questions shown on the application form')
                 .setValue('questions')
                 .setEmoji('📝'),
@@ -702,7 +702,7 @@ async function handleLogChannel(selectInteraction, rootInteraction, settings, ro
     await selectInteraction.showModal(modal);
 
     try {
-        const modalSubmission = await selectInteraction.awaitModalSubmit({
+        const modalSubmission = await selectInteraction.awaitModalAbsenden({
             time: 5 * 60 * 1000,
             filter: i => i.user.id === selectInteraction.user.id && i.customId === `app_cfg_log_channel_modal_${guildId}_${selectedRoleId || 'global'}`,
         });
@@ -713,15 +713,15 @@ async function handleLogChannel(selectInteraction, rootInteraction, settings, ro
         if (selectedRoleId) {
             const roleSettings = await getApplicationRoleSettings(client, guildId, selectedRoleId);
             roleSettings.logChannelId = channelId;
-            await saveApplicationRoleSettings(client, guildId, selectedRoleId, roleSettings);
+            await SpeichernApplicationRoleSettings(client, guildId, selectedRoleId, roleSettings);
         } else {
             await setLogChannel(client, guildId, 'applications', channelId);
             settings.logChannelId = channelId;
-            await saveApplicationSettings(client, guildId, settings);
+            await SpeichernApplicationSettings(client, guildId, settings);
         }
 
         await modalSubmission.reply({
-            embeds: [successEmbed('Log Channel Updated', `Application logs will now be sent to ${channel ?? `<#${channelId}>`}.\nYou can also manage this from \`/logging dashboard\`.`)],
+            embeds: [successEmbed('Log Channel Aktualisierend', `Application logs will now be sent to ${channel ?? `<#${channelId}>`}.\nYou can also manage this from \`/logging dashboard\`.`)],
             flags: MessageFlags.Ephemeral,
         });
 
@@ -758,7 +758,7 @@ async function handleManagerRole(selectInteraction, rootInteraction, settings, r
     await selectInteraction.showModal(modal);
 
     try {
-        const modalSubmission = await selectInteraction.awaitModalSubmit({
+        const modalSubmission = await selectInteraction.awaitModalAbsenden({
             time: 5 * 60 * 1000,
             filter: i => i.user.id === selectInteraction.user.id && i.customId === `app_cfg_manager_role_modal_${guildId}`,
         });
@@ -768,21 +768,21 @@ async function handleManagerRole(selectInteraction, rootInteraction, settings, r
 
         for (const roleId of selectedRoleIds) {
             if (roleSet.has(roleId)) {
-                roleSet.delete(roleId);
+                roleSet.Löschen(roleId);
             } else {
                 roleSet.add(roleId);
             }
         }
 
         settings.managerRoles = Array.from(roleSet);
-        await saveApplicationSettings(client, guildId, settings);
+        await SpeichernApplicationSettings(client, guildId, settings);
 
         const finalList = settings.managerRoles.length > 0
             ? settings.managerRoles.map(id => `<@&${id}>`).join(',')
             : '`None`';
 
         await modalSubmission.reply({
-            embeds: [successEmbed('Manager Roles Updated', `Current manager roles: ${finalList}`)],
+            embeds: [successEmbed('Manager Roles Aktualisierend', `Current manager roles: ${finalList}`)],
             flags: MessageFlags.Ephemeral,
         });
 
@@ -859,22 +859,22 @@ async function handleQuestions(selectInteraction, rootInteraction, settings, rol
 
     await selectInteraction.showModal(modal);
 
-    const submitted = await selectInteraction
-        .awaitModalSubmit({
+    const Absendented = await selectInteraction
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'app_cfg_questions' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
         .catch(() => null);
 
-    if (!submitted) return;
+    if (!Absendented) return;
 
     const newQuestions = ['q1', 'q2', 'q3', 'q4', 'q5']
-        .map(key => submitted.fields.getTextInputValue(key).trim())
+        .map(key => Absendented.fields.getTextInputValue(key).trim())
         .filter(Boolean);
 
     if (newQuestions.length === 0) {
-        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'At least one question is required.' });
+        await replyUserError(Absendented, { type: ErrorTypes.USER_INPUT, message: 'At least one question is required.' });
         return;
     }
 
@@ -882,18 +882,18 @@ async function handleQuestions(selectInteraction, rootInteraction, settings, rol
         
         const roleSettings = await getApplicationRoleSettings(client, guildId, selectedRoleId);
         roleSettings.questions = newQuestions;
-        await saveApplicationRoleSettings(client, guildId, selectedRoleId, roleSettings);
+        await SpeichernApplicationRoleSettings(client, guildId, selectedRoleId, roleSettings);
     } else {
         
         settings.questions = newQuestions;
-        await saveApplicationSettings(client, guildId, settings);
+        await SpeichernApplicationSettings(client, guildId, settings);
     }
 
-    await submitted.reply({
+    await Absendented.reply({
         embeds: [
             successEmbed(
-                '✅ Questions Updated',
-                `${newQuestions.length} question${newQuestions.length !== 1 ? 's' : ''} saved.`,
+                '✅ Questions Aktualisierend',
+                `${newQuestions.length} question${newQuestions.length !== 1 ? 's' : ''} Speichernd.`,
             ),
         ],
         flags: MessageFlags.Ephemeral,
@@ -932,7 +932,7 @@ async function handleRoleAdd(selectInteraction, rootInteraction, settings, roles
     await selectInteraction.showModal(modal);
 
     try {
-        const modalSubmission = await selectInteraction.awaitModalSubmit({
+        const modalSubmission = await selectInteraction.awaitModalAbsenden({
             time: 5 * 60 * 1000,
             filter: i => i.user.id === selectInteraction.user.id && i.customId === `app_cfg_role_add_modal_${guildId}`,
         });
@@ -947,8 +947,8 @@ async function handleRoleAdd(selectInteraction, rootInteraction, settings, roles
         }
 
         roles.push({ roleId, name: customName });
-        await saveApplicationRoles(client, guildId, roles);
-        await saveApplicationRoleSettings(client, guildId, roleId, {
+        await SpeichernApplicationRoles(client, guildId, roles);
+        await SpeichernApplicationRoleSettings(client, guildId, roleId, {
             questions: getDefaultApplicationQuestions(),
         });
 
@@ -998,7 +998,7 @@ async function handleRoleRemove(selectInteraction, rootInteraction, settings, ro
     await selectInteraction.showModal(modal);
 
     try {
-        const modalSubmission = await selectInteraction.awaitModalSubmit({
+        const modalSubmission = await selectInteraction.awaitModalAbsenden({
             time: 5 * 60 * 1000,
             filter: i => i.user.id === selectInteraction.user.id && i.customId === `app_cfg_role_remove_modal_${guildId}`,
         });
@@ -1012,7 +1012,7 @@ async function handleRoleRemove(selectInteraction, rootInteraction, settings, ro
         }
 
         roles.splice(index, 1);
-        await saveApplicationRoles(client, guildId, roles);
+        await SpeichernApplicationRoles(client, guildId, roles);
 
         await modalSubmission.reply({
             embeds: [successEmbed('Role Removed', `<@&${roleId}> has been removed from the application roles.`)],
@@ -1072,37 +1072,37 @@ async function handleRetention(selectInteraction, rootInteraction, settings, rol
 
     await selectInteraction.showModal(modal);
 
-    const submitted = await selectInteraction
-        .awaitModalSubmit({
+    const Absendented = await selectInteraction
+        .awaitModalAbsenden({
             filter: i =>
                 i.customId === 'app_cfg_retention' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
         .catch(() => null);
 
-    if (!submitted) return;
+    if (!Absendented) return;
 
-    const pendingDays = parseInt(submitted.fields.getTextInputValue('pending_days').trim(), 10);
-    const reviewedDays = parseInt(submitted.fields.getTextInputValue('reviewed_days').trim(), 10);
+    const pendingDays = parseInt(Absendented.fields.getTextInputValue('pending_days').trim(), 10);
+    const reviewedDays = parseInt(Absendented.fields.getTextInputValue('reviewed_days').trim(), 10);
 
     if (isNaN(pendingDays) || pendingDays < 1 || pendingDays > 3650) {
-        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Pending retention must be a whole number between **1** and **3650** days.' });
+        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Pending retention must be a whole number between **1** and **3650** days.' });
         return;
     }
 
     if (isNaN(reviewedDays) || reviewedDays < 1 || reviewedDays > 3650) {
-        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Reviewed retention must be a whole number between **1** and **3650** days.' });
+        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Reviewed retention must be a whole number between **1** and **3650** days.' });
         return;
     }
 
     settings.pendingApplicationRetentionDays = pendingDays;
     settings.reviewedApplicationRetentionDays = reviewedDays;
-    await saveApplicationSettings(client, guildId, settings);
+    await SpeichernApplicationSettings(client, guildId, settings);
 
-    await submitted.reply({
+    await Absendented.reply({
         embeds: [
             successEmbed(
-                '✅ Retention Updated',
+                '✅ Retention Aktualisierend',
                 `Pending applications will be kept for **${pendingDays} days**.\nReviewed applications will be kept for **${reviewedDays} days**.`,
             ),
         ],
@@ -1112,45 +1112,46 @@ async function handleRetention(selectInteraction, rootInteraction, settings, rol
     await refreshDashboard(rootInteraction, settings, roles, guildId, client);
 }
 
-async function handleDeleteApplication(confirmSubmit, selectedRoleId, guildId, roles, client) {
+async function handleLöschenApplication(BestätigenAbsenden, selectedRoleId, guildId, roles, client) {
     try {
         
         const roleIndex = roles.findIndex(r => r.roleId === selectedRoleId);
         if (roleIndex === -1) {
-            await replyUserError(confirmSubmit, { type: ErrorTypes.USER_INPUT, message: 'Application Rolle nicht gefunden.' });
+            await replyUserError(BestätigenAbsenden, { type: ErrorTypes.USER_INPUT, message: 'Application Rolle nicht gefunden.' });
             return;
         }
 
-        const deletedRole = roles[roleIndex];
+        const LöschendRole = roles[roleIndex];
 
         roles.splice(roleIndex, 1);
 
-        await saveApplicationRoles(client, guildId, roles);
+        await SpeichernApplicationRoles(client, guildId, roles);
 
-        await deleteApplicationRoleSettings(client, guildId, selectedRoleId);
+        await LöschenApplicationRoleSettings(client, guildId, selectedRoleId);
 
         const allApplications = await getApplications(client, guildId);
-        const applicationsToDelete = allApplications.filter(app => app.roleId === selectedRoleId);
+        const applicationsToLöschen = allApplications.filter(app => app.roleId === selectedRoleId);
 
-        for (const app of applicationsToDelete) {
-            await deleteApplication(client, guildId, app.id, app.userId);
+        for (const app of applicationsToLöschen) {
+            await LöschenApplication(client, guildId, app.id, app.userId);
         }
 
-        await confirmSubmit.reply({
+        await BestätigenAbsenden.reply({
             embeds: [
                 successEmbed(
-                    '🗑️ Application Deleted',
-                    `The application for <@&${selectedRoleId}> (**${deletedRole.name}**) has been permanently deleted.\n\n` +
-                    `Deleted: **${applicationsToDelete.length}** application${applicationsToDelete.length !== 1 ? 's' : ''}`,
+                    '🗑️ Application Löschend',
+                    `The application for <@&${selectedRoleId}> (**${LöschendRole.name}**) has been permanently Löschend.\n\n` +
+                    `Löschend: **${applicationsToLöschen.length}** application${applicationsToLöschen.length !== 1 ? 's' : ''}`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
         });
 
     } catch (error) {
-        logger.error('Error in handleDeleteApplication:', error);
-        await replyUserError(confirmSubmit, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while deleting the application. Bitte versuchen Sie es später erneut.' });
+        logger.error('Error in handleLöschenApplication:', error);
+        await replyUserError(BestätigenAbsenden, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while deleting the application. Bitte versuchen Sie es später erneut.' });
     }
 }
+
 
 

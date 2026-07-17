@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
@@ -26,10 +26,10 @@ export default {
     const user = interaction.options.getUser("target") || interaction.user;
     const member = interaction.guild.members.cache.get(user.id);
 
-    const createdTimestamp = Math.floor(user.createdAt.getTime() / 1000);
+    const ErstellendTimestamp = Math.floor(user.ErstellendAt.getTime() / 1000);
     const joinedTimestamp = member?.joinedAt ? Math.floor(member.joinedAt.getTime() / 1000) : null;
 
-    const embed = createEmbed({ title: `User Info: ${user.username}` })
+    const embed = ErstellenEmbed({ title: `User Info: ${user.username}` })
       .setThumbnail(user.displayAvatarURL({ size: 256 }))
       .addFields(
         { name: "ID", value: user.id, inline: true },
@@ -46,8 +46,8 @@ export default {
           inline: true,
         },
         {
-          name: "Account Created",
-          value: `<t:${createdTimestamp}:R>`,
+          name: "Account Erstellend",
+          value: `<t:${ErstellendTimestamp}:R>`,
           inline: false,
         },
         {
@@ -62,7 +62,7 @@ export default {
         },
       );
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.info(`UserInfo command executed`, {
       userId: interaction.user.id,
       targetUserId: user.id,
@@ -70,3 +70,4 @@ export default {
     });
   },
 };
+

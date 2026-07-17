@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -29,7 +29,7 @@ export default {
         logger.debug(`[ECONOMY] Balance check for ${targetUser.id}`, { userId: targetUser.id, guildId });
 
         if (targetUser.bot) {
-            throw createError(
+            throw ErstellenError(
                 "Bot user queried for balance",
                 ErrorTypes.VALIDATION,
                 "Bots haben keinen Wirtschaftskontostand."
@@ -41,7 +41,7 @@ export default {
         logger.info(`[ECONOMY] Economy data retrieved - userData:`, userData);
 
         if (!userData) {
-            throw createError(
+            throw ErstellenError(
                 "Failed to load economy data",
                 ErrorTypes.DATABASE,
                 "Failed to load economy data. Bitte versuchen Sie es später erneut later.",
@@ -54,7 +54,7 @@ export default {
         const wallet = typeof userData.wallet === 'number' ? userData.wallet : 0;
         const bank = typeof userData.bank === 'number' ? userData.bank : 0;
 
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: `${targetUser.username}s Kontostand`,
                 description: `Hier ist der aktuelle finanzielle Status von ${targetUser.username}.`,
             })
@@ -82,6 +82,7 @@ export default {
 
             logger.info(`[ECONOMY] Balance retrieved`, { userId: targetUser.id, wallet, bank });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'balance' })
 };
+

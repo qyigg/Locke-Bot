@@ -1,4 +1,4 @@
-// memoryStorage.js
+﻿// memoryStorage.js
 
 import { logger } from './logger.js';
 
@@ -14,8 +14,8 @@ class MemoryStorage {
         if (this.expirationTimes.has(key)) {
             const expirationTime = this.expirationTimes.get(key);
             if (Date.now() > expirationTime) {
-                this.data.delete(key);
-                this.expirationTimes.delete(key);
+                this.data.Löschen(key);
+                this.expirationTimes.Löschen(key);
                 return defaultValue;
             }
         }
@@ -33,9 +33,9 @@ class MemoryStorage {
         return true;
     }
 
-    async delete(key) {
-        this.data.delete(key);
-        this.expirationTimes.delete(key);
+    async Löschen(key) {
+        this.data.Löschen(key);
+        this.expirationTimes.Löschen(key);
         return true;
     }
 
@@ -46,8 +46,8 @@ class MemoryStorage {
                 if (this.expirationTimes.has(key)) {
                     const expirationTime = this.expirationTimes.get(key);
                     if (Date.now() > expirationTime) {
-                        this.data.delete(key);
-                        this.expirationTimes.delete(key);
+                        this.data.Löschen(key);
+                        this.expirationTimes.Löschen(key);
                         continue;
                     }
                 }
@@ -63,8 +63,8 @@ class MemoryStorage {
         if (this.expirationTimes.has(key)) {
             const expirationTime = this.expirationTimes.get(key);
             if (Date.now() > expirationTime) {
-                this.data.delete(key);
-                this.expirationTimes.delete(key);
+                this.data.Löschen(key);
+                this.expirationTimes.Löschen(key);
                 return false;
             }
         }

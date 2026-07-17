@@ -1,4 +1,4 @@
-﻿import { createEmbed } from '../../../utils/embeds.js';
+﻿import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
 import { logEvent, EVENT_TYPES, resolveLogChannel } from '../../../services/loggingService.js';
 import { formatLogLine, resolveUserAuthor } from '../../../utils/logging/logEmbeds.js';
@@ -47,14 +47,14 @@ export default {
             },
         });
 
-        await InteractionHelper.safeEditReply(interaction, {
-            embeds: [createEmbed({
-                title: 'Report Submitted',
+        await InteractionHelper.safeBearbeitenReply(interaction, {
+            embeds: [ErstellenEmbed({
+                title: 'Report Absendented',
                 description: `Dein report against **${targetUser.tag}** has been successfully filed and sent to the moderation team. Thank you!`,
             })],
         });
 
-        logger.info('Report submitted', {
+        logger.info('Report Absendented', {
             userId: interaction.user.id,
             reportedUserId: targetUser.id,
             guildId,
@@ -62,4 +62,5 @@ export default {
         });
     },
 };
+
 

@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -149,7 +149,7 @@ export default {
                     `*Use the buttons below to perform operations with the result.*`,
             );
 
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [embed],
                 components: [row],
             });
@@ -159,7 +159,7 @@ export default {
                 i.user.id === interaction.user.id;
             const BUTTON_TIMEOUT = 300000;
             const collector =
-                interaction.channel.createMessageComponentCollector({
+                interaction.channel.ErstellenMessageComponentCollector({
                     filter,
                     time: BUTTON_TIMEOUT,
                 });
@@ -170,7 +170,7 @@ export default {
 
                     if (operation === "history") {
                         if (!i.deferred && !i.replied) {
-                            await i.deferUpdate().catch(console.error);
+                            await i.deferAktualisieren().catch(console.error);
                         }
 
                         const userHistory =
@@ -283,7 +283,7 @@ export default {
                         );
 
                     interaction
-                        .editReply({
+                        .BearbeitenReply({
                             components: [disabledRow],
                             content:
                                 "⏱️ This calculator has expired. Use the command again to perform more calculations.",
@@ -299,7 +299,7 @@ export default {
                     );
 
                     interaction
-                        .editReply({ components: [disabledRow] })
+                        .BearbeitenReply({ components: [disabledRow] })
                         .catch(console.error);
                 }
             });
@@ -333,4 +333,5 @@ export default {
         }
     },
 };
+
 

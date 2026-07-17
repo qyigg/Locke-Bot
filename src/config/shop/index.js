@@ -44,7 +44,7 @@ export const shopConfig = {
     transaction: {
 cooldown: 1000,
 maxQuantity: 10,
-confirmTimeout: 30000,
+BestätigenTimeout: 30000,
         
         refundPolicy: {
             enabled: true,
@@ -56,7 +56,7 @@ fee: 0.1
     ui: {
         itemsPerPage: 5,
         showOutOfStock: true,
-        showOwnedItems: true,
+        showOwnBearbeitenems: true,
         showAffordability: true,
         
         colors: {
@@ -169,3 +169,4 @@ export function getItemsInCategory(categoryId) {
         category.itemTypes.includes(item.type)
     );
 }
+

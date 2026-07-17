@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, warningEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { BotConfig } from '../../config/bot.js';
 
@@ -31,7 +31,7 @@ export default {
             const now = Date.now();
 
             if (robberId === victimUser.id) {
-                throw createError(
+                throw ErstellenError(
                     "Cannot rob self",
                     ErrorTypes.VALIDATION,
                     "Du kannst dich selbst nicht berauben.",
@@ -40,7 +40,7 @@ export default {
             }
             
             if (victimUser.bot) {
-                throw createError(
+                throw ErstellenError(
                     "Cannot rob bot",
                     ErrorTypes.VALIDATION,
                     "Du kannst einen Bot nicht berauben.",
@@ -52,7 +52,7 @@ export default {
             const victimData = await getEconomyData(client, guildId, victimUser.id);
             
             if (!robberData || !victimData) {
-                throw createError(
+                throw ErstellenError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
                     "Failed to load economy data. Bitte versuchen Sie es später erneut later.",
@@ -67,7 +67,7 @@ export default {
                 const hours = Math.floor(remaining / (1000 * 60 * 60));
                 const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
 
-                throw createError(
+                throw ErstellenError(
                     "Robbery cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du musst dich verstecken. Warte **${hours}h ${minutes}m** bevor du einen weiteren Raub versuchst.`,
@@ -76,7 +76,7 @@ export default {
             }
 
             if (victimData.wallet < 500) {
-                throw createError(
+                throw ErstellenError(
                     "Victim too poor",
                     ErrorTypes.VALIDATION,
                     `${victimUser.username} is too poor. They need at least $500 cash to be worth robbing.`,
@@ -90,7 +90,7 @@ export default {
                 robberData.lastRob = now;
                 await setEconomyData(client, guildId, robberId, robberData);
 
-                return await InteractionHelper.safeEditReply(interaction, {
+                return await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [
                         warningEmbed(
                             'Raub blockiert',
@@ -149,6 +149,7 @@ export default {
                 )
                 .setFooter({ text: `Nächster Raub verfügbar in ${Math.ceil(ROB_COOLDOWN / (60 * 60 * 1000))} Stunden.` });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [resultEmbed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [resultEmbed] });
     }, { command: 'rob' })
 };
+

@@ -1,4 +1,4 @@
-import { PermissionsBitField, ChannelType } from 'discord.js';
+﻿import { PermissionsBitField, ChannelType } from 'discord.js';
 import { setLogChannel } from '../../../services/loggingService.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -27,7 +27,7 @@ export default {
 
       if (disable) {
         await setLogChannel(client, interaction.guildId, destination, null);
-        return InteractionHelper.safeEditReply(interaction, {
+        return InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [successEmbed(
             'Channel Cleared',
             `The **${DESTINATION_LABELS[destination]}** channel has been removed.`,
@@ -46,15 +46,16 @@ export default {
 
       await setLogChannel(client, interaction.guildId, destination, channel.id);
 
-      return InteractionHelper.safeEditReply(interaction, {
+      return InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [successEmbed(
-          'Channel Updated',
+          'Channel Aktualisierend',
           `**${DESTINATION_LABELS[destination]}** logs will be sent to ${channel}.\nUse \`/logging dashboard\` to toggle event categories.`,
         )],
       });
     } catch (error) {
       logger.error('logging_channel error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to update the log channel.' });
+      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to Aktualisieren the log channel.' });
     }
   },
 };
+

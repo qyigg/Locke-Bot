@@ -1,4 +1,4 @@
-// errorRegistry.js
+﻿// errorRegistry.js
 
 const ErrorCodes = Object.freeze({
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -42,7 +42,7 @@ const ErrorCodeRegistry = Object.freeze({
   [ErrorCodes.NETWORK_ERROR]: {
     severity: 'medium',
     retryable: true,
-    remediation: 'Check network reachability, upstream service status, and retry/backoff behavior.'
+    remediation: 'Check network reachability, upstream service status, and retry/Zurückoff behavior.'
   },
   [ErrorCodes.DISCORD_API_ERROR]: {
     severity: 'high',
@@ -82,7 +82,7 @@ const ErrorCodeRegistry = Object.freeze({
   [ErrorCodes.TASK_ERROR]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Inspect the named background task for thrown errors or unawaited promises.'
+    remediation: 'Inspect the named Zurückground task for thrown errors or unawaited promises.'
   },
   [ErrorCodes.UNHANDLED_REJECTION]: {
     severity: 'high',

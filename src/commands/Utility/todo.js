@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getFromDb, setInDb } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -58,8 +58,8 @@ export default {
                 .setDescription("Manage shared to-do lists")
                 .addSubcommand(subcommand =>
                     subcommand
-                        .setName("create")
-                        .setDescription("Create a new shared to-do list")
+                        .setName("Erstellen")
+                        .setDescription("Erstellen a new shared to-do list")
                         .addStringOption(option =>
                             option
                                 .setName("name")
@@ -139,7 +139,7 @@ export default {
                 const subcommand = interaction.options.getSubcommand();
                 const shareSubcommand = interaction.options.getSubcommandGroup() === 'share' ? interaction.options.getSubcommand() : null;
 
-        async function getOrCreateSharedList(listId, creatorId = null, listName = null) {
+        async function getOrErstellenSharedList(listId, creatorId = null, listName = null) {
             const listKey = `shared_todo_${listId}`;
             let listData = await getFromDb(listKey, null);
             
@@ -151,8 +151,8 @@ export default {
                         creatorId,
                         members: [creatorId],
                         tasks: [],
-                        nextId: 1,
-                        createdAt: new Date().toISOString()
+                        NächsteId: 1,
+                        ErstellendAt: new Date().toISOString()
                     };
                     await setInDb(listKey, listData);
                 } else {
@@ -162,7 +162,7 @@ export default {
             
             if (listData) {
                 if (!Array.isArray(listData.tasks)) listData.tasks = [];
-                if (!listData.nextId) listData.nextId = 1;
+                if (!listData.NächsteId) listData.NächsteId = 1;
                 if (!Array.isArray(listData.members)) listData.members = [];
             }
             
@@ -181,11 +181,11 @@ export default {
 
         if (shareSubcommand) {
             switch (shareSubcommand) {
-                case 'create': {
+                case 'Erstellen': {
                     const listName = interaction.options.getString('name');
                     const listId = generateShareId();
 
-                    await getOrCreateSharedList(listId, userId, listName);
+                    await getOrErstellenSharedList(listId, userId, listName);
 
                     const userSharedLists = await getFromDb(`user_shared_lists_${userId}`, []);
                     const sharedListsArray = Array.isArray(userSharedLists) ? userSharedLists : [];
@@ -194,11 +194,11 @@ export default {
                         await setInDb(`user_shared_lists_${userId}`, sharedListsArray);
                     }
 
-                    return await InteractionHelper.safeEditReply(interaction, {
+                    return await InteractionHelper.safeBearbeitenReply(interaction, {
                         embeds: [
                             successEmbed(
-                                "Shared List Created",
-                                `Created shared list "${listName}" with ID: \`${listId}\`\n` +
+                                "Shared List Erstellend",
+                                `Erstellend shared list "${listName}" with ID: \`${listId}\`\n` +
                                 `Use \`/todo share add list_id:${listId} user:@username\` to add members.`
                             )
                         ]
@@ -209,7 +209,7 @@ export default {
                     const listId = interaction.options.getString('list_id');
                     const memberToAdd = interaction.options.getUser('user');
 
-                    const listData = await getOrCreateSharedList(listId);
+                    const listData = await getOrErstellenSharedList(listId);
                     if (!listData) {
                         return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
@@ -229,7 +229,7 @@ export default {
                             await setInDb(`user_shared_lists_${memberToAdd.id}`, memberListsArray);
                         }
 
-                        return await InteractionHelper.safeEditReply(interaction, {
+                        return await InteractionHelper.safeBearbeitenReply(interaction, {
                             embeds: [
                                 successEmbed('Member Added', 
                                     `Added ${memberToAdd.username} to the shared list "${listData.name}"`
@@ -243,7 +243,7 @@ export default {
 
                 case 'view': {
                     const listId = interaction.options.getString('list_id');
-                    const listData = await getOrCreateSharedList(listId);
+                    const listData = await getOrErstellenSharedList(listId);
 
                     if (!listData) {
                         return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
@@ -262,7 +262,7 @@ export default {
                         const owner = interaction.guild.members.cache.get(listData.creatorId);
                         const ownerName = owner ? owner.user.username : `<@${listData.creatorId}>`;
 
-                        return await InteractionHelper.safeEditReply(interaction, {
+                        return await InteractionHelper.safeBearbeitenReply(interaction, {
                                 embeds: [
                                     successEmbed(
                                         `📋 **${listData.name}**\n\n` +
@@ -294,7 +294,7 @@ export default {
                     const taskList = listData.tasks
                         .map(task => 
                             `${task.completed ? '✅' : '📝'} #${task.id} ${task.text}` +
-                            `\`[${new Date(task.createdAt).toLocaleDateString()}]` +
+                            `\`[${new Date(task.ErstellendAt).toLocaleDateString()}]` +
                             (task.completed ? `• Completed by ${task.completedBy}` : '') + '`'
                         )
                         .join('\n');
@@ -312,7 +312,7 @@ export default {
                         `👥 **Members:** ${memberList}\n\n` +
                         `**Tasks:**\n${taskList}`;
 
-                    return await InteractionHelper.safeEditReply(interaction, {
+                    return await InteractionHelper.safeBearbeitenReply(interaction, {
                         embeds: [
                             successEmbed(`Shared List (ID: \`${listId}\`)`, fullListDisplay)
                         ],
@@ -339,7 +339,7 @@ export default {
                     const listId = interaction.options.getString('list_id');
                     const taskText = interaction.options.getString('task');
 
-                    const listData = await getOrCreateSharedList(listId);
+                    const listData = await getOrErstellenSharedList(listId);
 
                     if (!listData) {
                         return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
@@ -350,17 +350,17 @@ export default {
                     }
 
                     const newTask = {
-                        id: listData.nextId++,
+                        id: listData.NächsteId++,
                         text: taskText,
                         completed: false,
-                        createdAt: new Date().toISOString(),
-                        createdBy: userId
+                        ErstellendAt: new Date().toISOString(),
+                        ErstellendBy: userId
                     };
 
                     listData.tasks.push(newTask);
                     await setInDb(`shared_todo_${listId}`, listData);
 
-                    return await InteractionHelper.safeEditReply(interaction, {
+                    return await InteractionHelper.safeBearbeitenReply(interaction, {
                         embeds: [
                             successEmbed('Task Added', `Added "${taskText}" to the shared list "${listData.name}"`)
                         ]
@@ -371,7 +371,7 @@ export default {
                     const listId = interaction.options.getString('list_id');
                     const taskNumber = interaction.options.getInteger('number');
 
-                    const listData = await getOrCreateSharedList(listId);
+                    const listData = await getOrErstellenSharedList(listId);
 
                     if (!listData) {
                         return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
@@ -389,7 +389,7 @@ export default {
                     const [removedTask] = listData.tasks.splice(taskIndex, 1);
                     await setInDb(`shared_todo_${listId}`, listData);
 
-                    return await InteractionHelper.safeEditReply(interaction, {
+                    return await InteractionHelper.safeBearbeitenReply(interaction, {
                         embeds: [
                             successEmbed('Task Removed', `Removed "${removedTask.text}" from the shared list "${listData.name}".`)
                         ]
@@ -403,27 +403,27 @@ export default {
 
         const userData = await getFromDb(dbKey, {
             tasks: [],
-            nextId: 1
+            NächsteId: 1
         });
 
         if (!userData.tasks) userData.tasks = [];
-        if (!userData.nextId) userData.nextId = 1;
+        if (!userData.NächsteId) userData.NächsteId = 1;
 
         switch (subcommand) {
             case 'add': {
                 const taskText = interaction.options.getString('task');
 
                 const newTask = {
-                    id: userData.nextId++,
+                    id: userData.NächsteId++,
                     text: taskText,
                     completed: false,
-                    createdAt: new Date().toISOString()
+                    ErstellendAt: new Date().toISOString()
                 };
 
                 userData.tasks.push(newTask);
                 await setInDb(dbKey, userData);
 
-                return await InteractionHelper.safeEditReply(interaction, {
+                return await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [
                         successEmbed(
                             "Task Added",
@@ -435,7 +435,7 @@ export default {
 
             case 'list': {
                 if (userData.tasks.length === 0) {
-                    return await InteractionHelper.safeEditReply(interaction, {
+                    return await InteractionHelper.safeBearbeitenReply(interaction, {
                         embeds: [successEmbed('Dein to-do list is empty!', "Dein To-Do List")],
                     });
                 }
@@ -443,11 +443,11 @@ export default {
                 const taskList = userData.tasks
                     .map(task => 
                         `${task.completed ? '✅' : '📝'} #${task.id} ${task.text}` +
-                        `\`[${new Date(task.createdAt).toLocaleDateString()}\``
+                        `\`[${new Date(task.ErstellendAt).toLocaleDateString()}\``
                     )
                     .join('\n');
 
-                return await InteractionHelper.safeEditReply(interaction, {
+                return await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [
                         successEmbed('Dein To-Do List', taskList)
                     ],
@@ -469,7 +469,7 @@ export default {
                 task.completed = true;
                 await setInDb(`todo_${userId}`, userData);
 
-                return await InteractionHelper.safeEditReply(interaction, {
+                return await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [
                         successEmbed('Task Completed', `Marked "${task.text}" as complete!`)
                     ],
@@ -487,7 +487,7 @@ export default {
                 const [removedTask] = userData.tasks.splice(taskIndex, 1);
                 await setInDb(`todo_${userId}`, userData);
 
-                return await InteractionHelper.safeEditReply(interaction, {
+                return await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [
                         successEmbed('Task Removed', `Removed "${removedTask.text}" from Dein to-do list.`)
                     ],
@@ -499,4 +499,5 @@ export default {
         }
     },
 };
+
 

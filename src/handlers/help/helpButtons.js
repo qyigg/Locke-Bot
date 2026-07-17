@@ -1,29 +1,29 @@
-﻿import { createEmbed } from '../../utils/embeds.js';
-import { createAllCommandsMenu } from './helpSelectMenus.js';
-import { createInitialHelpMenu } from '../../commands/Core/help.js';
+﻿import { ErstellenEmbed } from '../../utils/embeds.js';
+import { ErstellenAllCommandsMenu } from './helpSelectMenus.js';
+import { ErstellenInitialHelpMenu } from '../../commands/Core/help.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 
-const BACK_BUTTON_ID = "help-back-to-main";
+const Zurück_BUTTON_ID = "help-Zurück-to-main";
 const PAGINATION_PREFIX = "help-page";
 const BUG_REPORT_BUTTON_ID = "help-bug-report";
 
-export const helpBackButton = {
-    name: BACK_BUTTON_ID,
+export const helpZurückButton = {
+    name: Zurück_BUTTON_ID,
     async execute(interaction, client) {
         try {
             if (!interaction.deferred && !interaction.replied) {
-                await interaction.deferUpdate();
+                await interaction.deferAktualisieren();
             }
 
-            const { embeds, components } = await createInitialHelpMenu(client);
-            await interaction.editReply({
+            const { embeds, components } = await ErstellenInitialHelpMenu(client);
+            await interaction.BearbeitenReply({
                 embeds,
                 components,
             });
         } catch (error) {
             if (error?.code === 40060 || error?.code === 10062) {
-                logger.warn('Help back button interaction already acknowledged or expired.', {
+                logger.warn('Help Zurück button interaction already acknowledged or expired.', {
                     event: 'interaction.help.button.unavailable',
                     errorCode: String(error.code),
                     customId: interaction.customId,
@@ -47,7 +47,7 @@ export const helpBugReportButton = {
 
         const bugRow = new ActionRowBuilder().addComponents(githubButton);
 
-        const bugReportEmbed = createEmbed({
+        const bugReportEmbed = ErstellenEmbed({
             title: '🐛 Bug Report',
             description: 'Found a bug? Please report it on our GitHub Issues page!\n\n' +
                 '**When reporting a bug, please include:**\n' +
@@ -92,36 +92,36 @@ function getPaginationInfo(components) {
 }
 
 export const helpPaginationButton = {
-    name: `${PAGINATION_PREFIX}_next`,
+    name: `${PAGINATION_PREFIX}_Nächste`,
     async execute(interaction, client) {
         try {
             if (!interaction.deferred && !interaction.replied) {
-                await interaction.deferUpdate();
+                await interaction.deferAktualisieren();
             }
 
             const { currentPage, totalPages } = getPaginationInfo(interaction.message?.components);
 
-            let nextPage = currentPage;
+            let NächstePage = currentPage;
             switch (interaction.customId) {
                 case `${PAGINATION_PREFIX}_first`:
-                    nextPage = 1;
+                    NächstePage = 1;
                     break;
                 case `${PAGINATION_PREFIX}_prev`:
-                    nextPage = Math.max(1, currentPage - 1);
+                    NächstePage = Math.max(1, currentPage - 1);
                     break;
-                case `${PAGINATION_PREFIX}_next`:
-                    nextPage = Math.min(totalPages, currentPage + 1);
+                case `${PAGINATION_PREFIX}_Nächste`:
+                    NächstePage = Math.min(totalPages, currentPage + 1);
                     break;
                 case `${PAGINATION_PREFIX}_last`:
-                    nextPage = totalPages;
+                    NächstePage = totalPages;
                     break;
                 default:
-                    nextPage = currentPage;
+                    NächstePage = currentPage;
                     break;
             }
 
-            const { embeds, components } = await createAllCommandsMenu(nextPage, client);
-            await interaction.editReply({ embeds, components });
+            const { embeds, components } = await ErstellenAllCommandsMenu(NächstePage, client);
+            await interaction.BearbeitenReply({ embeds, components });
         } catch (error) {
             if (error?.code === 40060 || error?.code === 10062) {
                 logger.warn('Help pagination interaction already acknowledged or expired.', {
@@ -137,3 +137,4 @@ export const helpPaginationButton = {
         }
     },
 };
+

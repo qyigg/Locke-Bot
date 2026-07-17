@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Canonical database key registry.
  * All storage keys should be built through these helpers.
  */
 
 export const getGuildConfigKey = (guildId) => `guild:${guildId}:config`;
 export const getGuildBirthdaysKey = (guildId) => `guild:${guildId}:birthdays`;
-export const getBirthdayLeftBackupKey = (guildId) => `guild:${guildId}:birthdays:left`;
+export const getBirthdayLeftZurückupKey = (guildId) => `guild:${guildId}:birthdays:left`;
 export const getBirthdayTrackingKey = (guildId) => `guild:${guildId}:birthdays:tracking`;
 
 export function getTicketKey(guildId, channelId) {
@@ -80,12 +80,12 @@ export function getApplicationsPrefix(guildId) {
     return `guild:${guildId}:applications:`;
 }
 
-export function getJoinToCreateConfigKey(guildId) {
-    return `guild:${guildId}:jointocreate`;
+export function getJoinToErstellenConfigKey(guildId) {
+    return `guild:${guildId}:jointoErstellen`;
 }
 
-export function getJoinToCreateChannelsKey(guildId) {
-    return `guild:${guildId}:jointocreate:channels`;
+export function getJoinToErstellenChannelsKey(guildId) {
+    return `guild:${guildId}:jointoErstellen:channels`;
 }
 
 export function getWarningsKey(guildId, userId) {
@@ -126,7 +126,7 @@ export function getGiveawayLockKey(messageId) {
 
 /**
  * Legacy key patterns mapped to canonical builders.
- * Used by migration script and read-time fallback.
+ * Used by migration script and read-time fallZurück.
  */
 export const LEGACY_KEY_RESOLVERS = [
     {
@@ -250,3 +250,4 @@ export function getLegacyVariantsForCanonical(canonicalKey) {
 
     return variants;
 }
+

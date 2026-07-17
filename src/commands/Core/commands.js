@@ -1,4 +1,4 @@
-import {
+﻿import {
   SlashCommandBuilder,
   PermissionFlagsBits,
   MessageFlags,
@@ -19,7 +19,7 @@ import {
 import {
   buildDashboardView,
   handleDashboardComponent,
-  createDashboardCollectorFilter,
+  ErstellenDashboardCollectorFilter,
   isCommandAccessCustomId,
 } from './modules/commands_dashboard.js';
 
@@ -167,7 +167,7 @@ export default {
       }
 
       const view = await buildDashboardView(client, interaction.guildId, interaction.guild, 'overview');
-      await InteractionHelper.safeEditReply(interaction, {
+      await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [view.embed],
         components: view.components,
       });
@@ -177,8 +177,8 @@ export default {
         return;
       }
 
-      const collector = replyMessage.createMessageComponentCollector({
-        filter: createDashboardCollectorFilter(interaction.user.id, interaction.guildId),
+      const collector = replyMessage.ErstellenMessageComponentCollector({
+        filter: ErstellenDashboardCollectorFilter(interaction.user.id, interaction.guildId),
         time: DASHBOARD_TIMEOUT_MS,
       });
 
@@ -196,7 +196,7 @@ export default {
           });
           await replyUserError(componentInteraction, {
             type: ErrorTypes.UNKNOWN,
-            message: error.message || 'Failed to update command access.',
+            message: error.message || 'Failed to Aktualisieren command access.',
           }).catch(() => {});
         }
       });
@@ -209,7 +209,7 @@ export default {
           return newRow;
         });
 
-        await replyMessage.edit({ components: disabledComponents }).catch(() => {});
+        await replyMessage.Bearbeiten({ components: disabledComponents }).catch(() => {});
       });
 
       return;
@@ -232,7 +232,7 @@ export default {
 
       if (isDisable) {
         await disableCategory(client, interaction.guildId, category.key);
-        return InteractionHelper.safeEditReply(interaction, {
+        return InteractionHelper.safeBearbeitenReply(interaction, {
           embeds: [
             successEmbed(
             'Kategorie deaktiviert',
@@ -243,7 +243,7 @@ export default {
       }
 
       await enableCategory(client, interaction.guildId, category.key);
-      return InteractionHelper.safeEditReply(interaction, {
+      return InteractionHelper.safeBearbeitenReply(interaction, {
       embeds: [successEmbed('Kategorie aktiviert', `**${category.displayName}** Befehle sind nun aktiviert (außer einzeln deaktivierten Befehlen).`)],
       });
     }
@@ -251,14 +251,15 @@ export default {
     const commandName = target.toLowerCase();
     if (isDisable) {
       await disableCommand(client, interaction.guildId, commandName);
-      return InteractionHelper.safeEditReply(interaction, {
+      return InteractionHelper.safeBearbeitenReply(interaction, {
       embeds: [successEmbed('Befehl deaktiviert', `\`/${commandName}\` ist jetzt in diesem Server deaktiviert.`)],
       });
     }
 
     await enableCommand(client, interaction.guildId, commandName);
-    return InteractionHelper.safeEditReply(interaction, {
+    return InteractionHelper.safeBearbeitenReply(interaction, {
     embeds: [successEmbed('Befehl aktiviert', `\`/${commandName}\` ist jetzt in diesem Server aktiviert.`)],
     });
   },
 };
+

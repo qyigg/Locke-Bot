@@ -9,9 +9,9 @@ import {
 } from '../config/bot.js';
 import botConfig from '../config/bot.js';
 import { handleApplicationModal } from '../commands/Community/apply.js';
-import { handleInteractionError, createError, ErrorTypes, ErrorCodes } from '../utils/errorHandler.js';
+import { handleInteractionError, ErstellenError, ErrorTypes, ErrorCodes } from '../utils/errorHandler.js';
 import { InteractionHelper } from '../utils/interactionHelper.js';
-import { createInteractionTraceContext, runWithTraceContext } from '../utils/logger.js';
+import { ErstellenInteractionTraceContext, runWithTraceContext } from '../utils/logger.js';
 import { validateChatInputPayloadOrThrow } from '../utils/commandInputValidation.js';
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
 import { isCommandEnabled } from '../services/commandAccessService.js';
@@ -30,9 +30,9 @@ const COMMAND_ERROR_SUBTYPES = {
   warnings: 'warnings_view_failed',
   ticket: 'ticket_failed',
   serverstats: 'serverstats_failed',
-  gcreate: 'giveaway_failed',
+  gErstellen: 'giveaway_failed',
   gend: 'giveaway_failed',
-  gdelete: 'giveaway_failed',
+  gLöschen: 'giveaway_failed',
   greroll: 'giveaway_failed',
 };
 
@@ -47,9 +47,9 @@ function withTraceContext(context = {}, traceContext = {}) {
 }
 
 export default {
-  name: Events.InteractionCreate,
+  name: Events.InteractionErstellen,
   async execute(interaction, client) {
-    const interactionTraceContext = createInteractionTraceContext(interaction);
+    const interactionTraceContext = ErstellenInteractionTraceContext(interaction);
     interaction.traceContext = interactionTraceContext;
     interaction.traceId = interactionTraceContext.traceId;
 
@@ -76,7 +76,7 @@ export default {
             const command = client.commands.get(interaction.commandName);
 
             if (!command) {
-              throw createError(
+              throw ErstellenError(
                 `No command matching ${interaction.commandName} was found.`,
                 ErrorTypes.CONFIGURATION,
                 'Sorry, that command does not exist.',
@@ -85,7 +85,7 @@ export default {
             }
 
             if (isMaintenanceMode() && !isBotOwner(interaction.user.id)) {
-              throw createError(
+              throw ErstellenError(
                 'Bot is in maintenance mode',
                 ErrorTypes.CONFIGURATION,
                 getBotMessage('maintenanceMode'),
@@ -94,7 +94,7 @@ export default {
             }
 
             if (!isCommandCategoryEnabled(command.category)) {
-              throw createError(
+              throw ErstellenError(
                 `Feature disabled for category ${command.category}`,
                 ErrorTypes.CONFIGURATION,
                 getBotMessage('commandDisabled'),
@@ -109,7 +109,7 @@ export default {
 
               if (expiresAt && Date.now() < expiresAt) {
                 const remainingSec = Math.ceil((expiresAt - Date.now()) / 1000);
-                throw createError(
+                throw ErstellenError(
                   `Default command cooldown active for ${interaction.commandName}`,
                   ErrorTypes.RATE_LIMIT,
                   getBotMessage('cooldownActive', { time: `${remainingSec}s` }),
@@ -123,7 +123,7 @@ export default {
             const abuseProtection = await enforceAbuseProtection(interaction, command, interaction.commandName);
             if (!abuseProtection.allowed) {
               const formattedCooldown = formatCooldownDuration(abuseProtection.remainingMs);
-              throw createError(
+              throw ErstellenError(
                 `Risky command cooldown active for ${interaction.commandName}`,
                 ErrorTypes.RATE_LIMIT,
                 `This command ist im Cooldown. Please wait ${formattedCooldown} before trying again.`,
@@ -143,7 +143,7 @@ export default {
               guildConfig = await getGuildConfig(client, interaction.guild.id, interactionTraceContext);
               const accessKey = resolveSlashAccessKey(interaction);
               if (!(await isCommandEnabled(client, interaction.guild.id, accessKey, command.category))) {
-                throw createError(
+                throw ErstellenError(
                   `Command ${accessKey} is disabled in Diese Gilde`,
                   ErrorTypes.CONFIGURATION,
                   'Dieser Befehl wurde für diesen Server deaktiviert.',
@@ -153,7 +153,7 @@ export default {
             }
 
             const permissionAllowed = await enforceDefaultCommandPermissions(interaction, command, {
-              source: 'interactionCreate',
+              source: 'interactionErstellen',
               guildConfig,
             });
             if (!permissionAllowed) {
@@ -237,7 +237,7 @@ export default {
             }
           } else if (interaction.commandName === 'reactroles' && focusedOption.name === 'panel') {
             try {
-              const { getAllReactionRoleMessages, deleteReactionRoleMessage } = await import('../services/reactionRoleService.js');
+              const { getAllReactionRoleMessages, LöschenReactionRoleMessage } = await import('../services/reactionRoleService.js');
               const guildId = interaction.guildId;
               const guild = interaction.guild;
               
@@ -256,13 +256,13 @@ export default {
                 
                 const channel = guild.channels.cache.get(panel.channelId);
                 if (!channel) {
-                  await deleteReactionRoleMessage(client, guildId, panel.messageId).catch(() => {});
+                  await LöschenReactionRoleMessage(client, guildId, panel.messageId).catch(() => {});
                   continue;
                 }
                 
                 const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
                 if (!msg) {
-                  await deleteReactionRoleMessage(client, guildId, panel.messageId).catch(() => {});
+                  await LöschenReactionRoleMessage(client, guildId, panel.messageId).catch(() => {});
                   continue;
                 }
                 validPanels.push(panel);
@@ -324,7 +324,7 @@ export default {
                 }, interactionTraceContext));
               }
             } else {
-              throw createError(
+              throw ErstellenError(
                 `No button handler found for ${buttonType}`,
                 ErrorTypes.CONFIGURATION,
                 'This button is not available.',
@@ -342,7 +342,7 @@ export default {
               return;
             }
 
-            throw createError(
+            throw ErstellenError(
               `No button handler found for ${customId}`,
               ErrorTypes.CONFIGURATION,
               'This button is not available.',
@@ -368,7 +368,7 @@ export default {
               return;
             }
 
-            throw createError(
+            throw ErstellenError(
               `No select menu handler found for ${customId}`,
               ErrorTypes.CONFIGURATION,
               'This select menu is not available.',
@@ -384,7 +384,7 @@ export default {
               customId: interaction.customId
             }, interactionTraceContext));
           }
-        } else if (interaction.isModalSubmit()) {
+        } else if (interaction.isModalAbsenden()) {
           if (interaction.customId.startsWith('app_modal_')) {
             try {
               await handleApplicationModal(interaction);
@@ -421,7 +421,7 @@ export default {
               return;
             }
 
-            throw createError(
+            throw ErstellenError(
               `No modal handler found for ${customId}`,
               ErrorTypes.CONFIGURATION,
               'This form is not available.',
@@ -440,7 +440,7 @@ export default {
           }
         }
       } catch (error) {
-        logger.error('Unhandled error in interactionCreate:', {
+        logger.error('Unhandled error in interactionErstellen:', {
           event: 'interaction.unhandled_error',
           errorCode: ErrorCodes.INTERACTION_UNHANDLED,
           error,
@@ -455,10 +455,10 @@ export default {
             type: 'interaction',
             commandName: interaction.commandName,
             customId: interaction.customId,
-            source: 'interactionCreate.unhandled'
+            source: 'interactionErstellen.unhandled'
           }, interactionTraceContext));
         } catch (replyError) {
-          logger.error('Failed to send fallback error response:', {
+          logger.error('Failed to send fallZurück error response:', {
             event: 'interaction.error_response_failed',
             errorCode: ErrorCodes.INTERACTION_RESPONSE_FAILED,
             error: replyError,
@@ -469,3 +469,4 @@ export default {
     });
   }
 };
+

@@ -5,24 +5,24 @@ import { InteractionHelper } from '../utils/interactionHelper.js';
 import { logger } from '../utils/logger.js';
 
 import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
-const warningDeleteSpecificHandler = {
-  name: 'warning_delete_specific',
+const warningLöschenSpecificHandler = {
+  name: 'warning_Löschen_specific',
   async execute(interaction, client) {
     try {
       const [, targetUserId, originalModeratorId] = interaction.customId.split(':');
       
       if (interaction.user.id !== originalModeratorId) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Only the moderator who viewed these warnings can delete them.' });
+        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Only the moderator who viewed these warnings can Löschen them.' });
       }
 
       const modal = new ModalBuilder()
-        .setCustomId(`warning_delete_modal:${targetUserId}:${interaction.user.id}`)
-        .setTitle('Delete Warning');
+        .setCustomId(`warning_Löschen_modal:${targetUserId}:${interaction.user.id}`)
+        .setTitle('Löschen Warning');
 
       const warningNumberInput = new TextInputBuilder()
         .setCustomId('warning_number')
         .setLabel('Warning Number (#1, #2, etc.)')
-        .setPlaceholder('Enter the warning number to delete')
+        .setPlaceholder('Enter the warning number to Löschen')
         .setRequired(true)
         .setStyle(TextInputStyle.Short)
         .setMaxLength(10);
@@ -32,8 +32,8 @@ const warningDeleteSpecificHandler = {
 
       await interaction.showModal(modal);
     } catch (error) {
-      logger.error('Warning delete specific button error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to open delete warning modal.' });
+      logger.error('Warning Löschen specific button error:', error);
+      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to open Löschen warning modal.' });
     }
   }
 };
@@ -52,15 +52,15 @@ const warningClearAllHandler = {
       const targetName = targetUser ? targetUser.username : 'this user';
 
       const clearModal = new ModalBuilder()
-        .setCustomId(`warning_clear_confirm_modal:${targetUserId}:${interaction.user.id}`)
+        .setCustomId(`warning_clear_Bestätigen_modal:${targetUserId}:${interaction.user.id}`)
         .setTitle('Clear All Warnings')
         .addComponents(
           new ActionRowBuilder().addComponents(
             new TextInputBuilder()
-              .setCustomId('delete_confirmation')
-              .setLabel(`Type "DELETE" to clear all warnings`)
+              .setCustomId('Löschen_Bestätigenation')
+              .setLabel(`Type "Löschen" to clear all warnings`)
               .setStyle(TextInputStyle.Short)
-              .setPlaceholder('DELETE')
+              .setPlaceholder('Löschen')
               .setMaxLength(6)
               .setMinLength(6)
               .setRequired(true)
@@ -70,17 +70,17 @@ const warningClearAllHandler = {
       await interaction.showModal(clearModal);
     } catch (error) {
       logger.error('Warning clear all button error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to open confirmation modal.' });
+      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to open Bestätigenation modal.' });
     }
   }
 };
 
-async function warningDeleteModalHandler(interaction, client) {
+async function warningLöschenModalHandler(interaction, client) {
   try {
     const [, targetUserId, originalModeratorId] = interaction.customId.split(':');
     
     if (interaction.user.id !== originalModeratorId) {
-      return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Only the original moderator can delete warnings.' });
+      return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Only the original moderator can Löschen warnings.' });
     }
 
     const warningNumberInput = interaction.fields.getTextInputValue('warning_number');
@@ -100,28 +100,28 @@ async function warningDeleteModalHandler(interaction, client) {
       return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Warning #${warningNumber} does not exist. This user only has ${warnings.length} warning(s).` });
     }
 
-    const warningToDelete = warnings[warningNumber - 1];
-    await WarningService.removeWarning(guildId, targetUserId, warningToDelete.id);
+    const warningToLöschen = warnings[warningNumber - 1];
+    await WarningService.removeWarning(guildId, targetUserId, warningToLöschen.id);
 
     const targetUser = await client.users.fetch(targetUserId).catch(() => null);
     const targetName = targetUser ? targetUser.username : 'Der Benutzer';
 
-    logger.info(`[MODERATION] Warning deleted for ${targetUserId} in ${guildId} by ${interaction.user.id}`, {
-      warningId: warningToDelete.id,
-      reason: warningToDelete.reason,
+    logger.info(`[MODERATION] Warning Löschend for ${targetUserId} in ${guildId} by ${interaction.user.id}`, {
+      warningId: warningToLöschen.id,
+      reason: warningToLöschen.reason,
       warningNumber
     });
 
-    await interaction.editReply({
-      embeds: [successEmbed('✅ Warning Deleted', `Warning #${warningNumber} for **${targetName}** has been deleted.\n\n**Reason was:** ${warningToDelete.reason.substring(0, 100)}`)]
+    await interaction.BearbeitenReply({
+      embeds: [successEmbed('✅ Warning Löschend', `Warning #${warningNumber} for **${targetName}** has been Löschend.\n\n**Reason was:** ${warningToLöschen.reason.substring(0, 100)}`)]
     });
   } catch (error) {
-    logger.error('Warning delete modal handler error:', error);
-    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to delete warning.' });
+    logger.error('Warning Löschen modal handler error:', error);
+    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to Löschen warning.' });
   }
 }
 
-async function warningClearConfirmModalHandler(interaction, client) {
+async function warningClearBestätigenModalHandler(interaction, client) {
   try {
     const [, targetUserId, originalModeratorId] = interaction.customId.split(':');
     
@@ -129,10 +129,10 @@ async function warningClearConfirmModalHandler(interaction, client) {
       return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Only the original moderator can clear warnings.' });
     }
 
-    const confirmation = interaction.fields.getTextInputValue('delete_confirmation').trim();
+    const Bestätigenation = interaction.fields.getTextInputValue('Löschen_Bestätigenation').trim();
 
-    if (confirmation !== 'DELETE') {
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You must type "DELETE" exactly to confirm clearing all warnings.' });
+    if (Bestätigenation !== 'Löschen') {
+      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You must type "Löschen" exactly to Bestätigen clearing all warnings.' });
     }
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -145,11 +145,11 @@ async function warningClearConfirmModalHandler(interaction, client) {
 
     logger.info(`[MODERATION] All warnings cleared for ${targetUserId} in ${guildId} by ${interaction.user.id}`);
 
-    await interaction.editReply({
+    await interaction.BearbeitenReply({
       embeds: [successEmbed('✅ Warnings Cleared', `All warnings for **${targetName}** have been cleared. **${count}** warning(s) removed.`)]
     });
   } catch (error) {
-    logger.error('Warning clear confirm modal handler error:', error);
+    logger.error('Warning clear Bestätigen modal handler error:', error);
     if (!interaction.replied && !interaction.deferred) {
       await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to clear warnings.' });
     } else {
@@ -159,14 +159,15 @@ async function warningClearConfirmModalHandler(interaction, client) {
 }
 
 export {
-  warningDeleteSpecificHandler,
+  warningLöschenSpecificHandler,
   warningClearAllHandler,
-  warningDeleteModalHandler,
-  warningClearConfirmModalHandler,
+  warningLöschenModalHandler,
+  warningClearBestätigenModalHandler,
 };
 
 export default {
-  name: 'warning_delete_modal',
-  execute: warningDeleteModalHandler
+  name: 'warning_Löschen_modal',
+  execute: warningLöschenModalHandler
 };
+
 

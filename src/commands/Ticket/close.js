@@ -1,15 +1,15 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getTicketPermissionContext } from '../../utils/ticket/ticketPermissions.js';
-import { closeTicket } from '../../services/ticket.js';
+import { SchließenTicket } from '../../services/ticket.js';
 export default {
     data: new SlashCommandBuilder()
-        .setName("close")
-        .setDescription("Closes the current ticket.")
+        .setName("Schließen")
+        .setDescription("Schließens the current ticket.")
         .setDMPermission(false)
         .addStringOption((option) =>
             option
@@ -29,33 +29,34 @@ export default {
             return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'This command can only be used in a valid ticket channel.' });
         }
 
-        if (!permissionContext.canCloseTicket) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the `Manage Channels` permission, the configured `Ticket Staff Role`, or be the ticket creator to close this ticket.' });
+        if (!permissionContext.canSchließenTicket) {
+            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the `Manage Channels` permission, the configured `Ticket Staff Role`, or be the ticket creator to Schließen this ticket.' });
         }
 
         const reason =
             interaction.options?.getString("reason") ||
-            "Closed via command without a specific reason.";
+            "Schließend via command without a specific reason.";
 
-        await closeTicket(interaction.channel, interaction.user, reason);
+        await SchließenTicket(interaction.channel, interaction.user, reason);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
-                    "Ticket Closed!",
-                    "This ticket has been closed successfully.",
+                    "Ticket geschlossen!",
+                    "This ticket has been Schließend successfully.",
                 ),
             ],
         });
 
-        logger.info('Ticket closed successfully', {
+        logger.info('Ticket geschlossen successfully', {
             userId: interaction.user.id,
             userTag: interaction.user.tag,
             channelId: interaction.channel.id,
             channelName: interaction.channel.name,
             guildId: interaction.guildId,
             reason: reason,
-            commandName: 'close'
+            commandName: 'Schließen'
         });
     },
 };
+

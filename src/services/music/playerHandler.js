@@ -1,16 +1,16 @@
-// Player event handlers for Riffy. Adapted from Musicify playerHandler (Apache-2.0).
+﻿// Player event handlers for Riffy. Adapted from Musicify playerHandler (Apache-2.0).
 
 import { logger } from '../../utils/logger.js';
-import { getGuildMusicData, clearUpdateInterval } from './playerStore.js';
+import { getGuildMusicData, clearAktualisierenInterval } from './playerStore.js';
 import {
     buildNowPlayingEmbed,
     buildPlayerButtonRows,
 } from './musicEmbeds.js';
 
-const UPDATE_INTERVAL_MS = 15 * 1000;
+const Aktualisieren_INTERVAL_MS = 15 * 1000;
 const IDLE_DISCONNECT_MS = 30 * 1000;
 
-async function editOrSendPlayerMessage(client, guildData, channelId, embed, components) {
+async function BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed, components) {
     const channel = client.channels.cache.get(channelId);
     if (!channel) {
         guildData.playerMessageId = null;
@@ -23,12 +23,12 @@ async function editOrSendPlayerMessage(client, guildData, channelId, embed, comp
     if (guildData.playerMessageId) {
         try {
             const msg = await channel.messages.fetch(guildData.playerMessageId);
-            await msg.edit(payload);
+            await msg.Bearbeiten(payload);
             return;
         } catch {
             guildData.playerMessageId = null;
             guildData.playerChannelId = null;
-            clearUpdateInterval(guildData);
+            clearAktualisierenInterval(guildData);
         }
     }
 
@@ -52,18 +52,18 @@ export async function refreshPlayerMessage(client, guildId) {
         const embed = buildNowPlayingEmbed(player.current, player, guildData);
         const components = buildPlayerButtonRows(player, guildData);
         const channelId = guildData.playerChannelId || player.textChannel;
-        await editOrSendPlayerMessage(client, guildData, channelId, embed, components);
+        await BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed, components);
     } catch (error) {
         logger.error('Failed to refresh music player message:', error);
     }
 }
 
-function startUpdateInterval(client, guildId) {
+function startAktualisierenInterval(client, guildId) {
     const guildData = getGuildMusicData(guildId);
-    clearUpdateInterval(guildData);
-    guildData.updateInterval = setInterval(() => {
+    clearAktualisierenInterval(guildData);
+    guildData.AktualisierenInterval = setInterval(() => {
         refreshPlayerMessage(client, guildId);
-    }, UPDATE_INTERVAL_MS);
+    }, Aktualisieren_INTERVAL_MS);
 }
 
 export function setupPlayerHandler(client) {
@@ -130,10 +130,10 @@ export function setupPlayerHandler(client) {
                 player.setLoop(guildData.loop);
             }
 
-            if (player.previous) {
-                guildData.previousTracks.push(player.previous);
-                if (guildData.previousTracks.length > 20) {
-                    guildData.previousTracks.shift();
+            if (player.Vorherige) {
+                guildData.VorherigeTracks.push(player.Vorherige);
+                if (guildData.VorherigeTracks.length > 20) {
+                    guildData.VorherigeTracks.shift();
                 }
             }
 
@@ -145,8 +145,8 @@ export function setupPlayerHandler(client) {
             const embed = buildNowPlayingEmbed(track, player, guildData);
             const components = buildPlayerButtonRows(player, guildData);
             const channelId = guildData.playerChannelId || player.textChannel;
-            await editOrSendPlayerMessage(client, guildData, channelId, embed, components);
-            startUpdateInterval(client, player.guildId);
+            await BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed, components);
+            startAktualisierenInterval(client, player.guildId);
         } catch (error) {
             logger.error('Music trackStart error:', error);
         }
@@ -155,7 +155,7 @@ export function setupPlayerHandler(client) {
     client.riffy.on('queueEnd', async (player) => {
         try {
             const guildData = getGuildMusicData(player.guildId);
-            clearUpdateInterval(guildData);
+            clearAktualisierenInterval(guildData);
 
             if (guildData.autoplay) {
                 player.autoplay(player);
@@ -167,10 +167,10 @@ export function setupPlayerHandler(client) {
                     const channel = client.channels.cache.get(guildData.playerChannelId);
                     if (channel) {
                         const msg = await channel.messages.fetch(guildData.playerMessageId);
-                        await msg.delete();
+                        await msg.Löschen();
                     }
                 } catch {
-                    // already deleted
+                    // already Löschend
                 }
                 guildData.playerMessageId = null;
                 guildData.playerChannelId = null;
@@ -183,7 +183,7 @@ export function setupPlayerHandler(client) {
                 guildData.idleTimeout = setTimeout(() => {
                     try {
                         const currentPlayer = client.riffy.players.get(player.guildId);
-                        if (currentPlayer && !currentPlayer.playing && !currentPlayer.paused && !currentPlayer.current) {
+                        if (currentPlayer && !currentPlayer.playing && !currentPlayer.Pausierend && !currentPlayer.current) {
                             currentPlayer.destroy();
                         }
                     } catch {
@@ -199,24 +199,24 @@ export function setupPlayerHandler(client) {
 
     client.riffy.on('playerDisconnect', async (player) => {
         const guildData = getGuildMusicData(player.guildId);
-        clearUpdateInterval(guildData);
+        clearAktualisierenInterval(guildData);
 
         if (guildData.playerMessageId && guildData.playerChannelId) {
             try {
                 const channel = client.channels.cache.get(guildData.playerChannelId);
                 if (channel) {
                     const msg = await channel.messages.fetch(guildData.playerMessageId);
-                    await msg.delete();
+                    await msg.Löschen();
                 }
             } catch {
-                // already deleted
+                // already Löschend
             }
         }
 
         guildData.playerMessageId = null;
         guildData.playerChannelId = null;
-        guildData.previousTracks = [];
-        guildData.autoPaused = false;
+        guildData.VorherigeTracks = [];
+        guildData.autoPausierend = false;
         if (guildData.idleTimeout) {
             clearTimeout(guildData.idleTimeout);
             guildData.idleTimeout = null;
@@ -252,3 +252,4 @@ export async function shutdownMusic(client) {
         }
     }
 }
+

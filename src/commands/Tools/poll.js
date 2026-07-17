@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -8,7 +8,7 @@ const MAX_OPTIONS = 10;
 export default {
     data: new SlashCommandBuilder()
         .setName('poll')
-        .setDescription('Create a simple poll with up to 10 options')
+        .setDescription('Erstellen a simple poll with up to 10 options')
         .addStringOption(option =>
             option.setName('question')
                 .setDescription('The poll question')
@@ -105,8 +105,9 @@ export default {
             await new Promise(resolve => setTimeout(resolve, 500));
         }
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             content: '✅ Poll Erfolgreich erstellt!',
         });
     },
 };
+

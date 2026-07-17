@@ -1,6 +1,6 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { WarningService } from '../../services/moderation/warningService.js';
@@ -37,9 +37,9 @@ export default {
         const totalWarns = validWarnings.length;
 
         if (totalWarns === 0) {
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [
-                    createEmbed({
+                    ErstellenEmbed({
                         title: `Warnings: ${target.tag}`,
                         description: "This user has no recorded warnings.",
                     }).setColor(getColor('success')),
@@ -48,7 +48,7 @@ export default {
             return;
         }
 
-        const embed = createEmbed({
+        const embed = ErstellenEmbed({
             title: `Warnings: ${target.tag}`,
             description: `Total Warnings: **${totalWarns}**`,
         }).setColor(getColor('warning'));
@@ -68,8 +68,8 @@ export default {
 
         const actionRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId(`warning_delete_specific:${target.id}:${interaction.user.id}`)
-                .setLabel('Delete Specific Warning')
+                .setCustomId(`warning_Löschen_specific:${target.id}:${interaction.user.id}`)
+                .setLabel('Löschen Specific Warning')
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId(`warning_clear_all:${target.id}:${interaction.user.id}`)
@@ -93,6 +93,7 @@ export default {
             },
         });
 
-        await InteractionHelper.safeEditReply(interaction, { embeds: [embed], components: [actionRow] });
+        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed], components: [actionRow] });
     },
 };
+

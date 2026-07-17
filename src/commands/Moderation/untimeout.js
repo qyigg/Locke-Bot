@@ -55,7 +55,7 @@ export default {
             moderator: interaction.member,
         });
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
                     `🔓 **Removed timeout** from ${targetUser.tag}`,
@@ -64,6 +64,7 @@ export default {
         });
     },
 };
+
 
 
 

@@ -1,4 +1,4 @@
-// postgresDatabase.js
+﻿// postgresDatabase.js
 
 import pg from 'pg';
 import { pgConfig, resolvePostgresPoolConfig } from '../config/database/postgres.js';
@@ -10,14 +10,14 @@ import {
 } from './database/keys.js';
 import {
     parseKey,
-    isTempBackedType,
+    isTempZurückedType,
     getStructuredListPlan,
 } from './database/keyParser.js';
 import { runKeyMigration } from './database/keyMigration.js';
 import {
     tableStatements,
     indexStatements,
-    UPDATE_TIMESTAMP_FUNCTION,
+    Aktualisieren_TIMESTAMP_FUNCTION,
     triggerDefinitions,
 } from './database/schema.js';
 
@@ -43,8 +43,8 @@ class PostgreSQLDatabase {
 
     async _establishConnection() {
         const retries = Number.isFinite(pgConfig.options.retries) ? pgConfig.options.retries : 0;
-        const baseDelay = Number.isFinite(pgConfig.options.backoffBase) ? pgConfig.options.backoffBase : 100;
-        const multiplier = Number.isFinite(pgConfig.options.backoffMultiplier) ? pgConfig.options.backoffMultiplier : 2;
+        const baseDelay = Number.isFinite(pgConfig.options.ZurückoffBase) ? pgConfig.options.ZurückoffBase : 100;
+        const multiplier = Number.isFinite(pgConfig.options.ZurückoffMultiplier) ? pgConfig.options.ZurückoffMultiplier : 2;
         const attempts = Math.max(1, retries + 1);
 
         for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -67,8 +67,8 @@ class PostgreSQLDatabase {
                 this.isConnected = true;
                 logger.info('PostgreSQL Database initialized successfully');
 
-                if (pgConfig.features.autoCreateTables) {
-                    await this.createTables();
+                if (pgConfig.features.autoErstellenTables) {
+                    await this.ErstellenTables();
 
                     try {
                         const columnCheck = await this.pool.query(`
@@ -90,7 +90,7 @@ class PostgreSQLDatabase {
                 }
 
                 if (pgConfig.migration.enabled) {
-                    const migrationCheck = await this.verifySchemaVersion();
+                    const migrationCheck = await this.VerifizierenSchemaVersion();
                     if (!migrationCheck.ok) {
                         const shouldBootstrapSchema =
                             migrationCheck.reason === 'MISSING_MIGRATION_VERSION'
@@ -125,8 +125,8 @@ class PostgreSQLDatabase {
                 if (this.pool) {
                     try {
                         await this.pool.end();
-                    } catch (closeError) {
-                        logger.warn('Failed to close PostgreSQL pool after error:', closeError.message);
+                    } catch (SchließenError) {
+                        logger.warn('Failed to Schließen PostgreSQL pool after error:', SchließenError.message);
                     }
                     this.pool = null;
                 }
@@ -146,8 +146,8 @@ class PostgreSQLDatabase {
                 }
 
                 logger.warn(`PostgreSQL connection attempt ${attempt} failed: ${error.message}`);
-                const backoff = Math.round(baseDelay * Math.pow(multiplier, attempt - 1));
-                await new Promise(resolve => setTimeout(resolve, backoff));
+                const Zurückoff = Math.round(baseDelay * Math.pow(multiplier, attempt - 1));
+                await new Promise(resolve => setTimeout(resolve, Zurückoff));
             }
         }
 
@@ -162,14 +162,14 @@ class PostgreSQLDatabase {
 
         try {
             const result = await runKeyMigration({ pool: this.pool, logger });
-            if (result?.alreadyDone) {
+            if (result?.alreadyFertig) {
                 logger.debug('Key migration already applied, skipping.');
             } else if (result && (result.migrated > 0 || result.errors > 0)) {
                 logger.info('Startup key migration finished', result);
             }
         } catch (error) {
-            // Never block startup on key migration; legacy reads still work via fallback.
-            logger.error('Startup key migration failed (continuing with legacy fallback):', error);
+            // Never block startup on key migration; legacy reads still work via fallZurück.
+            logger.error('Startup key migration failed (continuing with legacy fallZurück):', error);
         }
     }
 
@@ -193,7 +193,7 @@ class PostgreSQLDatabase {
         const safeMigrationTable = quoteIdentifier(migrationTable);
 
         await this.pool.query(`
-            CREATE TABLE IF NOT EXISTS ${safeMigrationTable} (
+            Erstellen TABLE IF NOT EXISTS ${safeMigrationTable} (
                 version INTEGER PRIMARY KEY,
                 label VARCHAR(255) NOT NULL,
                 applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -222,12 +222,12 @@ class PostgreSQLDatabase {
             `INSERT INTO ${safeMigrationTable} (version, label)
              VALUES ($1, $2)
              ON CONFLICT (version)
-             DO UPDATE SET label = EXCLUDED.label, applied_at = CURRENT_TIMESTAMP`,
+             DO Aktualisieren SET label = EXCLUDED.label, applied_at = CURRENT_TIMESTAMP`,
             [version, label]
         );
     }
 
-    async verifySchemaVersion() {
+    async VerifizierenSchemaVersion() {
         const latest = await this.getLatestSchemaVersion();
         const expectedVersion = Number(pgConfig.migration.expectedVersion);
 
@@ -253,7 +253,7 @@ class PostgreSQLDatabase {
         };
     }
 
-    async createTables() {
+    async ErstellenTables() {
         for (const table of tableStatements) {
             try {
                 await this.pool.query(table);
@@ -262,13 +262,13 @@ class PostgreSQLDatabase {
             }
         }
         
-        logger.info('Database tables created/verified');
+        logger.info('Database tables Erstellend/verified');
         
-        await this.createIndexes();
-        await this.createAuditTriggers();
+        await this.ErstellenIndexes();
+        await this.ErstellenAuditTriggers();
     }
 
-    async createIndexes() {
+    async ErstellenIndexes() {
         for (const index of indexStatements) {
             try {
                 await this.pool.query(index);
@@ -277,12 +277,12 @@ class PostgreSQLDatabase {
             }
         }
         
-        logger.info('Performance indexes created/verified');
+        logger.info('Performance indexes Erstellend/verified');
     }
 
-    async createAuditTriggers() {
+    async ErstellenAuditTriggers() {
         try {
-            await this.pool.query(UPDATE_TIMESTAMP_FUNCTION);
+            await this.pool.query(Aktualisieren_TIMESTAMP_FUNCTION);
 
             const triggers = triggerDefinitions;
 
@@ -305,16 +305,16 @@ class PostgreSQLDatabase {
                         `DROP TRIGGER IF EXISTS ${quoteIdentifier(safeTriggerIdentifier)} ON ${quoteIdentifier(safeTableIdentifier)};`
                     );
                     await this.pool.query(
-                        `CREATE TRIGGER ${quoteIdentifier(safeTriggerIdentifier)}
-                         BEFORE UPDATE ON ${quoteIdentifier(safeTableIdentifier)}
-                         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`
+                        `Erstellen TRIGGER ${quoteIdentifier(safeTriggerIdentifier)}
+                         BEFORE Aktualisieren ON ${quoteIdentifier(safeTableIdentifier)}
+                         FOR EACH ROW EXECUTE FUNCTION Aktualisieren_Aktualisierend_at_column();`
                     );
                 } catch (error) {
                     logger.warn(`Error creating trigger ${trigger.name} on ${trigger.table}: ${error.message}`);
                 }
             }
             
-            logger.info('Audit triggers created/verified');
+            logger.info('Audit triggers Erstellend/verified');
         } catch (error) {
             logger.warn('Error creating audit triggers:', error.message);
         }
@@ -328,7 +328,7 @@ class PostgreSQLDatabase {
         return result.rows.length > 0 ? result.rows[0].value : defaultValue;
     }
 
-    async _getWithLegacyFallback(canonicalKey, originalKey, defaultValue) {
+    async _getWithLegacyFallZurück(canonicalKey, originalKey, defaultValue) {
         let value = await this._getTempValue(canonicalKey, defaultValue);
         if (value !== defaultValue) {
             return value;
@@ -359,8 +359,8 @@ class PostgreSQLDatabase {
             const canonicalKey = canonicalizeKey(key);
             const parsedKey = parseKey(canonicalKey);
 
-            if (parsedKey.type === 'temp' || isTempBackedType(parsedKey.type)) {
-                return await this._getWithLegacyFallback(parsedKey.fullKey, key, defaultValue);
+            if (parsedKey.type === 'temp' || isTempZurückedType(parsedKey.type)) {
+                return await this._getWithLegacyFallZurück(parsedKey.fullKey, key, defaultValue);
             }
 
             if (parsedKey.type === 'cache') {
@@ -402,11 +402,11 @@ class PostgreSQLDatabase {
             const expiresAt = ttl ? new Date(Date.now() + ttl * 1000) : null;
             const jsonValue = JSON.stringify(value ?? null);
 
-            if (parsedKey.type === 'temp' || isTempBackedType(parsedKey.type)) {
+            if (parsedKey.type === 'temp' || isTempZurückedType(parsedKey.type)) {
                 await this.pool.query(
                     `INSERT INTO ${pgConfig.tables.temp_data} (key, value, expires_at)
                      VALUES ($1, $2, $3)
-                     ON CONFLICT (key) DO UPDATE SET value = $2, expires_at = $3`,
+                     ON CONFLICT (key) DO Aktualisieren SET value = $2, expires_at = $3`,
                     [parsedKey.fullKey, jsonValue, expiresAt],
                 );
                 return true;
@@ -416,7 +416,7 @@ class PostgreSQLDatabase {
                 await this.pool.query(
                     `INSERT INTO ${pgConfig.tables.cache_data} (key, value, expires_at)
                      VALUES ($1, $2, $3)
-                     ON CONFLICT (key) DO UPDATE SET value = $2, expires_at = $3`,
+                     ON CONFLICT (key) DO Aktualisieren SET value = $2, expires_at = $3`,
                     [parsedKey.fullKey, jsonValue, expiresAt],
                 );
                 return true;
@@ -429,36 +429,36 @@ class PostgreSQLDatabase {
         }
     }
 
-    async delete(key) {
+    async Löschen(key) {
         try {
             if (!this.isAvailable()) {
-                logger.warn('PostgreSQL not available, cannot delete key');
+                logger.warn('PostgreSQL not available, cannot Löschen key');
                 return false;
             }
 
             const canonicalKey = canonicalizeKey(key);
             const parsedKey = parseKey(canonicalKey);
-            let deleted = false;
+            let Löschend = false;
 
-            if (parsedKey.type === 'temp' || isTempBackedType(parsedKey.type)) {
-                await this.pool.query(`DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [parsedKey.fullKey]);
-                deleted = true;
+            if (parsedKey.type === 'temp' || isTempZurückedType(parsedKey.type)) {
+                await this.pool.query(`Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [parsedKey.fullKey]);
+                Löschend = true;
             } else if (parsedKey.type === 'cache') {
-                await this.pool.query(`DELETE FROM ${pgConfig.tables.cache_data} WHERE key = $1`, [parsedKey.fullKey]);
-                deleted = true;
+                await this.pool.query(`Löschen FROM ${pgConfig.tables.cache_data} WHERE key = $1`, [parsedKey.fullKey]);
+                Löschend = true;
             } else {
-                deleted = await this.deleteStructuredData(parsedKey);
+                Löschend = await this.LöschenStructuredData(parsedKey);
             }
 
             for (const legacyKey of getLegacyVariantsForCanonical(canonicalKey)) {
-                await this.pool.query(`DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [legacyKey]);
+                await this.pool.query(`Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [legacyKey]);
             }
 
             if (key !== canonicalKey) {
-                await this.pool.query(`DELETE FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [key]);
+                await this.pool.query(`Löschen FROM ${pgConfig.tables.temp_data} WHERE key = $1`, [key]);
             }
 
-            return deleted;
+            return Löschend;
         } catch (error) {
             logger.error(`Error deleting key ${key}:`, error);
             return false;
@@ -528,13 +528,13 @@ class PostgreSQLDatabase {
                 source = null,
                 moderatorId = null,
                 metadata = {},
-                createdAt = new Date()
+                ErstellendAt = new Date()
             } = record;
 
-            const timestamp = createdAt instanceof Date ? createdAt : new Date(createdAt);
+            const timestamp = ErstellendAt instanceof Date ? ErstellendAt : new Date(ErstellendAt);
 
             await this.pool.query(
-                `INSERT INTO ${pgConfig.tables.verification_audit} (guild_id, user_id, action, source, moderator_id, metadata, created_at)
+                `INSERT INTO ${pgConfig.tables.verification_audit} (guild_id, user_id, action, source, moderator_id, metadata, Erstellend_at)
                  VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [guildId, userId, action, source, moderatorId, metadata, timestamp]
             );
@@ -707,26 +707,26 @@ class PostgreSQLDatabase {
             switch (parsedKey.type) {
                 case 'guild_config':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, config, updated_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, config, Aktualisierend_at) 
                          VALUES ($1, $2, CURRENT_TIMESTAMP) 
-                         ON CONFLICT (id) DO UPDATE SET config = $2, updated_at = CURRENT_TIMESTAMP`,
+                         ON CONFLICT (id) DO Aktualisieren SET config = $2, Aktualisierend_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, value]
                     );
                     return true;
                 
                 case 'guild_birthdays':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.birthdays} WHERE guild_id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.birthdays} WHERE guild_id = $1`, [parsedKey.guildId]);
                     
                     for (const [userId, birthday] of Object.entries(value)) {
                         await this.pool.query(
-                            `INSERT INTO ${pgConfig.tables.users} (id, created_at) 
+                            `INSERT INTO ${pgConfig.tables.users} (id, Erstellend_at) 
                              VALUES ($1, CURRENT_TIMESTAMP) 
                              ON CONFLICT (id) DO NOTHING`,
                             [userId]
@@ -742,13 +742,13 @@ class PostgreSQLDatabase {
                 
                 case 'guild_giveaways':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.giveaways} WHERE guild_id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.giveaways} WHERE guild_id = $1`, [parsedKey.guildId]);
 
                     const giveaways = Array.isArray(value)
                         ? value
@@ -768,94 +768,94 @@ class PostgreSQLDatabase {
                 
                 case 'welcome_config':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.welcome_configs} (guild_id, config, updated_at) 
+                        `INSERT INTO ${pgConfig.tables.welcome_configs} (guild_id, config, Aktualisierend_at) 
                          VALUES ($1, $2, CURRENT_TIMESTAMP) 
-                         ON CONFLICT (guild_id) DO UPDATE SET config = $2, updated_at = CURRENT_TIMESTAMP`,
+                         ON CONFLICT (guild_id) DO Aktualisieren SET config = $2, Aktualisierend_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, value]
                     );
                     return true;
                 
                 case 'leveling_config':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.leveling_configs} (guild_id, config, updated_at) 
+                        `INSERT INTO ${pgConfig.tables.leveling_configs} (guild_id, config, Aktualisierend_at) 
                          VALUES ($1, $2, CURRENT_TIMESTAMP) 
-                         ON CONFLICT (guild_id) DO UPDATE SET config = $2, updated_at = CURRENT_TIMESTAMP`,
+                         ON CONFLICT (guild_id) DO Aktualisieren SET config = $2, Aktualisierend_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, value]
                     );
                     return true;
                 
                 case 'user_level':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.users} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.users} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.userId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.user_levels} (guild_id, user_id, xp, level, total_xp, last_message, rank, updated_at) 
+                        `INSERT INTO ${pgConfig.tables.user_levels} (guild_id, user_id, xp, level, total_xp, last_message, rank, Aktualisierend_at) 
                          VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) 
-                         ON CONFLICT (guild_id, user_id) DO UPDATE SET 
-                         xp = $3, level = $4, total_xp = $5, last_message = $6, rank = $7, updated_at = CURRENT_TIMESTAMP`,
+                         ON CONFLICT (guild_id, user_id) DO Aktualisieren SET 
+                         xp = $3, level = $4, total_xp = $5, last_message = $6, rank = $7, Aktualisierend_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, parsedKey.userId, value.xp || 0, value.level || 0, value.totalXp || 0, value.lastMessage || new Date(), value.rank || 0]
                     );
                     return true;
                 
                 case 'economy':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.users} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.users} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.userId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.economy} (guild_id, user_id, balance, bank, data, updated_at) 
+                        `INSERT INTO ${pgConfig.tables.economy} (guild_id, user_id, balance, bank, data, Aktualisierend_at) 
                          VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) 
-                         ON CONFLICT (guild_id, user_id) DO UPDATE SET 
-                         balance = $3, bank = $4, data = $5, updated_at = CURRENT_TIMESTAMP`,
+                         ON CONFLICT (guild_id, user_id) DO Aktualisieren SET 
+                         balance = $3, bank = $4, data = $5, Aktualisierend_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, parsedKey.userId, value.wallet ?? value.balance ?? 0, value.bank ?? 0, value]
                     );
                     return true;
                 
                 case 'afk_status':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.users} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.users} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.userId]
@@ -864,7 +864,7 @@ class PostgreSQLDatabase {
                     await this.pool.query(
                         `INSERT INTO ${pgConfig.tables.afk_status} (guild_id, user_id, reason, expires_at) 
                          VALUES ($1, $2, $3, $4) 
-                         ON CONFLICT (guild_id, user_id) DO UPDATE SET 
+                         ON CONFLICT (guild_id, user_id) DO Aktualisieren SET 
                          reason = $3, expires_at = $4, status_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, parsedKey.userId, value.reason, (value.expiresAt ?? value.expires_at) ? new Date(value.expiresAt ?? value.expires_at) : null]
                     );
@@ -872,7 +872,7 @@ class PostgreSQLDatabase {
                 
                 case 'ticket':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
@@ -881,15 +881,15 @@ class PostgreSQLDatabase {
                     await this.pool.query(
                         `INSERT INTO ${pgConfig.tables.tickets} (guild_id, channel_id, data, expires_at) 
                          VALUES ($1, $2, $3, $4) 
-                         ON CONFLICT (channel_id) DO UPDATE SET 
-                         data = $3, expires_at = $4, updated_at = CURRENT_TIMESTAMP`,
+                         ON CONFLICT (channel_id) DO Aktualisieren SET 
+                         data = $3, expires_at = $4, Aktualisierend_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, parsedKey.channelId, value, ttl ? new Date(Date.now() + ttl * 1000) : null]
                     );
                     return true;
                 
                 case 'counters':
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.guilds} (id, created_at) 
+                        `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
                          ON CONFLICT (id) DO NOTHING`,
                         [parsedKey.guildId]
@@ -911,7 +911,7 @@ class PostgreSQLDatabase {
                             logger.info('Added counters column to guilds table');
                         } catch (alterError) {
                             logger.error('Failed to add counters column:', alterError);
-                            throw new Error(`Counters column missing and could not be created: ${alterError.message}`);
+                            throw new Error(`Counters column missing and could not be Erstellend: ${alterError.message}`);
                         }
                     }
                     
@@ -922,9 +922,9 @@ class PostgreSQLDatabase {
 
                     try {
                         await this.pool.query(
-                            `INSERT INTO ${pgConfig.tables.guilds} (id, counters, updated_at) 
+                            `INSERT INTO ${pgConfig.tables.guilds} (id, counters, Aktualisierend_at) 
                              VALUES ($1, $2::jsonb, CURRENT_TIMESTAMP) 
-                             ON CONFLICT (id) DO UPDATE SET counters = $2::jsonb, updated_at = CURRENT_TIMESTAMP`,
+                             ON CONFLICT (id) DO Aktualisieren SET counters = $2::jsonb, Aktualisierend_at = CURRENT_TIMESTAMP`,
                             [parsedKey.guildId, jsonString]
                         );
                     } catch (queryError) {
@@ -942,48 +942,48 @@ class PostgreSQLDatabase {
         }
     }
 
-    async deleteStructuredData(parsedKey) {
+    async LöschenStructuredData(parsedKey) {
         try {
             switch (parsedKey.type) {
                 case 'guild_config':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.guilds} WHERE id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.guilds} WHERE id = $1`, [parsedKey.guildId]);
                     return true;
                 
                 case 'guild_birthdays':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.birthdays} WHERE guild_id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.birthdays} WHERE guild_id = $1`, [parsedKey.guildId]);
                     return true;
                 
                 case 'guild_giveaways':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.giveaways} WHERE guild_id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.giveaways} WHERE guild_id = $1`, [parsedKey.guildId]);
                     return true;
                 
                 case 'welcome_config':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.welcome_configs} WHERE guild_id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.welcome_configs} WHERE guild_id = $1`, [parsedKey.guildId]);
                     return true;
                 
                 case 'leveling_config':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.leveling_configs} WHERE guild_id = $1`, [parsedKey.guildId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.leveling_configs} WHERE guild_id = $1`, [parsedKey.guildId]);
                     return true;
                 
                 case 'user_level':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.user_levels} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.user_levels} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
                     return true;
                 
                 case 'economy':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.economy} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.economy} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
                     return true;
                 
                 case 'afk_status':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.afk_status} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.afk_status} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
                     return true;
                 
                 case 'ticket':
-                    await this.pool.query(`DELETE FROM ${pgConfig.tables.tickets} WHERE guild_id = $1 AND channel_id = $2`, [parsedKey.guildId, parsedKey.channelId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.tickets} WHERE guild_id = $1 AND channel_id = $2`, [parsedKey.guildId, parsedKey.channelId]);
                     return true;
 
                 case 'counters':
                     await this.pool.query(
-                        `UPDATE ${pgConfig.tables.guilds} SET counters = '[]'::jsonb, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+                        `Aktualisieren ${pgConfig.tables.guilds} SET counters = '[]'::jsonb, Aktualisierend_at = CURRENT_TIMESTAMP WHERE id = $1`,
                         [parsedKey.guildId],
                     );
                     return true;
@@ -1001,7 +1001,7 @@ class PostgreSQLDatabase {
         try {
             if (this.pool) {
                 await this.pool.end();
-                logger.info('PostgreSQL connection closed');
+                logger.info('PostgreSQL connection Schließend');
             }
         } catch (error) {
             logger.error('Error closing PostgreSQL connection:', error);

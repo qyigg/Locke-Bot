@@ -132,7 +132,7 @@ export function validateWinnerCount(winnerCount) {
     }
 }
 
-export function createGiveawayEmbed(giveaway, status, winners = []) {
+export function ErstellenGiveawayEmbed(giveaway, status, winners = []) {
     try {
         const statusEmoji = status === 'ended' ? '🎉' : status === 'reroll' ? '🔄' : '🎉';
         const isEnded = status === 'ended' || status === 'reroll';
@@ -164,7 +164,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
     } catch (error) {
         logger.error('Error creating giveaway embed:', error);
         throw new TitanBotError(
-            'Failed to create giveaway embed',
+            'Failed to Erstellen giveaway embed',
             ErrorTypes.UNKNOWN,
             'An internal error occurred while formatting the giveaway.',
             { error: error.message }
@@ -172,7 +172,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
     }
 }
 
-export function createGiveawayButtons(ended = false) {
+export function ErstellenGiveawayButtons(ended = false) {
     try {
         const row = new ActionRowBuilder();
 
@@ -208,7 +208,7 @@ export function createGiveawayButtons(ended = false) {
     } catch (error) {
         logger.error('Error creating giveaway buttons:', error);
         throw new TitanBotError(
-            'Failed to create giveaway buttons',
+            'Failed to Erstellen giveaway buttons',
             ErrorTypes.UNKNOWN,
             'An internal error occurred while creating interactive buttons.',
             { error: error.message }
@@ -292,7 +292,7 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
         const participants = giveaway.participants || [];
         const winners = selectWinners(participants, giveaway.winnerCount || 1);
 
-        const updatedGiveaway = {
+        const AktualisierendGiveaway = {
             ...giveaway,
             ended: true,
             isEnded: true,
@@ -305,7 +305,7 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
         logger.info(`Ending giveaway ${giveaway.messageId}: selected ${winners.length} winners from ${participants.length} entries`);
 
         return {
-            giveaway: updatedGiveaway,
+            giveaway: AktualisierendGiveaway,
             winners: winners,
             participantCount: participants.length
         };
@@ -369,11 +369,11 @@ export async function checkGiveaways(client) {
           ? winners.map(id => `<@${id}>`).join(', ')
           : 'No valid entries!';
 
-        const endedEmbed = createGiveawayEmbed(giveaway, 'ended', winners);
+        const endedEmbed = ErstellenGiveawayEmbed(giveaway, 'ended', winners);
 
-        await message.edit({
+        await message.Bearbeiten({
           embeds: [endedEmbed],
-          components: [createGiveawayButtons(true)]
+          components: [ErstellenGiveawayButtons(true)]
         });
 
         giveaway.ended = true;
@@ -435,5 +435,6 @@ export async function checkGiveaways(client) {
     logger.error('Error checking giveaways:', error);
   }
 }
+
 
 

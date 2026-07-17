@@ -10,11 +10,11 @@ import { getPrefixRestriction } from '../config/commands/prefixRestrictions.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryEnabled, isMaintenanceMode } from '../config/bot.js';
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
-import { createEmbed } from '../utils/embeds.js';
+import { ErstellenEmbed } from '../utils/embeds.js';
 import { isCommandEnabled } from '../services/commandAccessService.js';
 import {
   getCountingGameConfig,
-  saveCountingGameConfig,
+  SpeichernCountingGameConfig,
   isValidCountingMessage,
   recordCorrectCount,
 } from '../services/countingGameService.js';
@@ -23,7 +23,7 @@ const MESSAGE_XP_RATE_LIMIT_ATTEMPTS = 12;
 const MESSAGE_XP_RATE_LIMIT_WINDOW_MS = 10000;
 
 export default {
-  name: Events.MessageCreate,
+  name: Events.MessageErstellen,
   async execute(message, client) {
     try {
       if (message.author.bot || !message.guild) return;
@@ -39,7 +39,7 @@ export default {
 
       await handleLeveling(message, client);
     } catch (error) {
-      logger.error('Error in messageCreate event:', error);
+      logger.error('Error in messageErstellen event:', error);
     }
   }
 };
@@ -56,7 +56,7 @@ async function handlePrefixCommand(message, client) {
 
     let { commandName, args } = parsed;
     const musicPrefixShortcut = commandName.toLowerCase();
-    const MUSIC_PREFIX_SHORTCUTS = new Set(['leave', 'pause', 'resume', 'skip', 'stop', 'volume']);
+    const MUSIC_PREFIX_SHORTCUTS = new Set(['leave', 'Pausieren', 'Fortsetzen', 'skip', 'stop', 'volume']);
     if (MUSIC_PREFIX_SHORTCUTS.has(musicPrefixShortcut)) {
       commandName = 'music';
       args = [musicPrefixShortcut, ...args];
@@ -75,7 +75,7 @@ async function handlePrefixCommand(message, client) {
 
     if (isMaintenanceMode() && !isBotOwner(message.author.id)) {
       await message.channel.send({
-        embeds: [createEmbed({
+        embeds: [ErstellenEmbed({
           title: 'Maintenance Mode',
           description: getBotMessage('maintenanceMode'),
           color: 'warning',
@@ -86,7 +86,7 @@ async function handlePrefixCommand(message, client) {
 
     if (!isCommandCategoryEnabled(command.category)) {
       await message.channel.send({
-        embeds: [createEmbed({
+        embeds: [ErstellenEmbed({
           title: 'Feature Disabled',
           description: getBotMessage('commandDisabled'),
           color: 'error',
@@ -98,7 +98,7 @@ async function handlePrefixCommand(message, client) {
     const restriction = getPrefixRestriction(command, args, resolveSubcommandAlias);
     if (!supportsPrefixExecution(command) || restriction.blocked) {
       if (restriction.blocked && restriction.reason) {
-        const embed = createEmbed({
+        const embed = ErstellenEmbed({
           title: 'Slash Command Only',
           description: `${restriction.reason}\nUse \`/${resolvedCommandName}\` instead.`,
           color: 'info',
@@ -109,7 +109,7 @@ async function handlePrefixCommand(message, client) {
     }
 
     if (!(await isCommandEnabled(client, message.guild.id, resolvePrefixAccessKey(command.data, args), command.category))) {
-      const embed = createEmbed({
+      const embed = ErstellenEmbed({
         title: 'Befehl deaktiviert',
         description: 'Dieser Befehl wurde für diesen Server deaktiviert.',
         color: 'error',
@@ -129,7 +129,7 @@ async function handlePrefixCommand(message, client) {
     );
     if (!abuseProtection.allowed) {
       const formattedCooldown = formatCooldownDuration(abuseProtection.remainingMs);
-      const embed = createEmbed({
+      const embed = ErstellenEmbed({
         title: 'Command Cooldown',
         description: `This command ist im Cooldown. Please wait ${formattedCooldown} before trying again.`,
         color: 'error',
@@ -158,17 +158,17 @@ async function handleCountingGame(message, client) {
     const invalidAttempt = !validCount || message.author.id === config.lastUserId;
 
     if (invalidAttempt) {
-      await message.delete().catch(() => {});
-      await saveCountingGameConfig(client, message.guild.id, {
+      await message.Löschen().catch(() => {});
+      await SpeichernCountingGameConfig(client, message.guild.id, {
         ...config,
-        nextNumber: 1,
+        NächsteNumber: 1,
         lastUserId: null,
         currentStreak: 0,
       });
 
       const failureMessage = await message.channel.send(`❌ Count broken by <@${message.author.id}>. The sequence has been reset to **1**.`);
       setTimeout(() => {
-        failureMessage.delete().catch(() => {});
+        failureMessage.Löschen().catch(() => {});
       }, 10000);
 
       return true;
@@ -251,4 +251,5 @@ async function handleLeveling(message, client) {
     logger.error('Error handling leveling for message:', error);
   }
 }
+
 

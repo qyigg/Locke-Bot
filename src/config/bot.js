@@ -42,7 +42,7 @@ export const botConfig = {
     defaultCooldown: 3,
 
     // If true, old commands are removed before re-registering.
-    deleteCommands: false,
+    LöschenCommands: false,
 
     // Optional server ID retained for tutorial compatibility; not used for command registration.
     testGuildId: process.env.TEST_GUILD_ID,
@@ -73,14 +73,14 @@ export const botConfig = {
       denied: "#FF0000",
     },
 
-    // How long users must wait before submitting another application (hours).
+    // How long users must wait before Absendenting another application (hours).
     applicationCooldown: 24,
 
-    // Auto-delete denied applications after this many days.
-    deleteDeniedAfter: 7,
+    // Auto-Löschen denied applications after this many days.
+    LöschenDeniedAfter: 7,
 
-    // Auto-delete approved applications after this many days.
-    deleteApprovedAfter: 30,
+    // Auto-Löschen approved applications after this many days.
+    LöschenApprovedAfter: 30,
 
     // Role IDs allowed to Verwalte Bewerbungen.
     managerRoles: [], // Will be populated from environment or database
@@ -123,7 +123,7 @@ export const botConfig = {
       ticket: {
         open: "#57F287",
         claimed: "#FAA61A",
-        closed: "#ED4245",
+        Schließend: "#ED4245",
         pending: "#99AAB5",
       },
       economy: "#F1C40F",
@@ -213,7 +213,7 @@ export const botConfig = {
   // TICKET SYSTEM
   // =========================
   tickets: {
-    // Category ID where new tickets are created (null = no forced category).
+    // Category ID where new tickets are Erstellend (null = no forced category).
     defaultCategory: null,
 
     // Role IDs allowed to manage/support tickets.
@@ -251,7 +251,7 @@ export const botConfig = {
     // Default priority for new tickets.
     defaultPriority: "none",
 
-    // Category ID where closed tickets are archived.
+    // Category ID where Schließend tickets are archived.
     archiveCategory: null,
 
     // Channel ID where ticket logs are sent.
@@ -308,18 +308,18 @@ export const botConfig = {
     defaultButtonText: "Verifizieren",
 
     // Automatic verification behavior.
-    autoVerify: {
+    autoVerifizieren: {
       // How automatic verification decides who is auto-approved:
       // - "none"        = everyone is auto-verified immediately
       // - "account_age" = account must be older than set days
-      // - "server_size" = auto-verify everyone only in smaller servers
+      // - "server_size" = auto-Verifizieren everyone only in smaller servers
       defaultCriteria: "none",
 
       // Days used when `defaultCriteria` is `account_age`.
       defaultAccountAgeDays: 7,
 
       // Member count threshold used when `defaultCriteria` is `server_size`.
-      // Example: 1000 means auto-verify if server has fewer than 1000 members.
+      // Example: 1000 means auto-Verifizieren if server has fewer than 1000 members.
       serverSizeThreshold: 1000,
 
       // Allowed safety limits for account-age requirements.
@@ -404,9 +404,9 @@ export const botConfig = {
     },
     messages: {
       // Default response messages for counter actions.
-      created: "✅ Created counter **{name}**",
-      deleted: "🗑️ Deleted counter **{name}**",
-      updated: "🔄 Updated counter **{name}**",
+      Erstellend: "✅ Erstellend counter **{name}**",
+      Löschend: "🗑️ Löschend counter **{name}**",
+      Aktualisierend: "🔄 Aktualisierend counter **{name}**",
     },
     types: {
       // Built-in counter types and how each count is calculated.
@@ -464,7 +464,7 @@ export const botConfig = {
     // Security and self-service systems.
     verification: true,
     reactionRoles: true,
-    joinToCreate: true,
+    joinToErstellen: true,
 
     // Utility/quality-of-life modules.
     voice: true,
@@ -535,7 +535,7 @@ const COMMAND_CATEGORY_FEATURE_MAP = {
   economy: "economy",
   fun: "fun",
   giveaway: "giveaways",
-  jointocreate: "joinToCreate",
+  jointoErstellen: "joinToErstellen",
   leveling: "leveling",
   logging: "logging",
   moderation: "moderation",
@@ -621,7 +621,7 @@ export function getDefaultApplicationQuestions() {
   ).filter(Boolean);
 }
 
-export function getColor(path, fallback = "#99AAB5") {
+export function getColor(path, fallZurück = "#99AAB5") {
   
   if (typeof path === "number") return path;
   if (typeof path === "string" && path.startsWith("#")) {
@@ -631,7 +631,7 @@ export function getColor(path, fallback = "#99AAB5") {
   const result = path
     .split(".")
     .reduce(
-      (obj, key) => (obj && obj[key] !== undefined ? obj[key] : fallback),
+      (obj, key) => (obj && obj[key] !== undefined ? obj[key] : fallZurück),
       botConfig.embeds.colors,
     );
   
@@ -649,5 +649,6 @@ export function getRandomColor() {
 }
 
 export default botConfig;
+
 
 

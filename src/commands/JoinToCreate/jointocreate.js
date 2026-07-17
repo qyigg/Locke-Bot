@@ -5,18 +5,18 @@ import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import {
-    initializeJoinToCreate,
+    initializeJoinToErstellen,
     getChannelConfiguration,
-    updateChannelConfig,
+    AktualisierenChannelConfig,
     removeTriggerChannel,
     hasManageGuildPermission,
     logConfigurationChange,
     getConfiguration
-} from '../../services/joinToCreateService.js';
+} from '../../services/joinToErstellenService.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("jointocreate")
+        .setName("jointoErstellen")
         .setDescription("Verwalte das Bei Beitritt erstellte Kanäle-System.")
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .setDMPermission(false)
@@ -104,7 +104,7 @@ export default {
                     errorMessage = error.userMessage || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
                     logger.debug(`TitanBotError [${error.type}]: ${error.message}`, error.context || {});
                 } else {
-                    logger.error('Unexpected error in jointocreate command:', error);
+                    logger.error('Unexpected error in jointoErstellen command:', error);
                     errorMessage = 'An unexpected error occurred. Bitte versuchen Sie es später erneut or contact support.';
                 }
 
@@ -124,7 +124,7 @@ async function handleSetupSubcommand(interaction, client) {
         const bitrate = interaction.options.getInteger('bitrate') || 64;
         const guildId = interaction.guild.id;
 
-        logger.debug(`Setting up Join to Create in guild ${guildId} with template: ${nameTemplate}`);
+        logger.debug(`Setting up Join to Erstellen in guild ${guildId} with template: ${nameTemplate}`);
 
         const existingConfig = await getConfiguration(client, guildId);
         
@@ -150,12 +150,12 @@ async function handleSetupSubcommand(interaction, client) {
 
             if (activeTriggerChannels.length > 0) {
                 const primaryTrigger = activeTriggerChannels[0];
-                const errorMessage = `Dieser Server already has a Join to Create channel set up: ${primaryTrigger}\n\nUse \`/jointocreate dashboard\` to modify it, or remove it first before creating a new one.`;
+                const errorMessage = `Dieser Server already has a Join to Erstellen channel set up: ${primaryTrigger}\n\nUse \`/jointoErstellen dashboard\` to modify it, or remove it first before creating a new one.`;
 
                 throw new TitanBotError(
-                    'Guild already has a Join to Create channel',
+                    'Guild already has a Join to Erstellen channel',
                     ErrorTypes.VALIDATION,
-                    `Dieser Server hat bereits einen Bei Beitritt erstellten Kanal eingerichtet: ${primaryTrigger}\n\nVerwende \`/jointocreate dashboard\` zum Ändern oder lösche diesen zuerst, bevor du einen neuen erstellst.`,
+                    `Dieser Server hat bereits einen Bei Beitritt erstellten Kanal eingerichtet: ${primaryTrigger}\n\nVerwende \`/jointoErstellen dashboard\` zum Ändern oder lösche diesen zuerst, bevor du einen neuen erstellst.`,
                     {
                         guildId,
                         activeTriggerCount: activeTriggerChannels.length,
@@ -166,8 +166,8 @@ async function handleSetupSubcommand(interaction, client) {
             }
         }
 
-        logger.debug('Creating Join to Create trigger channel...');
-        let triggerChannel = await interaction.guild.channels.create({
+        logger.debug('Creating Join to Erstellen trigger channel...');
+        let triggerChannel = await interaction.guild.channels.Erstellen({
             name: 'Bei Beitritt erstellen',
             type: ChannelType.GuildVoice,
             parent: category?.id,
@@ -181,23 +181,23 @@ async function handleSetupSubcommand(interaction, client) {
             ],
         });
 
-        logger.debug(`Created trigger channel ${triggerChannel.id}, initializing config...`);
+        logger.debug(`Erstellend trigger channel ${triggerChannel.id}, initializing config...`);
 
-        const config = await initializeJoinToCreate(client, guildId, triggerChannel.id, {
+        const config = await initializeJoinToErstellen(client, guildId, triggerChannel.id, {
             nameTemplate: nameTemplate,
             userLimit: userLimit,
             bitrate: bitrate * 1000,
             categoryId: category?.id
         });
 
-        await logConfigurationChange(client, guildId, interaction.user.id, 'Initialized Join to Create', {
+        await logConfigurationChange(client, guildId, interaction.user.id, 'Initialized Join to Erstellen', {
             channelId: triggerChannel.id,
             nameTemplate,
             userLimit,
             bitrate
         });
 
-        logger.info(`Successfully created Join to Create system in guild ${guildId}`);
+        logger.info(`Successfully Erstellend Join to Erstellen system in guild ${guildId}`);
 
         const responseEmbed = successEmbed(
             '✅ Einrichtung abgeschlossen',
@@ -209,7 +209,7 @@ async function handleSetupSubcommand(interaction, client) {
             `${category ?`• Kategorie: ${category.name}`: '• Kategorie: Stammebene'}`
         );
 
-        return await InteractionHelper.safeEditReply(interaction, { embeds: [responseEmbed] });
+        return await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [responseEmbed] });
 
     } catch (error) {
         logger.error('Error in handleSetupSubcommand:', error);
@@ -271,29 +271,29 @@ async function handleConfigSubcommand(interaction, client) {
             .setLabel('🎵 Bitrate')
             .setStyle(ButtonStyle.Primary);
 
-        const deleteButton = new ButtonBuilder()
-            .setCustomId(`jtc_config_delete_${triggerChannel.id}`)
+        const LöschenButton = new ButtonBuilder()
+            .setCustomId(`jtc_config_Löschen_${triggerChannel.id}`)
             .setLabel('🗑️ Kanal entfernen')
             .setStyle(ButtonStyle.Danger);
 
-        const row = new ActionRowBuilder().addComponents(nameButton, limitButton, bitrateButton, deleteButton);
+        const row = new ActionRowBuilder().addComponents(nameButton, limitButton, bitrateButton, LöschenButton);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [configEmbed],
             components: [row]
         });
 
         const message = await interaction.fetchReply();
 
-        if (!message || typeof message.createMessageComponentCollector !== 'function') {
+        if (!message || typeof message.ErstellenMessageComponentCollector !== 'function') {
             throw new TitanBotError(
                 'Failed to fetch interaction reply for collector setup',
                 ErrorTypes.DISCORD_API,
-                'Failed to open configuration controls. Please run `/jointocreate dashboard` again.'
+                'Failed to open configuration controls. Please run `/jointoErstellen dashboard` again.'
             );
         }
 
-        const collector = message.createMessageComponentCollector({
+        const collector = message.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 300000
         });
@@ -317,7 +317,7 @@ async function handleConfigSubcommand(interaction, client) {
                     await handleUserLimitModal(buttonInteraction, triggerChannel, currentConfig, client);
                 } else if (customId.includes('jtc_config_bitrate_')) {
                     await handleBitrateModal(buttonInteraction, triggerChannel, currentConfig, client);
-                } else if (customId.includes('jtc_config_delete_')) {
+                } else if (customId.includes('jtc_config_Löschen_')) {
                     await handleChannelDeletion(buttonInteraction, triggerChannel, currentConfig, client);
                 }
             } catch (error) {
@@ -343,10 +343,10 @@ async function handleConfigSubcommand(interaction, client) {
                 nameButton.setDisabled(true),
                 limitButton.setDisabled(true),
                 bitrateButton.setDisabled(true),
-                deleteButton.setDisabled(true)
+                LöschenButton.setDisabled(true)
             );
 
-            message.edit({
+            message.Bearbeiten({
                 components: [disabledRow],
                 embeds: [configEmbed.setFooter({ text: 'Konfigurationssitzung abgelaufen. Führe den Befehl erneut aus, um Änderungen vorzunehmen.' })]
             }).catch(() => {});
@@ -405,7 +405,7 @@ async function handleNameTemplateModal(interaction, triggerChannel, currentConfi
 
         await interaction.showModal(modal);
 
-        const modalSubmission = await interaction.awaitModalSubmit({
+        const modalSubmission = await interaction.awaitModalAbsenden({
             filter: (i) => i.customId === `jtc_name_modal_${triggerChannel.id}` && i.user.id === interaction.user.id,
             time: 60000
         });
@@ -420,11 +420,11 @@ async function handleNameTemplateModal(interaction, triggerChannel, currentConfi
 
         const [newTemplate] = modalSubmission.fields.getStringSelectValues('template');
 
-        await updateChannelConfig(client, interaction.guild.id, triggerChannel.id, {
+        await AktualisierenChannelConfig(client, interaction.guild.id, triggerChannel.id, {
             nameTemplate: newTemplate
         });
 
-        await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Updated channel name template', {
+        await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Aktualisierend channel name template', {
             channelId: triggerChannel.id,
             newTemplate
         });
@@ -473,7 +473,7 @@ async function handleUserLimitModal(interaction, triggerChannel, currentConfig, 
 
         await interaction.showModal(modal);
 
-        const modalSubmission = await interaction.awaitModalSubmit({
+        const modalSubmission = await interaction.awaitModalAbsenden({
             filter: (i) => i.customId === `jtc_limit_modal_${triggerChannel.id}` && i.user.id === interaction.user.id,
             time: 60000
         });
@@ -488,11 +488,11 @@ async function handleUserLimitModal(interaction, triggerChannel, currentConfig, 
 
         const userInput = modalSubmission.fields.getTextInputValue('user_limit').trim();
 
-        await updateChannelConfig(client, interaction.guild.id, triggerChannel.id, {
+        await AktualisierenChannelConfig(client, interaction.guild.id, triggerChannel.id, {
             userLimit: parseInt(userInput)
         });
 
-        await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Updated user limit', {
+        await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Aktualisierend user limit', {
             channelId: triggerChannel.id,
             userLimit: parseInt(userInput)
         });
@@ -541,7 +541,7 @@ async function handleBitrateModal(interaction, triggerChannel, currentConfig, cl
 
         await interaction.showModal(modal);
 
-        const modalSubmission = await interaction.awaitModalSubmit({
+        const modalSubmission = await interaction.awaitModalAbsenden({
             filter: (i) => i.customId === `jtc_bitrate_modal_${triggerChannel.id}` && i.user.id === interaction.user.id,
             time: 60000
         });
@@ -556,11 +556,11 @@ async function handleBitrateModal(interaction, triggerChannel, currentConfig, cl
 
         const userInput = modalSubmission.fields.getTextInputValue('bitrate').trim();
 
-        await updateChannelConfig(client, interaction.guild.id, triggerChannel.id, {
+        await AktualisierenChannelConfig(client, interaction.guild.id, triggerChannel.id, {
             bitrate: parseInt(userInput) * 1000
         });
 
-        await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Updated bitrate', {
+        await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Aktualisierend bitrate', {
             channelId: triggerChannel.id,
             bitrate: parseInt(userInput)
         });
@@ -588,34 +588,34 @@ async function handleBitrateModal(interaction, triggerChannel, currentConfig, cl
 
 async function handleChannelDeletion(interaction, triggerChannel, currentConfig, client) {
     try {
-        const confirmRow = new ActionRowBuilder().addComponents(
+        const BestätigenRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId(`jtc_delete_confirm_${triggerChannel.id}`)
+                .setCustomId(`jtc_Löschen_Bestätigen_${triggerChannel.id}`)
                 .setLabel('🗑️ Ja, Löschen')
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
-                .setCustomId(`jtc_delete_cancel_${triggerChannel.id}`)
+                .setCustomId(`jtc_Löschen_Abbrechen_${triggerChannel.id}`)
                 .setLabel('❌ Abbrechen')
                 .setStyle(ButtonStyle.Secondary)
         );
 
         await InteractionHelper.safeReply(interaction, {
             embeds: [warningEmbed('Löschung bestätigen', `Bist du sicher, dass du **${triggerChannel.name}** aus dem Bei Beitritt erstellte Kanäle-System entfernen möchtest?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`)],
-            components: [confirmRow],
+            components: [BestätigenRow],
             flags: MessageFlags.Ephemeral
         });
 
         const message = await interaction.fetchReply();
-        const deleteCollector = message.createMessageComponentCollector({
+        const LöschenCollector = message.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: (i) => i.user.id === interaction.user.id && 
-                          (i.customId === `jtc_delete_confirm_${triggerChannel.id}` || 
-                           i.customId === `jtc_delete_cancel_${triggerChannel.id}`),
+                          (i.customId === `jtc_Löschen_Bestätigen_${triggerChannel.id}` || 
+                           i.customId === `jtc_Löschen_Abbrechen_${triggerChannel.id}`),
             time: 600_000,
             max: 1
         });
 
-        deleteCollector.on('collect', async (buttonInteraction) => {
+        LöschenCollector.on('collect', async (buttonInteraction) => {
             try {
                 
                 if (!hasManageGuildPermission(buttonInteraction.member)) {
@@ -626,37 +626,37 @@ async function handleChannelDeletion(interaction, triggerChannel, currentConfig,
                     return;
                 }
 
-                if (buttonInteraction.customId === `jtc_delete_confirm_${triggerChannel.id}`) {
+                if (buttonInteraction.customId === `jtc_Löschen_Bestätigen_${triggerChannel.id}`) {
                     
                     await removeTriggerChannel(client, interaction.guild.id, triggerChannel.id);
 
-                    await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Removed Join to Create trigger', {
+                    await logConfigurationChange(client, interaction.guild.id, interaction.user.id, 'Removed Join to Erstellen trigger', {
                         channelId: triggerChannel.id,
                         channelName: triggerChannel.name
                     });
 
                     try {
                         if (triggerChannel.members.size === 0) {
-                            await triggerChannel.delete('Join to Create trigger removed by administrator');
+                            await triggerChannel.Löschen('Join to Erstellen trigger removed by administrator');
                         }
-                    } catch (deleteError) {
-                        logger.warn(`Could not delete channel ${triggerChannel.id}: ${deleteError.message}`);
+                    } catch (LöschenError) {
+                        logger.warn(`Could not Löschen channel ${triggerChannel.id}: ${LöschenError.message}`);
                         
                     }
 
-                    await buttonInteraction.update({
+                    await buttonInteraction.Aktualisieren({
                         embeds: [successEmbed('Entfernt', `**${triggerChannel.name}** wurde aus dem Bei Beitritt erstellte Kanäle-System entfernt.`)],
                         components: []
                     });
 
                 } else {
-                    await buttonInteraction.update({
+                    await buttonInteraction.Aktualisieren({
                         embeds: [successEmbed('Abgebrochen', 'Kanal-Entfernung wurde abgebrochen.')],
                         components: []
                     });
                 }
             } catch (collectError) {
-                logger.error('Error handling delete confirmation:', collectError);
+                logger.error('Error handling Löschen Bestätigenation:', collectError);
                 await buttonInteraction.reply({
                     content: '❌ Ein Fehler ist aufgetreten bei der Verarbeitung deiner Anfrage.',
                     flags: MessageFlags.Ephemeral
@@ -664,9 +664,9 @@ async function handleChannelDeletion(interaction, triggerChannel, currentConfig,
             }
         });
 
-        deleteCollector.on('end', (collected, reason) => {
+        LöschenCollector.on('end', (collected, reason) => {
             if (reason === 'time' && collected.size === 0) {
-                message.edit({ components: [] }).catch(() => {});
+                message.Bearbeiten({ components: [] }).catch(() => {});
             }
         });
 
@@ -682,4 +682,5 @@ async function handleChannelDeletion(interaction, triggerChannel, currentConfig,
         );
     }
 }
+
 

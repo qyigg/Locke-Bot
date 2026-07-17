@@ -5,7 +5,7 @@ import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getTicketPermissionContext } from '../../utils/ticket/ticketPermissions.js';
-import { updateTicketPriority } from '../../services/ticket.js';
+import { AktualisierenTicketPriority } from '../../services/ticket.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -43,12 +43,12 @@ export default {
         }
 
         const priorityLevel = interaction.options.getString("level");
-        await updateTicketPriority(interaction.channel, priorityLevel, interaction.user);
+        await AktualisierenTicketPriority(interaction.channel, priorityLevel, interaction.user);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
-                    "Priority Updated",
+                    "Priority Aktualisierend",
                     `Ticket priority set to **${priorityLevel.toUpperCase()}**.`,
                 ),
             ],
@@ -65,4 +65,5 @@ export default {
         });
     },
 };
+
 

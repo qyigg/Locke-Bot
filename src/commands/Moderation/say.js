@@ -121,7 +121,7 @@ export default {
             },
         });
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
                     'Message Sent',
@@ -132,4 +132,5 @@ export default {
         });
     },
 };
+
 

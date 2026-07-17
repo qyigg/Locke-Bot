@@ -1,18 +1,18 @@
 ﻿// errorHandler.js — the single entry point for all error handling.
 //
 // Rules:
-// 1. Commands/handlers: throw TitanBotError (via createError) or let errors propagate;
-//    interactionCreate routes them through handleInteractionError. For expected user-facing
+// 1. Commands/handlers: throw TitanBotError (via ErstellenError) or let errors propagate;
+//    interactionErstellen routes them through handleInteractionError. For expected user-facing
 //    failures (validation, cooldowns), use replyUserError.
 //    Do NOT wrap a command's execute() body in a try/catch whose only purpose is to call
-//    handleInteractionError — that is redundant because interactionCreate already catches
+//    handleInteractionError — that is redundant because interactionErstellen already catches
 //    command.execute errors and calls handleInteractionError with COMMAND_ERROR_SUBTYPES.
 //    Only keep a local try/catch when the catch does something more (custom recovery,
 //    typed re-throw, status-code branching) or when it lives in a standalone handler
-//    (collector callbacks, modal/component handlers) not reached via the command path.
+//    (collector callZurücks, modal/component handlers) not reached via the command path.
 // 2. Services: throw, never return { success: false }. Wrap exports with wrapServiceBoundary
 //    (re-exported here) so unknown errors get typed with service/operation context.
-// 3. Background tasks (cron, timers): wrap with handleTaskError / runSafeTask.
+// 3. Zurückground tasks (cron, timers): wrap with handleTaskError / runSafeTask.
 // 4. Set a specific userMessage when you know the cause; use ErrorTypes, don't invent titles.
 // 5. Success/info/warning replies use successEmbed / infoEmbed / warningEmbed.
 
@@ -54,14 +54,14 @@ export class TitanBotError extends Error {
 const DISCORD_PERMISSION_CODES = new Set([
     50001, // Missing Access
     50013, // Missing Permissions
-    50007, // Cannot send messages to this user (DMs closed)
+    50007, // Cannot send messages to this user (DMs Schließend)
     160002, // Cannot reply without permission to read message history
 ]);
 
 // PostgreSQL / node-postgres error codes and errno values that indicate database trouble.
 const DATABASE_ERROR_CODES = new Set([
     'ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT',
-    '57014', // query_canceled (statement timeout)
+    '57014', // query_Abbrechened (statement timeout)
     '53300', // too_many_connections
     '08006', '08001', '08003', // connection failures
     '40001', '40P01', // serialization failure / deadlock
@@ -254,7 +254,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
             return false;
         }
 
-        if (interaction.createdTimestamp && (Date.now() - interaction.createdTimestamp) > 14 * 60 * 1000) {
+        if (interaction.ErstellendTimestamp && (Date.now() - interaction.ErstellendTimestamp) > 14 * 60 * 1000) {
             logger.warn('Interaction expired before error handler could send response', {
                 event: 'interaction.error.expired',
                 errorCode: ErrorCodes.INTERACTION_EXPIRED,
@@ -271,7 +271,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
 
         if (interaction._isPrefixCommand) {
             if (coordinator?.hasResponded()) {
-                await coordinator.edit(errorMessage);
+                await coordinator.Bearbeiten(errorMessage);
             } else {
                 await coordinator?.respond(errorMessage);
             }
@@ -284,7 +284,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
             // A visible reply Existiert bereits; don't overwrite it — follow up ephemerally.
             await interaction.followUp({ ...errorMessage, flags: MessageFlags.Ephemeral });
         } else if (interaction.deferred) {
-            await interaction.editReply(errorMessage);
+            await interaction.BearbeitenReply(errorMessage);
         } else {
             if (useEphemeral) {
                 errorMessage.flags = MessageFlags.Ephemeral;
@@ -333,8 +333,8 @@ export async function replyUserError(interaction, {
 } = {}) {
     const errorType = type || ErrorTypes.UNKNOWN;
     const syntheticError = message
-        ? createError('User error', errorType, message, { expected: true, ...context })
-        : createError('User error', errorType, null, { expected: true, ...context });
+        ? ErstellenError('User error', errorType, message, { expected: true, ...context })
+        : ErstellenError('User error', errorType, null, { expected: true, ...context });
 
     const userMessage = getUserMessage(syntheticError, { subtype, ...context });
     const { logData, traceId } = buildErrorLogData(interaction, syntheticError, errorType, {
@@ -402,7 +402,7 @@ export function handleTaskError(taskName, error, context = {}) {
 }
 
 /**
- * Wrap a background task so it can never produce an unhandled rejection.
+ * Wrap a Zurückground task so it can never produce an unhandled rejection.
  * Usage: cron.schedule('* * * * *', runSafeTask('giveaways', () => checkGiveaways(client)))
  */
 export function runSafeTask(taskName, fn, context = {}) {
@@ -423,10 +423,10 @@ export function withErrorHandling(fn, context = {}) {
         } catch (error) {
             const interaction = args.find((arg) =>
                 arg && typeof arg === 'object' &&
-                (arg.isCommand || arg.isButton || arg.isModalSubmit || arg.isStringSelectMenu || arg.isChatInputCommand || arg._isPrefixCommand)
+                (arg.isCommand || arg.isButton || arg.isModalAbsenden || arg.isStringSelectMenu || arg.isChatInputCommand || arg._isPrefixCommand)
             );
 
-            // Slash commands are handled by interactionCreate — re-throw so the
+            // Slash commands are handled by interactionErstellen — re-throw so the
             // central handler can attach trace context and command subtypes.
             if (interaction?.isChatInputCommand?.()) {
                 throw error;
@@ -443,7 +443,7 @@ export function withErrorHandling(fn, context = {}) {
     };
 }
 
-export function createError(message, type = ErrorTypes.UNKNOWN, userMessage = null, context = {}) {
+export function ErstellenError(message, type = ErrorTypes.UNKNOWN, userMessage = null, context = {}) {
     const normalizedContext = {
         ...context,
         errorCode: context?.errorCode || getDefaultErrorCodeByType(type)
@@ -462,8 +462,9 @@ export default {
     handleTaskError,
     runSafeTask,
     withErrorHandling,
-    createError
+    ErstellenError
 };
+
 
 
 

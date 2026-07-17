@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
@@ -40,7 +40,7 @@ export default {
                 return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} is not explicitly locked (everyone can already send messages).` });
             }
 
-            await channel.permissionOverwrites.edit(
+            await channel.permissionOverwrites.Bearbeiten(
                 everyoneRole,
                 { SendMessages: true },
                 {
@@ -63,7 +63,7 @@ export default {
                 }
             });
 
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [
                     successEmbed(
                         `🔓 **Channel Unlocked**`,
@@ -77,3 +77,4 @@ export default {
         }
     }
 };
+

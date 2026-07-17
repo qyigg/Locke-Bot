@@ -3,7 +3,7 @@ import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { setUserLevel, getLevelingConfig } from '../../services/leveling/leveling.js';
-import { createEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
@@ -39,7 +39,7 @@ export default {
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeEditReply(interaction, {
+      await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
@@ -64,9 +64,9 @@ export default {
 
     const userData = await setUserLevel(client, interaction.guildId, targetUser.id, newLevel);
 
-    await InteractionHelper.safeEditReply(interaction, {
+    await InteractionHelper.safeBearbeitenReply(interaction, {
       embeds: [
-        createEmbed({
+        ErstellenEmbed({
           title: 'Level Set',
           description: `Successfully set ${targetUser.tag}'s level to **${newLevel}**.\n**Total XP:** ${userData.totalXp}`,
           color: 'success'
@@ -79,4 +79,5 @@ export default {
     );
   }
 };
+
 

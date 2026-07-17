@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
@@ -56,7 +56,7 @@ export default {
             });
         }
 
-        let apiUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
+        let apiUrl = `https://is.gd/Erstellen.php?format=simple&url=${encodeURIComponent(url)}`;
         if (custom) {
             apiUrl += `&shorturl=${encodeURIComponent(custom)}`;
         }
@@ -115,10 +115,11 @@ export default {
 
         const embed = successEmbed('URL Shortened', `Here's Dein shortened URL: ${shortUrl}`);
         embed.setColor(getColor('success'));
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [embed],
         });
     },
 };
+
 
 

@@ -1,18 +1,18 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { infoEmbed, successEmbed } from '../../utils/embeds.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { verifyUser } from '../../services/verificationService.js';
+import { VerifizierenUser } from '../../services/verificationService.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('verify')
+        .setName('Verifizieren')
         .setDescription('Verifiziere dich selbst and gain access to the server'),
 
     async execute(interaction, config, client) {
         const guild = interaction.guild;
 
-        const result = await verifyUser(client, guild.id, interaction.user.id, {
+        const result = await VerifizierenUser(client, guild.id, interaction.user.id, {
             source: 'command_self',
             moderatorId: null
         });
@@ -26,12 +26,13 @@ export default {
 
         await InteractionHelper.safeReply(interaction, {
             embeds: [successEmbed(
-                "Verification Complete",
+                "Verifizierung abgeschlossen",
                 `You have been verified and given the **${result.roleName}** role! Welcome to the server! 🎉`
             )],
             flags: MessageFlags.Ephemeral
         });
     }
 };
+
 
 

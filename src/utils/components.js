@@ -1,9 +1,9 @@
-// components.js
+﻿// components.js
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getColor } from '../config/bot.js';
 
-export function getConfirmationButtons(customIdPrefix = 'confirm') {
+export function getBestätigenationButtons(customIdPrefix = 'Bestätigen') {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_yes`)
@@ -36,7 +36,7 @@ export function getPaginationRow(customIdPrefix = 'page', currentPage = 1, total
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(true),
         new ButtonBuilder()
-            .setCustomId(`${customIdPrefix}_next`)
+            .setCustomId(`${customIdPrefix}_Nächste`)
             .setLabel('▶️')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(currentPage >= totalPages),
@@ -48,7 +48,7 @@ export function getPaginationRow(customIdPrefix = 'page', currentPage = 1, total
     );
 }
 
-export function createSelectMenu(customId, placeholder, options = [], min = 1, max = 1) {
+export function ErstellenSelectMenu(customId, placeholder, options = [], min = 1, max = 1) {
     return new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(customId)
@@ -59,7 +59,7 @@ export function createSelectMenu(customId, placeholder, options = [], min = 1, m
     );
 }
 
-export function createButton(customId, label, style = 'primary', emoji = null, disabled = false) {
+export function ErstellenButton(customId, label, style = 'primary', emoji = null, disabled = false) {
     
     if (!customId || typeof customId !== 'string' || customId.length === 0) {
         throw new Error('customId must be a non-empty string');
@@ -91,7 +91,7 @@ export function createButton(customId, label, style = 'primary', emoji = null, d
     return button;
 }
 
-export function createLinkButton(label, url, emoji = null) {
+export function ErstellenLinkButton(label, url, emoji = null) {
     
     if (!label || typeof label !== 'string') {
         throw new Error('label must be a non-empty string');
@@ -118,7 +118,7 @@ export function createLinkButton(label, url, emoji = null) {
     return button;
 }
 
-export function createButtonRow(buttons) {
+export function ErstellenButtonRow(buttons) {
     const row = new ActionRowBuilder();
     
     if (!Array.isArray(buttons) || buttons.length === 0) {
@@ -130,9 +130,9 @@ export function createButtonRow(buttons) {
         
         try {
             if (button.url) {
-                row.addComponents(createLinkButton(button.label, button.url, button.emoji));
+                row.addComponents(ErstellenLinkButton(button.label, button.url, button.emoji));
             } else {
-                row.addComponents(createButton(
+                row.addComponents(ErstellenButton(
                     button.customId,
                     button.label,
                     button.style || 'primary',

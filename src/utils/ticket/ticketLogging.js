@@ -36,7 +36,7 @@ export async function logTicketEvent({ client, guildId, event }) {
       return;
     }
 
-    const embed = await createTicketLogEmbed(guild, event);
+    const embed = await ErstellenTicketLogEmbed(guild, event);
 
     const messageOptions = { embeds: [embed] };
 
@@ -51,7 +51,7 @@ export async function logTicketEvent({ client, guildId, event }) {
   }
 }
 
-export async function logTicketFeedback({
+export async function logTicketFeedZurück({
   client,
   guildId,
   ticketNumber,
@@ -64,7 +64,7 @@ export async function logTicketFeedback({
     client,
     guildId,
     event: {
-      type: 'feedback',
+      type: 'feedZurück',
       ticketId: ticketChannelId,
       ticketNumber,
       userId,
@@ -82,14 +82,14 @@ function getLogChannelForEventType(config, eventType) {
       return config.ticketTranscriptChannelId || null;
 
     case 'open':
-    case 'close':
-    case 'delete':
+    case 'Schließen':
+    case 'Löschen':
     case 'claim':
     case 'unclaim':
     case 'priority':
     case 'pin':
     case 'unpin':
-    case 'feedback':
+    case 'feedZurück':
       return config.ticketLogsChannelId || null;
 
     default:
@@ -98,17 +98,17 @@ function getLogChannelForEventType(config, eventType) {
 }
 
 const TICKET_EVENT_STYLES = {
-  open: { color: 0x5865F2, title: 'Ticket Created' },
-  close: { color: 0xED4245, title: 'Ticket Schließend' },
-  delete: { color: 0x8b0000, title: 'Ticket Löschend' },
-  claim: { color: 0x5865F2, title: 'Ticket Claimed' },
+  open: { color: 0x5865F2, title: 'Ticket Erstellend' },
+  Schließen: { color: 0xED4245, title: 'Ticket Schließend' },
+  Löschen: { color: 0x8b0000, title: 'Ticket Löschend' },
+  claim: { color: 0x5865F2, title: 'Ticket beansprucht' },
   unclaim: { color: 0xFAA61A, title: 'Ticket Unclaimed' },
-  priority: { color: 0x9b59b6, title: 'Priority Updated' },
+  priority: { color: 0x9b59b6, title: 'Priority Aktualisierend' },
   transcript: { color: 0x57F287, title: 'Transcript Generated' },
-  feedback: { color: 0x57F287, title: 'Feedback Received' },
+  feedZurück: { color: 0x57F287, title: 'FeedZurück Received' },
 };
 
-async function createTicketLogEmbed(guild, event) {
+async function ErstellenTicketLogEmbed(guild, event) {
   const style = TICKET_EVENT_STYLES[event.type] || { color: 0x95a5a6, title: 'Ticket Event' };
   const ticketNumber = event.ticketNumber || event.ticketId;
   const ticketRef = ticketNumber ? `#${ticketNumber}` : 'Unbekannt';
@@ -136,7 +136,7 @@ async function createTicketLogEmbed(guild, event) {
       }
       break;
 
-    case 'close':
+    case 'Schließen':
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
@@ -150,7 +150,7 @@ async function createTicketLogEmbed(guild, event) {
       }
       break;
 
-    case 'delete':
+    case 'Löschen':
       author = await resolveUserAuthor(guild.client, event.executorId);
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
@@ -180,7 +180,7 @@ async function createTicketLogEmbed(guild, event) {
       inlineFields = [
         { name: 'Ticket', value: ticketRef, inline: true },
         { name: 'Priority', value: priorityLabel, inline: true },
-        { name: 'Updated by', value: executorMention || 'Unbekannt', inline: true },
+        { name: 'Aktualisierend by', value: executorMention || 'Unbekannt', inline: true },
       ];
       break;
     }
@@ -205,7 +205,7 @@ async function createTicketLogEmbed(guild, event) {
       }
       break;
 
-    case 'feedback': {
+    case 'feedZurück': {
       const rating = event.metadata?.rating ?? event.rating;
       const comment = event.metadata?.comment;
       const ratingDisplay = formatRatingStars(rating) || 'No rating';
@@ -235,7 +235,7 @@ async function createTicketLogEmbed(guild, event) {
       }
   }
 
-  const titlePrefix = event.type === 'feedback' ? '⭐ ' : '';
+  const titlePrefix = event.type === 'feedZurück' ? '⭐ ' : '';
   return buildStandardLogEmbed({
     color: style.color,
     title: `${titlePrefix}${style.title}`,
@@ -277,5 +277,6 @@ export function validateLogChannel(channel, botMember) {
 
   return { valid: true };
 }
+
 
 

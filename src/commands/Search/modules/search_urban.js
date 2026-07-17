@@ -1,5 +1,5 @@
 ﻿import axios from 'axios';
-import { createEmbed } from '../../../utils/embeds.js';
+import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
 import { handleInteractionError, replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -28,7 +28,7 @@ export default {
 
             deferTimer = setTimeout(() => {
                 InteractionHelper.safeDefer(interaction).catch((deferError) => {
-                    logger.debug('Urban command defer fallback failed', {
+                    logger.debug('Urban command defer fallZurück failed', {
                         error: deferError?.message,
                         interactionId: interaction.id,
                         commandName: 'urban'
@@ -58,7 +58,7 @@ export default {
                 ? `*"${cleanExample.replace(/\n/g, ' ').slice(0, 500)}..."*`
                 : '*No example provided*';
 
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: definition.word,
                 description: formattedDefinition,
                 color: 'info'
@@ -119,5 +119,6 @@ export default {
         }
     },
 };
+
 
 

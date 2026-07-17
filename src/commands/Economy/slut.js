@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -29,7 +29,7 @@ const FINE_OUTCOMES = [
 ];
 
 const ROBBED_OUTCOMES = [
-    "A fake buyer chargeback wiped part of Dein earnings.",
+    "A fake buyer chargeZurück wiped part of Dein earnings.",
     "A scam booking cleaned out a chunk of Dein cash.",
     "You got baited by a fraud account and lost money.",
 ];
@@ -119,7 +119,7 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (!userData) {
-                throw createError(
+                throw ErstellenError(
                     "Failed to load economy data for slut command",
                     ErrorTypes.DATABASE,
                     "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
@@ -131,7 +131,7 @@ export default {
 
             if (now - lastSlut < SLUT_COOLDOWN) {
                 const remainingTime = lastSlut + SLUT_COOLDOWN - now;
-                throw createError(
+                throw ErstellenError(
                     "Slut cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Du musst warten, bevor du wieder arbeiten kannst! Versuche es in **${Math.ceil(remainingTime / 60000)}** Minuten erneut.`,
@@ -176,14 +176,15 @@ export default {
                 `🧾 **Total Lost:** $${(userData.totalSlutLosses || 0).toLocaleString()}`
             ];
 
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: outcome.title,
                 description: summaryLines.join('\n'),
                 color: outcome.delta >= 0 ? 'success' : 'error',
                 timestamp: true
             });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'slut' })
 };
+
 

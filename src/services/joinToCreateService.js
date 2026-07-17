@@ -1,9 +1,9 @@
-﻿// joinToCreateService.js
+﻿// joinToErstellenService.js
 
 import {
-    getJoinToCreateConfig,
-    saveJoinToCreateConfig,
-    updateJoinToCreateConfig,
+    getJoinToErstellenConfig,
+    SpeichernJoinToErstellenConfig,
+    AktualisierenJoinToErstellenConfig,
     getTemporaryChannelInfo,
     formatChannelName as formatChannelNameUtil
 } from '../utils/database.js';
@@ -50,7 +50,7 @@ export function validateChannelNameTemplate(template) {
         throw new TitanBotError(
             'Channel template contains forbidden characters',
             ErrorTypes.VALIDATION,
-            'Channel template cannot contain @, #, :, or backtick characters.'
+            'Channel template cannot contain @, #, :, or Zurücktick characters.'
         );
     }
 
@@ -177,7 +177,7 @@ export function formatChannelName(template, variables) {
     }
 }
 
-export async function initializeJoinToCreate(client, guildId, channelId, options = {}) {
+export async function initializeJoinToErstellen(client, guildId, channelId, options = {}) {
     try {
         if (!client || !client.db) {
             throw new TitanBotError(
@@ -205,21 +205,21 @@ export async function initializeJoinToCreate(client, guildId, channelId, options
             validateUserLimit(options.userLimit);
         }
 
-        const config = await getJoinToCreateConfig(client, guildId);
+        const config = await getJoinToErstellenConfig(client, guildId);
 
         if (config.triggerChannels.includes(channelId)) {
             throw new TitanBotError(
-                'Channel already configured as Join to Create trigger',
+                'Channel already configured as Join to Erstellen trigger',
                 ErrorTypes.VALIDATION,
-                'This channel is already set up as a Join to Create trigger.'
+                'This channel is already set up as a Join to Erstellen trigger.'
             );
         }
 
         if (Array.isArray(config.triggerChannels) && config.triggerChannels.length > 0) {
             throw new TitanBotError(
-                'Guild already has a Join to Create trigger configured',
+                'Guild already has a Join to Erstellen trigger configured',
                 ErrorTypes.VALIDATION,
-                'Dieser Server already has a Join to Create channel configured. Use `/jointocreate dashboard` to modify it, or remove it before creating a new one.',
+                'Dieser Server already has a Join to Erstellen channel configured. Use `/jointoErstellen dashboard` to modify it, or remove it before creating a new one.',
                 {
                     guildId,
                     existingTriggerChannelId: config.triggerChannels[0],
@@ -241,20 +241,20 @@ export async function initializeJoinToCreate(client, guildId, channelId, options
                 userLimit: options.userLimit !== undefined ? options.userLimit : config.userLimit,
                 bitrate: options.bitrate || config.bitrate,
                 categoryId: options.categoryId || null,
-                createdAt: Date.now()
+                ErstellendAt: Date.now()
             };
         }
 
-        const saveResult = await saveJoinToCreateConfig(client, guildId, config);
-        if (!saveResult) {
+        const SpeichernResult = await SpeichernJoinToErstellenConfig(client, guildId, config);
+        if (!SpeichernResult) {
             throw new TitanBotError(
-                'Failed to save Join to Create configuration',
+                'Failed to Speichern Join to Erstellen configuration',
                 ErrorTypes.DATABASE,
-                'Failed to set up Join to Create system. Bitte versuchen Sie es später erneut.'
+                'Failed to set up Join to Erstellen system. Bitte versuchen Sie es später erneut.'
             );
         }
 
-        logger.info(`Initialized Join to Create for guild ${guildId} with trigger channel ${channelId}`);
+        logger.info(`Initialized Join to Erstellen for guild ${guildId} with trigger channel ${channelId}`);
 
         return config;
 
@@ -263,14 +263,14 @@ export async function initializeJoinToCreate(client, guildId, channelId, options
             throw error;
         }
         throw new TitanBotError(
-            `Failed to initialize Join to Create: ${error.message}`,
+            `Failed to initialize Join to Erstellen: ${error.message}`,
             ErrorTypes.DATABASE,
-            'Failed to set up Join to Create system.'
+            'Failed to set up Join to Erstellen system.'
         );
     }
 }
 
-export async function updateChannelConfig(client, guildId, channelId, updates) {
+export async function AktualisierenChannelConfig(client, guildId, channelId, Aktualisierens) {
     try {
         if (!client || !client.db) {
             throw new TitanBotError(
@@ -280,24 +280,24 @@ export async function updateChannelConfig(client, guildId, channelId, updates) {
             );
         }
 
-        const config = await getJoinToCreateConfig(client, guildId);
+        const config = await getJoinToErstellenConfig(client, guildId);
 
         if (!config.triggerChannels.includes(channelId)) {
             throw new TitanBotError(
-                'Channel is not configured as a Join to Create trigger',
+                'Channel is not configured as a Join to Erstellen trigger',
                 ErrorTypes.VALIDATION,
-                'This channel is not set up as a Join to Create trigger.'
+                'This channel is not set up as a Join to Erstellen trigger.'
             );
         }
 
-        if (updates.nameTemplate) {
-            validateChannelNameTemplate(updates.nameTemplate);
+        if (Aktualisierens.nameTemplate) {
+            validateChannelNameTemplate(Aktualisierens.nameTemplate);
         }
-        if (updates.bitrate !== undefined) {
-            validateBitrate(updates.bitrate / 1000);
+        if (Aktualisierens.bitrate !== undefined) {
+            validateBitrate(Aktualisierens.bitrate / 1000);
         }
-        if (updates.userLimit !== undefined) {
-            validateUserLimit(updates.userLimit);
+        if (Aktualisierens.userLimit !== undefined) {
+            validateUserLimit(Aktualisierens.userLimit);
         }
 
         if (!config.channelOptions) {
@@ -306,14 +306,14 @@ export async function updateChannelConfig(client, guildId, channelId, updates) {
 
         config.channelOptions[channelId] = {
             ...config.channelOptions[channelId],
-            ...updates,
-            updatedAt: Date.now()
+            ...Aktualisierens,
+            AktualisierendAt: Date.now()
         };
 
-        await saveJoinToCreateConfig(client, guildId, config);
+        await SpeichernJoinToErstellenConfig(client, guildId, config);
 
-        logger.info(`Updated Join to Create config for channel ${channelId} in guild ${guildId}`, {
-            updates: Object.keys(updates)
+        logger.info(`Aktualisierend Join to Erstellen config for channel ${channelId} in guild ${guildId}`, {
+            Aktualisierens: Object.keys(Aktualisierens)
         });
 
         return config.channelOptions[channelId];
@@ -323,9 +323,9 @@ export async function updateChannelConfig(client, guildId, channelId, updates) {
             throw error;
         }
         throw new TitanBotError(
-            `Failed to update channel config: ${error.message}`,
+            `Failed to Aktualisieren channel config: ${error.message}`,
             ErrorTypes.DATABASE,
-            'Failed to update configuration.'
+            'Failed to Aktualisieren configuration.'
         );
     }
 }
@@ -340,14 +340,14 @@ export async function removeTriggerChannel(client, guildId, channelId) {
             );
         }
 
-        const config = await getJoinToCreateConfig(client, guildId);
+        const config = await getJoinToErstellenConfig(client, guildId);
 
         const index = config.triggerChannels.indexOf(channelId);
         if (index === -1) {
             throw new TitanBotError(
-                'Kanal nicht gefunden in Join to Create triggers',
+                'Kanal nicht gefunden in Join to Erstellen triggers',
                 ErrorTypes.VALIDATION,
-                'This channel is not configured as a Join to Create trigger.'
+                'This channel is not configured as a Join to Erstellen trigger.'
             );
         }
 
@@ -355,20 +355,20 @@ export async function removeTriggerChannel(client, guildId, channelId) {
         config.enabled = config.triggerChannels.length > 0;
 
         if (config.channelOptions && config.channelOptions[channelId]) {
-            delete config.channelOptions[channelId];
+            Löschen config.channelOptions[channelId];
         }
 
         if (config.temporaryChannels) {
             for (const [tempChannelId, tempInfo] of Object.entries(config.temporaryChannels)) {
                 if (tempInfo.triggerChannelId === channelId) {
-                    delete config.temporaryChannels[tempChannelId];
+                    Löschen config.temporaryChannels[tempChannelId];
                 }
             }
         }
 
-        await saveJoinToCreateConfig(client, guildId, config);
+        await SpeichernJoinToErstellenConfig(client, guildId, config);
 
-        logger.info(`Removed Join to Create trigger channel ${channelId} from guild ${guildId}`);
+        logger.info(`Removed Join to Erstellen trigger channel ${channelId} from guild ${guildId}`);
 
         return true;
 
@@ -394,7 +394,7 @@ export async function getConfiguration(client, guildId) {
             );
         }
 
-        return await getJoinToCreateConfig(client, guildId);
+        return await getJoinToErstellenConfig(client, guildId);
 
     } catch (error) {
         if (error instanceof TitanBotError) {
@@ -424,9 +424,9 @@ export async function getChannelConfiguration(client, guildId, channelId) {
 
         if (!config.triggerChannels || !Array.isArray(config.triggerChannels) || !config.triggerChannels.includes(channelId)) {
             throw new TitanBotError(
-                'Channel is not a valid Join to Create trigger',
+                'Channel is not a valid Join to Erstellen trigger',
                 ErrorTypes.VALIDATION,
-                'This channel is not set up as a Join to Create trigger.'
+                'This channel is not set up as a Join to Erstellen trigger.'
             );
         }
 
@@ -466,7 +466,7 @@ export async function logConfigurationChange(client, guildId, userId, action, de
             guildId,
             eventType: EVENT_TYPES.COUNTER_CONFIG,
             data: {
-                title: 'Join to Create Updated',
+                title: 'Join to Erstellen Aktualisierend',
                 lines: [
                     formatLogLine('Action', action),
                     formatLogLine('Details', typeof details === 'string' ? details : JSON.stringify(details)),
@@ -475,11 +475,11 @@ export async function logConfigurationChange(client, guildId, userId, action, de
             },
         });
     } catch (error) {
-        logger.warn(`Failed to log Join to Create configuration change: ${error.message}`);
+        logger.warn(`Failed to log Join to Erstellen configuration change: ${error.message}`);
     }
 }
 
-export async function createTemporaryChannel(guild, member, options = {}) {
+export async function ErstellenTemporaryChannel(guild, member, options = {}) {
     try {
         if (!guild || !member) {
             throw new TitanBotError(
@@ -512,7 +512,7 @@ export async function createTemporaryChannel(guild, member, options = {}) {
             guildName: guild.name
         });
 
-        const tempChannel = await guild.channels.create({
+        const tempChannel = await guild.channels.Erstellen({
             name: channelName,
             type: ChannelType.GuildVoice,
             parent: parentId,
@@ -530,7 +530,7 @@ export async function createTemporaryChannel(guild, member, options = {}) {
             ]
         });
 
-        logger.info(`Created temporary voice channel ${tempChannel.name} (${tempChannel.id}) for user ${member.user.tag}`);
+        logger.info(`Erstellend temporary voice channel ${tempChannel.name} (${tempChannel.id}) for user ${member.user.tag}`);
 
         return {
             id: tempChannel.id,
@@ -543,9 +543,9 @@ export async function createTemporaryChannel(guild, member, options = {}) {
             throw error;
         }
         throw new TitanBotError(
-            `Failed to create temporary channel: ${error.message}`,
+            `Failed to Erstellen temporary channel: ${error.message}`,
             ErrorTypes.DISCORD_API,
-            'Failed to create Dein temporary voice channel. Please contact an administrator.'
+            'Failed to Erstellen Dein temporary voice channel. Please contact an administrator.'
         );
     }
 }
@@ -555,15 +555,16 @@ export default {
     validateBitrate,
     validateUserLimit,
     formatChannelName,
-    initializeJoinToCreate,
-    updateChannelConfig,
+    initializeJoinToErstellen,
+    AktualisierenChannelConfig,
     removeTriggerChannel,
     getConfiguration,
     isTriggerChannel,
     getChannelConfiguration,
     hasManageGuildPermission,
     logConfigurationChange,
-    createTemporaryChannel
+    ErstellenTemporaryChannel
 };
+
 
 

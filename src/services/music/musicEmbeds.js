@@ -1,12 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { getPaginationRow } from '../../utils/components.js';
 
 const QUEUE_PAGE_SIZE = 10;
 
 export const MUSIC_BUTTON_IDS = {
-    PAUSE: 'music_pause',
-    RESUME: 'music_resume',
+    Pausieren: 'music_Pausieren',
+    Fortsetzen: 'music_Fortsetzen',
     SKIP: 'music_skip',
     STOP: 'music_stop',
     SHUFFLE: 'music_shuffle',
@@ -16,7 +16,7 @@ export const MUSIC_BUTTON_IDS = {
     QUEUE: 'music_queue',
     QUEUE_FIRST: 'music_queue_first',
     QUEUE_PREV: 'music_queue_prev',
-    QUEUE_NEXT: 'music_queue_next',
+    QUEUE_Nächste: 'music_queue_Nächste',
     QUEUE_LAST: 'music_queue_last',
 };
 
@@ -58,7 +58,7 @@ export function buildNowPlayingEmbed(track, player, guildData) {
     const position = formatDuration(player?.position || 0);
     const duration = formatDuration(track?.info?.length || 0);
 
-    return createEmbed({
+    return ErstellenEmbed({
         title: 'Now Playing',
         description: track?.info?.title || 'Unknown track',
         color: 'primary',
@@ -71,7 +71,7 @@ export function buildNowPlayingEmbed(track, player, guildData) {
             { name: 'Queue', value: `${player?.queue?.length || 0} track(s)`, inline: true },
         ],
         thumbnail: getTrackArtwork(track),
-        footer: player?.paused ? 'Paused' : 'Playing',
+        footer: player?.Pausierend ? 'Pausierend' : 'Playing',
     });
 }
 
@@ -98,7 +98,7 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
             .join('\n');
     }
 
-    return createEmbed({
+    return ErstellenEmbed({
         title: 'Music Queue',
         description: description.substring(0, 4096),
         color: 'info',
@@ -107,20 +107,20 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
 }
 
 export function buildPlayerButtonRows(player, guildData) {
-    const paused = player?.paused;
+    const Pausierend = player?.Pausierend;
     const row1 = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(MUSIC_BUTTON_IDS.PAUSE)
-            .setLabel('Pause')
+            .setCustomId(MUSIC_BUTTON_IDS.Pausieren)
+            .setLabel('Pausieren')
             .setStyle(ButtonStyle.Primary)
             .setEmoji('⏸️')
-            .setDisabled(Boolean(paused)),
+            .setDisabled(Boolean(Pausierend)),
         new ButtonBuilder()
-            .setCustomId(MUSIC_BUTTON_IDS.RESUME)
-            .setLabel('Resume')
+            .setCustomId(MUSIC_BUTTON_IDS.Fortsetzen)
+            .setLabel('Fortsetzen')
             .setStyle(ButtonStyle.Success)
             .setEmoji('▶️')
-            .setDisabled(!paused),
+            .setDisabled(!Pausierend),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.SKIP)
             .setLabel('Skip')
@@ -171,3 +171,4 @@ export function buildQueuePaginationRow(page, totalPages) {
 export function getQueuePageSize() {
     return QUEUE_PAGE_SIZE;
 }
+

@@ -1,12 +1,12 @@
 ﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder, MessageFlags } from 'discord.js';
-import { getWelcomeConfig, updateWelcomeConfig } from '../../utils/database.js';
+import { getWelcomeConfig, AktualisierenWelcomeConfig } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
 
-function createAutoroleInfoEmbed(description) {
+function ErstellenAutoroleInfoEmbed(description) {
     return new EmbedBuilder()
         .setColor(getColor('primary'))
         .setDescription(description)
@@ -62,10 +62,10 @@ export default {
 
             const guildConfig = await getGuildConfig(client, guild.id);
             const verificationEnabled = Boolean(guildConfig.verification?.enabled);
-            const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+            const autoVerifizierenEnabled = Boolean(guildConfig.verification?.autoVerifizieren?.enabled);
 
-            if (verificationEnabled || autoVerifyEnabled) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht add AutoRole while the verification system or AutoVerify is enabled. Disable those first.' });
+            if (verificationEnabled || autoVerifizierenEnabled) {
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht add AutoRole while the verification system or AutoVerifizieren is enabled. Disable those first.' });
             }
             
             if (role.position >= guild.members.me.roles.highest.position) {
@@ -83,15 +83,15 @@ export default {
                     return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Die Rolle ${role} is already set to be auto-assigned.` });
                 }
 
-                await updateWelcomeConfig(client, guild.id, {
+                await AktualisierenWelcomeConfig(client, guild.id, {
                     roleIds: [role.id]
                 });
 
                 logger.info(`[Autorole] Set single auto-role to ${role.name} (${role.id}) in ${guild.name} by ${interaction.user.tag}`);
-                await InteractionHelper.safeEditReply(interaction, {
-                    embeds: [createAutoroleInfoEmbed(
+                await InteractionHelper.safeBearbeitenReply(interaction, {
+                    embeds: [ErstellenAutoroleInfoEmbed(
                         currentRoleId
-                            ? `✅ Auto-role updated to ${role}. Only one auto-role is allowed.`
+                            ? `✅ Auto-role Aktualisierend to ${role}. Only one auto-role is allowed.`
                             : `✅ Auto-role set to ${role}.`
                     )],
                     flags: MessageFlags.Ephemeral
@@ -114,15 +114,15 @@ export default {
                     return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Die Rolle ${role} is not set to be auto-assigned.` });
                 }
 
-                const updatedRoles = existingRoles.filter(id => id !== role.id);
+                const AktualisierendRoles = existingRoles.filter(id => id !== role.id);
                 
-                await updateWelcomeConfig(client, guild.id, {
-                    roleIds: updatedRoles
+                await AktualisierenWelcomeConfig(client, guild.id, {
+                    roleIds: AktualisierendRoles
                 });
 
                 logger.info(`[Autorole] Removed role ${role.name} (${role.id}) from auto-assign in ${guild.name} by ${interaction.user.tag}`);
-                await InteractionHelper.safeEditReply(interaction, {
-                    embeds: [createAutoroleInfoEmbed(`✅ Removed ${role} from auto-assigned roles.`)],
+                await InteractionHelper.safeBearbeitenReply(interaction, {
+                    embeds: [ErstellenAutoroleInfoEmbed(`✅ Removed ${role} from auto-assigned roles.`)],
                     flags: MessageFlags.Ephemeral
                 });
             } catch (error) {
@@ -135,10 +135,10 @@ export default {
             try {
                 const guildConfig = await getGuildConfig(client, guild.id);
                 const verificationEnabled = Boolean(guildConfig.verification?.enabled);
-                const autoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+                const autoVerifizierenEnabled = Boolean(guildConfig.verification?.autoVerifizieren?.enabled);
                 const conflictSummary = [
                     verificationEnabled ? 'Verification system is enabled' : null,
-                    autoVerifyEnabled ? 'AutoVerify is enabled' : null
+                    autoVerifizierenEnabled ? 'AutoVerifizieren is enabled' : null
                 ].filter(Boolean).join('\n');
 
                 const config = await getWelcomeConfig(client, guild.id);
@@ -146,15 +146,15 @@ export default {
 
                 const singleRoleIds = autoRoles.length > 1 ? [autoRoles[0]] : autoRoles;
                 if (singleRoleIds.length !== autoRoles.length) {
-                    await updateWelcomeConfig(client, guild.id, {
+                    await AktualisierenWelcomeConfig(client, guild.id, {
                         roleIds: singleRoleIds
                     });
                     logger.info(`[Autorole] Trimmed auto-role list to one role in ${interaction.guild.name}`);
                 }
 
                 if (singleRoleIds.length === 0) {
-                    return InteractionHelper.safeEditReply(interaction, {
-                        embeds: [createAutoroleInfoEmbed(`ℹ️ No role is set to be auto-assigned.${conflictSummary ?`\n\n⚠️ Setup blockers:\n${conflictSummary}`: ''}`)],
+                    return InteractionHelper.safeBearbeitenReply(interaction, {
+                        embeds: [ErstellenAutoroleInfoEmbed(`ℹ️ No role is set to be auto-assigned.${conflictSummary ?`\n\n⚠️ Setup blockers:\n${conflictSummary}`: ''}`)],
                         flags: MessageFlags.Ephemeral
                     });
                 }
@@ -174,15 +174,15 @@ export default {
 
                 if (invalidRoleIds.length > 0) {
                     logger.info(`[Autorole] Cleaning up ${invalidRoleIds.length} invalid role(s) from guild ${interaction.guild.name}`);
-                    const updatedRoles = singleRoleIds.filter(id => !invalidRoleIds.includes(id));
-                    await updateWelcomeConfig(client, guild.id, {
-                        roleIds: updatedRoles
+                    const AktualisierendRoles = singleRoleIds.filter(id => !invalidRoleIds.includes(id));
+                    await AktualisierenWelcomeConfig(client, guild.id, {
+                        roleIds: AktualisierendRoles
                     });
                 }
 
                 if (validRoles.length === 0) {
-                    return InteractionHelper.safeEditReply(interaction, {
-                        embeds: [createAutoroleInfoEmbed(`ℹ️ No valid auto-role found. Any invalid role has been removed.${conflictSummary ?`\n\n⚠️ Setup blockers:\n${conflictSummary}`: ''}`)],
+                    return InteractionHelper.safeBearbeitenReply(interaction, {
+                        embeds: [ErstellenAutoroleInfoEmbed(`ℹ️ No valid auto-role found. Any invalid role has been removed.${conflictSummary ?`\n\n⚠️ Setup blockers:\n${conflictSummary}`: ''}`)],
                         flags: MessageFlags.Ephemeral
                     });
                 }
@@ -193,7 +193,7 @@ export default {
                     .setDescription(`${validRoles[0]}${conflictSummary ?`\n\n⚠️ Setup blockers:\n${conflictSummary}`: ''}`)
                     .setFooter({ text: 'Only one auto-role can be configured.' });
 
-                await InteractionHelper.safeEditReply(interaction, {
+                await InteractionHelper.safeBearbeitenReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral
                 });
@@ -205,4 +205,5 @@ export default {
         }
     },
 };
+
 

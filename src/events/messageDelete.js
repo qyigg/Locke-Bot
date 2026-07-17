@@ -1,13 +1,13 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
-import { getReactionRoleMessage, deleteReactionRoleMessage } from '../services/reactionRoleService.js';
+import { getReactionRoleMessage, LöschenReactionRoleMessage } from '../services/reactionRoleService.js';
 import { formatLogLine } from '../utils/logging/logEmbeds.js';
 
 const MAX_LOGGED_MESSAGE_CONTENT_LENGTH = 1024;
 
 export default {
-  name: Events.MessageDelete,
+  name: Events.MessageLöschen,
   once: false,
 
   async execute(message) {
@@ -17,14 +17,14 @@ export default {
       try {
         const reactionRoleData = await getReactionRoleMessage(message.client, message.guild.id, message.id);
         if (reactionRoleData) {
-          await deleteReactionRoleMessage(message.client, message.guild.id, message.id);
-          logger.info(`Cleaned up reaction role database entry for manually deleted message ${message.id} in guild ${message.guild.id}`);
+          await LöschenReactionRoleMessage(message.client, message.guild.id, message.id);
+          logger.info(`Cleaned up reaction role database entry for manually Löschend message ${message.id} in guild ${message.guild.id}`);
 
           try {
             await logEvent({
               client: message.client,
               guildId: message.guild.id,
-              eventType: EVENT_TYPES.REACTION_ROLE_DELETE,
+              eventType: EVENT_TYPES.REACTION_ROLE_Löschen,
               data: {
                 title: 'Reaction Role Removed',
                 lines: [
@@ -40,7 +40,7 @@ export default {
           }
         }
       } catch (reactionRoleCleanupError) {
-        logger.warn(`Failed to clean up reaction role data for deleted message ${message.id}:`, reactionRoleCleanupError);
+        logger.warn(`Failed to clean up reaction role data for Löschend message ${message.id}:`, reactionRoleCleanupError);
       }
 
       if (message.author?.bot) return;
@@ -49,7 +49,7 @@ export default {
         formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unbekannt'),
         formatLogLine('Message ID', `\`${message.id}\``),
         formatLogLine('Message author', message.author ? message.author.toString() : 'Unbekannt'),
-        formatLogLine('Message created', `<t:${Math.floor(message.createdTimestamp / 1000)}:R>`),
+        formatLogLine('Message Erstellend', `<t:${Math.floor(message.ErstellendTimestamp / 1000)}:R>`),
       ];
 
       let messageBody = null;
@@ -66,9 +66,9 @@ export default {
       await logEvent({
         client: message.client,
         guildId: message.guild.id,
-        eventType: EVENT_TYPES.MESSAGE_DELETE,
+        eventType: EVENT_TYPES.MESSAGE_Löschen,
         data: {
-          title: 'Message deleted',
+          title: 'Message Löschend',
           lines: metaLines,
           quoted: true,
           section: messageBody ? { title: 'Message', body: messageBody || '*(empty message)*' } : null,
@@ -78,7 +78,8 @@ export default {
       });
 
     } catch (error) {
-      logger.error('Error in messageDelete event:', error);
+      logger.error('Error in messageLöschen event:', error);
     }
   }
 };
+

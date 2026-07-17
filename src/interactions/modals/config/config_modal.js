@@ -34,7 +34,7 @@ function parseValue(key, rawValue) {
         return id;
     }
 
-    if (key === 'dmOnClose') {
+    if (key === 'dmOnSchließen') {
         if (['yes', 'true', 'enabled', 'enable'].includes(value.toLowerCase())) {
             return true;
         }
@@ -96,10 +96,10 @@ export default {
 
         try {
             const value = resolveModalValue(key, interaction);
-            await ConfigService.updateSetting(interaction.client, guildId, key, value, interaction.user.id);
+            await ConfigService.AktualisierenSetting(interaction.client, guildId, key, value, interaction.user.id);
 
             await interaction.reply({
-                embeds: [successEmbed('Configuration Updated', buildSuccessMessage(key, value, interaction.guild))],
+                embeds: [successEmbed('Configuration Aktualisierend', buildSuccessMessage(key, value, interaction.guild))],
                 flags: MessageFlags.Ephemeral,
             });
         } catch (error) {
@@ -108,5 +108,6 @@ export default {
         }
     },
 };
+
 
 

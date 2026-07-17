@@ -1,4 +1,4 @@
-import { MessageFlags } from 'discord.js';
+﻿import { MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
 import { handleInteractionError } from '../utils/errorHandler.js';
 import { getGuildMusicData } from '../services/music/playerStore.js';
@@ -7,8 +7,8 @@ import {
     buildQueueReply,
     destroyPlayerSession,
     setLoopMode,
-    applyPause,
-    applyResume,
+    applyPausieren,
+    applyFortsetzen,
 } from '../services/music/musicActions.js';
 import { canControlMusic, VOICE_CHANNEL_DENIAL } from '../services/music/permissions.js';
 import { refreshPlayerMessage } from '../services/music/playerHandler.js';
@@ -39,7 +39,7 @@ async function handleMusicButton(interaction, client) {
     const queuePaginationIds = [
         MUSIC_BUTTON_IDS.QUEUE_FIRST,
         MUSIC_BUTTON_IDS.QUEUE_PREV,
-        MUSIC_BUTTON_IDS.QUEUE_NEXT,
+        MUSIC_BUTTON_IDS.QUEUE_Nächste,
         MUSIC_BUTTON_IDS.QUEUE_LAST,
     ];
 
@@ -51,7 +51,7 @@ async function handleMusicButton(interaction, client) {
             return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
         }
 
-        await interaction.deferUpdate();
+        await interaction.deferAktualisieren();
         const payload = buildQueueReply(client, interaction.guild.id, guildData.queuePages.get(interaction.user.id) || 0);
         const totalPages = payload.totalPages;
         let page = payload.page;
@@ -63,7 +63,7 @@ async function handleMusicButton(interaction, client) {
             case MUSIC_BUTTON_IDS.QUEUE_PREV:
                 page = Math.max(0, page - 1);
                 break;
-            case MUSIC_BUTTON_IDS.QUEUE_NEXT:
+            case MUSIC_BUTTON_IDS.QUEUE_Nächste:
                 page = Math.min(totalPages - 1, page + 1);
                 break;
             case MUSIC_BUTTON_IDS.QUEUE_LAST:
@@ -74,10 +74,10 @@ async function handleMusicButton(interaction, client) {
         }
 
         guildData.queuePages.set(interaction.user.id, page);
-        const updated = buildQueueReply(client, interaction.guild.id, page);
-        return interaction.editReply({
-            embeds: updated.embeds,
-            components: updated.components,
+        const Aktualisierend = buildQueueReply(client, interaction.guild.id, page);
+        return interaction.BearbeitenReply({
+            embeds: Aktualisierend.embeds,
+            components: Aktualisierend.components,
         });
     }
 
@@ -89,19 +89,19 @@ async function handleMusicButton(interaction, client) {
         return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: VOICE_CHANNEL_DENIAL });
     }
 
-    await interaction.deferUpdate();
+    await interaction.deferAktualisieren();
 
     try {
         switch (customId) {
-            case MUSIC_BUTTON_IDS.PAUSE:
-                await applyPause(client, interaction.guild.id);
+            case MUSIC_BUTTON_IDS.Pausieren:
+                await applyPausieren(client, interaction.guild.id);
                 break;
-            case MUSIC_BUTTON_IDS.RESUME:
-                await applyResume(client, interaction.guild.id);
+            case MUSIC_BUTTON_IDS.Fortsetzen:
+                await applyFortsetzen(client, interaction.guild.id);
                 break;
             case MUSIC_BUTTON_IDS.SKIP:
                 // Under track-loop, stop() would replay the same track. Clear it so the
-                // skip advances; trackStart re-applies the stored loop to the next track.
+                // skip advances; trackStart re-applies the stored loop to the Nächste track.
                 if (player.loop === 'track') {
                     player.setLoop('none');
                 }
@@ -119,8 +119,8 @@ async function handleMusicButton(interaction, client) {
                 break;
             case MUSIC_BUTTON_IDS.LOOP: {
                 const guildDataLoop = getGuildMusicData(interaction.guild.id);
-                const next = guildDataLoop.loop === 'none' ? 'track' : guildDataLoop.loop === 'track' ? 'queue' : 'none';
-                await setLoopMode(client, interaction, next);
+                const Nächste = guildDataLoop.loop === 'none' ? 'track' : guildDataLoop.loop === 'track' ? 'queue' : 'none';
+                await setLoopMode(client, interaction, Nächste);
                 break;
             }
             case MUSIC_BUTTON_IDS.VOL_DOWN:
@@ -159,3 +159,4 @@ export const musicButtonHandler = {
 };
 
 export default musicButtonHandler;
+

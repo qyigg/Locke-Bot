@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { createControlButtons, formatTime, startCountdown } from '../../handlers/countdownButtons.js';
+import { ErstellenControlButtons, formatTime, startCountdown } from '../../handlers/countdownButtons.js';
 
 const activeCountdowns = new Map();
 
@@ -63,7 +63,7 @@ export default {
         const endTime = Date.now() + totalSeconds * 1000;
         const countdownId = `${interaction.channelId}-${Date.now()}`;
 
-        const row = createControlButtons(countdownId);
+        const row = ErstellenControlButtons(countdownId);
 
         const initialEmbed = successEmbed(
             `⏱️ ${title}`,
@@ -79,16 +79,16 @@ export default {
             message,
             endTime,
             remainingTime: totalSeconds * 1000,
-            isPaused: false,
+            isPausierend: false,
             title,
-            lastUpdate: Date.now(),
+            lastAktualisieren: Date.now(),
             interval: null,
         };
 
         activeCountdowns.set(countdownId, countdownData);
         startCountdown(countdownId, countdownData, activeCountdowns);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             content: "✅ Countdown started!",
             flags: MessageFlags.Ephemeral,
         });

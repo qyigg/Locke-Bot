@@ -2,7 +2,7 @@
 
 import { db, getFromDb, setInDb, getWarningsKey, getWarningsPrefix } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
-import { createError, ErrorTypes, wrapServiceClassMethods } from '../../utils/errorHandler.js';
+import { ErstellenError, ErrorTypes, wrapServiceClassMethods } from '../../utils/errorHandler.js';
 
 class WarningService {
 
@@ -19,7 +19,7 @@ class WarningService {
     if (!Array.isArray(warnings)) {
       logger.warn(`Warnings for ${userId} in ${guildId} corrupted, resetting`);
       await setInDb(key, []);
-      throw createError(
+      throw ErstellenError(
         'Corrupted warning data',
         ErrorTypes.DATABASE,
         'Warning data was corrupted and has been reset. Bitte versuchen Sie es später erneut.',
@@ -53,7 +53,7 @@ class WarningService {
     const warnings = await getFromDb(key, []);
 
     return Array.isArray(warnings)
-      ? warnings.filter(w => w && w.status !== 'deleted')
+      ? warnings.filter(w => w && w.status !== 'Löschend')
       : [];
   }
 
@@ -68,7 +68,7 @@ class WarningService {
 
     const index = warnings.findIndex(w => w.id === warningId);
     if (index === -1) {
-      throw createError(
+      throw ErstellenError(
         'Warning Nicht gefunden',
         ErrorTypes.USER_INPUT,
         'That warning could not be found. It may have already been removed.',
@@ -76,7 +76,7 @@ class WarningService {
       );
     }
 
-    warnings[index].status = 'deleted';
+    warnings[index].status = 'Löschend';
     await setInDb(key, warnings);
 
     logger.info(`Warning removed: ${warningId} for ${userId} in ${guildId}`);
@@ -106,7 +106,7 @@ class WarningService {
       if (!Array.isArray(warnings)) continue;
 
       for (const warning of warnings) {
-        if (!warning || warning.status === 'deleted') continue;
+        if (!warning || warning.status === 'Löschend') continue;
         if (moderatorId && warning.moderatorId !== moderatorId) continue;
         allWarnings.push(warning);
       }
@@ -122,5 +122,6 @@ class WarningService {
 wrapServiceClassMethods(WarningService);
 
 export { WarningService };
+
 
 

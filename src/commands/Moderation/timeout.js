@@ -99,7 +99,7 @@ export default {
             durationChoices.find((c) => c.value === durationMinutes)
                 ?.name || `${durationMinutes} minutes`;
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [
                 successEmbed(
                     `⏳ **Timed out** ${targetUser.tag} for ${durationDisplay}.`,
@@ -109,6 +109,7 @@ export default {
         });
     },
 };
+
 
 
 

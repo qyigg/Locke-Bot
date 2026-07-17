@@ -1,11 +1,11 @@
 ﻿import { PermissionFlagsBits } from 'discord.js';
-import { createEmbed, successEmbed } from '../../../utils/embeds.js';
-import { getServerCounters, saveServerCounters, updateCounter, getCounterEmoji, getCounterTypeLabel } from '../../../services/serverstatsService.js';
+import { ErstellenEmbed, successEmbed } from '../../../utils/embeds.js';
+import { getServerCounters, SpeichernServerCounters, AktualisierenCounter, getCounterEmoji, getCounterTypeLabel } from '../../../services/serverstatsService.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
-export async function handleUpdate(interaction, client) {
+export async function handleAktualisieren(interaction, client) {
     const guild = interaction.guild;
     const counterId = interaction.options.getString("counter-id");
     const newType = interaction.options.getString("type");
@@ -18,12 +18,12 @@ export async function handleUpdate(interaction, client) {
     }
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to update counters.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to Aktualisieren counters.' }).catch(logger.error);
         return;
     }
 
     if (!newType) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You must provide a new counter type to update.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You must provide a new counter type to Aktualisieren.' }).catch(logger.error);
         return;
     }
 
@@ -40,7 +40,7 @@ export async function handleUpdate(interaction, client) {
         const oldChannel = guild.channels.cache.get(counter.channelId);
 
         if (!oldChannel) {
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Der Kanal for this counter no longer exists. Du kannst nicht update a counter for a deleted channel.' }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Der Kanal for this counter no longer exists. Du kannst nicht Aktualisieren a counter for a Löschend channel.' }).catch(logger.error);
             return;
         }
 
@@ -48,7 +48,7 @@ export async function handleUpdate(interaction, client) {
             const existingTypeCounter = counters.find(c => c.type === newType && c.id !== counter.id);
             if (existingTypeCounter) {
                 const existingChannel = guild.channels.cache.get(existingTypeCounter.channelId);
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `A **${getCounterTypeLabel(newType)}** counter Existiert bereits for Dieser Server${existingChannel ? ` in ${existingChannel}` : ''}. Delete it first before reusing that type.` }).catch(logger.error);
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `A **${getCounterTypeLabel(newType)}** counter Existiert bereits for Dieser Server${existingChannel ? ` in ${existingChannel}` : ''}. Löschen it first before reusing that type.` }).catch(logger.error);
                 return;
             }
         }
@@ -56,25 +56,25 @@ export async function handleUpdate(interaction, client) {
         const oldType = counter.type;
 
         counter.type = newType;
-        counter.updatedAt = new Date().toISOString();
+        counter.AktualisierendAt = new Date().toISOString();
 
-        const saved = await saveServerCounters(client, guild.id, counters);
-        if (!saved) {
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to save updated counter data. Bitte versuchen Sie es später erneut.' }).catch(logger.error);
+        const Speichernd = await SpeichernServerCounters(client, guild.id, counters);
+        if (!Speichernd) {
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to Speichern Aktualisierend counter data. Bitte versuchen Sie es später erneut.' }).catch(logger.error);
             return;
         }
 
-        const updatedCounter = counters[counterIndex];
-        const updated = await updateCounter(client, guild, updatedCounter);
-        if (!updated) {
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Counter updated but failed to update channel name. The counter will update on the next scheduled run.' }).catch(logger.error);
+        const AktualisierendCounter = counters[counterIndex];
+        const Aktualisierend = await AktualisierenCounter(client, guild, AktualisierendCounter);
+        if (!Aktualisierend) {
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Counter Aktualisierend but failed to Aktualisieren channel name. The counter will Aktualisieren on the Nächste scheduled run.' }).catch(logger.error);
             return;
         }
 
-        const finalChannel = guild.channels.cache.get(updatedCounter.channelId);
+        const finalChannel = guild.channels.cache.get(AktualisierendCounter.channelId);
 
-        await InteractionHelper.safeEditReply(interaction, {
-            embeds: [successEmbed(`**Counter Erfolgreich aktualisiert!**\n\n**Counter ID:** \`${counterId}\`\n**Type Changed:** ${getCounterEmoji(oldType)} ${getCounterTypeLabel(oldType)} → ${getCounterEmoji(newType)} ${getCounterTypeLabel(newType)}\n\n**Current Settings:**\n**Type:** ${getCounterEmoji(updatedCounter.type)} ${getCounterTypeLabel(updatedCounter.type)}\n**Channel:** ${finalChannel}\n**Channel Name:** ${finalChannel.name}\n\nThe counter will automatically update every 15 minutes.`)]
+        await InteractionHelper.safeBearbeitenReply(interaction, {
+            embeds: [successEmbed(`**Counter Erfolgreich aktualisiert!**\n\n**Counter ID:** \`${counterId}\`\n**Type Changed:** ${getCounterEmoji(oldType)} ${getCounterTypeLabel(oldType)} → ${getCounterEmoji(newType)} ${getCounterTypeLabel(newType)}\n\n**Current Settings:**\n**Type:** ${getCounterEmoji(AktualisierendCounter.type)} ${getCounterTypeLabel(AktualisierendCounter.type)}\n**Channel:** ${finalChannel}\n**Channel Name:** ${finalChannel.name}\n\nThe counter will automatically Aktualisieren every 15 minutes.`)]
         }).catch(logger.error);
 
     } catch (error) {
@@ -82,5 +82,6 @@ export async function handleUpdate(interaction, client) {
         await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while updating the counter. Bitte versuchen Sie es später erneut.' }).catch(logger.error);
     }
 }
+
 
 

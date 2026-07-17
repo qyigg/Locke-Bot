@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { createEmbed } from '../../../utils/embeds.js';
+﻿import axios from 'axios';
+import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
 import { handleInteractionError, replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -33,7 +33,7 @@ export default {
             }
 
             const data = response.data[0];
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: data.word,
                 description: data.phonetic ? `*${data.phonetic}*` : '',
                 color: 'success'
@@ -62,7 +62,7 @@ export default {
 
             embed.setFooter({ text: 'Powered by Free Dictionary API' });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
 
             logger.info('Dictionary definition retrieved', {
                 userId: interaction.user.id,
@@ -92,3 +92,4 @@ export default {
         }
     },
 };
+

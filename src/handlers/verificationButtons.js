@@ -1,6 +1,6 @@
 ﻿import { MessageFlags } from 'discord.js';
 import { successEmbed } from '../utils/embeds.js';
-import { verifyUser } from '../services/verificationService.js';
+import { VerifizierenUser } from '../services/verificationService.js';
 import { handleInteractionError, replyUserError, ErrorTypes } from '../utils/errorHandler.js';
 import { logger } from '../utils/logger.js';
 import { InteractionHelper } from '../utils/interactionHelper.js';
@@ -16,13 +16,13 @@ export async function handleVerificationButton(interaction, client) {
         const guild = interaction.guild;
         const userId = interaction.user.id;
 
-        logger.debug('User clicked verify button', {
+        logger.debug('User clicked Verifizieren button', {
             guildId: guild.id,
             userId,
             userTag: interaction.user.tag
         });
 
-        const result = await verifyUser(client, guild.id, userId, {
+        const result = await VerifizierenUser(client, guild.id, userId, {
             source: 'button_click',
             moderatorId: null
         });
@@ -31,13 +31,13 @@ export async function handleVerificationButton(interaction, client) {
             return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Du bist bereits verifiziert und hast Zugriff auf alle Server-Kanäle.' });
         }
 
-        logger.info('User verified via button', {
+        logger.info('Benutzer verifiziert via button', {
             guildId: guild.id,
             userId,
             roleName: result.roleName
         });
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [successEmbed(
                 "✅ Verifizierung erfolgreich!",
                 `Du wurdest verifiziert und hast die Rolle **${result.roleName}** erhalten!\n\nDu hast jetzt Zugriff auf alle Server-Kanäle und Funktionen. Willkommen! 🎉`
@@ -54,12 +54,13 @@ export async function handleVerificationButton(interaction, client) {
         await handleInteractionError(
             interaction,
             error,
-            { command: 'verify_button', action: 'verification' }
+            { command: 'Verifizieren_button', action: 'verification' }
         );
     }
 }
 
 export default {
-    customId: "verify_user",
+    customId: "Verifizieren_user",
     execute: handleVerificationButton
 };
+

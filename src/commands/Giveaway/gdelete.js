@@ -2,13 +2,13 @@
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { getGuildGiveaways, deleteGiveaway } from '../../utils/giveaways.js';
+import { getGuildGiveaways, LöschenGiveaway } from '../../utils/giveaways.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
-        .setName("gdelete")
+        .setName("gLöschen")
         .setDescription(
             "Löscht eine Gewinnspielnachricht und entfernt sie aus der Datenbank.",
         )
@@ -64,10 +64,10 @@ export default {
             );
         }
 
-        let deletedMessage = false;
+        let LöschendMessage = false;
         let channelName = "Unknown Channel";
 
-        const tryDeleteFromChannel = async (channel) => {
+        const tryLöschenFromChannel = async (channel) => {
             if (!channel || !channel.isTextBased() || !channel.messages?.fetch) {
                 return false;
             }
@@ -77,36 +77,36 @@ export default {
                 return false;
             }
 
-            await message.delete();
+            await message.Löschen();
             channelName = channel.name || 'unknown-channel';
-            deletedMessage = true;
+            LöschendMessage = true;
             return true;
         };
 
         try {
             const channel = await interaction.client.channels.fetch(giveaway.channelId).catch(() => null);
-            if (await tryDeleteFromChannel(channel)) {
-                logger.debug(`Deleted giveaway message ${messageId} from channel ${channelName}`);
+            if (await tryLöschenFromChannel(channel)) {
+                logger.debug(`Löschend giveaway message ${messageId} from channel ${channelName}`);
             }
 
-            if (!deletedMessage && interaction.guild) {
+            if (!LöschendMessage && interaction.guild) {
                 const textChannels = interaction.guild.channels.cache.filter(
                     ch => ch.id !== giveaway.channelId && ch.isTextBased() && ch.messages?.fetch
                 );
 
                 for (const [, guildChannel] of textChannels) {
-                    const foundAndDeleted = await tryDeleteFromChannel(guildChannel).catch(() => false);
-                    if (foundAndDeleted) {
-                        logger.debug(`Deleted giveaway message ${messageId} via fallback lookup in #${channelName}`);
+                    const foundAndLöschend = await tryLöschenFromChannel(guildChannel).catch(() => false);
+                    if (foundAndLöschend) {
+                        logger.debug(`Löschend giveaway message ${messageId} via fallZurück lookup in #${channelName}`);
                         break;
                     }
                 }
             }
         } catch (error) {
-            logger.warn(`Could not delete giveaway message: ${error.message}`);
+            logger.warn(`Could not Löschen giveaway message: ${error.message}`);
         }
 
-        const removedFromDatabase = await deleteGiveaway(
+        const removedFromDatabase = await LöschenGiveaway(
             interaction.client,
             interaction.guildId,
             messageId,
@@ -114,15 +114,15 @@ export default {
 
         if (!removedFromDatabase) {
             throw new TitanBotError(
-                `Failed to delete giveaway from database: ${messageId}`,
+                `Failed to Löschen giveaway from database: ${messageId}`,
                 ErrorTypes.UNKNOWN,
                 'Das Gewinnspiel konnte nicht aus der Datenbank entfernt werden. Bitte versuchen Sie es erneut.',
                 { messageId, guildId: interaction.guildId }
             );
         }
 
-        const giveawaysAfterDelete = await getGuildGiveaways(interaction.client, interaction.guildId);
-        const stillExistsInDatabase = giveawaysAfterDelete.some(g => g.messageId === messageId);
+        const giveawaysAfterLöschen = await getGuildGiveaways(interaction.client, interaction.guildId);
+        const stillExistsInDatabase = giveawaysAfterLöschen.some(g => g.messageId === messageId);
 
         if (stillExistsInDatabase) {
             throw new TitanBotError(
@@ -133,7 +133,7 @@ export default {
             );
         }
 
-        const statusMsg = deletedMessage
+        const statusMsg = LöschendMessage
             ? `und die Nachricht wurde aus #${channelName} gelöscht`
             : `aber die Nachricht wurde bereits gelöscht oder der Kanal war nicht erreichbar.`;
 
@@ -147,15 +147,15 @@ export default {
                 ? 'Dieses Gewinnspiel endete ohne gültige Gewinner.'
                 : 'Kein Gewinner wurde vor dem Löschen ausgewählt.';
 
-        logger.info(`Giveaway deleted: ${messageId} in ${channelName}`);
+        logger.info(`Giveaway Löschend: ${messageId} in ${channelName}`);
 
         try {
             await logEvent({
                 client: interaction.client,
                 guildId: interaction.guildId,
-                eventType: EVENT_TYPES.GIVEAWAY_DELETE,
+                eventType: EVENT_TYPES.GIVEAWAY_Löschen,
                 data: {
-                    description: `Giveaway deleted: ${giveaway.prize}`,
+                    description: `Giveaway Löschend: ${giveaway.prize}`,
                     channelId: giveaway.channelId,
                     userId: interaction.user.id,
                     fields: [
@@ -187,3 +187,4 @@ export default {
         });
     },
 };
+

@@ -1,8 +1,8 @@
 ﻿import { EmbedBuilder } from 'discord.js';
-import { getTicketData, saveTicketData } from '../../../utils/database.js';
+import { getTicketData, SpeichernTicketData } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 import { getColor } from '../../../config/bot.js';
-import { logTicketFeedback } from '../../../utils/ticket/ticketLogging.js';
+import { logTicketFeedZurück } from '../../../utils/ticket/ticketLogging.js';
 
 const STAR_LABELS = {
     '1': '⭐ 1 — Poor',
@@ -13,18 +13,18 @@ const STAR_LABELS = {
 };
 
 export default {
-    name: 'ticket_feedback',
+    name: 'ticket_feedZurück',
 
     async execute(interaction, client, args) {
         
         const [guildId, channelId] = args;
 
         if (!guildId || !channelId) {
-            await interaction.update({
+            await interaction.Aktualisieren({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('⚠️ Invalid Feedback Link')
-                        .setDescription('This feedback link appears to be malformed.')
+                        .setTitle('⚠️ Invalid FeedZurück Link')
+                        .setDescription('This feedZurück link appears to be malformed.')
                         .setColor(getColor('error')),
                 ],
                 components: [],
@@ -36,11 +36,11 @@ export default {
         try {
             ticketData = await getTicketData(guildId, channelId);
         } catch (err) {
-            logger.warn('ticketFeedback: failed to load ticket data', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurück: failed to load ticket data', { guildId, channelId, error: err.message });
         }
 
         if (!ticketData) {
-            await interaction.update({
+            await interaction.Aktualisieren({
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('⚠️ Ticket Nicht gefunden')
@@ -57,7 +57,7 @@ export default {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('❌ Not Allowed')
-                        .setDescription('Only the ticket creator can submit feedback for this ticket.')
+                        .setDescription('Only the ticket creator can Absenden feedZurück for this ticket.')
                         .setColor(getColor('error')),
                 ],
                 ephemeral: true,
@@ -65,12 +65,12 @@ export default {
             return;
         }
 
-        if (ticketData.feedback?.rating) {
-            await interaction.update({
+        if (ticketData.feedZurück?.rating) {
+            await interaction.Aktualisieren({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('✅ Already Submitted')
-                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for Dein feedback!`)
+                        .setTitle('✅ Already Absendented')
+                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedZurück.rating)]}**.\nThank you for Dein feedZurück!`)
                         .setColor(getColor('success')),
                 ],
                 components: [],
@@ -82,17 +82,17 @@ export default {
         const ratingLabel = STAR_LABELS[String(rating)] ?? `${rating} stars`;
 
         try {
-            ticketData.feedback = {
+            ticketData.feedZurück = {
                 rating,
-                submittedAt: new Date().toISOString(),
+                AbsendentedAt: new Date().toISOString(),
             };
-            await saveTicketData(guildId, channelId, ticketData);
+            await SpeichernTicketData(guildId, channelId, ticketData);
         } catch (err) {
-            logger.error('ticketFeedback: failed to save feedback', { guildId, channelId, rating, error: err.message });
+            logger.error('ticketFeedZurück: failed to Speichern feedZurück', { guildId, channelId, rating, error: err.message });
         }
 
         try {
-            await logTicketFeedback({
+            await logTicketFeedZurück({
                 client: interaction.client,
                 guildId,
                 ticketNumber: ticketData.id,
@@ -101,22 +101,22 @@ export default {
                 rating,
             });
         } catch (err) {
-            logger.warn('ticketFeedback: failed to send log', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurück: failed to send log', { guildId, channelId, error: err.message });
         }
 
         const thankYouEmbed = new EmbedBuilder()
-            .setTitle('✅ Thanks for Dein feedback!')
-            .setDescription(`You rated Dein support experience **${ratingLabel}**.\n\nDein feedback has been recorded and helps us improve!`)
+            .setTitle('✅ Thanks for Dein feedZurück!')
+            .setDescription(`You rated Dein support experience **${ratingLabel}**.\n\nDein feedZurück has been recorded and helps us improve!`)
             .setColor(getColor('success'))
             .setFooter({ text: 'Thank you for using our support system.' })
             .setTimestamp();
 
-        await interaction.update({
+        await interaction.Aktualisieren({
             embeds: [thankYouEmbed],
             components: [],
         });
 
-        logger.info('Ticket feedback submitted', {
+        logger.info('Ticket feedZurück Absendented', {
             guildId,
             channelId,
             userId: interaction.user.id,
@@ -124,4 +124,5 @@ export default {
         });
     },
 };
+
 

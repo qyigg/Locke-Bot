@@ -5,8 +5,8 @@ import { logger } from './logger.js';
 import { TitanBotError, ErrorTypes } from './errorHandler.js';
 import { unwrapReplitData } from './database.js';
 import { 
-    createGiveawayEmbed as createGiveawayEmbedService,
-    createGiveawayButtons as createGiveawayButtonsService,
+    ErstellenGiveawayEmbed as ErstellenGiveawayEmbedService,
+    ErstellenGiveawayButtons as ErstellenGiveawayButtonsService,
     selectWinners as selectWinnersService
 } from '../services/giveawayService.js';
 
@@ -47,10 +47,10 @@ export async function getGuildGiveaways(client, guildId) {
     }
 }
 
-export async function saveGiveaway(client, guildId, giveawayData) {
+export async function SpeichernGiveaway(client, guildId, giveawayData) {
     try {
         if (!client.db) {
-            logger.warn('Database not available for saveGiveaway');
+            logger.warn('Database not available for SpeichernGiveaway');
             return false;
         }
 
@@ -58,7 +58,7 @@ export async function saveGiveaway(client, guildId, giveawayData) {
             throw new TitanBotError(
                 'Invalid giveaway data: missing messageId',
                 ErrorTypes.VALIDATION,
-                'Cannot save giveaway without a message ID.',
+                'Cannot Speichern giveaway without a message ID.',
                 { giveawayData }
             );
         }
@@ -71,7 +71,7 @@ export async function saveGiveaway(client, guildId, giveawayData) {
         
         await client.db.set(key, giveawayMap);
         
-        logger.debug(`Saved giveaway ${giveawayData.messageId} in guild ${guildId}`);
+        logger.debug(`Speichernd giveaway ${giveawayData.messageId} in guild ${guildId}`);
         return true;
     } catch (error) {
         logger.error(`Error saving giveaway in guild ${guildId}:`, error);
@@ -82,10 +82,10 @@ export async function saveGiveaway(client, guildId, giveawayData) {
     }
 }
 
-export async function deleteGiveaway(client, guildId, messageId) {
+export async function LöschenGiveaway(client, guildId, messageId) {
     try {
         if (!client.db) {
-            logger.warn('Database not available for deleteGiveaway');
+            logger.warn('Database not available for LöschenGiveaway');
             return false;
         }
 
@@ -93,7 +93,7 @@ export async function deleteGiveaway(client, guildId, messageId) {
             throw new TitanBotError(
                 'Missing messageId parameter',
                 ErrorTypes.VALIDATION,
-                'Cannot delete giveaway without a message ID.',
+                'Cannot Löschen giveaway without a message ID.',
                 { messageId }
             );
         }
@@ -108,10 +108,10 @@ export async function deleteGiveaway(client, guildId, messageId) {
             return false;
         }
         
-        delete giveawayMap[messageId];
+        Löschen giveawayMap[messageId];
         await client.db.set(key, giveawayMap);
         
-        logger.debug(`Deleted giveaway ${messageId} from guild ${guildId}`);
+        logger.debug(`Löschend giveaway ${messageId} from guild ${guildId}`);
         return true;
     } catch (error) {
         logger.error(`Error deleting giveaway ${messageId} in guild ${guildId}:`, error);
@@ -122,9 +122,9 @@ export async function deleteGiveaway(client, guildId, messageId) {
     }
 }
 
-export function createGiveawayEmbed(giveaway, status, winners = []) {
+export function ErstellenGiveawayEmbed(giveaway, status, winners = []) {
     try {
-        return createGiveawayEmbedService(giveaway, status, winners);
+        return ErstellenGiveawayEmbedService(giveaway, status, winners);
     } catch (error) {
         logger.error('Error creating giveaway embed:', error);
         throw error;
@@ -155,12 +155,12 @@ export function pickWinners(entrants, count) {
 }
 
 export function giveawayEmbed(giveaway, status, winners = []) {
-    return createGiveawayEmbed(giveaway, status, winners);
+    return ErstellenGiveawayEmbed(giveaway, status, winners);
 }
 
 export function giveawayButtons(ended = false) {
     try {
-        return createGiveawayButtonsService(ended);
+        return ErstellenGiveawayButtonsService(ended);
     } catch (error) {
         logger.error('Error creating giveaway buttons:', error);
         
@@ -191,3 +191,4 @@ export function giveawayButtons(ended = false) {
         return row;
     }
 }
+

@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -22,8 +22,8 @@ export default {
 
       const uptimeStr = `${days}t ${hours}h ${minutes}m ${seconds}s`;
 
-      await InteractionHelper.safeEditReply(interaction, {
-        embeds: [createEmbed({ 
+      await InteractionHelper.safeBearbeitenReply(interaction, {
+        embeds: [ErstellenEmbed({ 
           title: "System-Betriebszeit", 
           description: `\`\`\`${uptimeStr}\`\`\`` 
         })],
@@ -32,8 +32,8 @@ export default {
       logger.error('Uptime-Befehlsfehler:', error);
       
       try {
-        return await InteractionHelper.safeEditReply(interaction, {
-          embeds: [createEmbed({ title: 'Systemfehler', description: 'Konnte Betriebszeit nicht berechnen.', color: 'error' })],
+        return await InteractionHelper.safeBearbeitenReply(interaction, {
+          embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Betriebszeit nicht berechnen.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
       } catch (replyError) {

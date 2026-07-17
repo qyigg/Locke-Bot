@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+﻿import { EmbedBuilder } from 'discord.js';
 import { getUserBirthday } from '../../../services/birthdayService.js';
 import { logger } from '../../../utils/logger.js';
 
@@ -20,7 +20,7 @@ export default {
                 .setDescription(targetUser.id === interaction.user.id 
                     ? "Du hast deinen Geburtstag noch nicht eingestellt. Verwende `/geburtstag set` um ihn hinzuzufügen!"
                     : `${targetUser.username} hat seinen Geburtstag noch nicht eingestellt.`);
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [embed]
             });
         }
@@ -30,7 +30,7 @@ export default {
             .setTitle('Geburtstagsangaben')
             .setDescription(`**Datum:** ${birthdayData.monthName} ${birthdayData.day}\n**Benutzer:** ${targetUser.toString()}`);
 
-        await InteractionHelper.safeEditReply(interaction, {
+        await InteractionHelper.safeBearbeitenReply(interaction, {
             embeds: [embed]
         });
 

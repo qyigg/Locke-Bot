@@ -1,9 +1,9 @@
 ﻿import { botConfig, getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
-import { createEmbed, infoEmbed, successEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, infoEmbed, successEmbed } from '../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../services/config/guildConfig.js';
-import { withErrorHandling, createError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
-import { removeVerification, verifyUser } from '../../services/verificationService.js';
+import { withErrorHandling, ErstellenError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
+import { removeVerification, VerifizierenUser } from '../../services/verificationService.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getWelcomeConfig } from '../../utils/database.js';
@@ -68,7 +68,7 @@ export default {
             const guild = interaction.guild;
 
             if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-                throw createError(
+                throw ErstellenError(
                     'Missing ManageGuild permission for verification admin subcommand',
                     ErrorTypes.PERMISSION,
                     'You need the **Manage Server** permission to use this verification subcommand.',
@@ -84,7 +84,7 @@ export default {
                 case "dashboard":
                     return await verificationDashboard.execute(interaction, config, client);
                 default:
-                    throw createError(
+                    throw ErstellenError(
                         `Unknown subcommand: ${subcommand}`,
                         ErrorTypes.VALIDATION,
                         "Please select a valid subcommand.",
@@ -105,10 +105,10 @@ async function handleSetup(interaction, guild, client) {
     const botMember = guild.members.me;
 
     if (!botMember) {
-        throw createError(
+        throw ErstellenError(
             'Bot member Nicht gefunden in guild cache',
             ErrorTypes.CONFIGURATION,
-            'I could not verify my permissions in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
+            'I could not Verifizieren my permissions in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
             { guildId: guild.id }
         );
     }
@@ -123,7 +123,7 @@ async function handleSetup(interaction, guild, client) {
     );
     
     if (missingChannelPerms.length > 0) {
-        throw createError(
+        throw ErstellenError(
             `Missing channel permissions: ${missingChannelPerms.join(', ')}`,
             ErrorTypes.PERMISSION,
             'I need **View Channel**, **Send Messages**, and **Embed Links** in the verification channel.',
@@ -132,7 +132,7 @@ async function handleSetup(interaction, guild, client) {
     }
 
     if (!botMember.permissions.has(PermissionFlagsBits.ManageRoles)) {
-        throw createError(
+        throw ErstellenError(
             "Missing ManageRoles permission",
             ErrorTypes.PERMISSION,
             "I need the 'Manage Roles' permission to give verified roles.",
@@ -141,7 +141,7 @@ async function handleSetup(interaction, guild, client) {
     }
 
     if (verifiedRole.id === guild.id || verifiedRole.managed) {
-        throw createError(
+        throw ErstellenError(
             'Invalid verified role selected',
             ErrorTypes.VALIDATION,
             'Please choose a normal assignable role (not @everyone or an integration-managed role).',
@@ -151,7 +151,7 @@ async function handleSetup(interaction, guild, client) {
 
     const botRole = botMember.roles.highest;
     if (verifiedRole.position >= botRole.position) {
-        throw createError(
+        throw ErstellenError(
             "Role hierarchy error",
             ErrorTypes.PERMISSION,
             "The verified role must be below my highest role in the server role hierarchy.",
@@ -161,17 +161,17 @@ async function handleSetup(interaction, guild, client) {
 
     const guildConfig = await getGuildConfig(client, guild.id);
     const welcomeConfig = await getWelcomeConfig(client, guild.id);
-    const hasAutoVerifyEnabled = Boolean(guildConfig.verification?.autoVerify?.enabled);
+    const hasAutoVerifizierenEnabled = Boolean(guildConfig.verification?.autoVerifizieren?.enabled);
     const hasAutoRoleConfigured = Boolean(guildConfig.autoRole) || (Array.isArray(welcomeConfig.roleIds) && welcomeConfig.roleIds.length > 0);
 
-    if (hasAutoVerifyEnabled || hasAutoRoleConfigured) {
-        throw createError(
+    if (hasAutoVerifizierenEnabled || hasAutoRoleConfigured) {
+        throw ErstellenError(
             'Verification setup blocked by conflicting onboarding system',
             ErrorTypes.CONFIGURATION,
-            'Du kannst nicht enable the verification system while **AutoVerify** or **AutoRole** is configured. Disable those first.',
+            'Du kannst nicht enable the verification system while **AutoVerifizieren** or **AutoRole** is configured. Disable those first.',
             {
                 guildId: guild.id,
-                hasAutoVerifyEnabled,
+                hasAutoVerifizierenEnabled,
                 hasAutoRoleConfigured,
                 expected: true,
                 suppressErrorLog: true
@@ -181,29 +181,29 @@ async function handleSetup(interaction, guild, client) {
 
     await InteractionHelper.safeDefer(interaction);
 
-    const verifyEmbed = createEmbed({
+    const VerifizierenEmbed = ErstellenEmbed({
         title: "Server-Verifizierung",
         description: message,
         color: getColor('success')
     });
 
-    const verifyButton = new ActionRowBuilder().addComponents(
+    const VerifizierenButton = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId("verify_user")
+            .setCustomId("Verifizieren_user")
             .setLabel(buttonText)
             .setStyle(ButtonStyle.Success)
             .setEmoji("✅")
     );
 
-    const verifyMessage = await verificationChannel.send({
-        embeds: [verifyEmbed],
-        components: [verifyButton]
+    const VerifizierenMessage = await verificationChannel.send({
+        embeds: [VerifizierenEmbed],
+        components: [VerifizierenButton]
     });
 
     guildConfig.verification = {
         enabled: true,
         channelId: verificationChannel.id,
-        messageId: verifyMessage.id,
+        messageId: VerifizierenMessage.id,
         roleId: verifiedRole.id,
         message: message,
         buttonText: buttonText
@@ -211,9 +211,9 @@ async function handleSetup(interaction, guild, client) {
 
     await setGuildConfig(client, guild.id, guildConfig);
 
-    await InteractionHelper.safeEditReply(interaction, {
+    await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [successEmbed(
-            'Verification System Updated',
+            'Verification System Aktualisierend',
             [
                 `Channel: ${verificationChannel}`,
                 `Verified Role: ${verifiedRole}`,
@@ -248,5 +248,6 @@ async function handleRemove(interaction, guild, client) {
         embeds: [successEmbed('Verification Removed', `Verification removed from ${targetUser.tag}.`)]
     });
 }
+
 
 

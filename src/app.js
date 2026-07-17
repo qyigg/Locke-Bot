@@ -7,7 +7,7 @@ import cron from 'node-cron';
 import config from './config/application.js';
 import { initializeDatabase } from './utils/database.js';
 import { getGuildConfig } from './services/config/guildConfig.js';
-import { getServerCounters, saveServerCounters, updateCounter } from './services/serverstatsService.js';
+import { getServerCounters, SpeichernServerCounters, AktualisierenCounter } from './services/serverstatsService.js';
 import { logger, startupLog, shutdownLog } from './utils/logger.js';
 import { checkBirthdays } from './services/birthdayService.js';
 import { checkGiveaways } from './services/giveawayService.js';
@@ -116,7 +116,7 @@ class TitanBot extends Client {
     const host = process.env.WEB_HOST || '0.0.0.0';
     const corsOrigin = this.config.api?.cors?.origin || '*';
     
-    app.use((req, res, next) => {
+    app.use((req, res, Nächste) => {
       const allowedOrigins = Array.isArray(corsOrigin) ? corsOrigin : [corsOrigin];
       const origin = req.headers.origin;
       
@@ -129,14 +129,14 @@ class TitanBot extends Client {
       if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
       }
-      next();
+      Nächste();
     });
 
     const requestCounts = new Map();
     const windowMs = this.config.api?.rateLimit?.windowMs || 60000;
     const maxRequests = this.config.api?.rateLimit?.max || 100;
     
-    app.use((req, res, next) => {
+    app.use((req, res, Nächste) => {
       const ip = req.ip;
       const now = Date.now();
       const windowStart = now - windowMs;
@@ -153,7 +153,7 @@ class TitanBot extends Client {
       
       times.push(now);
       requestCounts.set(ip, times);
-      next();
+      Nächste();
     });
 
     app.get('/health', (req, res) => {
@@ -225,9 +225,9 @@ class TitanBot extends Client {
         const errorMessage = error?.message || 'Unknown server error';
 
         if (!hasStartedListening && errorCode === 'EADDRINUSE' && attempt < maxPortRetryAttempts) {
-          const nextPort = port + 1;
-        startupLog(`Port ${port} wird bereits verwendet. Versuche Port ${nextPort}...`);
-          setTimeout(() => startServer(nextPort, attempt + 1), 250);
+          const NächstePort = port + 1;
+        startupLog(`Port ${port} wird bereits verwendet. Versuche Port ${NächstePort}...`);
+          setTimeout(() => startServer(NächstePort, attempt + 1), 250);
           return;
         }
 
@@ -250,12 +250,12 @@ class TitanBot extends Client {
   setupCronJobs() {
     cron.schedule('0 6 * * *', runSafeTask('birthday_check', () => checkBirthdays(this)));
     cron.schedule('* * * * *', runSafeTask('giveaway_check', () => checkGiveaways(this)));
-    cron.schedule('*/15 * * * *', runSafeTask('counter_update', () => this.updateAllCounters()));
+    cron.schedule('*/15 * * * *', runSafeTask('counter_Aktualisieren', () => this.AktualisierenAllCounters()));
   }
 
-  async updateAllCounters() {
+  async AktualisierenAllCounters() {
     if (!this.db) {
-      logger.warn('Datenbank nicht verfügbar für Counter-Updates');
+      logger.warn('Datenbank nicht verfügbar für Counter-Aktualisierens');
       return;
     }
     
@@ -270,7 +270,7 @@ class TitanBot extends Client {
             const channel = guild.channels.cache.get(counter.channelId);
             if (channel) {
               validCounters.push(counter);
-              await updateCounter(this, guild, counter);
+              await AktualisierenCounter(this, guild, counter);
             } else {
               orphanedCounters.push(counter);
               logger.info(`Verwaiste Counter ${counter.id} werden entfernt (Typ: ${counter.type}, gelöschter Kanal: ${counter.channelId}) aus Guild ${guildId}`);
@@ -278,14 +278,14 @@ class TitanBot extends Client {
           }
         }
         
-        // Save cleaned counters if any were orphaned
-        // Save cleaned counters if any were orphaned
+        // Speichern cleaned counters if any were orphaned
+        // Speichern cleaned counters if any were orphaned
         if (orphanedCounters.length > 0) {
-          await saveServerCounters(this, guildId, validCounters);
-          logger.info(`${orphanedCounters.length} verwaiste Counter wurden aus Guild ${guildId} während des geplanten Updates bereinigt`);
+          await SpeichernServerCounters(this, guildId, validCounters);
+          logger.info(`${orphanedCounters.length} verwaiste Counter wurden aus Guild ${guildId} während des geplanten Aktualisierens bereinigt`);
         }
       } catch (error) {
-        logger.error(`Fehler beim Update von Countern für Guild ${guildId}:`, error);
+        logger.error(`Fehler beim Aktualisieren von Countern für Guild ${guildId}:`, error);
       }
     }
   }
@@ -348,12 +348,12 @@ class TitanBot extends Client {
 
       if (this.webServer) {
         logger.info('Webserver wird geschlossen...');
-        await new Promise((resolve) => this.webServer.close(resolve));
+        await new Promise((resolve) => this.webServer.Schließen(resolve));
         logger.info('✅ Webserver geschlossen');
       }
 
-      // Close database connection
-      // Close database connection
+      // Schließen database connection
+      // Schließen database connection
       if (this.db && this.db.db) {
         logger.info('Datenbankverbindung wird geschlossen...');
         try {

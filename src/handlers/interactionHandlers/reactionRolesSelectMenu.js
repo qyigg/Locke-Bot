@@ -1,7 +1,7 @@
 ﻿import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { handleInteractionError, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getColor } from '../../config/bot.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 import { getReactionRoleMessage } from '../../services/reactionRoleService.js';
@@ -12,7 +12,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         if (!deferSuccess) return;
 
         if (!interaction.inGuild() || !interaction.guild || !interaction.member) {
-            throw createError(
+            throw ErstellenError(
                 'Reaction role interaction used outside a guild context',
                 ErrorTypes.VALIDATION,
                 'This reaction role menu can only be used inside a server.',
@@ -26,7 +26,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
 
         if (!reactionRoleData) {
             logger.warn(`Reaction role data Nicht gefunden for message ${interaction.message.id} in guild ${interaction.guildId}`);
-            return interaction.editReply({
+            return interaction.BearbeitenReply({
                 embeds: [
                     new EmbedBuilder()
                         .setDescription('❌ This reaction role message is no longer active.')
@@ -41,16 +41,16 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         const me = interaction.guild.members.me ?? await interaction.guild.members.fetchMe().catch(() => null);
 
         if (!me) {
-            throw createError(
+            throw ErstellenError(
                 'Unable to fetch bot member for permission validation',
                 ErrorTypes.PERMISSION,
-                'I could not verify my server permissions. Bitte versuchen Sie es später erneut.',
+                'I could not Verifizieren my server permissions. Bitte versuchen Sie es später erneut.',
                 { guildId: interaction.guildId }
             );
         }
 
         if (!me.permissions.has('ManageRoles')) {
-            throw createError(
+            throw ErstellenError(
                 'Bot missing ManageRoles permission',
                 ErrorTypes.PERMISSION,
                 'I do not have permission to manage roles in Dieser Server.',
@@ -158,16 +158,16 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             .setColor(getColor('success'))
             .setTimestamp();
 
-        await interaction.editReply({ embeds: [responseEmbed] });
+        await interaction.BearbeitenReply({ embeds: [responseEmbed] });
 
         if (addedRoles.length > 0 || removedRoles.length > 0) {
             try {
                 await logEvent({
                     client,
                     guildId: interaction.guildId,
-                    eventType: EVENT_TYPES.REACTION_ROLE_UPDATE,
+                    eventType: EVENT_TYPES.REACTION_ROLE_Aktualisieren,
                     data: {
-                        description: `Reaction roles updated for ${member.user.tag}`,
+                        description: `Reaction roles Aktualisierend for ${member.user.tag}`,
                         userId: member.user.id,
                         channelId: interaction.channelId,
                         fields: [
@@ -190,11 +190,11 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
                     }
                 });
             } catch (logError) {
-                logger.warn('Failed to log reaction role update:', logError);
+                logger.warn('Failed to log reaction role Aktualisieren:', logError);
             }
         }
 
-        logger.info(`Reaction roles updated for ${member.user.tag}: +${addedRoles.length}, -${removedRoles.length}`);
+        logger.info(`Reaction roles Aktualisierend for ${member.user.tag}: +${addedRoles.length}, -${removedRoles.length}`);
 
     } catch (error) {
         await handleInteractionError(interaction, error, {
@@ -203,5 +203,6 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         });
     }
 }
+
 
 

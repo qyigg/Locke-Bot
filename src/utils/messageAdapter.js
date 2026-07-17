@@ -1,7 +1,7 @@
-// messageAdapter.js
+﻿// messageAdapter.js
 
 import { mapArgumentsToOptions } from './prefixParser.js';
-import { createEmbed } from './embeds.js';
+import { ErstellenEmbed } from './embeds.js';
 import { handleInteractionError } from './errorHandler.js';
 import { logger } from './logger.js';
 import { InteractionHelper } from './interactionHelper.js';
@@ -52,7 +52,7 @@ export function resolvePrefixAccessKey(commandData, args) {
   return commandName;
 }
 
-export function createMockInteraction(message, commandData, args) {
+export function ErstellenMockInteraction(message, commandData, args) {
   const options = mapArgumentsToOptions(args, commandData);
   const commandStartTime = Date.now();
 
@@ -132,8 +132,8 @@ export function createMockInteraction(message, commandData, args) {
       })),
     },
 
-    createdTimestamp: message.createdTimestamp,
-    createdAt: message.createdAt,
+    ErstellendTimestamp: message.ErstellendTimestamp,
+    ErstellendAt: message.ErstellendAt,
     _commandStartTime: commandStartTime,
     _isPrefixCommand: true,
 
@@ -143,13 +143,13 @@ export function createMockInteraction(message, commandData, args) {
     replied: false,
     _replyMessage: null,
 
-    deleteReply: async () => {
+    LöschenReply: async () => {
       const replyMessage = coordinator.getReplyMessage();
       if (replyMessage?.deletable) {
-        return replyMessage.delete();
+        return replyMessage.Löschen();
       }
       if (message.deletable) {
-        return message.delete();
+        return message.Löschen();
       }
     },
 
@@ -162,7 +162,7 @@ export function createMockInteraction(message, commandData, args) {
   const coordinator = ResponseCoordinator.attach(mockInteraction, { message });
 
   mockInteraction.reply = (payload) => coordinator.respond(payload);
-  mockInteraction.editReply = (payload) => coordinator.edit(payload);
+  mockInteraction.BearbeitenReply = (payload) => coordinator.Bearbeiten(payload);
   mockInteraction.followUp = (payload) => coordinator.followUp(payload);
   mockInteraction.deferReply = () => coordinator.deferLocal();
 
@@ -189,7 +189,7 @@ export function supportsPrefixExecution(command) {
 }
 
 export async function executePrefixCommand(command, message, args, client, prefixOverride = null, guildConfig = null) {
-  const mockInteraction = createMockInteraction(message, command.data, args);
+  const mockInteraction = ErstellenMockInteraction(message, command.data, args);
   const coordinator = mockInteraction._responseCoordinator;
   const prefix = prefixOverride || getCommandPrefix();
 
@@ -221,3 +221,4 @@ export async function executePrefixCommand(command, message, args, client, prefi
     });
   }
 }
+

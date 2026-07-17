@@ -29,7 +29,7 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
                     : 'An unexpected error occurred while updating the configuration.';
 
             if (!componentInteraction.replied && !componentInteraction.deferred) {
-                await componentInteraction.deferUpdate().catch(() => {});
+                await componentInteraction.deferAktualisieren().catch(() => {});
             }
 
             await replyUserError(componentInteraction, {
@@ -55,7 +55,7 @@ export async function startDashboardSession({
     onButton,
     onTimeout,
 }) {
-    await InteractionHelper.safeEditReply(interaction, { embeds, components, flags });
+    await InteractionHelper.safeBearbeitenReply(interaction, { embeds, components, flags });
 
     const replyMessage = await interaction.fetchReply().catch(() => null);
     const replyMessageId = replyMessage?.id;
@@ -67,7 +67,7 @@ export async function startDashboardSession({
     const collectors = [];
 
     if (selectMenuId && onSelect) {
-        const selectCollector = interaction.channel.createMessageComponentCollector({
+        const selectCollector = interaction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.StringSelect,
             filter: (i) => belongsToDashboard(i) && i.customId === selectMenuId,
             time: timeoutMs,
@@ -78,7 +78,7 @@ export async function startDashboardSession({
     }
 
     if (buttonMatcher && onButton) {
-        const buttonCollector = interaction.channel.createMessageComponentCollector({
+        const buttonCollector = interaction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: (i) => belongsToDashboard(i) && matchesCustomId(i.customId, buttonMatcher),
             time: timeoutMs,
@@ -103,11 +103,11 @@ export async function startDashboardSession({
             const timeoutEmbed = new EmbedBuilder()
                 .setTitle('Dashboard Timed Out')
                 .setDescription(
-                    'This dashboard has been closed due to inactivity. Please run the command again to continue.',
+                    'This dashboard has been Schließend due to inactivity. Please run the command again to continue.',
                 )
                 .setColor(getColor('error'));
 
-            await InteractionHelper.safeEditReply(interaction, {
+            await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [timeoutEmbed],
                 components: [],
                 flags,
@@ -117,5 +117,6 @@ export async function startDashboardSession({
 
     return { stop: stopAll, replyMessageId };
 }
+
 
 

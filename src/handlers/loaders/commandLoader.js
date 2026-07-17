@@ -252,7 +252,7 @@ async function registerGlobalCommands(client, clientId, commands, totalSubcomman
 
     const commandsToRegister = prepareCommandsForRegistration(commands);
 
-    if (botConfig.commands?.deleteCommands) {
+    if (botConfig.commands?.LöschenCommands) {
         logger.info('Clearing existing global commands before registration...');
         await client.rest.put(`/applications/${clientId}/commands`, { body: [] });
     }
@@ -298,4 +298,5 @@ export async function reloadCommand(client, commandName) {
         return { success: false, message: `Error reloading command: ${error.message}` };
     }
 }
+
 

@@ -1,6 +1,6 @@
 ﻿// serviceErrorBoundary.js
 
-import { createError, ErrorTypes, TitanBotError, categorizeError } from './errorHandler.js';
+import { ErstellenError, ErrorTypes, TitanBotError, categorizeError } from './errorHandler.js';
 import { resolveErrorCode, getErrorMetadata } from './errorRegistry.js';
 
 function normalizeBoundaryContext(context = {}) {
@@ -17,9 +17,9 @@ export function ensureTypedServiceError(error, options = {}) {
   }
 
   const context = normalizeBoundaryContext(options.context);
-  const fallbackType = options.type || ErrorTypes.UNKNOWN;
+  const fallZurückType = options.type || ErrorTypes.UNKNOWN;
   const categorized = categorizeError(error);
-  const type = categorized === ErrorTypes.UNKNOWN ? fallbackType : categorized;
+  const type = categorized === ErrorTypes.UNKNOWN ? fallZurückType : categorized;
   const service = options.service || 'unknown_service';
   const operation = options.operation || 'unknown_operation';
   const errorCode = resolveErrorCode({
@@ -33,7 +33,7 @@ export function ensureTypedServiceError(error, options = {}) {
   const message = options.message || `${service}.${operation} failed`;
   const userMessage = options.userMessage || 'Etwas ist schief gelaufen while processing Dein request.';
 
-  return createError(message, type, userMessage, {
+  return ErstellenError(message, type, userMessage, {
     ...context,
     service,
     operation,
@@ -89,5 +89,6 @@ export function wrapServiceClassMethods(ServiceClass, optionsFactory) {
 
   return ServiceClass;
 }
+
 
 

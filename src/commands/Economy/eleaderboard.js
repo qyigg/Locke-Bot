@@ -1,6 +1,6 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getEconomyPrefix } from '../../utils/database.js';
@@ -28,7 +28,7 @@ export default {
             }
 
             if (allKeys.length === 0) {
-                throw createError(
+                throw ErstellenError(
                     "No economy data found",
                     ErrorTypes.VALIDATION,
                     "No economy data found for Dieser Server."
@@ -78,12 +78,13 @@ export default {
                 ? leaderboardEntries.join("\n")
                 : "No economy data is available for Dieser Server yet.";
 
-            const embed = createEmbed({
+            const embed = ErstellenEmbed({
                 title: `Wirtschafts-Rangliste`,
                 description,
                 footer: `Dein Rang: ${userRank > 0 ?`#${userRank}`: "Keine Ranglistendaten verfügbar"}`,
             });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'eleaderboard' })
 };
+

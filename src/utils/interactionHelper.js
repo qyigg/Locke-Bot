@@ -1,8 +1,8 @@
-// interactionHelper.js
+﻿// interactionHelper.js
 
 import { logger } from './logger.js';
 import { MessageFlags } from 'discord.js';
-import { handleInteractionError, createError, ErrorTypes } from './errorHandler.js';
+import { handleInteractionError, ErstellenError, ErrorTypes } from './errorHandler.js';
 import { ResponseCoordinator } from './responseCoordinator.js';
 
 const INTERACTION_TIMEOUT_MS = 15 * 60 * 1000;
@@ -13,7 +13,7 @@ function isInteractionUnavailableError(error) {
     return INTERACTION_UNAVAILABLE_CODES.has(error?.code);
 }
 
-function sanitizeEditReplyOptions(options = {}) {
+function sanitizeBearbeitenReplyOptions(options = {}) {
     if (!options || typeof options !== 'object') {
         return options;
     }
@@ -37,10 +37,10 @@ export class InteractionHelper {
         }
 
         const originalReply = interaction.reply?.bind(interaction);
-        const originalEditReply = interaction.editReply?.bind(interaction);
+        const originalBearbeitenReply = interaction.BearbeitenReply?.bind(interaction);
         const originalFollowUp = interaction.followUp?.bind(interaction);
 
-        if (!originalReply || !originalEditReply || !originalFollowUp) {
+        if (!originalReply || !originalBearbeitenReply || !originalFollowUp) {
             return;
         }
 
@@ -59,9 +59,9 @@ export class InteractionHelper {
 
             if (interaction.deferred && !interaction.replied) {
                 if (coordinator && interaction._isPrefixCommand) {
-                    return coordinator.edit(sanitizeEditReplyOptions(options));
+                    return coordinator.Bearbeiten(sanitizeBearbeitenReplyOptions(options));
                 }
-                return await originalEditReply(sanitizeEditReplyOptions(options));
+                return await originalBearbeitenReply(sanitizeBearbeitenReplyOptions(options));
             }
 
             if (coordinator && interaction._isPrefixCommand) {
@@ -79,7 +79,7 @@ export class InteractionHelper {
 
         if (!interaction.user || typeof interaction.user !== 'object') return false;
 
-        if (interaction.createdTimestamp && (Date.now() - interaction.createdTimestamp) > INTERACTION_TIMEOUT_MS) {
+        if (interaction.ErstellendTimestamp && (Date.now() - interaction.ErstellendTimestamp) > INTERACTION_TIMEOUT_MS) {
             return false;
         }
 
@@ -139,7 +139,7 @@ export class InteractionHelper {
         }
     }
 
-    static async safeEditReply(interaction, options) {
+    static async safeBearbeitenReply(interaction, options) {
         try {
             const coordinator = this.getCoordinator(interaction);
             if (coordinator?.isUsageFinalized()) {
@@ -147,37 +147,37 @@ export class InteractionHelper {
             }
 
             if (!this.isInteractionValid(interaction)) {
-                logger.warn(`Interaction ${interaction.id} has expired before edit, ignoring`);
+                logger.warn(`Interaction ${interaction.id} has expired before Bearbeiten, ignoring`);
                 return false;
             }
 
             if (coordinator && (interaction._isPrefixCommand || coordinator.getReplyMessage())) {
-                await coordinator.edit(sanitizeEditReplyOptions(options));
+                await coordinator.Bearbeiten(sanitizeBearbeitenReplyOptions(options));
                 return true;
             }
 
             if (!interaction.replied && !interaction.deferred) {
-                logger.debug(`Interaction ${interaction.id} not deferred, using reply fallback instead of edit`);
+                logger.debug(`Interaction ${interaction.id} not deferred, using reply fallZurück instead of Bearbeiten`);
                 return await this.safeReply(interaction, options);
             }
 
-            await interaction.editReply(sanitizeEditReplyOptions(options));
+            await interaction.BearbeitenReply(sanitizeBearbeitenReplyOptions(options));
             return true;
         } catch (error) {
             if (isInteractionUnavailableError(error)) {
-                logger.warn(`Interaction ${interaction.id} unavailable during edit:`, error.message);
+                logger.warn(`Interaction ${interaction.id} unavailable during Bearbeiten:`, error.message);
                 return false;
             }
             if (error.code === 40060) {
-                logger.warn(`Interaction ${interaction.id} already acknowledged during edit:`, error.message);
+                logger.warn(`Interaction ${interaction.id} already acknowledged during Bearbeiten:`, error.message);
                 return false;
             }
             if (error.name === 'InteractionNotReplied' || error.message.includes('not been sent or deferred')) {
-                logger.debug(`Interaction ${interaction.id} not replied, using reply fallback instead of edit:`, error.message);
+                logger.debug(`Interaction ${interaction.id} not replied, using reply fallZurück instead of Bearbeiten:`, error.message);
                 return await this.safeReply(interaction, options);
             }
             if (error.code === 10008) {
-                logger.debug(`Interaction ${interaction.id} reply message deleted, using followUp fallback`);
+                logger.debug(`Interaction ${interaction.id} reply message Löschend, using followUp fallZurück`);
                 try {
                     await interaction.followUp(options);
                     return true;
@@ -186,11 +186,11 @@ export class InteractionHelper {
                         logger.warn(`Interaction ${interaction.id} unavailable during followUp:`, followUpError.message);
                         return false;
                     }
-                    logger.error('Failed to follow up after deleted reply:', followUpError);
+                    logger.error('Failed to follow up after Löschend reply:', followUpError);
                     return false;
                 }
             }
-            logger.error('Failed to edit reply:', error);
+            logger.error('Failed to Bearbeiten reply:', error);
             return false;
         }
     }
@@ -209,7 +209,7 @@ export class InteractionHelper {
 
             if (coordinator && (interaction._isPrefixCommand || coordinator.hasResponded())) {
                 if (coordinator.hasResponded()) {
-                    await coordinator.edit(sanitizeEditReplyOptions(options));
+                    await coordinator.Bearbeiten(sanitizeBearbeitenReplyOptions(options));
                 } else {
                     await coordinator.respond(options);
                 }
@@ -217,7 +217,7 @@ export class InteractionHelper {
             }
 
             if (interaction.deferred && !interaction.replied) {
-                await interaction.editReply(sanitizeEditReplyOptions(options));
+                await interaction.BearbeitenReply(sanitizeBearbeitenReplyOptions(options));
                 return true;
             }
 
@@ -304,7 +304,7 @@ export class InteractionHelper {
             }
 
             const errorToHandle = typeof errorEmbed === 'string'
-                ? createError(error.message || 'Command failed', ErrorTypes.UNKNOWN, errorEmbed, { expected: true })
+                ? ErstellenError(error.message || 'Command failed', ErrorTypes.UNKNOWN, errorEmbed, { expected: true })
                 : error;
 
             await handleInteractionError(interaction, errorToHandle, { source: 'interactionHelper.safeExecute' });
@@ -319,7 +319,7 @@ export class InteractionHelper {
 
         if (interaction._isPrefixCommand) {
             if (coordinator?.hasResponded()) {
-                return await coordinator.edit(sanitizeEditReplyOptions(options));
+                return await coordinator.Bearbeiten(sanitizeBearbeitenReplyOptions(options));
             }
             return await coordinator?.respond(options) ?? this.safeReply(interaction, options);
         }
@@ -330,7 +330,7 @@ export class InteractionHelper {
         }
 
         if (interaction.deferred) {
-            return await this.safeEditReply(interaction, options);
+            return await this.safeBearbeitenReply(interaction, options);
         }
 
         return await this.safeReply(interaction, options);
@@ -351,3 +351,4 @@ export function withSafeExecuteDecorator(target, propertyName, descriptor) {
 
     return descriptor;
 }
+

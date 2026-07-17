@@ -1,5 +1,5 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
+import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -192,7 +192,7 @@ export default {
                 );
                 embed.setColor(getColor('success'));
 
-                await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
 
             } catch (error) {
                 logger.error(`Base conversion error to ${toName}:`, error);
@@ -224,7 +224,7 @@ export default {
             );
             embed.setColor(getColor('primary'));
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
         }
     },
 };

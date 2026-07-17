@@ -1,4 +1,4 @@
-import loggingButtonsHandler from '../../../handlers/loggingButtons.js';
+﻿import loggingButtonsHandler from '../../../handlers/loggingButtons.js';
 
 export default [
   {
@@ -10,7 +10,7 @@ export default [
     execute: loggingButtonsHandler.execute,
   },
   {
-    name: 'log_dash_back',
+    name: 'log_dash_Zurück',
     execute: loggingButtonsHandler.execute,
   },
   {
@@ -22,3 +22,4 @@ export default [
     execute: loggingButtonsHandler.execute,
   },
 ];
+

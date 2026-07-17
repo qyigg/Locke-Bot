@@ -4,7 +4,7 @@ import { logger } from '../utils/logger.js';
 import { TitanBotError, ErrorTypes, handleInteractionError, replyUserError } from '../utils/errorHandler.js';
 import { 
     getGuildGiveaways, 
-    saveGiveaway, 
+    SpeichernGiveaway, 
     isGiveawayEnded 
 } from '../utils/giveaways.js';
 import { Mutex } from '../utils/mutex.js';
@@ -12,8 +12,8 @@ import {
     selectWinners,
     isUserRateLimited,
     recordUserInteraction,
-    createGiveawayEmbed,
-    createGiveawayButtons
+    ErstellenGiveawayEmbed,
+    ErstellenGiveawayButtons
 } from '../services/giveawayService.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 
@@ -59,16 +59,16 @@ export const giveawayJoinHandler = {
                 participants.push(userId);
                 giveaway.participants = participants;
 
-                await saveGiveaway(client, interaction.guildId, giveaway);
+                await SpeichernGiveaway(client, interaction.guildId, giveaway);
 
                 logger.debug(`User ${interaction.user.tag} joined giveaway ${interaction.message.id}`);
 
-                const updatedEmbed = createGiveawayEmbed(giveaway, 'active');
-                const updatedRow = createGiveawayButtons(false);
+                const AktualisierendEmbed = ErstellenGiveawayEmbed(giveaway, 'active');
+                const AktualisierendRow = ErstellenGiveawayButtons(false);
 
-                await interaction.message.edit({
-                    embeds: [updatedEmbed],
-                    components: [updatedRow]
+                await interaction.message.Bearbeiten({
+                    embeds: [AktualisierendEmbed],
+                    components: [AktualisierendRow]
                 });
 
                 await interaction.reply({
@@ -140,17 +140,17 @@ export const giveawayEndHandler = {
             giveaway.endedAt = new Date().toISOString();
             giveaway.endedBy = interaction.user.id;
 
-            await saveGiveaway(client, interaction.guildId, giveaway);
+            await SpeichernGiveaway(client, interaction.guildId, giveaway);
 
             logger.info(`Giveaway ended via button by ${interaction.user.tag}: ${interaction.message.id}`);
 
-            const updatedEmbed = createGiveawayEmbed(giveaway, 'ended', winners);
-            const updatedRow = createGiveawayButtons(true);
+            const AktualisierendEmbed = ErstellenGiveawayEmbed(giveaway, 'ended', winners);
+            const AktualisierendRow = ErstellenGiveawayButtons(true);
 
-            await interaction.message.edit({
+            await interaction.message.Bearbeiten({
                 content: '🎉 **GIVEAWAY ENDED** 🎉',
-                embeds: [updatedEmbed],
-                components: [updatedRow]
+                embeds: [AktualisierendEmbed],
+                components: [AktualisierendRow]
             });
 
             try {
@@ -264,17 +264,17 @@ export const giveawayRerollHandler = {
             giveaway.rerolledAt = new Date().toISOString();
             giveaway.rerolledBy = interaction.user.id;
 
-            await saveGiveaway(client, interaction.guildId, giveaway);
+            await SpeichernGiveaway(client, interaction.guildId, giveaway);
 
             logger.info(`Giveaway rerolled via button by ${interaction.user.tag}: ${interaction.message.id}`);
 
-            const updatedEmbed = createGiveawayEmbed(giveaway, 'reroll', newWinners);
-            const updatedRow = createGiveawayButtons(true);
+            const AktualisierendEmbed = ErstellenGiveawayEmbed(giveaway, 'reroll', newWinners);
+            const AktualisierendRow = ErstellenGiveawayButtons(true);
 
-            await interaction.message.edit({
+            await interaction.message.Bearbeiten({
                 content: '🔄 **GIVEAWAY REROLLED** 🔄',
-                embeds: [updatedEmbed],
-                components: [updatedRow]
+                embeds: [AktualisierendEmbed],
+                components: [AktualisierendRow]
             });
 
             try {
@@ -383,5 +383,6 @@ export const giveawayViewHandler = {
         }
     }
 };
+
 
 

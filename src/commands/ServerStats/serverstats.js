@@ -1,12 +1,12 @@
 ﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, ChannelType } from 'discord.js';
-import { createEmbed, successEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
-import { handleCreate } from './modules/serverstats_create.js';
+import { handleErstellen } from './modules/serverstats_Erstellen.js';
 import { handleList } from './modules/serverstats_list.js';
-import { handleUpdate } from './modules/serverstats_update.js';
-import { handleDelete } from './modules/serverstats_delete.js';
+import { handleAktualisieren } from './modules/serverstats_Aktualisieren.js';
+import { handleLöschen } from './modules/serverstats_Löschen.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -17,8 +17,8 @@ export default {
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
         .addSubcommand(subcommand =>
             subcommand
-                .setName("create")
-                .setDescription("Create a new statistics tracker channel in a category")
+                .setName("Erstellen")
+                .setDescription("Erstellen a new statistics tracker channel in a category")
                 .addStringOption(option =>
                     option
                         .setName("type")
@@ -33,7 +33,7 @@ export default {
                 .addStringOption(option =>
                     option
                         .setName("channel_type")
-                        .setDescription("Der Kanal type to create for this tracker")
+                        .setDescription("Der Kanal type to Erstellen for this tracker")
                         .setRequired(true)
                         .addChoices(
                             { name: "voice channel (recommended)", value: "voice" },
@@ -43,7 +43,7 @@ export default {
                 .addChannelOption(option =>
                     option
                         .setName("category")
-                        .setDescription("The category where the statistics tracker channel will be created")
+                        .setDescription("The category where the statistics tracker channel will be Erstellend")
                         .setRequired(true)
                         .addChannelTypes(ChannelType.GuildCategory)
                 )
@@ -55,12 +55,12 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName("update")
-                .setDescription("Update an existing statistics tracker")
+                .setName("Aktualisieren")
+                .setDescription("Aktualisieren an existing statistics tracker")
                 .addStringOption(option =>
                     option
                         .setName("counter-id")
-                        .setDescription("The ID of the tracker to update")
+                        .setDescription("The ID of the tracker to Aktualisieren")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
@@ -77,12 +77,12 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName("delete")
-                .setDescription("Delete an existing statistics tracker")
+                .setName("Löschen")
+                .setDescription("Löschen an existing statistics tracker")
                 .addStringOption(option =>
                     option
                         .setName("counter-id")
-                        .setDescription("The ID of the tracker to delete")
+                        .setDescription("The ID of the tracker to Löschen")
                         .setRequired(true)
                 )
         ),
@@ -91,20 +91,21 @@ export default {
         const subcommand = interaction.options.getSubcommand();
 
         switch (subcommand) {
-            case "create":
-                await handleCreate(interaction, client);
+            case "Erstellen":
+                await handleErstellen(interaction, client);
                 break;
             case "list":
                 await handleList(interaction, client);
                 break;
-            case "update":
-                await handleUpdate(interaction, client);
+            case "Aktualisieren":
+                await handleAktualisieren(interaction, client);
                 break;
-            case "delete":
-                await handleDelete(interaction, client);
+            case "Löschen":
+                await handleLöschen(interaction, client);
                 break;
             default:
                 await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Unknown subcommand.' });
         }
     }
 };
+

@@ -116,7 +116,7 @@ function buildDashboardEmbed(state) {
         .setTitle('Embed Builder — Control Panel')
         .setDescription(lines.join('\n'))
         .setColor(getColor('info'))
-        .setFooter({ text: 'The preview above updates live · Closes after 5 min of inactivity' });
+        .setFooter({ text: 'The preview above Aktualisierens live · Schließens after 5 min of inactivity' });
 }
 
 function buildMainMenu(state) {
@@ -125,9 +125,9 @@ function buildMainMenu(state) {
         .setPlaceholder('Choose an action...')
         .addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel('Edit Content')
+                .setLabel('Bearbeiten Content')
                 .setDescription('Set the title and description')
-                .setValue('edit_content')
+                .setValue('Bearbeiten_content')
                 .setEmoji('✏️'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Set Color')
@@ -159,13 +159,13 @@ function buildMainMenu(state) {
     if (state.fields.length > 0) {
         select.addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel('Edit Field')
+                .setLabel('Bearbeiten Field')
                 .setDescription('Modify the name, value, or inline setting of a field')
-                .setValue('edit_field')
+                .setValue('Bearbeiten_field')
                 .setEmoji('📝'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Remove Field')
-                .setDescription('Delete a field from the embed')
+                .setDescription('Löschen a field from the embed')
                 .setValue('remove_field')
                 .setEmoji('➖'),
         );
@@ -208,16 +208,16 @@ function buildMainMenu(state) {
 }
 
 async function refreshDashboard(interaction, state) {
-    return await InteractionHelper.safeEditReply(interaction, {
+    return await InteractionHelper.safeBearbeitenReply(interaction, {
         embeds: [buildPreviewEmbed(state), buildDashboardEmbed(state)],
         components: [new ActionRowBuilder().addComponents(buildMainMenu(state))],
     });
 }
 
-async function handleEditContent(selectInteraction, rootInteraction, state) {
+async function handleBearbeitenContent(selectInteraction, rootInteraction, state) {
     const modal = new ModalBuilder()
         .setCustomId('eb_content')
-        .setTitle('Edit Content')
+        .setTitle('Bearbeiten Content')
         .addComponents(
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
@@ -244,25 +244,25 @@ async function handleEditContent(selectInteraction, rootInteraction, state) {
     const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
-    const submitted = await selectInteraction
-        .awaitModalSubmit({
+    const Absendented = await selectInteraction
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_content' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
         .catch(() => null);
 
-    if (!submitted) return;
+    if (!Absendented) return;
 
-    await submitted.deferUpdate().catch(() => {});
+    await Absendented.deferAktualisieren().catch(() => {});
 
-    state.title       = submitted.fields.getTextInputValue('eb_title').trim()       || null;
-    state.description = submitted.fields.getTextInputValue('eb_description').trim() || null;
+    state.title       = Absendented.fields.getTextInputValue('eb_title').trim()       || null;
+    state.description = Absendented.fields.getTextInputValue('eb_description').trim() || null;
 
     await refreshDashboard(rootInteraction, state);
 }
 
 async function handleSetColor(selectInteraction, rootInteraction, state) {
-    await selectInteraction.deferUpdate().catch(() => {});
+    await selectInteraction.deferAktualisieren().catch(() => {});
 
     const colorSelect = new StringSelectMenuBuilder()
         .setCustomId('eb_color_pick')
@@ -290,7 +290,7 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
         flags: MessageFlags.Ephemeral,
     });
 
-    const colorCollector = rootInteraction.channel.createMessageComponentCollector({
+    const colorCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_color_pick',
@@ -322,19 +322,19 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
             const shown = await InteractionHelper.safeShowModal(colorInter, hexModal);
             if (!shown) return;
 
-            const hexSubmit = await colorInter
-                .awaitModalSubmit({
+            const hexAbsenden = await colorInter
+                .awaitModalAbsenden({
                     filter: i =>
                         i.customId === 'eb_custom_hex' && i.user.id === colorInter.user.id,
                     time: 60_000,
                 })
                 .catch(() => null);
 
-            if (!hexSubmit) return;
+            if (!hexAbsenden) return;
 
-            const hex = hexSubmit.fields.getTextInputValue('hex_value').trim();
+            const hex = hexAbsenden.fields.getTextInputValue('hex_value').trim();
             if (!isValidHex(hex)) {
-                await replyUserError(hexSubmit, {
+                await replyUserError(hexAbsenden, {
                     type: ErrorTypes.USER_INPUT,
                     message: `\`${hex}\` is not a valid hex color. Use the format \`#RRGGBB\` (e.g. \`#5865F2\`).`,
                 });
@@ -342,10 +342,10 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
             }
 
             state.color = hex;
-            await hexSubmit.deferUpdate().catch(() => {});
+            await hexAbsenden.deferAktualisieren().catch(() => {});
         } else {
             state.color = picked;
-            await colorInter.deferUpdate().catch(() => {});
+            await colorInter.deferAktualisieren().catch(() => {});
         }
 
         await refreshDashboard(rootInteraction, state);
@@ -393,28 +393,28 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
     const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
-    const submitted = await selectInteraction
-        .awaitModalSubmit({
+    const Absendented = await selectInteraction
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_author' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
         .catch(() => null);
 
-    if (!submitted) return;
+    if (!Absendented) return;
 
-    const name    = submitted.fields.getTextInputValue('author_name').trim();
-    const iconUrl = submitted.fields.getTextInputValue('author_icon').trim();
-    const url     = submitted.fields.getTextInputValue('author_url').trim();
+    const name    = Absendented.fields.getTextInputValue('author_name').trim();
+    const iconUrl = Absendented.fields.getTextInputValue('author_icon').trim();
+    const url     = Absendented.fields.getTextInputValue('author_url').trim();
 
     if (iconUrl && !isValidUrl(iconUrl)) {
-        await replyUserError(submitted, {
+        await replyUserError(Absendented, {
             type: ErrorTypes.USER_INPUT,
             message: 'Author icon URL must be a valid `https://` URL.',
         });
         return;
     }
     if (url && !isValidUrl(url)) {
-        await replyUserError(submitted, {
+        await replyUserError(Absendented, {
             type: ErrorTypes.USER_INPUT,
             message: 'Author link URL must be a valid `https://` URL.',
         });
@@ -423,7 +423,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
 
     state.author = name ? { name, iconUrl: iconUrl || null, url: url || null } : null;
 
-    await submitted.deferUpdate().catch(() => {});
+    await Absendented.deferAktualisieren().catch(() => {});
     await refreshDashboard(rootInteraction, state);
 }
 
@@ -456,20 +456,20 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
     const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
-    const submitted = await selectInteraction
-        .awaitModalSubmit({
+    const Absendented = await selectInteraction
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_footer' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
         .catch(() => null);
 
-    if (!submitted) return;
+    if (!Absendented) return;
 
-    const text    = submitted.fields.getTextInputValue('footer_text').trim();
-    const iconUrl = submitted.fields.getTextInputValue('footer_icon').trim();
+    const text    = Absendented.fields.getTextInputValue('footer_text').trim();
+    const iconUrl = Absendented.fields.getTextInputValue('footer_icon').trim();
 
     if (iconUrl && !isValidUrl(iconUrl)) {
-        await replyUserError(submitted, {
+        await replyUserError(Absendented, {
             type: ErrorTypes.USER_INPUT,
             message: 'Footer icon URL must be a valid `https://` URL.',
         });
@@ -478,12 +478,12 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
 
     state.footer = text ? { text, iconUrl: iconUrl || null } : null;
 
-    await submitted.deferUpdate().catch(() => {});
+    await Absendented.deferAktualisieren().catch(() => {});
     await refreshDashboard(rootInteraction, state);
 }
 
 async function handleSetImages(selectInteraction, rootInteraction, state) {
-    await selectInteraction.deferUpdate().catch(() => {});
+    await selectInteraction.deferAktualisieren().catch(() => {});
 
     const imageSelect = new StringSelectMenuBuilder()
         .setCustomId('eb_image_pick')
@@ -526,7 +526,7 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
         flags: MessageFlags.Ephemeral,
     });
 
-    const imgMenuCollector = rootInteraction.channel.createMessageComponentCollector({
+    const imgMenuCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_image_pick',
@@ -540,13 +540,13 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 
         if (pick === 'clear_thumbnail') {
             state.thumbnail = null;
-            await imgInter.deferUpdate();
+            await imgInter.deferAktualisieren();
             await refreshDashboard(rootInteraction, state);
             return;
         }
         if (pick === 'clear_image') {
             state.image = null;
-            await imgInter.deferUpdate();
+            await imgInter.deferAktualisieren();
             await refreshDashboard(rootInteraction, state);
             return;
         }
@@ -571,19 +571,19 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
         const shown = await InteractionHelper.safeShowModal(imgInter, urlModal);
         if (!shown) return;
 
-        const submitted = await imgInter
-            .awaitModalSubmit({
+        const Absendented = await imgInter
+            .awaitModalAbsenden({
                 filter: i =>
                     i.customId === 'eb_image_url' && i.user.id === imgInter.user.id,
                 time: 60_000,
             })
             .catch(() => null);
 
-        if (!submitted) return;
+        if (!Absendented) return;
 
-        const url = submitted.fields.getTextInputValue('image_url').trim();
+        const url = Absendented.fields.getTextInputValue('image_url').trim();
         if (!isValidUrl(url)) {
-            await replyUserError(submitted, {
+            await replyUserError(Absendented, {
                 type: ErrorTypes.USER_INPUT,
                 message: 'Image URL must be a valid `https://` link to a publicly accessible image.',
             });
@@ -593,7 +593,7 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
         if (isThumb) state.thumbnail = url;
         else         state.image     = url;
 
-        await submitted.deferUpdate().catch(() => {});
+        await Absendented.deferAktualisieren().catch(() => {});
         await refreshDashboard(rootInteraction, state);
         } catch (error) {
             logger.warn('Embed builder image picker interaction failed:', error.message);
@@ -603,7 +603,7 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 
 async function handleAddField(selectInteraction, rootInteraction, state) {
     if (state.fields.length >= MAX_FIELDS) {
-        await selectInteraction.deferUpdate();
+        await selectInteraction.deferAktualisieren();
         await replyUserError(selectInteraction, {
             type: ErrorTypes.VALIDATION,
             message: `Embeds can have a maximum of ${MAX_FIELDS} fields.`,
@@ -654,31 +654,31 @@ async function handleAddField(selectInteraction, rootInteraction, state) {
     const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
-    const submitted = await selectInteraction
-        .awaitModalSubmit({
+    const Absendented = await selectInteraction
+        .awaitModalAbsenden({
             filter: i => i.customId === 'eb_add_field' && i.user.id === selectInteraction.user.id,
             time: 120_000,
         })
         .catch(() => null);
 
-    if (!submitted) return;
+    if (!Absendented) return;
 
-    const name     = submitted.fields.getTextInputValue('field_name').trim();
-    const value    = submitted.fields.getTextInputValue('field_value').trim();
-    const inline   = submitted.fields.getRadioGroup('field_inline') === 'yes';
+    const name     = Absendented.fields.getTextInputValue('field_name').trim();
+    const value    = Absendented.fields.getTextInputValue('field_value').trim();
+    const inline   = Absendented.fields.getRadioGroup('field_inline') === 'yes';
 
     state.fields.push({ name, value, inline });
 
-    await submitted.deferUpdate().catch(() => {});
+    await Absendented.deferAktualisieren().catch(() => {});
     await refreshDashboard(rootInteraction, state);
 }
 
-async function handleEditField(selectInteraction, rootInteraction, state) {
-    await selectInteraction.deferUpdate();
+async function handleBearbeitenField(selectInteraction, rootInteraction, state) {
+    await selectInteraction.deferAktualisieren();
 
     const pickSelect = new StringSelectMenuBuilder()
-        .setCustomId('eb_edit_field_pick')
-        .setPlaceholder('Select a field to edit...')
+        .setCustomId('eb_Bearbeiten_field_pick')
+        .setPlaceholder('Select a field to Bearbeiten...')
         .addOptions(
             state.fields.slice(0, 25).map((f, i) =>
                 new StringSelectMenuOptionBuilder()
@@ -694,7 +694,7 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
     await selectInteraction.followUp({
         embeds: [
             new EmbedBuilder()
-                .setTitle('Edit Field')
+                .setTitle('Bearbeiten Field')
                 .setDescription('Select the field you want to modify.')
                 .setColor(getColor('info')),
         ],
@@ -702,10 +702,10 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
         flags: MessageFlags.Ephemeral,
     });
 
-    const pickCollector = rootInteraction.channel.createMessageComponentCollector({
+    const pickCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
-            i.user.id === selectInteraction.user.id && i.customId === 'eb_edit_field_pick',
+            i.user.id === selectInteraction.user.id && i.customId === 'eb_Bearbeiten_field_pick',
         time: 60_000,
         max: 1,
     });
@@ -714,13 +714,13 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
         try {
         const idx   = parseInt(pickInter.values[0], 10);
         const field = state.fields[idx];
-        if (!field) { await pickInter.deferUpdate(); return; }
+        if (!field) { await pickInter.deferAktualisieren(); return; }
 
         const modal = new ModalBuilder()
-            .setCustomId('eb_edit_field_modal')
-            .setTitle(`Edit Field ${idx + 1}`);
+            .setCustomId('eb_Bearbeiten_field_modal')
+            .setTitle(`Bearbeiten Field ${idx + 1}`);
 
-        const editNameLabel = new LabelBuilder()
+        const BearbeitenNameLabel = new LabelBuilder()
             .setLabel('Field Name')
             .setTextInputComponent(
                 new TextInputBuilder()
@@ -731,7 +731,7 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
                     .setRequired(true),
             );
 
-        const editValueLabel = new LabelBuilder()
+        const BearbeitenValueLabel = new LabelBuilder()
             .setLabel('Field Value')
             .setTextInputComponent(
                 new TextInputBuilder()
@@ -742,7 +742,7 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
                     .setRequired(true),
             );
 
-        const editInlineRadio = new RadioGroupBuilder()
+        const BearbeitenInlineRadio = new RadioGroupBuilder()
             .setCustomId('field_inline')
             .setRequired(false)
             .addOptions([
@@ -751,47 +751,47 @@ async function handleEditField(selectInteraction, rootInteraction, state) {
             ]);
         
         if (field.inline) {
-            editInlineRadio.setOptions([
+            BearbeitenInlineRadio.setOptions([
                 { label: 'No — full width', value: 'no' },
                 { label: 'Yes — side-by-side', value: 'yes', default: true },
             ]);
         }
 
-        const editInlineLabel = new LabelBuilder()
+        const BearbeitenInlineLabel = new LabelBuilder()
             .setLabel('Display inline?')
-            .setRadioGroupComponent(editInlineRadio);
+            .setRadioGroupComponent(BearbeitenInlineRadio);
 
-        modal.addLabelComponents(editNameLabel, editValueLabel, editInlineLabel);
+        modal.addLabelComponents(BearbeitenNameLabel, BearbeitenValueLabel, BearbeitenInlineLabel);
 
         const shown = await InteractionHelper.safeShowModal(pickInter, modal);
         if (!shown) return;
 
-        const submitted = await pickInter
-            .awaitModalSubmit({
+        const Absendented = await pickInter
+            .awaitModalAbsenden({
                 filter: i =>
-                    i.customId === 'eb_edit_field_modal' && i.user.id === pickInter.user.id,
+                    i.customId === 'eb_Bearbeiten_field_modal' && i.user.id === pickInter.user.id,
                 time: 120_000,
             })
             .catch(() => null);
 
-        if (!submitted) return;
+        if (!Absendented) return;
 
-        const name   = submitted.fields.getTextInputValue('field_name').trim();
-        const value  = submitted.fields.getTextInputValue('field_value').trim();
-        const inline = submitted.fields.getRadioGroup('field_inline') === 'yes';
+        const name   = Absendented.fields.getTextInputValue('field_name').trim();
+        const value  = Absendented.fields.getTextInputValue('field_value').trim();
+        const inline = Absendented.fields.getRadioGroup('field_inline') === 'yes';
 
         state.fields[idx] = { name, value, inline };
 
-        await submitted.deferUpdate().catch(() => {});
+        await Absendented.deferAktualisieren().catch(() => {});
         await refreshDashboard(rootInteraction, state);
         } catch (error) {
-            logger.warn('Embed builder field edit interaction failed:', error.message);
+            logger.warn('Embed builder field Bearbeiten interaction failed:', error.message);
         }
     });
 }
 
 async function handleRemoveField(selectInteraction, rootInteraction, state) {
-    await selectInteraction.deferUpdate();
+    await selectInteraction.deferAktualisieren();
 
     const pickSelect = new StringSelectMenuBuilder()
         .setCustomId('eb_remove_field_pick')
@@ -812,14 +812,14 @@ async function handleRemoveField(selectInteraction, rootInteraction, state) {
         embeds: [
             new EmbedBuilder()
                 .setTitle('Remove Field')
-                .setDescription('Select the field you want to delete.')
+                .setDescription('Select the field you want to Löschen.')
                 .setColor(getColor('warning')),
         ],
         components: [new ActionRowBuilder().addComponents(pickSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const removeCollector = rootInteraction.channel.createMessageComponentCollector({
+    const removeCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_remove_field_pick',
@@ -828,7 +828,7 @@ async function handleRemoveField(selectInteraction, rootInteraction, state) {
     });
 
     removeCollector.on('collect', async removeInter => {
-        await removeInter.deferUpdate();
+        await removeInter.deferAktualisieren();
         const idx = parseInt(removeInter.values[0], 10);
         state.fields.splice(idx, 1);
         await refreshDashboard(rootInteraction, state);
@@ -836,7 +836,7 @@ async function handleRemoveField(selectInteraction, rootInteraction, state) {
 }
 
 async function handleReorderFields(selectInteraction, rootInteraction, state) {
-    await selectInteraction.deferUpdate();
+    await selectInteraction.deferAktualisieren();
 
     const pickSelect = new StringSelectMenuBuilder()
         .setCustomId('eb_reorder_pick')
@@ -864,7 +864,7 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
         flags: MessageFlags.Ephemeral,
     });
 
-    const pickCollector = rootInteraction.channel.createMessageComponentCollector({
+    const pickCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_reorder_pick',
@@ -873,7 +873,7 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
     });
 
     pickCollector.on('collect', async pickInter => {
-        await pickInter.deferUpdate();
+        await pickInter.deferAktualisieren();
         const sourceIdx = parseInt(pickInter.values[0], 10);
 
         const upBtn = new ButtonBuilder()
@@ -890,8 +890,8 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
             .setEmoji('⬇️')
             .setDisabled(sourceIdx === state.fields.length - 1);
 
-        const cancelBtn = new ButtonBuilder()
-            .setCustomId('eb_reorder_cancel')
+        const AbbrechenBtn = new ButtonBuilder()
+            .setCustomId('eb_reorder_Abbrechen')
             .setLabel('Abbrechen')
             .setStyle(ButtonStyle.Secondary);
 
@@ -904,22 +904,22 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
                     )
                     .setColor(getColor('info')),
             ],
-            components: [new ActionRowBuilder().addComponents(upBtn, downBtn, cancelBtn)],
+            components: [new ActionRowBuilder().addComponents(upBtn, downBtn, AbbrechenBtn)],
             flags: MessageFlags.Ephemeral,
         });
 
-        const dirCollector = rootInteraction.channel.createMessageComponentCollector({
+        const dirCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: i =>
                 i.user.id === selectInteraction.user.id &&
-                ['eb_reorder_up', 'eb_reorder_down', 'eb_reorder_cancel'].includes(i.customId),
+                ['eb_reorder_up', 'eb_reorder_down', 'eb_reorder_Abbrechen'].includes(i.customId),
             time: 30_000,
             max: 1,
         });
 
         dirCollector.on('collect', async dirInter => {
-            await dirInter.deferUpdate();
-            if (dirInter.customId === 'eb_reorder_cancel') return;
+            await dirInter.deferAktualisieren();
+            if (dirInter.customId === 'eb_reorder_Abbrechen') return;
 
             const targetIdx =
                 dirInter.customId === 'eb_reorder_up' ? sourceIdx - 1 : sourceIdx + 1;
@@ -942,7 +942,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         state.fields.length === 0 &&
         !state.author?.name
     ) {
-        await selectInteraction.deferUpdate();
+        await selectInteraction.deferAktualisieren();
         await replyUserError(selectInteraction, {
             type: ErrorTypes.VALIDATION,
             message: 'Add at least a title, description, or field before posting.',
@@ -950,7 +950,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         return;
     }
 
-    await selectInteraction.deferUpdate();
+    await selectInteraction.deferAktualisieren();
 
     const chanSelect = new ChannelSelectMenuBuilder()
         .setCustomId('eb_post_channel')
@@ -968,7 +968,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         flags: MessageFlags.Ephemeral,
     });
 
-    const chanCollector = rootInteraction.channel.createMessageComponentCollector({
+    const chanCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
         componentType: ComponentType.ChannelSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_post_channel',
@@ -977,7 +977,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
     });
 
     chanCollector.on('collect', async chanInter => {
-        await chanInter.deferUpdate();
+        await chanInter.deferAktualisieren();
         const channel = chanInter.channels.first();
 
         if (!channel) {
@@ -1013,7 +1013,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
 }
 
 async function handleJsonExport(selectInteraction, rootInteraction, state) {
-    await selectInteraction.deferUpdate();
+    await selectInteraction.deferAktualisieren();
 
     const previewEmbed = buildPreviewEmbed(state);
     const json = JSON.stringify(previewEmbed.toJSON(), null, 2);
@@ -1077,7 +1077,7 @@ export default {
 
             await refreshDashboard(interaction, state);
 
-            const collector = interaction.channel.createMessageComponentCollector({
+            const collector = interaction.channel.ErstellenMessageComponentCollector({
                 componentType: ComponentType.StringSelect,
                 filter: i =>
                     i.user.id === interaction.user.id && i.customId === 'eb_menu',
@@ -1087,8 +1087,8 @@ export default {
             collector.on('collect', async ci => {
                 try {
                     switch (ci.values[0]) {
-                        case 'edit_content':
-                            await handleEditContent(ci, interaction, state);
+                        case 'Bearbeiten_content':
+                            await handleBearbeitenContent(ci, interaction, state);
                             break;
                         case 'set_color':
                             await handleSetColor(ci, interaction, state);
@@ -1105,8 +1105,8 @@ export default {
                         case 'add_field':
                             await handleAddField(ci, interaction, state);
                             break;
-                        case 'edit_field':
-                            await handleEditField(ci, interaction, state);
+                        case 'Bearbeiten_field':
+                            await handleBearbeitenField(ci, interaction, state);
                             break;
                         case 'remove_field':
                             await handleRemoveField(ci, interaction, state);
@@ -1116,7 +1116,7 @@ export default {
                             break;
                         case 'toggle_timestamp':
                             state.timestamp = !state.timestamp;
-                            await ci.deferUpdate();
+                            await ci.deferAktualisieren();
                             await refreshDashboard(interaction, state);
                             break;
                         case 'post_embed':
@@ -1135,11 +1135,11 @@ export default {
                             state.image       = null;
                             state.timestamp   = false;
                             state.fields      = [];
-                            await ci.deferUpdate();
+                            await ci.deferAktualisieren();
                             await refreshDashboard(interaction, state);
                             break;
                         default:
-                            await ci.deferUpdate();
+                            await ci.deferAktualisieren();
                     }
                 } catch (error) {
                     logger.error('Error in embedbuilder collector:', error);
@@ -1147,7 +1147,7 @@ export default {
                         error instanceof TitanBotError
                             ? error.userMessage || 'Ein Fehler ist aufgetreten.'
                             : 'Ein unerwarteter Fehler ist aufgetreten.';
-                    if (!ci.replied && !ci.deferred) await ci.deferUpdate().catch(() => {});
+                    if (!ci.replied && !ci.deferred) await ci.deferAktualisieren().catch(() => {});
                     await replyUserError(ci, {
                         type: ErrorTypes.UNKNOWN,
                         message: msg,
@@ -1157,7 +1157,7 @@ export default {
 
             collector.on('end', async (_, reason) => {
                 if (reason === 'time') {
-                    await InteractionHelper.safeEditReply(interaction, { components: [] }).catch(() => {});
+                    await InteractionHelper.safeBearbeitenReply(interaction, { components: [] }).catch(() => {});
                 }
             });
         } catch (error) {
@@ -1171,4 +1171,5 @@ export default {
         }
     },
 };
+
 

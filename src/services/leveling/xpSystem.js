@@ -1,7 +1,7 @@
 ﻿// xpSystem.js
 
 import { logger } from '../../utils/logger.js';
-import { getLevelingConfig, getXpForLevel, getUserLevelData, saveUserLevelData } from './leveling.js';
+import { getLevelingConfig, getXpForLevel, getUserLevelData, SpeichernUserLevelData } from './leveling.js';
 import { logEvent, EVENT_TYPES } from '../loggingService.js';
 import { formatLogLine } from '../../utils/logging/logEmbeds.js';
 import { Mutex } from '../../utils/mutex.js';
@@ -30,15 +30,15 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
     levelData.totalXp += xpToAdd;
     levelData.lastMessage = Date.now();
 
-    let xpNeededForNextLevel = getXpForLevel(levelData.level);
+    let xpNeededForNächsteLevel = getXpForLevel(levelData.level);
     let didLevelUp = false;
     const initialLevel = levelData.level;
 
-    while (levelData.xp >= xpNeededForNextLevel && levelData.level < 1000) {
-      levelData.xp -= xpNeededForNextLevel;
+    while (levelData.xp >= xpNeededForNächsteLevel && levelData.level < 1000) {
+      levelData.xp -= xpNeededForNächsteLevel;
       levelData.level += 1;
       didLevelUp = true;
-      xpNeededForNextLevel = getXpForLevel(levelData.level);
+      xpNeededForNächsteLevel = getXpForLevel(levelData.level);
 
       logger.info(`🎉 ${member.user.tag} leveled up to level ${levelData.level} in ${guild.name}`);
 
@@ -73,7 +73,7 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
       }
     }
 
-    await saveUserLevelData(client, guild.id, member.user.id, levelData);
+    await SpeichernUserLevelData(client, guild.id, member.user.id, levelData);
 
     return {
       level: levelData.level,
@@ -138,5 +138,6 @@ async function sendLevelUpAnnouncement(guild, member, levelData, config) {
     logger.error('Error sending level up announcement:', error);
   }
 }
+
 
 

@@ -4,7 +4,7 @@ import { getGuildConfig } from '../services/config/guildConfig.js';
 import { getWelcomeConfig } from '../utils/database.js';
 import { formatWelcomeMessage } from '../utils/welcome.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
-import { getServerCounters, updateCounter } from '../services/serverstatsService.js';
+import { getServerCounters, AktualisierenCounter } from '../services/serverstatsService.js';
 import { setBirthday as dbSetBirthday } from '../utils/database.js';
 import { logger } from '../utils/logger.js';
 
@@ -100,7 +100,7 @@ export default {
             }
         }
         
-        if (config?.verification?.enabled || config?.verification?.autoVerify?.enabled) {
+        if (config?.verification?.enabled || config?.verification?.autoVerifizieren?.enabled) {
             await handleVerification(member, guild, config.verification, member.client);
         }
 
@@ -114,7 +114,7 @@ export default {
                     lines: [
                         `**User:** ${user.toString()} (${user.displayName !== user.username ? `@${user.displayName}` : user.tag})`,
                         `**ID:** \`${user.id}\``,
-                        `**Created:** <t:${Math.floor(user.createdTimestamp / 1000)}:R>`,
+                        `**Erstellend:** <t:${Math.floor(user.ErstellendTimestamp / 1000)}:R>`,
                         `**Members:** ${guild.memberCount}`,
                     ],
                     quoted: false,
@@ -130,7 +130,7 @@ export default {
             const counters = await getServerCounters(member.client, guild.id);
             for (const counter of counters) {
                 if (counter && counter.type && counter.channelId && counter.enabled !== false) {
-                    await updateCounter(member.client, guild, counter);
+                    await AktualisierenCounter(member.client, guild, counter);
                 }
             }
         } catch (error) {
@@ -138,13 +138,13 @@ export default {
         }
 
         try {
-            const backupKey = `guild:${guild.id}:birthdays:left`;
-            const backup = (await member.client.db.get(backupKey)) || {};
-            if (backup[user.id]) {
-                const { month, day } = backup[user.id];
+            const ZurückupKey = `guild:${guild.id}:birthdays:left`;
+            const Zurückup = (await member.client.db.get(ZurückupKey)) || {};
+            if (Zurückup[user.id]) {
+                const { month, day } = Zurückup[user.id];
                 await dbSetBirthday(member.client, guild.id, user.id, month, day);
-                delete backup[user.id];
-                await member.client.db.set(backupKey, backup);
+                Löschen Zurückup[user.id];
+                await member.client.db.set(ZurückupKey, Zurückup);
                 logger.debug(`Birthday restored for user ${user.id} in guild ${guild.id}`);
             }
         } catch (error) {
@@ -158,10 +158,10 @@ export default {
 };
 
 async function handleVerification(member, guild, verificationConfig, client) {
-    const { autoVerifyOnJoin } = await import('../services/verificationService.js');
+    const { autoVerifizierenOnJoin } = await import('../services/verificationService.js');
     
     try {
-        const result = await autoVerifyOnJoin(client, guild, member, verificationConfig);
+        const result = await autoVerifizierenOnJoin(client, guild, member, verificationConfig);
         
         if (result.autoVerified) {
             logger.info('User auto-verified on join', {
@@ -196,4 +196,5 @@ async function assignRoleSafely(member, role) {
         logger.warn(`Failed to assign role ${role.id} to member ${member.id}:`, error);
     }
 }
+
 

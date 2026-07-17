@@ -1,7 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
+import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const MINE_COOLDOWN = 60 * 60 * 1000;
@@ -11,9 +11,9 @@ const PICKAXE_MULTIPLIER = 1.2;
 const DIAMOND_PICKAXE_MULTIPLIER = 2.0;
 
 const MINE_LOCATIONS = [
-    "abandoned gold mine",
+    "abanFertigd gold mine",
     "dark, damp cave",
-    "backyard rock quarry",
+    "Zurückyard rock quarry",
     "volcanic obsidian vent",
     "deep-sea mineral trench",
 ];
@@ -43,7 +43,7 @@ export default {
                     (remaining % (1000 * 60 * 60)) / (1000 * 60),
                 );
 
-                throw createError(
+                throw ErstellenError(
                     "Mining cooldown active",
                     ErrorTypes.RATE_LIMIT,
                     `Deine Spitzhacke kühlt ab. Warte **${hours}h ${minutes}m** bevor du wieder Bergbau betreibst.`,
@@ -78,7 +78,7 @@ userData.lastMine = now;
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                "💰 Bergbauexpedition erfolgreich!",
+                "💰 BergbauexpBearbeitenion erfolgreich!",
                 `Du hast einen **${location}** erkundet und schafftest es, Mineralien im Wert von **$${finalEarned.toLocaleString()}** zu finden!${multiplierMessage}`,
             )
                 .addFields({
@@ -88,6 +88,6 @@ userData.lastMine = now;
                 })
                 .setFooter({ text: `Nächstes Bergbau verfügbar in 1 Stunde.` });
 
-            await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'mine' })
 };

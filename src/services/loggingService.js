@@ -1,7 +1,7 @@
 ﻿// loggingService.js
 
 import { ChannelType } from 'discord.js';
-import { getGuildConfig, updateGuildConfig } from './config/guildConfig.js';
+import { getGuildConfig, AktualisierenGuildConfig } from './config/guildConfig.js';
 import { logger } from '../utils/logger.js';
 import {
   appendContentSection,
@@ -30,13 +30,13 @@ const EVENT_TYPES = {
   LEVELING_LEVELUP: 'leveling.levelup',
   LEVELING_MILESTONE: 'leveling.milestone',
 
-  MESSAGE_DELETE: 'message.delete',
-  MESSAGE_EDIT: 'message.edit',
-  MESSAGE_BULK_DELETE: 'message.bulkdelete',
+  MESSAGE_Löschen: 'message.Löschen',
+  MESSAGE_Bearbeiten: 'message.Bearbeiten',
+  MESSAGE_BULK_Löschen: 'message.bulkLöschen',
 
-  ROLE_CREATE: 'role.create',
-  ROLE_DELETE: 'role.delete',
-  ROLE_UPDATE: 'role.update',
+  ROLE_Erstellen: 'role.Erstellen',
+  ROLE_Löschen: 'role.Löschen',
+  ROLE_Aktualisieren: 'role.Aktualisieren',
 
   MEMBER_JOIN: 'member.join',
   MEMBER_LEAVE: 'member.leave',
@@ -44,19 +44,19 @@ const EVENT_TYPES = {
 
   REACTION_ROLE_ADD: 'reactionrole.add',
   REACTION_ROLE_REMOVE: 'reactionrole.remove',
-  REACTION_ROLE_CREATE: 'reactionrole.create',
-  REACTION_ROLE_DELETE: 'reactionrole.delete',
-  REACTION_ROLE_UPDATE: 'reactionrole.update',
+  REACTION_ROLE_Erstellen: 'reactionrole.Erstellen',
+  REACTION_ROLE_Löschen: 'reactionrole.Löschen',
+  REACTION_ROLE_Aktualisieren: 'reactionrole.Aktualisieren',
 
-  GIVEAWAY_CREATE: 'giveaway.create',
+  GIVEAWAY_Erstellen: 'giveaway.Erstellen',
   GIVEAWAY_WINNER: 'giveaway.winner',
   GIVEAWAY_REROLL: 'giveaway.reroll',
-  GIVEAWAY_DELETE: 'giveaway.delete',
+  GIVEAWAY_Löschen: 'giveaway.Löschen',
 
-  COUNTER_UPDATE: 'counter.update',
+  COUNTER_Aktualisieren: 'counter.Aktualisieren',
   COUNTER_CONFIG: 'counter.config',
 
-  APPLICATION_SUBMIT: 'application.submit',
+  APPLICATION_Absenden: 'application.Absenden',
   APPLICATION_REVIEW: 'application.review',
 
   REPORT_FILE: 'report.file',
@@ -77,27 +77,27 @@ const EVENT_COLORS = {
   'moderation.config': 0x5865F2,
   'leveling.levelup': 0x00ff00,
   'leveling.milestone': 0xFFD700,
-  'message.delete': 0x8b0000,
-  'message.edit': 0xFFA500,
-  'message.bulkdelete': 0xFF0000,
-  'role.create': 0x2ecc71,
-  'role.delete': 0xe74c3c,
-  'role.update': 0x3498db,
+  'message.Löschen': 0x8b0000,
+  'message.Bearbeiten': 0xFFA500,
+  'message.bulkLöschen': 0xFF0000,
+  'role.Erstellen': 0x2ecc71,
+  'role.Löschen': 0xe74c3c,
+  'role.Aktualisieren': 0x3498db,
   'member.join': 0x2ecc71,
   'member.leave': 0xe74c3c,
   'member.namechange': 0x3498db,
   'reactionrole.add': 0x2ecc71,
   'reactionrole.remove': 0xe74c3c,
-  'reactionrole.create': 0x3498db,
-  'reactionrole.delete': 0x8b0000,
-  'reactionrole.update': 0xFFA500,
-  'giveaway.create': 0x57F287,
+  'reactionrole.Erstellen': 0x3498db,
+  'reactionrole.Löschen': 0x8b0000,
+  'reactionrole.Aktualisieren': 0xFFA500,
+  'giveaway.Erstellen': 0x57F287,
   'giveaway.winner': 0xFEE75C,
   'giveaway.reroll': 0x3498DB,
-  'giveaway.delete': 0xE74C3C,
-  'counter.update': 0x0099ff,
+  'giveaway.Löschen': 0xE74C3C,
+  'counter.Aktualisieren': 0x0099ff,
   'counter.config': 0x5865F2,
-  'application.submit': 0x5865F2,
+  'application.Absenden': 0x5865F2,
   'application.review': 0x57F287,
   'report.file': 0xED4245,
 };
@@ -117,27 +117,27 @@ const EVENT_ICONS = {
   'moderation.config': '⚙️',
   'leveling.levelup': '📈',
   'leveling.milestone': '🏆',
-  'message.delete': '❌',
-  'message.edit': '✏️',
-  'message.bulkdelete': '🗑️',
-  'role.create': '➕',
-  'role.delete': '➖',
-  'role.update': '🔄',
+  'message.Löschen': '❌',
+  'message.Bearbeiten': '✏️',
+  'message.bulkLöschen': '🗑️',
+  'role.Erstellen': '➕',
+  'role.Löschen': '➖',
+  'role.Aktualisieren': '🔄',
   'member.join': '👋',
   'member.leave': '👋',
   'member.namechange': '🏷️',
   'reactionrole.add': '✅',
   'reactionrole.remove': '❌',
-  'reactionrole.create': '🎭',
-  'reactionrole.delete': '🗑️',
-  'reactionrole.update': '🔄',
-  'giveaway.create': '🎁',
+  'reactionrole.Erstellen': '🎭',
+  'reactionrole.Löschen': '🗑️',
+  'reactionrole.Aktualisieren': '🔄',
+  'giveaway.Erstellen': '🎁',
   'giveaway.winner': '🎉',
   'giveaway.reroll': '🔄',
-  'giveaway.delete': '🗑️',
-  'counter.update': '📊',
+  'giveaway.Löschen': '🗑️',
+  'counter.Aktualisieren': '📊',
   'counter.config': '⚙️',
-  'application.submit': '📝',
+  'application.Absenden': '📝',
   'application.review': '📋',
   'report.file': '🚨',
 };
@@ -246,7 +246,7 @@ export async function logEvent({
       return null;
     }
 
-    const embed = createLogEmbed(guild, eventType, data);
+    const embed = ErstellenLogEmbed(guild, eventType, data);
 
     const messageOptions = { embeds: [embed] };
     if (content) {
@@ -265,7 +265,7 @@ export async function logEvent({
   }
 }
 
-function createLogEmbed(guild, eventType, data) {
+function ErstellenLogEmbed(guild, eventType, data) {
   const color = data.color ?? EVENT_COLORS[eventType] ?? 0x0099ff;
   const icon = EVENT_ICONS[eventType] || '📌';
   const title = data.title || `${icon} ${formatEventType(eventType)}`;
@@ -384,7 +384,7 @@ export async function toggleEventLogging(client, guildId, eventTypes, enabled) {
       }
     });
 
-    await updateGuildConfig(client, guildId, { logging });
+    await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
   } catch (error) {
     logger.error('Error toggling event logging:', error);
@@ -408,7 +408,7 @@ export async function setLogChannel(client, guildId, destination, channelId) {
       logging.enabled = true;
     }
 
-    await updateGuildConfig(client, guildId, { logging });
+    await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
   } catch (error) {
     logger.error('Error setting log channel:', error);
@@ -425,7 +425,7 @@ export async function setLoggingEnabled(client, guildId, enabled) {
   try {
     const config = await getGuildConfig(client, guildId);
     const logging = { ...config.logging, enabled };
-    await updateGuildConfig(client, guildId, { logging });
+    await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
   } catch (error) {
     logger.error('Error setting logging enabled:', error);
@@ -433,7 +433,7 @@ export async function setLoggingEnabled(client, guildId, enabled) {
   }
 }
 
-export async function updateIgnoreList(client, guildId, { action, type, id }) {
+export async function AktualisierenIgnoreList(client, guildId, { action, type, id }) {
   try {
     const config = await getGuildConfig(client, guildId);
     const ignore = { ...getIgnoreList(config) };
@@ -452,7 +452,7 @@ export async function updateIgnoreList(client, guildId, { action, type, id }) {
     ignore[listKey] = current;
 
     const logging = { ...config.logging, ignore };
-    await updateGuildConfig(client, guildId, { logging });
+    await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
   } catch (error) {
     logger.error('Error updating ignore list:', error);
@@ -468,4 +468,5 @@ export function resolveApplicationLogChannel(config, roleSettings = {}, appSetti
 }
 
 export { EVENT_TYPES, EVENT_COLORS, EVENT_ICONS, LOG_DESTINATIONS };
+
 

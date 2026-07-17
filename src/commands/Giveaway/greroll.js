@@ -2,11 +2,11 @@
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { getGuildGiveaways, saveGiveaway } from '../../utils/giveaways.js';
+import { getGuildGiveaways, SpeichernGiveaway } from '../../utils/giveaways.js';
 import { 
     selectWinners,
-    createGiveawayEmbed, 
-    createGiveawayButtons 
+    ErstellenGiveawayEmbed, 
+    ErstellenGiveawayButtons 
 } from '../../services/giveawayService.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -96,7 +96,7 @@ export default {
             giveaway.winnerCount,
         );
 
-        const updatedGiveaway = {
+        const AktualisierendGiveaway = {
             ...giveaway,
             winnerIds: newWinners,
             rerolledAt: new Date().toISOString(),
@@ -112,13 +112,13 @@ export default {
 
         if (!channel || !channel.isTextBased()) {
 
-            await saveGiveaway(
+            await SpeichernGiveaway(
                 interaction.client,
                 interaction.guildId,
-                updatedGiveaway,
+                AktualisierendGiveaway,
             );
 
-            logger.warn(`Could not find channel for giveaway ${messageId}, but saved new winners to database`);
+            logger.warn(`Could not find channel for giveaway ${messageId}, but Speichernd new winners to database`);
 
             return InteractionHelper.safeReply(interaction, {
                 embeds: [
@@ -140,10 +140,10 @@ export default {
 
         if (!message) {
 
-            await saveGiveaway(
+            await SpeichernGiveaway(
                 interaction.client,
                 interaction.guildId,
-                updatedGiveaway,
+                AktualisierendGiveaway,
             );
 
             const winnerMentions = newWinners
@@ -154,14 +154,14 @@ export default {
                 ? await channel.messages.fetch(giveaway.winnerPingMessageId).catch(() => null)
                 : null;
             if (existingPingMsg) {
-                await existingPingMsg.edit({
+                await existingPingMsg.Bearbeiten({
                     content: `🔄 **GEWINNSPIEL UMWAHL** 🔄 Neue Gewinner für **${giveaway.prize}**: ${winnerMentions}!`,
                 });
             } else {
                 const newPingMsg = await channel.send({
                     content: `🔄 **GEWINNSPIEL UMWAHL** 🔄 Neue Gewinner für **${giveaway.prize}**: ${winnerMentions}!`,
                 });
-                updatedGiveaway.winnerPingMessageId = newPingMsg.id;
+                AktualisierendGiveaway.winnerPingMessageId = newPingMsg.id;
             }
 
             logger.info(`Giveaway rerolled (message Nicht gefunden, but announced): ${messageId}`);
@@ -209,16 +209,16 @@ export default {
             });
         }
 
-        await saveGiveaway(
+        await SpeichernGiveaway(
             interaction.client,
             interaction.guildId,
-            updatedGiveaway,
+            AktualisierendGiveaway,
         );
 
-        const newEmbed = createGiveawayEmbed(updatedGiveaway, "reroll", newWinners);
-        const newRow = createGiveawayButtons(true);
+        const newEmbed = ErstellenGiveawayEmbed(AktualisierendGiveaway, "reroll", newWinners);
+        const newRow = ErstellenGiveawayButtons(true);
 
-        await message.edit({
+        await message.Bearbeiten({
             content: "🔄 **GEWINNSPIEL UMGEWÄHLT** 🔄",
             embeds: [newEmbed],
             components: [newRow],
@@ -232,14 +232,14 @@ export default {
             ? await channel.messages.fetch(giveaway.winnerPingMessageId).catch(() => null)
             : null;
         if (existingPingMsg) {
-            await existingPingMsg.edit({
+            await existingPingMsg.Bearbeiten({
                 content: `🔄 **NEUE GEWINNER** 🔄 HERZLICHEN GLÜCKWUNSCH ${winnerMentions}! Ihr seid die neuen Gewinner des **${giveaway.prize}** Gewinnspiels! Bitte kontaktiert den Gastgeber <@${giveaway.hostId}>, um euren Preis zu beanspruchen.`,
             });
         } else {
             const newPingMsg = await channel.send({
                 content: `🔄 **NEUE GEWINNER** 🔄 HERZLICHEN GLÜCKWUNSCH ${winnerMentions}! Ihr seid die neuen Gewinner des **${giveaway.prize}** Gewinnspiels! Bitte kontaktiert den Gastgeber <@${giveaway.hostId}>, um euren Preis zu beanspruchen.`,
             });
-            updatedGiveaway.winnerPingMessageId = newPingMsg.id;
+            AktualisierendGiveaway.winnerPingMessageId = newPingMsg.id;
         }
 
         logger.info(`Giveaway successfully rerolled: ${messageId} with ${newWinners.length} new winners`);
@@ -287,3 +287,4 @@ export default {
         });
     },
 };
+

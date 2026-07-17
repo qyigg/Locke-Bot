@@ -1,7 +1,7 @@
 ﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
-import { getLevelingConfig, saveLevelingConfig } from '../../services/leveling/leveling.js';
+import { ErstellenEmbed } from '../../utils/embeds.js';
+import { getLevelingConfig, SpeichernLevelingConfig } from '../../services/leveling/leveling.js';
 import { botHasPermission } from '../../utils/permissionGuard.js';
 import { TitanBotError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -120,7 +120,7 @@ export default {
                 announceLevelUp: true,
             };
 
-            await saveLevelingConfig(client, interaction.guildId, newConfig);
+            await SpeichernLevelingConfig(client, interaction.guildId, newConfig);
 
             logger.info(`Leveling system set up in guild ${interaction.guildId}`, {
                 channelId: channel.id,
@@ -130,9 +130,9 @@ export default {
                 userId: interaction.user.id,
             });
 
-            return await InteractionHelper.safeEditReply(interaction, {
+            return await InteractionHelper.safeBearbeitenReply(interaction, {
                 embeds: [
-                    createEmbed({
+                    ErstellenEmbed({
                         title: 'Leveling System Set Up',
                         description:
                             `The leveling system is now **enabled** and ready to go.\n\n` +
@@ -148,3 +148,4 @@ export default {
         }
     },
 };
+
