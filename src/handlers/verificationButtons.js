@@ -10,7 +10,7 @@ export async function handleVerificationButton(interaction, client) {
         await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
 
         if (!interaction.guild) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This button can only be used in a server.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Dieser Button kann nur auf einem Server verwendet werden.' });
         }
 
         const guild = interaction.guild;
@@ -28,7 +28,7 @@ export async function handleVerificationButton(interaction, client) {
         });
 
         if (result.status === 'already_verified') {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'You are already verified and have access to all server channels.' });
+            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Du bist bereits verifiziert und hast Zugriff auf alle Serverkanäle.' });
         }
 
         logger.info('User verified via button', {
@@ -39,8 +39,8 @@ export async function handleVerificationButton(interaction, client) {
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [successEmbed(
-                "✅ Verification Successful!",
-                `You have been verified and given the **${result.roleName}** role!\n\nYou now have access to all server channels and features. Welcome! 🎉`
+                '✅ Verifizierung erfolgreich!',
+                `Du wurdest verifiziert und hast die Rolle **${result.roleName}** erhalten!\n\nDu hast jetzt Zugriff auf alle Serverkanäle und Funktionen. Willkommen! 🎉`
             )],
         });
 
