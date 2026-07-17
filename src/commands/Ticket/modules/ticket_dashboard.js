@@ -116,7 +116,7 @@ async function repostTicketPanel(client, guild, guildConfig, guildId) {
 }
 
 function formatCloseDuration(ms) {
-    if (ms == null) return '`N/A`';
+    if (ms == null) return '`k. A.`';
     const hours = Math.floor(ms / 3_600_000);
     const minutes = Math.floor((ms % 3_600_000) / 60_000);
     if (hours > 0) return `${hours}h ${minutes}m`;
@@ -161,7 +161,7 @@ function buildDashboardEmbed(config, guild, panelStatus = null, ticketStats = nu
             { name: '\u200B', value: '\u200B', inline: true },
             { name: 'Panel-Nachricht', value: panelMsg, inline: false },
             { name: 'Button-Beschriftung', value: btnLabel, inline: true },
-            { name: 'Max Tickets/User', value: String(config.maxTicketsPerUser || 3), inline: true },
+            { name: 'Max. Tickets/Nutzer', value: String(config.maxTicketsPerUser || 3), inline: true },
             { name: 'DM bei Schließen', value: config.dmOnClose !== false ? 'Aktiviert' : 'Deaktiviert', inline: true },
             { name: 'Ticket-Logs-Kanal', value: ticketLogsChannel, inline: true },
             { name: 'Transkript-Kanal', value: transcriptChannel, inline: true },
@@ -385,7 +385,7 @@ async function handlePanelMessage(selectInteraction, rootInteraction, guildConfi
     await submitted.reply({
         embeds: [
             successEmbed(
-                '✅ Panel Message Updated',
+                '✅ Panel-Nachricht aktualisiert',
                 `Die Panel-Nachricht wurde aktualisiert.${
                     panelUpdated
                         ? '\nDas live Ticket-Panel wurde ebenfalls aktualisiert.'
@@ -438,7 +438,7 @@ async function handleButtonLabel(selectInteraction, rootInteraction, guildConfig
     await submitted.reply({
         embeds: [
             successEmbed(
-                '✅ Button Label Updated',
+                '✅ Button-Beschriftung aktualisiert',
                 `Button-Beschriftung auf \`${newLabel}\` geändert.${
                     panelUpdated
                         ? '\nDer Button im live Ticket-Panel wurde ebenfalls aktualisiert.'
@@ -548,7 +548,7 @@ async function handleOpenCategory(selectInteraction, rootInteraction, guildConfi
         await catInteraction.followUp({
             embeds: [
                 successEmbed(
-                    'Open Category Updated',
+                    'Kategorie für offene Tickets aktualisiert',
                     `Neue Tickets werden jetzt in **${category.name}** erstellt.`,
                 ),
             ],
@@ -608,7 +608,7 @@ async function handleClosedCategory(selectInteraction, rootInteraction, guildCon
         await catInteraction.followUp({
             embeds: [
                 successEmbed(
-                    'Closed Category Updated',
+                    'Kategorie für geschlossene Tickets aktualisiert',
                     `Geschlossene Tickets werden jetzt nach **${category.name}** verschoben.`,
                 ),
             ],
@@ -675,7 +675,7 @@ async function handleMaxTickets(selectInteraction, rootInteraction, guildConfig,
     await submitted.reply({
         embeds: [
             successEmbed(
-                'Max Tickets Updated',
+                'Maximale Ticket-Anzahl aktualisiert',
                 `Benutzer können jetzt höchstens **${newMax}** offene Ticket${newMax !== 1 ? 's' : ''} gleichzeitig haben.`,
             ),
         ],
@@ -695,7 +695,7 @@ async function handleDmOnClose(btnInteraction, rootInteraction, guildConfig, gui
     await btnInteraction.followUp({
         embeds: [
             successEmbed(
-                'DM on Close Updated',
+                'DM bei Schließen aktualisiert',
                 `Benutzer erhalten **${newState ? 'jetzt' : 'nicht mehr'}** eine DM, wenn ihr Ticket geschlossen wird.`,
             ),
         ],
@@ -912,11 +912,11 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
                     .setCustomId('delete_confirmation')
-                    .setLabel('Tippe "DELETE" zur Bestätigung')
+                    .setLabel('Tippe "LÖSCHEN" zur Bestätigung')
                     .setStyle(TextInputStyle.Short)
-                    .setPlaceholder('DELETE')
-                    .setMaxLength(6)
-                    .setMinLength(6)
+                    .setPlaceholder('LÖSCHEN')
+                    .setMaxLength(8)
+                    .setMinLength(7)
                     .setRequired(true)
             )
         );
@@ -935,10 +935,10 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
         return;
     }
 
-    const confirmation = submitted.fields.getTextInputValue('delete_confirmation').trim();
+    const confirmation = submitted.fields.getTextInputValue('delete_confirmation').trim().toLowerCase();
 
-    if (confirmation !== 'DELETE') {
-        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Du musst zur Bestätigung exakt "DELETE" eingeben.' });
+    if (confirmation !== 'löschen' && confirmation !== 'loeschen') {
+        await replyUserError(submitted, { type: ErrorTypes.UNKNOWN, message: 'Du musst zur Bestätigung exakt „LÖSCHEN“ eingeben.' });
         await refreshDashboard(rootInteraction, guildConfig, guildId, client);
         return;
     }
