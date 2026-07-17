@@ -11,11 +11,11 @@ export default {
         .addUserOption((option) =>
             option
                 .setName("target")
-                .setDescription("Der Benutzer to ban")
+        .setDescription("Der zu banneende Benutzer")
                 .setRequired(true),
         )
         .addStringOption((option) =>
-            option.setName("reason").setDescription("Reason for the ban"),
+            option.setName("reason").setDescription("Grund für den Ban"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
     category: "moderation",
@@ -28,7 +28,7 @@ export default {
             throw new TitanBotError(
                 'Zielbenutzer fehlt',
                 ErrorTypes.USER_INPUT,
-                'Du musst angeben a user to ban.',
+                'Du musst einen Benutzer angeben zum Bannen.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -44,7 +44,7 @@ export default {
             throw new TitanBotError(
                 'Cannot ban bot',
                 ErrorTypes.VALIDATION,
-                'Du kannst nicht ban the bot.',
+                'Du kannst nicht den Bot bannen.',
             );
         }
 
