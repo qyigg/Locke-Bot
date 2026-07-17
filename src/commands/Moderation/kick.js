@@ -7,15 +7,15 @@ import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("kick")
-        .setDescription("Kick a user from the server")
+        .setDescription("Entferne einen Benutzer vom Server")
         .addUserOption((option) =>
             option
                 .setName("target")
-                .setDescription("The user to kick")
+                .setDescription("Der zu entfernende Benutzer")
                 .setRequired(true),
         )
         .addStringOption((option) =>
-            option.setName("reason").setDescription("Reason for the kick"),
+            option.setName("reason").setDescription("Grund für den Kick"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     category: "moderation",
@@ -23,13 +23,13 @@ export default {
     async execute(interaction, config, client) {
         const targetUser = interaction.options.getUser("target");
         const member = interaction.options.getMember("target");
-        const reason = interaction.options.getString("reason") || "No reason provided";
+        const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!targetUser) {
             throw new TitanBotError(
                 'Missing target user',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to kick.',
+                'Du musst einen Benutzer zum Entfernen angeben.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -38,7 +38,7 @@ export default {
             throw new TitanBotError(
                 "Cannot kick self",
                 ErrorTypes.VALIDATION,
-                "You cannot kick yourself.",
+                "Du kannst dich nicht selbst kicken.",
             );
         }
 
@@ -46,7 +46,7 @@ export default {
             throw new TitanBotError(
                 "Cannot kick bot",
                 ErrorTypes.VALIDATION,
-                "You cannot kick the bot.",
+                "Du kannst den Bot nicht kicken.",
             );
         }
 
@@ -54,7 +54,7 @@ export default {
             throw new TitanBotError(
                 "Target not found",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server.",
+                "Der Zielbenutzer ist aktuell nicht auf diesem Server.",
                 { subtype: 'user_not_found' },
             );
         }
@@ -69,8 +69,8 @@ export default {
         await InteractionHelper.universalReply(interaction, {
             embeds: [
                 successEmbed(
-                    `👢 **Kicked** ${targetUser.tag}`,
-                    `**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                    `👢 **Gekickt** ${targetUser.tag}`,
+                    `**Grund:** ${reason}\n**Fall-ID:** #${result.caseId}`,
                 ),
             ],
         });

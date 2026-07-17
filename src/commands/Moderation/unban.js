@@ -8,16 +8,16 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("unban")
-        .setDescription("Unban a user from the server")
+        .setDescription("Hebe den Bann eines Benutzers auf")
         .addStringOption(option =>
             option
                 .setName("target")
-                .setDescription("The ID (or mention) of the user to unban")
+                .setDescription("Die ID (oder Erwähnung) des zu entbannenden Benutzers")
                 .setRequired(true),
         )
         .addStringOption(option =>
             option.setName("reason")
-                .setDescription("Reason for the unban")
+                .setDescription("Grund für die Entbannung")
                 .setRequired(false),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
@@ -40,7 +40,7 @@ export default {
         if (!/^\d{17,20}$/.test(targetId)) {
             return replyUserError(interaction, {
                 type: ErrorTypes.USER_INPUT,
-                message: 'Please provide a valid user ID or mention.',
+                message: 'Bitte gib eine gültige Benutzer-ID oder Erwähnung an.',
             });
         }
 
@@ -48,11 +48,11 @@ export default {
         if (!targetUser) {
             return replyUserError(interaction, {
                 type: ErrorTypes.USER_INPUT,
-                message: `Could not find a user with the ID \`${targetId}\`.`,
+                message: `Es konnte kein Benutzer mit der ID \`${targetId}\` gefunden werden.`,
             });
         }
 
-        const reason = interaction.options.getString("reason") || "No reason provided";
+        const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         const result = await ModerationService.unbanUser({
             guild: interaction.guild,
@@ -64,8 +64,8 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    "✅ User Unbanned",
-                    `Successfully unbanned **${targetUser.tag}** from the server.\n\n**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                    '✅ Benutzer entbannt',
+                    `**${targetUser.tag}** wurde erfolgreich entbannt.\n\n**Grund:** ${reason}\n**Fall-ID:** #${result.caseId}`,
                 ),
             ],
         });

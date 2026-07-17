@@ -9,18 +9,18 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("warn")
-        .setDescription("Warn a user")
+        .setDescription("Verwarne einen Benutzer")
         .addUserOption((o) =>
             o
                 .setName("target")
                 .setRequired(true)
-                .setDescription("User to warn"),
+                .setDescription("Zu verwarnender Benutzer"),
         )
         .addStringOption((o) =>
             o
                 .setName("reason")
                 .setRequired(true)
-                .setDescription("Reason for the warning"),
+                .setDescription("Grund für die Verwarnung"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     category: "moderation",
@@ -46,7 +46,7 @@ export default {
             throw new TitanBotError(
                 'Missing target user',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to warn.',
+                'Du musst einen Benutzer zum Verwarnen angeben.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -55,7 +55,7 @@ export default {
             throw new TitanBotError(
                 'Missing warning reason',
                 ErrorTypes.VALIDATION,
-                'You must provide a reason for the warning.',
+                'Du musst einen Grund für die Verwarnung angeben.',
                 { subtype: 'missing_required' },
             );
         }
@@ -64,7 +64,7 @@ export default {
             throw new TitanBotError(
                 "Target not found",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server."
+                "Der Zielbenutzer ist aktuell nicht auf diesem Server."
             );
         }
 
@@ -82,7 +82,7 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: "User Warned",
+                action: "Benutzer verwarnt",
                 target: `${target.tag} (${target.id})`,
                 executor: `${moderator.tag} (${moderator.id})`,
                 reason,
@@ -99,8 +99,8 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    `⚠️ **Warned** ${target.tag}`,
-                    `**Reason:** ${reason}\n**Total Warns:** ${totalCount}`,
+                    `⚠️ **Verwarnt** ${target.tag}`,
+                    `**Grund:** ${reason}\n**Verwarnungen gesamt:** ${totalCount}`,
                 ),
             ],
         });
