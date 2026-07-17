@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, ChannelType } from 'discord.js';
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
@@ -33,7 +33,7 @@ export default {
                 .addStringOption(option =>
                     option
                         .setName("channel_type")
-                        .setDescription("The channel type to create for this tracker")
+                        .setDescription("Der Kanal type to create for this tracker")
                         .setRequired(true)
                         .addChoices(
                             { name: "voice channel (recommended)", value: "voice" },
@@ -51,7 +51,7 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("list")
-                .setDescription("List all statistics trackers for this server")
+                .setDescription("List all statistics trackers for Dieser Server")
         )
         .addSubcommand(subcommand =>
             subcommand

@@ -1,4 +1,4 @@
-import { botConfig, getColor } from '../../../config/bot.js';
+﻿import { botConfig, getColor } from '../../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
@@ -95,7 +95,7 @@ async function handleSetup(interaction, guild, client) {
             throw createError(
                 'Auto-verify enable blocked by conflicting onboarding system',
                 ErrorTypes.CONFIGURATION,
-                'You cannot enable **AutoVerify** while the verification system or AutoRole is configured. Disable those first.',
+                'Du kannst nicht enable **AutoVerify** while the verification system or AutoRole is configured. Disable those first.',
                 {
                     guildId: guild.id,
                     verificationEnabled,
@@ -109,9 +109,9 @@ async function handleSetup(interaction, guild, client) {
         const botMember = guild.members.me;
         if (!botMember) {
             throw createError(
-                'Bot member not found in guild cache',
+                'Bot member Nicht gefunden in guild cache',
                 ErrorTypes.CONFIGURATION,
-                'I could not verify my permissions in this server. Please try again in a moment.',
+                'I could not verify my permissions in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
                 { guildId: guild.id }
             );
         }
@@ -188,3 +188,5 @@ async function handleSetup(interaction, guild, client) {
         throw error;
     }
 }
+
+

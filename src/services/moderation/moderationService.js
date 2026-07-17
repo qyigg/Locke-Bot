@@ -1,4 +1,4 @@
-// moderationService.js
+﻿// moderationService.js
 
 import { PermissionFlagsBits } from 'discord.js';
 import { logger } from '../../utils/logger.js';
@@ -18,8 +18,8 @@ export class ModerationService {
   static buildHierarchyMessage({ actor, actorRole, targetRole, targetLabel, action }) {
     if (actor === 'moderator') {
       return (
-        `You cannot ${action} **${targetLabel}** — their role **${targetRole.name}** is equal to or above yours (**${actorRole.name}**). ` +
-        `In **Server Settings → Roles**, drag your moderator role above **${targetRole.name}**.`
+        `Du kannst nicht ${action} **${targetLabel}** — their role **${targetRole.name}** is equal to or above Deins (**${actorRole.name}**). ` +
+        `In **Server Settings → Roles**, drag Dein moderator role above **${targetRole.name}**.`
       );
     }
 
@@ -46,7 +46,7 @@ export class ModerationService {
     if (!modRole || !targetRole) {
       return `Role hierarchy blocked ${action} for ${targetLabel}`;
     }
-    return `Your role **${modRole.name}** is too low for **${targetRole.name}** — move your role higher`;
+    return `Dein role **${modRole.name}** is too low for **${targetRole.name}** — move Dein role higher`;
   }
 
   static validateHierarchy(moderator, target, action) {
@@ -64,7 +64,7 @@ export class ModerationService {
     if (!modRole || !targetRole) {
       return {
         valid: false,
-        error: 'Could not resolve role hierarchy. Try mentioning the user or use the slash command.',
+        error: 'Could not resolve role hierarchy. Try mentioning Der Benutzer or use the slash command.',
       };
     }
 
@@ -100,7 +100,7 @@ export class ModerationService {
     if (!botRole || !targetRole) {
       return {
         valid: false,
-        error: 'Could not resolve bot role hierarchy. Check that my role is configured in this server.',
+        error: 'Could not resolve bot role hierarchy. Check that my role is configured in Dieser Server.',
       };
     }
 
@@ -136,7 +136,7 @@ export class ModerationService {
     guild,
     user,
     moderator,
-    reason = 'No reason provided',
+    reason = 'Kein Grund angegeben',
     deleteDays = 0
   }) {
     try {
@@ -167,7 +167,7 @@ export class ModerationService {
 
         if (!isOwner && !hasHighPerms) {
             throw new TitanBotError(
-                'You do not have sufficient permissions to ban users who are not in the server.',
+                'Du hast keine sufficient permissions to ban users who are not in the server.',
                 ErrorTypes.PERMISSION,
                 'You need "Manage Server" or "Administrator" permissions to ban users not currently in the guild.'
             );
@@ -210,7 +210,7 @@ export class ModerationService {
     guild,
     member,
     moderator,
-    reason = 'No reason provided'
+    reason = 'Kein Grund angegeben'
   }) {
     try {
       if (!guild || !member || !moderator) {
@@ -268,7 +268,7 @@ export class ModerationService {
     member,
     moderator,
     durationMs,
-    reason = 'No reason provided'
+    reason = 'Kein Grund angegeben'
   }) {
     try {
       if (!guild || !member || !moderator || !durationMs) {
@@ -392,7 +392,7 @@ export class ModerationService {
     guild,
     user,
     moderator,
-    reason = 'No reason provided'
+    reason = 'Kein Grund angegeben'
   }) {
     try {
       if (!guild || !user || !moderator) {
@@ -410,7 +410,7 @@ export class ModerationService {
         throw new TitanBotError(
           'User not banned',
           ErrorTypes.VALIDATION,
-          `${user.tag} is not currently banned from this server`
+          `${user.tag} is not currently banned from Dieser Server`
         );
       }
 
@@ -444,3 +444,5 @@ export class ModerationService {
     }
   }
 }
+
+

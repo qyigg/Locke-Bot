@@ -1,4 +1,4 @@
-import { Events, MessageFlags } from 'discord.js';
+﻿import { Events, MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import {
@@ -126,7 +126,7 @@ export default {
               throw createError(
                 `Risky command cooldown active for ${interaction.commandName}`,
                 ErrorTypes.RATE_LIMIT,
-                `This command is on cooldown. Please wait ${formattedCooldown} before trying again.`,
+                `This command ist im Cooldown. Please wait ${formattedCooldown} before trying again.`,
                 withTraceContext({
                   commandName: interaction.commandName,
                   subtype: 'command_cooldown',
@@ -144,7 +144,7 @@ export default {
               const accessKey = resolveSlashAccessKey(interaction);
               if (!(await isCommandEnabled(client, interaction.guild.id, accessKey, command.category))) {
                 throw createError(
-                  `Command ${accessKey} is disabled in this guild`,
+                  `Command ${accessKey} is disabled in Diese Gilde`,
                   ErrorTypes.CONFIGURATION,
                   'Dieser Befehl wurde für diesen Server deaktiviert.',
                   withTraceContext({ commandName: accessKey, guildId: interaction.guild.id }, interactionTraceContext)

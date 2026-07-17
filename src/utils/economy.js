@@ -1,4 +1,4 @@
-// economy.js
+﻿// economy.js
 
 import { getColor, getEconomyKey as getEconomyStorageKey } from './database.js';
 import { BotConfig } from '../config/bot.js';
@@ -149,16 +149,16 @@ function formatCooldown(ms) {
 export function getWorkReward() {
     const amount = Math.floor(Math.random() * (WORK_MAX - WORK_MIN + 1)) + WORK_MIN;
     const jobs = [
-        'worked at a fast food restaurant',
-        'worked as a programmer',
-        'worked as a construction worker',
-        'worked as a doctor',
-        'worked as a streamer',
-        'worked as a YouTuber',
-        'worked as a teacher',
-        'worked as a cashier',
-        'worked as a delivery driver',
-        'worked as a freelancer'
+        'hast in einem Fast-Food-Restaurant gearbeitet',
+        'hast als Programmierer gearbeitet',
+        'hast als Bauarbeiter gearbeitet',
+        'hast als Arzt gearbeitet',
+        'hast als Streamer gearbeitet',
+        'hast als YouTuber gearbeitet',
+        'hast als Lehrer gearbeitet',
+        'hast als Kassierer gearbeitet',
+        'hast als Lieferfahrer gearbeitet',
+        'hast als Freelancer gearbeitet'
     ];
     
     const job = jobs[Math.floor(Math.random() * jobs.length)];
@@ -166,7 +166,7 @@ export function getWorkReward() {
     return {
         amount,
         job,
-        message: `You ${job} and earned ${formatCurrency(amount)}!`
+        message: `Du ${job} und verdient ${formatCurrency(amount)}!`
     };
 }
 
@@ -175,32 +175,32 @@ export function getCrimeOutcome() {
         {
             success: true,
             amount: Math.floor(Math.random() * 200) + 50,
-            message: 'You successfully robbed a bank and got away with {amount}!' 
+            message: 'Du hast erfolgreich eine Bank überfallen und bist mit {amount} davongekommen!' 
         },
         {
             success: true,
             amount: Math.floor(Math.random() * 100) + 20,
-            message: 'You pickpocketed someone and stole {amount}!' 
+            message: 'Du hast jemanden bestohlen und {amount} geklaut!' 
         },
         {
             success: true,
             amount: Math.floor(Math.random() * 150) + 30,
-            message: 'You hacked into a bank account and transferred {amount} to yourself!' 
+            message: 'Du hast ein Bankkonto gehackt und {amount} auf dein Konto überwiesen!' 
         },
         {
             success: false,
             fine: Math.floor(Math.random() * 100) + 50,
-            message: 'You got caught and had to pay a fine of {fine}!' 
+            message: 'Du bist erwischt worden und musstest eine Geldstrafe von {fine} zahlen!' 
         },
         {
             success: false,
             fine: Math.floor(Math.random() * 150) + 50,
-            message: 'The police caught you! You paid {fine} to get out of jail.' 
+            message: 'Die Polizei hat dich erwischt! Du zahltest {fine}, um aus dem Gefängnis herauszukommen.' 
         },
         {
             success: false,
             fine: 0,
-            message: 'Your attempt failed, but you managed to escape!' 
+            message: 'Dein Versuch ist fehlgeschlagen, aber du bist entkommen!' 
         }
     ];
     
@@ -212,7 +212,7 @@ export function getRobOutcome(targetBalance) {
         return {
             success: false,
             amount: 0,
-            message: 'The target has no money to steal!'
+            message: 'Das Ziel hat kein Geld zum Stehlen!'
         };
     }
     
@@ -227,7 +227,7 @@ Math.floor(Math.random() * (targetBalance * 0.3)) + 1,
         return {
             success: true,
             amount,
-            message: `You successfully robbed them and got away with {amount}!`
+            message: `Du hast sie erfolgreich beraubt und bist mit {amount} davongekommen!`
         };
     } else {
         const fine = Math.floor(Math.random() * 200) + 100;
@@ -236,7 +236,7 @@ Math.floor(Math.random() * (targetBalance * 0.3)) + 1,
             success: false,
             amount: 0,
             fine,
-            message: `You got caught! You had to pay a fine of {fine}.`
+            message: `Du bist erwischt worden! Du musstest eine Geldstrafe von {fine} zahlen.`
         };
     }
 }
@@ -249,9 +249,9 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
     const validAmount = validateNumber(amount, 'amount');
     if (validAmount === null || validAmount <= 0) {
         throw createError(
-            'Invalid amount',
+            'Ungültiger Betrag',
             ErrorTypes.VALIDATION,
-            'Amount must be a positive number.',
+            'Der Betrag muss eine positive Zahl sein.',
             { guildId, userId, amount, operation: 'addMoney' }
         );
     }
@@ -271,9 +271,9 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
         const maxBank = getMaxBankCapacity(userData);
         if ((userData.bank || 0) + validAmount > maxBank) {
             throw createError(
-                'Bank capacity exceeded',
+                'Bankkapazität überschritten',
                 ErrorTypes.VALIDATION,
-                `Bank capacity exceeded. Current: ${userData.bank || 0}, Max: ${maxBank}.`,
+                `Bankkapazität überschritten. Current: ${userData.bank || 0}, Max: ${maxBank}.`,
                 { guildId, userId, current: userData.bank || 0, max: maxBank, operation: 'addMoney' }
             );
         }
@@ -291,16 +291,16 @@ export const addMoney = wrapServiceBoundary(async function addMoney(client, guil
 }, {
     service: 'economy',
     operation: 'addMoney',
-    userMessage: 'Failed to add money. Please try again.',
+    userMessage: 'Failed to add money. Bitte versuchen Sie es später erneut.',
 });
 
 export const removeMoney = wrapServiceBoundary(async function removeMoney(client, guildId, userId, amount, type = 'wallet') {
     const validAmount = validateNumber(amount, 'amount');
     if (validAmount === null || validAmount <= 0) {
         throw createError(
-            'Invalid amount',
+            'Ungültiger Betrag',
             ErrorTypes.VALIDATION,
-            'Amount must be a positive number.',
+            'Der Betrag muss eine positive Zahl sein.',
             { guildId, userId, amount, operation: 'removeMoney' }
         );
     }
@@ -346,7 +346,7 @@ export const removeMoney = wrapServiceBoundary(async function removeMoney(client
 }, {
     service: 'economy',
     operation: 'removeMoney',
-    userMessage: 'Failed to remove money. Please try again.',
+    userMessage: 'Failed to remove money. Bitte versuchen Sie es später erneut.',
 });
 
 export function getShopInventory() {
@@ -381,7 +381,7 @@ export function getShopInventory() {
             name: 'Bank Loan',
             emoji: '🏦',
             price: 5000,
-            description: 'Increases your bank capacity by 50,000!',
+            description: 'Increases Dein bank capacity by 50,000!',
             type: 'upgrade',
             effect: 'bank_capacity',
             value: 50000
@@ -397,3 +397,4 @@ export function getShopInventory() {
         }
     ];
 }
+

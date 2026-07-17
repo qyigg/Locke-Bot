@@ -1,4 +1,4 @@
-import { getColor } from '../../../config/bot.js';
+﻿import { getColor } from '../../../config/bot.js';
 import { PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { createEmbed } from '../../../utils/embeds.js';
 import { getServerCounters, saveServerCounters, getCounterEmoji, getCounterTypeLabel } from '../../../services/serverstatsService.js';
@@ -32,7 +32,7 @@ export async function handleDelete(interaction, client) {
 
         const counterToDelete = counters.find(c => c.id === counterId);
         if (!counterToDelete) {
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Counter with ID \`${counterId}\` not found. Use \`/serverstats list\` to see all counters.` }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Counter with ID \`${counterId}\` Nicht gefunden. Use \`/serverstats list\` to see all counters.` }).catch(logger.error);
             return;
         }
 
@@ -40,7 +40,7 @@ export async function handleDelete(interaction, client) {
 
         const embed = createEmbed({
             title: "Delete Counter & Channel",
-            description: `Are you sure you want to delete this counter and its channel?\n\n**ID:** \`${counterToDelete.id}\`\n**Type:** ${getCounterTypeDisplay(counterToDelete.type)}\n**Channel:** ${channel || 'Deleted Channel'}\n\n **The channel will be permanently deleted!**`,
+            description: `Are you sure you want to delete this counter and its channel?\n\n**ID:** \`${counterToDelete.id}\`\n**Type:** ${getCounterTypeDisplay(counterToDelete.type)}\n**Channel:** ${channel || 'Deleted Channel'}\n\n **Der Kanal will be permanently deleted!**`,
             color: getColor('error')
         });
 
@@ -59,7 +59,7 @@ export async function handleDelete(interaction, client) {
 
     } catch (error) {
         logger.error("Error in handleDelete:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while fetching counters. Bitte versuchen Sie es später erneut.' }).catch(logger.error);
     }
 }
 
@@ -69,9 +69,9 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
     const counter = counters.find(c => c.id === counterId);
     if (!counter) {
         throw createError(
-            'Counter not found',
+            'Counter Nicht gefunden',
             ErrorTypes.USER_INPUT,
-            `Counter with ID \`${counterId}\` was not found.`,
+            `Counter with ID \`${counterId}\` was Nicht gefunden.`,
             { guildId: guild.id, counterId, operation: 'performDeletionByCounterId' }
         );
     }
@@ -83,7 +83,7 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
         throw createError(
             'Counter delete failed',
             ErrorTypes.DATABASE,
-            'Failed to delete counter. Please try again.',
+            'Failed to delete counter. Bitte versuchen Sie es später erneut.',
             { guildId: guild.id, counterId, operation: 'performDeletionByCounterId' }
         );
     }
@@ -100,7 +100,7 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
         }
     }
 
-    let message = `✅ **Counter Deleted Successfully!**\n\n**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}`;
+    let message = `✅ **Counter Erfolgreich gelöscht!**\n\n**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}`;
 
     if (channelDeleted) {
         message += `\n**Channel:** ${channel.name} (deleted)`;
@@ -114,9 +114,11 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
 }, {
     service: 'serverstats',
     operation: 'performDeletionByCounterId',
-    userMessage: 'An error occurred while deleting the counter. Please try again.',
+    userMessage: 'Ein Fehler ist aufgetreten while deleting the counter. Bitte versuchen Sie es später erneut.',
 });
 
 function getCounterTypeDisplay(type) {
     return `${getCounterEmoji(type)} ${getCounterTypeLabel(type)}`;
 }
+
+

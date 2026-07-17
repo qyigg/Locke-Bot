@@ -1,4 +1,4 @@
-import { getColor } from '../../../config/bot.js';
+﻿import { getColor } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -264,7 +264,7 @@ export default {
 
             if (!guildConfig.ticketPanelChannelId) {
                 throw new TitanBotError(
-                    'Ticket system not configured',
+                    'Ticketsystem nicht konfiguriert',
                     ErrorTypes.CONFIGURATION,
                     'The ticket system has not been set up yet. Run `/ticket setup` first to configure it.',
                 );
@@ -467,7 +467,7 @@ async function handleStaffRole(selectInteraction, rootInteraction, guildConfig, 
             new EmbedBuilder()
                 .setTitle('🛡️ Change Staff Role')
                 .setDescription(
-                    `**Current:** ${guildConfig.ticketStaffRoleId ? `<@&${guildConfig.ticketStaffRoleId}>` : '`Not set`'}\n\nSelect the role that should have staff access to manage tickets.`,
+                    `**Current:** ${guildConfig.ticketStaffRoleId ? `<@&${guildConfig.ticketStaffRoleId}>` : '`Not set`'}\n\nSelect Die Rolle that should have staff access to manage tickets.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -1018,3 +1018,4 @@ async function handleDeleteSystem(btnInteraction, rootInteraction, guildConfig, 
         components: [],
     }).catch(() => {});
 }
+

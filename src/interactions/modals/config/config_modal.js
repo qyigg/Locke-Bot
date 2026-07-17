@@ -1,4 +1,4 @@
-import { successEmbed } from '../../../utils/embeds.js';
+﻿import { successEmbed } from '../../../utils/embeds.js';
 
 import ConfigService from '../../../services/config/configService.js';
 import { MessageFlags } from 'discord.js';
@@ -86,7 +86,7 @@ function buildSuccessMessage(key, value, guild) {
         return `Moderator role set to ${role ?? `<@&${value}>`}.`;
     }
 
-    return `The setting \`${key}\` has been updated successfully.`;
+    return `The setting \`${key}\` has been Erfolgreich aktualisiert.`;
 }
 
 export default {
@@ -104,7 +104,9 @@ export default {
             });
         } catch (error) {
             logger.error('Config modal handler error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: error.message || 'Please try again.' });
+            await replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: error.message || 'Bitte versuchen Sie es später erneut.' });
         }
     },
 };
+
+

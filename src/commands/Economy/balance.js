@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -8,7 +8,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('balance')
-        .setDescription("Check your or someone else's balance")
+        .setDescription("Überprüfe deinen oder den Kontostand von jemand anderem")
         .addUserOption(option =>
             option
                 .setName('user')
@@ -32,7 +32,7 @@ export default {
             throw createError(
                 "Bot user queried for balance",
                 ErrorTypes.VALIDATION,
-                "Bots don't have an economy balance."
+                "Bots haben keinen Wirtschaftskontostand."
             );
         }
 
@@ -44,7 +44,7 @@ export default {
             throw createError(
                 "Failed to load economy data",
                 ErrorTypes.DATABASE,
-                "Failed to load economy data. Please try again later.",
+                "Failed to load economy data. Bitte versuchen Sie es später erneut later.",
                 { userId: targetUser.id, guildId }
             );
         }
@@ -55,12 +55,12 @@ export default {
         const bank = typeof userData.bank === 'number' ? userData.bank : 0;
 
             const embed = createEmbed({
-                title: `${targetUser.username}'s Balance`,
-                description: `Here is the current financial status for ${targetUser.username}.`,
+                title: `${targetUser.username}s Kontostand`,
+                description: `Hier ist der aktuelle finanzielle Status von ${targetUser.username}.`,
             })
                 .addFields(
                     {
-                        name: "💵 Cash",
+                        name: "💵 Bargeld",
                         value: `$${wallet.toLocaleString()}`,
                         inline: true,
                     },
@@ -70,13 +70,13 @@ export default {
                         inline: true,
                     },
                     {
-                        name: "💰 Total",
+                        name: "💰 Insgesamt",
                         value: `$${(wallet + bank).toLocaleString()}`,
                         inline: true,
                     }
                 )
                 .setFooter({
-                    text: `Requested by ${interaction.user.tag}`,
+                    text: `Angefordert von ${interaction.user.tag}`,
                     iconURL: interaction.user.displayAvatarURL(),
                 });
 

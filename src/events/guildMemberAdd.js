@@ -1,4 +1,4 @@
-import { Events, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+﻿import { Events, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { getColor, botConfig } from '../config/bot.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import { getWelcomeConfig } from '../utils/database.js';
@@ -31,14 +31,14 @@ export default {
             if (permissions?.has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
                 const formatData = { user, guild, member };
                 const welcomeMessage = formatWelcomeMessage(
-                    welcomeConfig.welcomeMessage || welcomeConfig.welcomeEmbed?.description || botConfig.welcome?.defaultWelcomeMessage || 'Welcome {user} to {server}!',
+                    welcomeConfig.welcomeMessage || welcomeConfig.welcomeEmbed?.description || botConfig.welcome?.defaultWelcomeMessage || 'Willkommen {user} in {server}!',
                     formatData
                 );
 
                 const messageContent = welcomeConfig.welcomePing ? user.toString() : null;
 
                 const embedTitle = formatWelcomeMessage(
-                    welcomeConfig.welcomeEmbed?.title || '🎉 Welcome!',
+                    welcomeConfig.welcomeEmbed?.title || '🎉 Willkommen!',
                     formatData
                 );
                 const embedFooter = welcomeConfig.welcomeEmbed?.footer
@@ -196,3 +196,4 @@ async function assignRoleSafely(member, role) {
         logger.warn(`Failed to assign role ${role.id} to member ${member.id}:`, error);
     }
 }
+

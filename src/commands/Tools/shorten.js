@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -74,8 +74,8 @@ export default {
             });
         } catch (networkError) {
             const message = networkError?.name === 'AbortError'
-                ? 'The URL shortener timed out. Please try again in a moment.'
-                : 'Unable to reach the URL shortener service right now. Please try again later.';
+                ? 'The URL shortener timed out. Bitte versuchen Sie es später erneut in a moment.'
+                : 'Unable to reach the URL shortener service right now. Bitte versuchen Sie es später erneut later.';
             return replyUserError(interaction, {
                 type: ErrorTypes.NETWORK,
                 message,
@@ -87,7 +87,7 @@ export default {
         if (!response.ok) {
             return replyUserError(interaction, {
                 type: ErrorTypes.UNKNOWN,
-                message: `Shortener service returned HTTP ${response.status}. Please try again later.`,
+                message: `Shortener service returned HTTP ${response.status}. Bitte versuchen Sie es später erneut later.`,
             });
         }
 
@@ -96,7 +96,7 @@ export default {
         try {
             new URL(shortUrl);
         } catch (e) {
-            if (shortUrl.includes("already exists")) {
+            if (shortUrl.includes("Existiert bereits")) {
                 return replyUserError(interaction, {
                     type: ErrorTypes.VALIDATION,
                     message: 'That custom URL is already taken. Try a different one.',
@@ -113,10 +113,12 @@ export default {
             });
         }
 
-        const embed = successEmbed('URL Shortened', `Here's your shortened URL: ${shortUrl}`);
+        const embed = successEmbed('URL Shortened', `Here's Dein shortened URL: ${shortUrl}`);
         embed.setColor(getColor('success'));
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed],
         });
     },
 };
+
+

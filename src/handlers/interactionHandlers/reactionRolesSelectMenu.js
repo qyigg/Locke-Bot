@@ -1,4 +1,4 @@
-import { EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
 import { handleInteractionError, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -25,7 +25,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         const reactionRoleData = await getReactionRoleMessage(client, interaction.guildId, interaction.message.id);
 
         if (!reactionRoleData) {
-            logger.warn(`Reaction role data not found for message ${interaction.message.id} in guild ${interaction.guildId}`);
+            logger.warn(`Reaction role data Nicht gefunden for message ${interaction.message.id} in guild ${interaction.guildId}`);
             return interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
@@ -44,7 +44,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             throw createError(
                 'Unable to fetch bot member for permission validation',
                 ErrorTypes.PERMISSION,
-                'I could not verify my server permissions. Please try again.',
+                'I could not verify my server permissions. Bitte versuchen Sie es später erneut.',
                 { guildId: interaction.guildId }
             );
         }
@@ -53,7 +53,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             throw createError(
                 'Bot missing ManageRoles permission',
                 ErrorTypes.PERMISSION,
-                'I do not have permission to manage roles in this server.',
+                'I do not have permission to manage roles in Dieser Server.',
                 { guildId: interaction.guildId }
             );
         }
@@ -76,7 +76,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
 
             const role = interaction.guild.roles.cache.get(roleId);
             if (!role) {
-                logger.warn(`Role ${roleId} not found in guild ${interaction.guildId}`);
+                logger.warn(`Role ${roleId} Nicht gefunden in guild ${interaction.guildId}`);
                 skippedRoles.push(roleId);
                 continue;
             }
@@ -135,7 +135,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             }
         }
 
-        let description = '🎭 **Roles updated successfully!**\n\n';
+        let description = '🎭 **Roles Erfolgreich aktualisiert!**\n\n';
 
         if (addedRoles.length > 0) {
             description += `✅ **Added:** ${addedRoles.map(name => `**${name}**`).join(', ')}\n`;
@@ -146,7 +146,7 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         }
 
         if (addedRoles.length === 0 && removedRoles.length === 0) {
-            description += 'No changes were made to your roles.';
+            description += 'No changes were made to Dein roles.';
         }
 
         if (skippedRoles.length > 0) {
@@ -203,3 +203,5 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         });
     }
 }
+
+

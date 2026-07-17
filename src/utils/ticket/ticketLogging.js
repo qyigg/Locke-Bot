@@ -1,4 +1,4 @@
-// ticketLogging.js
+﻿// ticketLogging.js
 
 import { ChannelType } from 'discord.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
@@ -26,7 +26,7 @@ export async function logTicketEvent({ client, guildId, event }) {
 
     const channel = guild.channels.cache.get(logChannelId) || await guild.channels.fetch(logChannelId).catch(() => null);
     if (!channel) {
-      logger.warn(`Ticket log channel not found: ${logChannelId} for event type: ${event.type}`);
+      logger.warn(`Ticket log Kanal nicht gefunden: ${logChannelId} for event type: ${event.type}`);
       return;
     }
 
@@ -277,4 +277,5 @@ export function validateLogChannel(channel, botMember) {
 
   return { valid: true };
 }
+
 

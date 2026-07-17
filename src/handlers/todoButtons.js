@@ -1,4 +1,4 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
+﻿import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { successEmbed } from '../utils/embeds.js';
 import { getFromDb, setInDb } from '../utils/database.js';
 import { checkRateLimit } from '../utils/rateLimiter.js';
@@ -226,7 +226,7 @@ const sharedTodoAddModalHandler = {
       let listData = await getFromDb(listKey, null);
       
       if (!listData) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
       }
 
       if (!listData.members || !listData.members.includes(userId)) {
@@ -256,7 +256,7 @@ const sharedTodoAddModalHandler = {
 
     } catch (error) {
       logger.error('Error in shared todo add modal:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while adding the task.' });
+      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while adding the task.' });
     }
   }
 };
@@ -287,7 +287,7 @@ const sharedTodoCompleteModalHandler = {
       let listData = await getFromDb(listKey, null);
       
       if (!listData) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
       }
 
       if (!listData.members || !listData.members.includes(userId)) {
@@ -299,7 +299,7 @@ const sharedTodoCompleteModalHandler = {
       const task = listData.tasks.find(t => t.id === taskId);
       
       if (!task) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
       }
 
       if (task.completed) {
@@ -321,7 +321,7 @@ const sharedTodoCompleteModalHandler = {
 
     } catch (error) {
       logger.error('Error in shared todo complete modal:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while completing the task.' });
+      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while completing the task.' });
     }
   }
 };
@@ -352,7 +352,7 @@ const sharedTodoRemoveModalHandler = {
       const listData = await getFromDb(listKey, null);
 
       if (!listData) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
       }
 
       if (!listData.members || !listData.members.includes(userId)) {
@@ -365,7 +365,7 @@ const sharedTodoRemoveModalHandler = {
 
       const taskIndex = listData.tasks.findIndex(task => task.id === taskId);
       if (taskIndex === -1) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
       }
 
       const [removedTask] = listData.tasks.splice(taskIndex, 1);
@@ -379,10 +379,11 @@ const sharedTodoRemoveModalHandler = {
       });
     } catch (error) {
       logger.error('Error in shared todo remove modal:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while removing the task.' });
+      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while removing the task.' });
     }
   }
 };
 
 export default sharedTodoAddHandler;
 export { sharedTodoCompleteHandler, sharedTodoRemoveHandler, sharedTodoAddModalHandler, sharedTodoCompleteModalHandler, sharedTodoRemoveModalHandler };
+

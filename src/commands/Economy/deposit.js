@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { successEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -7,7 +7,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('deposit')
-        .setDescription('Deposit money from your wallet into your bank')
+        .setDescription('Zahle Geld von deinem Geldbeutel auf deine Bank ein')
         .addStringOption(option =>
             option
                 .setName('amount')
@@ -29,7 +29,7 @@ export default {
                 throw createError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -67,7 +67,7 @@ export default {
                     embeds: [
                         buildUserErrorEmbed(
                             'validation',
-                            `You tried to deposit more than you have. Depositing your remaining cash: **$${depositAmount.toLocaleString()}**`
+                            `You tried to deposit more than you have. Depositing Dein remaining cash: **$${depositAmount.toLocaleString()}**`
                         )
                     ],
                     flags: MessageFlags.Ephemeral,
@@ -80,7 +80,7 @@ export default {
                 throw createError(
                     "Bank is full",
                     ErrorTypes.VALIDATION,
-                    `Your bank is currently full (Max Capacity: $${maxBank.toLocaleString()}). Purchase a **Bank Upgrade** to increase your limit.`,
+                    `Dein bank is currently full (Max Capacity: $${maxBank.toLocaleString()}). Purchase a **Bank Upgrade** to increase Dein limit.`,
                     { maxBank, currentBank: userData.bank, userId }
                 );
             }
@@ -94,7 +94,7 @@ export default {
                         embeds: [
                             buildUserErrorEmbed(
                                 'validation',
-                                `You only had space for **$${depositAmount.toLocaleString()}** in your bank account (Max: $${maxBank.toLocaleString()}). The rest remains in your cash.`
+                                `You only had space for **$${depositAmount.toLocaleString()}** in Dein bank account (Max: $${maxBank.toLocaleString()}). The rest remains in Dein cash.`
                             )
                         ],
                         flags: MessageFlags.Ephemeral,
@@ -106,7 +106,7 @@ export default {
                 throw createError(
                     "No space or cash for deposit",
                     ErrorTypes.VALIDATION,
-                    "The amount you tried to deposit was either 0 or exceeded your bank capacity after checking your cash balance.",
+                    "The amount you tried to deposit was either 0 or exceeded Dein bank capacity after checking Dein cash balance.",
                     { depositAmount, availableSpace, walletBalance: userData.wallet }
                 );
             }
@@ -117,17 +117,17 @@ export default {
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                'Deposit Successful',
-                `You successfully deposited **$${depositAmount.toLocaleString()}** into your bank.`
+                'Einzahlung erfolgreich',
+                `Du hast erfolgreich **$${depositAmount.toLocaleString()}** auf deine Bank eingezahlt.`
             )
                 .addFields(
                     {
-                        name: "New Cash Balance",
+                        name: "Neuer Bargeldkontostand",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "New Bank Balance",
+                        name: "Neuer Bankkontostand",
                         value: `$${userData.bank.toLocaleString()} / $${maxBank.toLocaleString()}`,
                         inline: true,
                     },
@@ -136,3 +136,4 @@ export default {
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'deposit' })
 };
+

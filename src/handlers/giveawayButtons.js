@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from 'discord.js';
+﻿import { MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../utils/embeds.js';
 import { logger } from '../utils/logger.js';
 import { TitanBotError, ErrorTypes, handleInteractionError, replyUserError } from '../utils/errorHandler.js';
@@ -35,7 +35,7 @@ export const giveawayJoinHandler = {
 
                 if (!giveaway) {
                     throw new TitanBotError(
-                        'Giveaway not found in database',
+                        'Giveaway Nicht gefunden in database',
                         ErrorTypes.VALIDATION,
                         'This giveaway is no longer active.',
                         { messageId: interaction.message.id, guildId: interaction.guildId }
@@ -74,7 +74,7 @@ export const giveawayJoinHandler = {
                 await interaction.reply({
                     embeds: [
                         successEmbed(
-                            'Success! You have entered the giveaway! 🎉',
+                            'Erfolg! You have entered the giveaway! 🎉',
                             `Good luck! There are now ${participants.length} entry/entries.`
                         )
                     ],
@@ -107,7 +107,7 @@ export const giveawayEndHandler = {
             }
 
             if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-                return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the \'Manage Server\' permission to end a giveaway.' });
+                return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the \'Manage Server\' permission to Beende ein Giveaway.' });
             }
 
             const guildGiveaways = await getGuildGiveaways(client, interaction.guildId);
@@ -115,7 +115,7 @@ export const giveawayEndHandler = {
 
             if (!giveaway) {
                 throw new TitanBotError(
-                    'Giveaway not found in database',
+                    'Giveaway Nicht gefunden in database',
                     ErrorTypes.VALIDATION,
                     'This giveaway is no longer active.',
                     { messageId: interaction.message.id, guildId: interaction.guildId }
@@ -223,7 +223,7 @@ export const giveawayRerollHandler = {
             }
 
             if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-                return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the \'Manage Server\' permission to reroll a giveaway.' });
+                return replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the \'Manage Server\' permission to Rerolle ein Giveaway.' });
             }
 
             const guildGiveaways = await getGuildGiveaways(client, interaction.guildId);
@@ -231,7 +231,7 @@ export const giveawayRerollHandler = {
 
             if (!giveaway) {
                 throw new TitanBotError(
-                    'Giveaway not found in database',
+                    'Giveaway Nicht gefunden in database',
                     ErrorTypes.VALIDATION,
                     'This giveaway is no longer active.',
                     { messageId: interaction.message.id, guildId: interaction.guildId }
@@ -348,7 +348,7 @@ export const giveawayViewHandler = {
 
             if (!giveaway) {
                 throw new TitanBotError(
-                    'Giveaway not found in database',
+                    'Giveaway Nicht gefunden in database',
                     ErrorTypes.VALIDATION,
                     'This giveaway could not be found.',
                     { messageId: interaction.message.id, guildId: interaction.guildId }
@@ -383,3 +383,5 @@ export const giveawayViewHandler = {
         }
     }
 };
+
+

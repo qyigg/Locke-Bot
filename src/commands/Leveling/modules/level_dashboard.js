@@ -1,4 +1,4 @@
-import { getColor } from '../../../config/bot.js';
+﻿import { getColor } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -70,7 +70,7 @@ function buildSelectMenu(guildId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Change Level-up Channel')
-                .setDescription('Set the channel where level-up notifications are sent')
+                .setDescription('Set Der Kanal where level-up notifications are sent')
                 .setValue('channel')
                 .setEmoji('📢'),
             new StringSelectMenuOptionBuilder()
@@ -256,7 +256,7 @@ async function handleRoleRewardAdd(selectInteraction, rootInteraction, cfg, guil
 
     const roleLabel = new LabelBuilder()
         .setLabel('Role to Award')
-        .setDescription('This role will be given when the user reaches the level')
+        .setDescription('This role will be given when Der Benutzer reaches the level')
         .setRoleSelectMenuComponent(roleSelect);
 
     const levelInput = new TextInputBuilder()
@@ -365,7 +365,7 @@ async function handleRoleRewardRemove(selectInteraction, rootInteraction, cfg, g
     await saveLevelingConfig(client, guildId, cfg);
 
     await submitted.reply({
-        embeds: [successEmbed('Role Reward Removed', `The role reward for level **${level}** has been removed.`)],
+        embeds: [successEmbed('Role Reward Removed', `Die Rolle reward for level **${level}** has been removed.`)],
         flags: MessageFlags.Ephemeral,
     });
 

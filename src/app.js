@@ -50,10 +50,10 @@ class TitanBot extends Client {
 
   async start() {
     try {
-      startupLog('Starting TitanBot...');
+      startupLog('TitanBot wird gestartet...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      startupLog('Initializing database...');
+      startupLog('Datenbank wird initialisiert...');
       const dbInstance = await initializeDatabase();
       this.db = dbInstance.db;
 
@@ -62,49 +62,49 @@ class TitanBot extends Client {
       if (dbStatus.isDegraded) {
         logger.warn('');
         logger.warn('╔═══════════════════════════════════════════════════════╗');
-        logger.warn('║ ⚠️  DATABASE RUNNING IN DEGRADED MODE                 ║');
+        logger.warn('║ ⚠️  DATENBANK LÄUFT IM EINGESCHRÄNKTEN MODUS          ║');
         logger.warn('║                                                       ║');
-        logger.warn('║ Connection: In-Memory Storage (PostgreSQL unavailable)║');
-        logger.warn('║ Data Persistence: DISABLED - data lost on restart    ║');
-        logger.warn('║ Action Required: Fix PostgreSQL and restart bot      ║');
+        logger.warn('║ Verbindung: In-Memory Storage (PostgreSQL nicht aktiv)║');
+        logger.warn('║ Persistenz: DEAKTIVIERT - Daten gehen beim Neustart   ║');
+        logger.warn('║ Aktion nötig: PostgreSQL reparieren und Bot neustarten║');
         logger.warn('╚═══════════════════════════════════════════════════════╝');
         logger.warn('');
       } else {
-        startupLog(`✅ Database Status: ${dbStatus.connectionType} (fully operational)`);
+        startupLog(`✅ Datenbank Status: ${dbStatus.connectionType} (vollständig aktiv)`);
       }
       
-      startupLog('Starting web server...');
+      startupLog('Webserver wird gestartet...');
       this.startWebServer();
       
-      startupLog('Loading commands...');
+      startupLog('Befehle werden geladen...');
       await loadCommands(this);
-      startupLog(`Commands loaded: ${this.commands.size}`);
+      startupLog(`Befehle geladen: ${this.commands.size}`);
       
-      startupLog('Loading handlers...');
+      startupLog('Handler werden geladen...');
       await this.loadHandlers();
-      startupLog('Handlers loaded');
+      startupLog('Handler geladen');
 
       initializeMusic(this);
       
-      startupLog('Logging into Discord...');
+      startupLog('Verbindung zu Discord wird hergestellt...');
       await this.login(this.config.bot.token);
-      startupLog('Discord login successful');
+      startupLog('Discord-Anmeldung erfolgreich');
       
-      startupLog('Registering slash commands globally...');
+      startupLog('Slash-Befehle werden global registriert...');
       await this.registerCommands();
-      startupLog('Slash commands registration complete');
+      startupLog('Registrierung von Slash-Befehlen abgeschlossen');
       
       const databaseMode = dbStatus.isDegraded
-        ? 'Optional in-memory mode (data resets after restart)'
-        : 'Connected (persistent data enabled)';
-      const handlerSummary = `${this.buttons.size} buttons, ${this.selectMenus.size} menus, ${this.modals.size} modals`;
+        ? 'Optionaler In-Memory-Modus (Daten setzen sich nach Neustart zurück)'
+        : 'Verbunden (Persistente Daten aktiviert)';
+      const handlerSummary = `${this.buttons.size} Buttons, ${this.selectMenus.size} Menüs, ${this.modals.size} Modals`;
       startupLog(
-        `ONLINE ✅ | ${this.commands.size} commands loaded | ${handlerSummary} | Database: ${databaseMode}`
+        `ONLINE ✅ | ${this.commands.size} Befehle geladen | ${handlerSummary} | Datenbank: ${databaseMode}`
       );
       
       this.setupCronJobs();
     } catch (error) {
-      logger.error('Failed to start bot:', error);
+      logger.error('Bot konnte nicht gestartet werden:', error);
       process.exit(1);
     }
   }
@@ -148,7 +148,7 @@ class TitanBot extends Client {
       const times = requestCounts.get(ip).filter(t => t > windowStart);
       
       if (times.length >= maxRequests) {
-        return res.status(429).json({ error: 'Too many requests' });
+        return res.status(429).json({ error: 'Zu viele Anfragen' });
       }
       
       times.push(now);
@@ -159,7 +159,7 @@ class TitanBot extends Client {
     app.get('/health', (req, res) => {
       const dbStatus = this.db?.getStatus?.() || { isDegraded: 'unknown' };
       const status = {
-        status: 'healthy',
+        status: 'gesund',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         database: {
@@ -190,14 +190,14 @@ class TitanBot extends Client {
       if (isReady) {
         return res.status(200).json({
           ready: true,
-          message: 'Bot is ready',
+          message: 'Bot ist bereit',
           metrics,
         });
       }
 
       res.status(503).json({
         ready: false,
-        reason: !this.isReady() ? 'Bot not Ready' : 'Database degraded',
+        reason: !this.isReady() ? 'Bot nicht bereit' : 'Datenbank degradiert',
         metrics,
       });
     });
@@ -215,9 +215,9 @@ class TitanBot extends Client {
       const server = app.listen(port, host, () => {
         hasStartedListening = true;
         this.webServer = server;
-        startupLog(`✅ Web Server running on ${host}:${port}`);
-        startupLog(`Health endpoint: http://${host}:${port}/health`);
-        startupLog(`Ready endpoint: http://${host}:${port}/ready`);
+        startupLog(`✅ Webserver läuft auf ${host}:${port}`);
+        startupLog(`Health Endpunkt: http://${host}:${port}/health`);
+        startupLog(`Ready Endpunkt: http://${host}:${port}/ready`);
       });
 
       server.on('error', (error) => {
@@ -226,17 +226,17 @@ class TitanBot extends Client {
 
         if (!hasStartedListening && errorCode === 'EADDRINUSE' && attempt < maxPortRetryAttempts) {
           const nextPort = port + 1;
-          startupLog(`Port ${port} is already in use. Trying port ${nextPort}...`);
+        startupLog(`Port ${port} wird bereits verwendet. Versuche Port ${nextPort}...`);
           setTimeout(() => startServer(nextPort, attempt + 1), 250);
           return;
         }
 
         if (hasStartedListening && errorCode === 'EADDRINUSE') {
-          logger.warn(`Web server reported a duplicate bind warning on ${host}:${port}, but the bot remains online.`);
+        logger.warn(`Webserver meldete eine doppelte Bind-Warnung auf ${host}:${port}, aber der Bot bleibt online.`);
           return;
         }
 
-        logger.error(`❌ Web server error on port ${port} (${errorCode}): ${errorMessage}`);
+      logger.error(`❌ Webserver-Fehler auf Port ${port} (${errorCode}): ${errorMessage}`);
 
         if (!hasStartedListening) {
           process.exit(1);
@@ -255,7 +255,7 @@ class TitanBot extends Client {
 
   async updateAllCounters() {
     if (!this.db) {
-      logger.warn('Database not available for counter updates');
+      logger.warn('Datenbank nicht verfügbar für Counter-Updates');
       return;
     }
     
@@ -273,7 +273,7 @@ class TitanBot extends Client {
               await updateCounter(this, guild, counter);
             } else {
               orphanedCounters.push(counter);
-              logger.info(`Removing orphaned counter ${counter.id} (type: ${counter.type}, deleted channel: ${counter.channelId}) from guild ${guildId}`);
+              logger.info(`Verwaiste Counter ${counter.id} werden entfernt (Typ: ${counter.type}, gelöschter Kanal: ${counter.channelId}) aus Guild ${guildId}`);
             }
           }
         }
@@ -282,16 +282,16 @@ class TitanBot extends Client {
         // Save cleaned counters if any were orphaned
         if (orphanedCounters.length > 0) {
           await saveServerCounters(this, guildId, validCounters);
-          logger.info(`Cleaned up ${orphanedCounters.length} orphaned counter(s) from guild ${guildId} during scheduled update`);
+          logger.info(`${orphanedCounters.length} verwaiste Counter wurden aus Guild ${guildId} während des geplanten Updates bereinigt`);
         }
       } catch (error) {
-        logger.error(`Error updating counters for guild ${guildId}:`, error);
+        logger.error(`Fehler beim Update von Countern für Guild ${guildId}:`, error);
       }
     }
   }
 
   async loadHandlers() {
-    startupLog('Loading handlers...');
+    startupLog('Handler werden geladen...');
     const handlers = [
       { path: 'events', type: 'default', required: true },
       { path: 'interactions', type: 'default', required: true }
@@ -299,7 +299,7 @@ class TitanBot extends Client {
 
     for (const handler of handlers) {
       try {
-        startupLog(`Loading handler: ${handler.path}`);
+        startupLog(`Handler wird geladen: ${handler.path}`);
         const module = await import(`./handlers/loaders/${handler.path}.js`);
         const loaderFn = handler.type.startsWith('named:')
           ? module[handler.type.split(':')[1]]
@@ -307,16 +307,16 @@ class TitanBot extends Client {
 
         if (typeof loaderFn === 'function') {
           await loaderFn(this);
-          startupLog(`✅ Loaded ${handler.path}`);
+          startupLog(`✅ ${handler.path} geladen`);
         } else {
-          throw new Error(`Invalid loader export from ${handler.path}`);
+          throw new Error(`Ungültiger Loader-Export von ${handler.path}`);
         }
       } catch (error) {
         if (handler.required) {
-          logger.error(`❌ Failed to load required handler ${handler.path}:`, error.message);
+          logger.error(`❌ Erforderlicher Handler ${handler.path} konnte nicht geladen werden:`, error.message);
           throw error;
         } else if (error.code !== 'MODULE_NOT_FOUND') {
-          logger.warn(`⚠️  Failed to load optional handler ${handler.path}:`, error.message);
+          logger.warn(`⚠️  Optionaler Handler ${handler.path} konnte nicht geladen werden:`, error.message);
         }
       }
     }
@@ -331,57 +331,57 @@ class TitanBot extends Client {
   }
 
   async shutdown(reason = 'UNKNOWN') {
-    shutdownLog(`Bot is shutting down (${reason})...`);
+    shutdownLog(`Bot wird heruntergefahren (${reason})...`);
     logger.info(`\n${'='.repeat(60)}`);
-    logger.info(`🛑 Graceful Shutdown Initiated (${reason})`);
+    logger.info(`🛑 Sauberer Herunterfahren eingeleitet (${reason})`);
     logger.info(`${'='.repeat(60)}`);
 
     try {
       
-      logger.info('Stopping cron jobs...');
+      logger.info('Cron-Jobs werden gestoppt...');
       cron.getTasks().forEach(task => task.stop());
-      logger.info('✅ Cron jobs stopped');
+      logger.info('✅ Cron-Jobs gestoppt');
 
-      logger.info('Stopping music players...');
+      logger.info('Musik-Player werden gestoppt...');
       await shutdownMusic(this);
-      logger.info('✅ Music players stopped');
+      logger.info('✅ Musik-Player gestoppt');
 
       if (this.webServer) {
-        logger.info('Closing web server...');
+        logger.info('Webserver wird geschlossen...');
         await new Promise((resolve) => this.webServer.close(resolve));
-        logger.info('✅ Web server closed');
+        logger.info('✅ Webserver geschlossen');
       }
 
       // Close database connection
       // Close database connection
       if (this.db && this.db.db) {
-        logger.info('Closing database connection...');
+        logger.info('Datenbankverbindung wird geschlossen...');
         try {
           if (this.db.db.pool) {
             await this.db.db.pool.end();
-            logger.info('✅ Database connection closed');
+            logger.info('✅ Datenbankverbindung geschlossen');
           }
         } catch (error) {
-          logger.warn('Error closing database pool:', error.message);
+          logger.warn('Fehler beim Schließen der Datenbankverbindung:', error.message);
         }
       }
 
-      logger.info('Destroying Discord client...');
+      logger.info('Discord-Client wird zerstört...');
       if (this.isReady()) {
         try {
           this.destroy();
-          logger.info('✅ Discord client destroyed');
+          logger.info('✅ Discord-Client zerstört');
         } catch (error) {
 
-          logger.warn('Discord client destroy warning (non-critical):', error.message);
+          logger.warn('Discord-Client Zerstör-Warnung (nicht kritisch):', error.message);
         }
       }
 
-      logger.info('✅ Graceful shutdown complete');
-  shutdownLog('Bot stopped successfully.');
+      logger.info('✅ Sauberes Herunterfahren abgeschlossen');
+  shutdownLog('Bot erfolgreich gestoppt.');
       process.exit(0);
     } catch (error) {
-      logger.error('Error during graceful shutdown:', error);
+      logger.error('Fehler beim sauberen Herunterfahren:', error);
       process.exit(1);
     }
   }

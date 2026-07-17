@@ -1,4 +1,4 @@
-import { MessageFlags } from 'discord.js';
+﻿import { MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -135,7 +135,7 @@ export async function playQuery(client, interaction, query) {
 
     const { loadType, tracks, playlistInfo } = result;
 
-    if (loadType === 'playlist' || loadType === 'PLAYLIST_LOADED') {
+    if (loadType === 'playlist' || loadType === 'PLAYLIST_Geladen') {
         let added = 0;
         let skipped = 0;
 
@@ -165,11 +165,11 @@ export async function playQuery(client, interaction, query) {
         loadType === 'search'
         || loadType === 'track'
         || loadType === 'SEARCH_RESULT'
-        || loadType === 'TRACK_LOADED'
+        || loadType === 'TRACK_Geladen'
     ) {
         const track = tracks?.[0];
         if (!track) {
-            throw new TitanBotError('No results', ErrorTypes.USER_INPUT, 'No results found for that query.');
+            throw new TitanBotError('No results', ErrorTypes.USER_INPUT, 'Keine Ergebnisse gefunden for that query.');
         }
 
         if (isDuplicateTrack(player, track)) {
@@ -200,7 +200,7 @@ export async function playQuery(client, interaction, query) {
         };
     }
 
-    throw new TitanBotError('No results', ErrorTypes.USER_INPUT, `No results found. (loadType: ${loadType})`);
+    throw new TitanBotError('No results', ErrorTypes.USER_INPUT, `Keine Ergebnisse gefunden. (loadType: ${loadType})`);
 }
 
 export async function skipTrack(client, interaction) {
@@ -532,3 +532,5 @@ export async function replyMusicSuccess(interaction, embed) {
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 }
+
+

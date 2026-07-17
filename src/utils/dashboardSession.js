@@ -1,4 +1,4 @@
-import { ComponentType, EmbedBuilder } from 'discord.js';
+﻿import { ComponentType, EmbedBuilder } from 'discord.js';
 import { getColor } from '../config/bot.js';
 import { TitanBotError, ErrorTypes, replyUserError } from './errorHandler.js';
 import { InteractionHelper } from './interactionHelper.js';
@@ -25,7 +25,7 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
 
             const errorMessage =
                 error instanceof TitanBotError
-                    ? error.userMessage || 'An error occurred while processing your selection.'
+                    ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
                     : 'An unexpected error occurred while updating the configuration.';
 
             if (!componentInteraction.replied && !componentInteraction.deferred) {
@@ -117,3 +117,5 @@ export async function startDashboardSession({
 
     return { stop: stopAll, replyMessageId };
 }
+
+

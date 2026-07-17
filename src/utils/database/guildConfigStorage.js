@@ -1,4 +1,4 @@
-import { logger } from '../logger.js';
+﻿import { logger } from '../logger.js';
 import { GUILD_CONFIG_DEFAULTS } from '../../config/guild/guildConfigDefaults.js';
 import { normalizeGuildConfig, validateGuildConfigOrThrow } from '../schemas.js';
 import { createError, ErrorTypes } from '../errorHandler.js';
@@ -75,10 +75,11 @@ export async function writeGuildConfig(client, guildId, config, context = {}) {
         throw createError(
             'Guild config write rejected by database layer',
             ErrorTypes.DATABASE,
-            'Failed to save server configuration. Please try again.',
+            'Failed to save server configuration. Bitte versuchen Sie es später erneut.',
             { guildId, ...context },
         );
     }
 
     return validated;
 }
+

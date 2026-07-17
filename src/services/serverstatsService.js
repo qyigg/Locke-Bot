@@ -1,4 +1,4 @@
-// serverstatsService.js
+﻿// serverstatsService.js
 
 import { logger } from '../utils/logger.js';
 import { logEvent, EVENT_TYPES } from './loggingService.js';
@@ -157,7 +157,7 @@ export async function updateCounter(client, guild, counter) {
       }
     }
     if (!channel) {
-      logger.warn(`Counter channel ${channelId} not found in guild ${guild.id}, skipping update`);
+      logger.warn(`Counter channel ${channelId} Nicht gefunden in guild ${guild.id}, skipping update`);
       return false;
     }
 
@@ -272,7 +272,7 @@ export async function saveServerCounters(client, guildId, counters) {
 
     await client.db.set(getServerCountersKey(guildId), sanitizedCounters);
     if (process.env.NODE_ENV !== 'production') {
-      logger.debug('Counters saved successfully');
+      logger.debug('Counters Erfolgreich gespeichert');
     }
     return true;
   } catch (error) {

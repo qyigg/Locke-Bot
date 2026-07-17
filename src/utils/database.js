@@ -1,4 +1,4 @@
-// database.js — facade re-exporting split modules for backward compatibility
+﻿// database.js — facade re-exporting split modules for backward compatibility
 
 import { pgDb } from './postgresDatabase.js';
 import { logger } from './logger.js';
@@ -141,7 +141,7 @@ export const getColor = (path, fallback = "#000000") => {
 
     for (const part of parts) {
         if (current[part] === undefined) {
-            logger.warn(`Color path '${path}' not found in config, using fallback`);
+            logger.warn(`Color path '${path}' Nicht gefunden in config, using fallback`);
             return fallback;
         }
         current = current[part];
@@ -343,12 +343,12 @@ function normalizeWelcomeConfig(raw = {}) {
     const channelId = base.channelId ?? null;
     const goodbyeChannelId = base.goodbyeChannelId ?? null;
 
-    const welcomeMessage = base.welcomeMessage ?? "Welcome {user} to {server}!";
-    const leaveMessage = base.leaveMessage ?? "{user.tag} has left the server.";
+    const welcomeMessage = base.welcomeMessage ?? "Willkommen {user} in {server}!";
+    const leaveMessage = base.leaveMessage ?? "{user.tag} hat den Server verlassen.";
 
     const welcomeEmbed = base.welcomeEmbed ?? {
-        title: "🎉 Welcome!",
-        description: "Welcome {user} to {server}!",
+        title: "🎉 Willkommen!",
+        description: "Willkommen {user} in {server}!",
         color: getColor("success"),
         thumbnail: true,
         footer: "Welcome to {server}!"
@@ -356,7 +356,7 @@ function normalizeWelcomeConfig(raw = {}) {
 
     const leaveEmbed = base.leaveEmbed ?? {
         title: "👋 Goodbye",
-        description: "{user.tag} has left the server.",
+        description: "{user.tag} hat den Server verlassen.",
         color: getColor("error"),
         thumbnail: true,
         footer: "Goodbye from {server}!"
@@ -908,7 +908,7 @@ export async function updateApplication(client, guildId, applicationId, updates)
     try {
         const existingApplication = await getApplication(client, guildId, applicationId);
         if (!existingApplication) {
-            throw new Error(`Application ${applicationId} not found`);
+            throw new Error(`Application ${applicationId} Nicht gefunden`);
         }
         
         const updatedApplication = {
@@ -1194,3 +1194,4 @@ formatted = formatted.substring(0, 100);
 function generateCaseId() {
     return `${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 4)}`;
 }
+

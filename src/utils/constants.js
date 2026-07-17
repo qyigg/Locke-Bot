@@ -1,4 +1,4 @@
-// constants.js
+﻿// constants.js
 
 export const DEFAULT_ECONOMY_DATA = {
     wallet: 0,
@@ -71,10 +71,10 @@ export const DEFAULTS = {
 };
 
 export const ERROR_DEFAULTS = {
-    INVALID_INPUT: 'Invalid input provided',
+    INVALID_INPUT: 'Ungültige Eingabe provided',
     DATABASE_ERROR: 'Database operation failed',
-    NOT_FOUND: 'Not found',
-    INSUFFICIENT_PERMISSIONS: 'Insufficient permissions',
+    NOT_FOUND: 'Nicht gefunden',
+    INSUFFICIENT_PERMISSIONS: 'Unzureichende Berechtigungen',
     INVALID_FORMAT: 'Invalid format'
 };
 

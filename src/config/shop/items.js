@@ -1,4 +1,4 @@
-export const shopItems = [
+﻿export const shopItems = [
     {
         id: 'extra_work',
         name: 'Extra Work Shift',
@@ -127,7 +127,7 @@ roleId: null,
         id: 'personal_safe',
         name: '🔒 Personal Safe',
         price: 30000,
-        description: 'Protects your money from theft. Prevents others from robbing you.',
+        description: 'Protects Dein money from theft. Prevents others from robbing you.',
         type: 'tool',
         durability: null,
         effect: {
@@ -153,7 +153,7 @@ export function getItemPrice(itemId) {
 export function validatePurchase(itemId, userData) {
     const item = getItemById(itemId);
     if (!item) {
-        return { valid: false, reason: 'Item not found' };
+        return { valid: false, reason: 'Item Nicht gefunden' };
     }
 
     const inventory = userData.inventory || {};
@@ -201,3 +201,4 @@ export function validatePurchase(itemId, userData) {
 
     return { valid: true };
 }
+

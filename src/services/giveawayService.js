@@ -1,4 +1,4 @@
-// giveawayService.js
+﻿// giveawayService.js
 
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
@@ -247,7 +247,7 @@ export function selectWinners(participants, winnerCount) {
         throw new TitanBotError(
             'Failed to select winners',
             ErrorTypes.UNKNOWN,
-            'An error occurred while selecting winners.',
+            'Ein Fehler ist aufgetreten while selecting winners.',
             { error: error.message, participantCount: participants.length }
         );
     }
@@ -318,7 +318,7 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
         throw new TitanBotError(
             'Failed to end giveaway',
             ErrorTypes.UNKNOWN,
-            'An error occurred while ending the giveaway.',
+            'Ein Fehler ist aufgetreten while ending the giveaway.',
             { error: error.message, giveawayId: giveaway?.messageId }
         );
     }
@@ -346,19 +346,19 @@ export async function checkGiveaways(client) {
 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-          logger.debug(`Guild ${guildId} not found, skipping giveaway ${messageId}`);
+          logger.debug(`Guild ${guildId} Nicht gefunden, skipping giveaway ${messageId}`);
           continue;
         }
 
         const channel = await guild.channels.fetch(giveaway.channelId).catch(() => null);
         if (!channel) {
-          logger.debug(`Channel ${giveaway.channelId} not found for giveaway ${messageId}`);
+          logger.debug(`Channel ${giveaway.channelId} Nicht gefunden for giveaway ${messageId}`);
           continue;
         }
 
         const message = await channel.messages.fetch(messageId).catch(() => null);
         if (!message) {
-          logger.debug(`Message ${messageId} not found for giveaway in channel ${giveaway.channelId}`);
+          logger.debug(`Message ${messageId} Nicht gefunden for giveaway in channel ${giveaway.channelId}`);
           continue;
         }
 
@@ -387,7 +387,7 @@ export async function checkGiveaways(client) {
         }
 
         if (winners.length > 0) {
-          const winnerAnnouncement = `🎉 Congratulations ${winnerMentions}! You won the **${giveaway.prize || 'giveaway'}**! Please contact <@${giveaway.hostId}> to claim your prize.`;
+          const winnerAnnouncement = `🎉 Congratulations ${winnerMentions}! You won the **${giveaway.prize || 'giveaway'}**! Please contact <@${giveaway.hostId}> to claim Dein prize.`;
           const winnerPingMsg = await channel.send({ content: winnerAnnouncement });
           giveaway.winnerPingMessageId = winnerPingMsg.id;
           await markGiveawayEnded(client, giveawayId, giveaway);
@@ -435,3 +435,5 @@ export async function checkGiveaways(client) {
     logger.error('Error checking giveaways:', error);
   }
 }
+
+

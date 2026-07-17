@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { infoEmbed, successEmbed } from '../../utils/embeds.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { verifyUser } from '../../services/verificationService.js';
@@ -7,7 +7,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('verify')
-        .setDescription('Verify yourself and gain access to the server'),
+        .setDescription('Verifiziere dich selbst and gain access to the server'),
 
     async execute(interaction, config, client) {
         const guild = interaction.guild;
@@ -19,7 +19,7 @@ export default {
 
         if (result.status === 'already_verified') {
             return await InteractionHelper.safeReply(interaction, {
-                embeds: [infoEmbed('Already Verified', "You are already verified.")],
+                embeds: [infoEmbed('Bereits verifiziert', "You are Bereits verifiziert.")],
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -33,3 +33,5 @@ export default {
         });
     }
 };
+
+

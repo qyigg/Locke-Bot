@@ -1,4 +1,4 @@
-// configService.js
+﻿// configService.js
 
 import { logger } from '../../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from './guildConfig.js';
@@ -166,7 +166,7 @@ class ConfigService {
 
             if (!channel) {
                 throw createError(
-                    'Channel not found',
+                    'Kanal nicht gefunden',
                     ErrorTypes.VALIDATION,
                     'The specified channel does not exist.',
                     { key, channelId }
@@ -200,7 +200,7 @@ class ConfigService {
 
             if (!role) {
                 throw createError(
-                    'Role not found',
+                    'Rolle nicht gefunden',
                     ErrorTypes.VALIDATION,
                     'The specified role does not exist.',
                     { key, roleId }
@@ -359,7 +359,7 @@ class ConfigService {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
             throw createError(
-                'Guild not found',
+                'Guild Nicht gefunden',
                 ErrorTypes.VALIDATION,
                 'Guild does not exist.',
                 { guildId }
@@ -396,7 +396,7 @@ class ConfigService {
             conflicts
         });
 
-        logger.info(`[CONFIG_SERVICE] Setting updated successfully`, {
+        logger.info(`[CONFIG_SERVICE] Setting Erfolgreich aktualisiert`, {
             guildId,
             key,
             adminId,
@@ -424,7 +424,7 @@ class ConfigService {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
             throw createError(
-                'Guild not found',
+                'Guild Nicht gefunden',
                 ErrorTypes.VALIDATION,
                 'Guild does not exist.',
                 { guildId }
@@ -566,7 +566,7 @@ class ConfigService {
 
         if (!guild) {
             throw createError(
-                'Guild not found',
+                'Guild Nicht gefunden',
                 ErrorTypes.VALIDATION,
                 'Guild does not exist.',
                 { guildId }
@@ -619,7 +619,8 @@ wrapServiceClassMethods(ConfigService, (methodName) => ({
     service: 'ConfigService',
     operation: methodName,
     message: `Configuration service operation failed: ${methodName}`,
-    userMessage: 'A configuration operation failed. Please try again in a moment.'
+    userMessage: 'A configuration operation failed. Bitte versuchen Sie es später erneut in a moment.'
 }));
 
 export default ConfigService;
+

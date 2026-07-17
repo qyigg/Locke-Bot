@@ -1,4 +1,4 @@
-import { botConfig, getColor } from '../../../config/bot.js';
+﻿import { botConfig, getColor } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -72,7 +72,7 @@ function buildSelectMenu(guildId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Change Role')
-                .setDescription('Select the role to assign automatically')
+                .setDescription('Select Die Rolle to assign automatically')
                 .setValue('role')
                 .setEmoji('🏷️'),
             new StringSelectMenuOptionBuilder()
@@ -228,7 +228,7 @@ export default {
 
                     const errorMessage =
                         error instanceof TitanBotError
-                            ? error.userMessage || 'An error occurred while processing your selection.'
+                            ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
                             : 'An unexpected error occurred while updating the configuration.';
 
                     if (!selectInteraction.replied && !selectInteraction.deferred) {
@@ -327,7 +327,7 @@ async function handleCriteria(selectInteraction, rootInteraction, guildConfig, g
                 .setValue('account_age'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('No Criteria (verify everyone)')
-                .setDescription('All users gain the role immediately')
+                .setDescription('All users gain Die Rolle immediately')
                 .setValue('none'),
         );
 
@@ -399,7 +399,7 @@ async function handleRole(selectInteraction, rootInteraction, guildConfig, guild
         embeds: [
             new EmbedBuilder()
                 .setTitle('Auto-Verification Role')
-                .setDescription('Select the role to assign to auto-verified users.')
+                .setDescription('Select Die Rolle to assign to auto-verified users.')
                 .setColor(getColor('info')),
         ],
         components: [new ActionRowBuilder().addComponents(roleSelect)],
@@ -502,3 +502,4 @@ async function handleAccountAge(selectInteraction, rootInteraction, guildConfig,
 
     await refreshDashboard(rootInteraction, guildConfig, guildId, client);
 }
+

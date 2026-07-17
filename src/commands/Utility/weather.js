@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -36,7 +36,7 @@ export default {
         const geoData = await geoResponse.json();
 
         if (!geoData.results || geoData.results.length === 0) {
-            logger.info(`Weather command - city not found`, {
+            logger.info(`Weather command - city Nicht gefunden`, {
                 userId: interaction.user.id,
                 city: city,
                 guildId: interaction.guildId

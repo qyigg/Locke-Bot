@@ -5,15 +5,15 @@ export default {
     slashOnly: true,
     data: new SlashCommandBuilder()
         .setName('shop-config')
-        .setDescription('Configure shop settings. (Manage Server required)')
+        .setDescription('Konfiguriere Shop-Einstellungen. (Server verwalten erforderlich)')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('setrole')
-                .setDescription('Set the Discord role granted when the Premium Role shop item is purchased.')
+                .setDescription('Stelle die Discord-Rolle ein, die gewährt wird, wenn der Premium-Rollen-Shop-Artikel gekauft wird.')
                 .addRoleOption(option =>
                     option
                         .setName('role')
-                        .setDescription('The role to grant for Premium Role purchases.')
+                        .setDescription('Die Rolle, die für Premium-Rollen-Käufe gewährt werden soll.')
                         .setRequired(true),
                 ),
         ),

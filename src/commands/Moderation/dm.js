@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
@@ -13,7 +13,7 @@ export default {
         .addUserOption(option =>
             option
                 .setName("user")
-                .setDescription("The user to send a DM to")
+                .setDescription("Der Benutzer to send a DM to")
                 .setRequired(true)
         )
         .addStringOption(option =>
@@ -54,7 +54,7 @@ export default {
             }
 
             if (targetUser.bot) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot send DMs to bot accounts.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht send DMs to bot accounts.' });
             }
 
             const sanitized = sanitizeMarkdown(message);
@@ -67,7 +67,7 @@ export default {
                         anonymous ? "Message from the Staff Team" : `Message from ${interaction.user.tag}`,
                         sanitized
                     ).setFooter({
-                        text: `You cannot reply to this message. | Logger ID: ${interaction.id}`
+                        text: `Du kannst nicht reply to this message. | Logger ID: ${interaction.id}`
                     })
                 ]
             });

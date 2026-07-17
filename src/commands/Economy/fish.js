@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -22,17 +22,17 @@ const FISH_TYPES = [
 ];
 
 const CATCH_MESSAGES = [
-    "You cast your line into the crystal clear waters...",
-    "You wait patiently as your bobber floats...",
+    "You cast Dein line into the crystal clear waters...",
+    "You wait patiently as Dein bobber floats...",
     "After a few minutes of waiting, you feel a tug...",
-    "The water ripples as something takes your bait...",
-    "You reel in your catch with expert precision...",
+    "The water ripples as something takes Dein bait...",
+    "You reel in Dein catch with expert precision...",
 ];
 
 export default {
     data: new SlashCommandBuilder()
         .setName('fish')
-        .setDescription('Go fishing to catch fish and earn money'),
+        .setDescription('Gehe fischen um Fische zu fangen und Geld zu verdienen'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -56,7 +56,7 @@ export default {
                 throw createError(
                     "Fishing cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You're too tired to fish right now. Rest for **${hours}h ${minutes}m** before fishing again.`,
+                    `Du bist zu müde zum Fischen. Ruhe dich **${hours}h ${minutes}m** aus, bevor du wieder fischst.`,
                     { remaining, cooldownType: 'fish' }
                 );
             }
@@ -109,23 +109,23 @@ export default {
             };
 
             const embed = createEmbed({
-                title: 'Fishing Success!',
-                description: `${catchMessage}\n\nYou caught a **${fishCaught.emoji} ${fishCaught.name}**! You sold it for **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
+                title: 'Fischen erfolgreich!',
+                description: `${catchMessage}\n\nDu hast einen **${fishCaught.emoji} ${fishCaught.name}** gefangen! Du hast ihn für **$${finalEarned.toLocaleString()}** verkauft!${multiplierMessage}`,
                 color: rarityColors[fishCaught.rarity]
             })
                 .addFields(
                     {
-                        name: "New Cash Balance",
+                        name: "Neuer Bargeldkontostand",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "Rarity",
+                        name: "Seltenheit",
                         value: fishCaught.rarity.charAt(0).toUpperCase() + fishCaught.rarity.slice(1),
                         inline: true,
                     }
                 )
-                .setFooter({ text: `Next fishing trip available in 45 minutes.` });
+                .setFooter({ text: `Nächste Angeltour verfügbar in 45 Minuten.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'fish' })

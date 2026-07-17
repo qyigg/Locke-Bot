@@ -1,4 +1,4 @@
-import { pgConfig } from '../../config/database/postgres.js';
+﻿import { pgConfig } from '../../config/database/postgres.js';
 import { canonicalizeKey } from './keys.js';
 import { parseKey } from './keyParser.js';
 
@@ -188,7 +188,7 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
 
             try {
                 if (await keyExists(client, canonicalKey)) {
-                    logger.info(`Skip ${legacyKey} -> ${canonicalKey} (canonical already exists)`);
+                    logger.info(`Skip ${legacyKey} -> ${canonicalKey} (canonical Existiert bereits)`);
                     summary.skipped += 1;
                     if (!dryRun) {
                         await client.query(
@@ -243,3 +243,4 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
         client.release();
     }
 }
+

@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../services/config/guildConfig.js';
@@ -23,7 +23,7 @@ export default {
                     option
 .setName("panel_channel")
                         .setDescription(
-                            "The channel where the Ticket-Panel will be sent.",
+                            "Der Kanal where the Ticket-Panel will be sent.",
                         )
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true),
@@ -67,7 +67,7 @@ export default {
                     option
                         .setName("staff_role")
                         .setDescription(
-                            "The role that can access tickets (optional).",
+                            "Die Rolle that can access tickets (optional).",
                         )
                         .setRequired(false),
                 )
@@ -104,7 +104,7 @@ export default {
                 PermissionFlagsBits.ManageChannels,
             )
         ) {
-            logger.warn('Ticket command permission denied', {
+            logger.warn('Ticket command Berechtigung verweigert', {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'ticket'
@@ -121,7 +121,7 @@ export default {
         if (subcommand === "setup") {
             const existingConfig = await getGuildConfig(client, interaction.guildId);
             if (existingConfig?.ticketPanelChannelId) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `This server already has a ticket system set up (panel in <#${existingConfig.ticketPanelChannelId}>).\n\nOnly one ticket system is supported per server. Use \`/ticket dashboard\` to edit or update the existing setup, or select **Delete System** from the dashboard to remove it and start fresh.` });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Dieser Server already has a ticket system set up (panel in <#${existingConfig.ticketPanelChannelId}>).\n\nOnly one ticket system is supported per server. Use \`/ticket dashboard\` to edit or update the existing setup, or select **Delete System** from the dashboard to remove it and start fresh.` });
             }
 
             const panelChannel =
@@ -169,7 +169,7 @@ description: panelMessage,
                     currentConfig.dmOnClose = dmOnClose;
 
                     await setGuildConfig(client, interaction.guildId, currentConfig);
-                    logger.info('Ticket configuration saved', {
+                    logger.info('Ticket Konfiguration gespeichert', {
                         guildId: interaction.guildId,
                         categoryId: categoryChannel?.id,
                         closedCategoryId: closedCategoryChannel?.id,
@@ -210,7 +210,7 @@ description: panelMessage,
                     ],
                 });
 
-                logger.info('Ticket-Panel setup completed', {
+                logger.info('Ticket-Panel Einrichtung abgeschlossend', {
                     userId: interaction.user.id,
                     userTag: interaction.user.tag,
                     guildId: interaction.guildId,
@@ -281,7 +281,7 @@ description: panelMessage,
                     commandName: 'ticket_setup'
                 });
                 if (interaction.deferred || interaction.replied) {
-                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not send the Ticket-Panel or save configuration. Check the bot\'s permissions (especially the ability to send messages in the target channel) and database connection.' }).catch(err => {
+                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not send the Ticket-Panel or save configuration. Überprüfe den Bot\'s permissions (especially the ability to send messages in the target channel) and database connection.' }).catch(err => {
                         logger.error('Failed to send error reply', {
                             error: err.message,
                             guildId: interaction.guildId
@@ -297,3 +297,5 @@ description: panelMessage,
         }
     }
 };
+
+

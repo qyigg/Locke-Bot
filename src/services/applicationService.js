@@ -1,4 +1,4 @@
-// applicationService.js
+﻿// applicationService.js
 
 import { logger } from '../utils/logger.js';
 import { createError, ErrorTypes } from '../utils/errorHandler.js';
@@ -28,9 +28,9 @@ class ApplicationService {
     static validateApplicationSubmission(data) {
         if (!data.guildId || !data.userId || !data.roleId) {
             throw createError(
-                'Missing required fields for application submission',
+                'Erforderliches Feld fehlts for application submission',
                 ErrorTypes.VALIDATION,
-                'Invalid application data. Please try again.',
+                'Invalid application data. Bitte versuchen Sie es später erneut.',
                 { data }
             );
         }
@@ -108,9 +108,9 @@ class ApplicationService {
 
         if (!isManager) {
             throw createError(
-                'User lacks permission to manage applications',
+                'User lacks permission to Verwalte Bewerbungen',
                 ErrorTypes.PERMISSION,
-                'You do not have permission to manage applications.',
+                'Du hast keine Berechtigung to Verwalte Bewerbungen.',
                 { userId: member.id, guildId }
             );
         }
@@ -130,7 +130,7 @@ class ApplicationService {
                 throw createError(
                     'Applications are disabled',
                     ErrorTypes.CONFIGURATION,
-                    'Applications are currently disabled in this server.',
+                    'Applications are currently disabled in Dieser Server.',
                     { guildId: data.guildId }
                 );
             }
@@ -193,7 +193,7 @@ class ApplicationService {
             const application = await getApplication(client, guildId, applicationId);
             if (!application) {
                 throw createError(
-                    'Application not found',
+                    'Application Nicht gefunden',
                     ErrorTypes.CONFIGURATION,
                     'The application you are trying to review does not exist.',
                     { applicationId, guildId }
@@ -210,7 +210,7 @@ class ApplicationService {
             }
 
             const status = action === 'approve' ? 'approved' : 'denied';
-            const sanitizedReason = reason ? reason.trim().substring(0, 500) : 'No reason provided.';
+            const sanitizedReason = reason ? reason.trim().substring(0, 500) : 'Kein Grund angegeben.';
 
             const updatedApplication = await updateApplication(client, guildId, applicationId, {
                 status,
@@ -260,7 +260,7 @@ class ApplicationService {
             throw createError(
                 'Failed to retrieve applications',
                 ErrorTypes.DATABASE,
-                'An error occurred while retrieving applications.',
+                'Ein Fehler ist aufgetreten while retrieving applications.',
                 { guildId, filters }
             );
         }
@@ -333,7 +333,7 @@ class ApplicationService {
                     throw createError(
                         'Missing role ID',
                         ErrorTypes.VALIDATION,
-                        'You must specify a role to add.',
+                        'Du musst angeben a role to add.',
                         { action }
                     );
                 }
@@ -364,7 +364,7 @@ class ApplicationService {
                     throw createError(
                         'Missing role ID',
                         ErrorTypes.VALIDATION,
-                        'You must specify a role to remove.',
+                        'Du musst angeben a role to remove.',
                         { action }
                     );
                 }
@@ -419,9 +419,9 @@ class ApplicationService {
                 stack: error.stack
             });
             throw createError(
-                'Failed to retrieve your applications',
+                'Failed to retrieve Dein applications',
                 ErrorTypes.DATABASE,
-                'An error occurred while retrieving your applications.',
+                'Ein Fehler ist aufgetreten while retrieving Dein applications.',
                 { guildId, userId }
             );
         }
@@ -433,7 +433,7 @@ class ApplicationService {
 
             if (!application) {
                 throw createError(
-                    'Application not found',
+                    'Application Nicht gefunden',
                     ErrorTypes.CONFIGURATION,
                     'The application you are looking for does not exist.',
                     { applicationId, guildId }
@@ -454,3 +454,6 @@ class ApplicationService {
 }
 
 export default ApplicationService;
+
+
+

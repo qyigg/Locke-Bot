@@ -21,7 +21,7 @@ const MINE_LOCATIONS = [
 export default {
     data: new SlashCommandBuilder()
         .setName('mine')
-        .setDescription('Go mining to earn money'),
+        .setDescription('Gehe Bergbau betreiben um Geld zu verdienen'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -46,7 +46,7 @@ export default {
                 throw createError(
                     "Mining cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `Your pickaxe is cooling down. Wait for **${hours}h ${minutes}m** before mining again.`,
+                    `Deine Spitzhacke kühlt ab. Warte **${hours}h ${minutes}m** bevor du wieder Bergbau betreibst.`,
                     { remaining, cooldownType: 'mine' }
                 );
             }
@@ -78,15 +78,15 @@ userData.lastMine = now;
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                "💰 Mining Expedition Successful!",
-                `You explored a **${location}** and managed to find minerals worth **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
+                "💰 Bergbauexpedition erfolgreich!",
+                `Du hast einen **${location}** erkundet und schafftest es, Mineralien im Wert von **$${finalEarned.toLocaleString()}** zu finden!${multiplierMessage}`,
             )
                 .addFields({
-                    name: "New Cash Balance",
+                    name: "Neuer Bargeldkontostand",
                     value: `$${userData.wallet.toLocaleString()}`,
                     inline: true,
                 })
-                .setFooter({ text: `Next mine available in 1 hour.` });
+                .setFooter({ text: `Nächstes Bergbau verfügbar in 1 Stunde.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'mine' })

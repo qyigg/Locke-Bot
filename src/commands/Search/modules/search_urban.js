@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import { createEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
 import { handleInteractionError, replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
@@ -109,7 +109,7 @@ export default {
             if (error.response?.status === 404 || !error.response) {
                 await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('term')}" on Urban Dictionary.` });
             } else if (error.response?.status === 429) {
-                await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'Too many requests to Urban Dictionary. Please try again in a few minutes.' });
+                await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'Too many requests to Urban Dictionary. Bitte versuchen Sie es später erneut in ein paar minutes.' });
             } else {
                 await handleInteractionError(interaction, error, {
                     commandName: 'urban',
@@ -119,3 +119,5 @@ export default {
         }
     },
 };
+
+

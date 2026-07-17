@@ -1,4 +1,4 @@
-import { ChannelType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+﻿import { ChannelType, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { successEmbed, errorEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../../utils/errorHandler.js';
@@ -36,7 +36,7 @@ export default {
             });
 
             const embed = successEmbed(
-                '✅ Join to Create Setup Complete',
+                '✅ Join to Create Einrichtung abgeschlossen',
                 `Created trigger channel: ${triggerChannel}\n\n` +
                 `**Settings:**\n` +
                 `• Temporary Channel Name Template: \`${nameTemplate}\`\n` +

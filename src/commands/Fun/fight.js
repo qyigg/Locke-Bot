@@ -9,11 +9,11 @@ const EMBED_DESCRIPTION_LIMIT = 4096;
 export default {
     data: new SlashCommandBuilder()
     .setName("fight")
-    .setDescription("Starts a simulated 1v1 text-based battle.")
+    .setDescription("Startet einen simulierten 1v1 Text-basierten Kampf.")
     .addUserOption((option) =>
       option
         .setName("opponent")
-        .setDescription("The user to fight.")
+        .setDescription("Der Benutzer zum Kämpfen.")
         .setRequired(true),
     ),
   category: 'Fun',
@@ -26,16 +26,16 @@ export default {
 
     if (challenger.id === opponent.id) {
       const embed = warningEmbed(
-        "⚔️ Invalid Challenge",
-        `**${challenger.username}**, you can't fight yourself! That's a draw before it even starts.`
+        "⚔️ Ungültige Herausforderung",
+        `**${challenger.username}**, du kannst nicht gegen dich selbst kämpfen! Das ist ein Unentschieden, bevor es überhaupt beginnt.`
       );
       return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }
 
     if (opponent.bot) {
       const embed = warningEmbed(
-        "⚔️ Invalid Opponent",
-        "You can't fight bots! Challenge a real person instead."
+        "⚔️ Ungültiger Gegner",
+        "Du kannst nicht gegen Bots kämpfen! Fordere eine echte Person heraus."
       );
       return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }
@@ -47,25 +47,25 @@ export default {
 
     const log = [];
     log.push(
-      `💥 **${challenger.username}** challenges **${opponent.username}** to a duel! (Best of ${rounds} rounds)`,
+      `💥 **${challenger.username}** fordert **${opponent.username}** zu einem Duell heraus! (Best of ${rounds} Runden)`,
     );
 
     for (let i = 1; i <= rounds; i++) {
       const attacker = rand(0, 1) === 0 ? challenger : opponent;
       const target = attacker.id === challenger.id ? opponent : challenger;
       const action = [
-        "throws a wild punch",
-        "lands a critical hit",
-        "uses a weak spell",
-        "parries and counterattacks",
+        "wirft einen wilden Schlag",
+        "landert einen Kritischen Treffer",
+        "setzt einen schwachen Zauber ein",
+        "pariert und kontert",
       ][rand(0, 3)];
       log.push(
-        `\n**Round ${i}:** ${attacker.username} ${action} on ${target.username} for ${rand(1, damage)} damage!`,
+        `\n**Runde ${i}:** ${attacker.username} ${action} auf ${target.username} mit ${rand(1, damage)} Schaden!`,
       );
     }
 
     const outcomeText = log.join("\n");
-    const winnerText = `👑 **${winner.username}** has defeated ${loser.username} and claims the victory!`;
+    const winnerText = `👑 **${winner.username}** hat ${loser.username} besiegt und beansprucht den Sieg!`;
     const fullDescription = `${outcomeText}\n\n${winnerText}`;
 
     const description = fullDescription.length <= EMBED_DESCRIPTION_LIMIT
@@ -73,7 +73,7 @@ export default {
       : `${fullDescription.slice(0, EMBED_DESCRIPTION_LIMIT - 15)}\n\n...`;
 
     const embed = successEmbed(
-      "🏆 Duel Complete!",
+      "🏆 Duell Abgeschlossen!",
       description
     );
 

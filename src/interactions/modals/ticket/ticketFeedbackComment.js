@@ -1,4 +1,4 @@
-import { EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { getTicketData, saveTicketData } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 import { getColor } from '../../../config/bot.js';
@@ -35,7 +35,7 @@ export default {
             await InteractionHelper.safeReply(interaction, {
                 embeds: [buildEmbed(
                     '⚠️ Empty Feedback',
-                    'Please enter a comment before submitting your feedback.',
+                    'Please enter a comment before submitting Dein feedback.',
                     getColor('warning'),
                 )],
                 flags: MessageFlags.Ephemeral,
@@ -58,7 +58,7 @@ export default {
         if (!ticketData) {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [buildEmbed(
-                    '⚠️ Ticket Not Found',
+                    '⚠️ Ticket Nicht gefunden',
                     'Could not find the ticket associated with this feedback.',
                     getColor('error'),
                 )],
@@ -106,7 +106,7 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [buildEmbed(
                 '✅ Feedback Submitted',
-                'Your written feedback has been recorded. Thank you for helping us improve!',
+                'Dein written feedback has been recorded. Thank you for helping us improve!',
                 getColor('success'),
             )],
         });
@@ -118,3 +118,5 @@ export default {
         });
     },
 };
+
+

@@ -1,4 +1,4 @@
-// joinToCreateService.js
+﻿// joinToCreateService.js
 
 import {
     getJoinToCreateConfig,
@@ -183,7 +183,7 @@ export async function initializeJoinToCreate(client, guildId, channelId, options
             throw new TitanBotError(
                 'Database service not available',
                 ErrorTypes.DATABASE,
-                'System error occurred. Please try again.'
+                'Systemfehler occurred. Bitte versuchen Sie es später erneut.'
             );
         }
 
@@ -219,7 +219,7 @@ export async function initializeJoinToCreate(client, guildId, channelId, options
             throw new TitanBotError(
                 'Guild already has a Join to Create trigger configured',
                 ErrorTypes.VALIDATION,
-                'This server already has a Join to Create channel configured. Use `/jointocreate dashboard` to modify it, or remove it before creating a new one.',
+                'Dieser Server already has a Join to Create channel configured. Use `/jointocreate dashboard` to modify it, or remove it before creating a new one.',
                 {
                     guildId,
                     existingTriggerChannelId: config.triggerChannels[0],
@@ -250,7 +250,7 @@ export async function initializeJoinToCreate(client, guildId, channelId, options
             throw new TitanBotError(
                 'Failed to save Join to Create configuration',
                 ErrorTypes.DATABASE,
-                'Failed to set up Join to Create system. Please try again.'
+                'Failed to set up Join to Create system. Bitte versuchen Sie es später erneut.'
             );
         }
 
@@ -276,7 +276,7 @@ export async function updateChannelConfig(client, guildId, channelId, updates) {
             throw new TitanBotError(
                 'Database service not available',
                 ErrorTypes.DATABASE,
-                'Database service is currently unavailable. Please try again later.'
+                'Database service is currently unavailable. Bitte versuchen Sie es später erneut later.'
             );
         }
 
@@ -336,7 +336,7 @@ export async function removeTriggerChannel(client, guildId, channelId) {
             throw new TitanBotError(
                 'Database service not available',
                 ErrorTypes.DATABASE,
-                'Database service is currently unavailable. Please try again later.'
+                'Database service is currently unavailable. Bitte versuchen Sie es später erneut later.'
             );
         }
 
@@ -345,7 +345,7 @@ export async function removeTriggerChannel(client, guildId, channelId) {
         const index = config.triggerChannels.indexOf(channelId);
         if (index === -1) {
             throw new TitanBotError(
-                'Channel not found in Join to Create triggers',
+                'Kanal nicht gefunden in Join to Create triggers',
                 ErrorTypes.VALIDATION,
                 'This channel is not configured as a Join to Create trigger.'
             );
@@ -390,7 +390,7 @@ export async function getConfiguration(client, guildId) {
             throw new TitanBotError(
                 'Database service not available',
                 ErrorTypes.DATABASE,
-                'Database service is currently unavailable. Please try again later.'
+                'Database service is currently unavailable. Bitte versuchen Sie es später erneut later.'
             );
         }
 
@@ -442,7 +442,7 @@ export async function getChannelConfiguration(client, guildId, channelId) {
         throw new TitanBotError(
             `Failed to get channel configuration: ${error.message}`,
             ErrorTypes.DATABASE,
-            'Failed to retrieve channel configuration. Please try again.'
+            'Failed to retrieve channel configuration. Bitte versuchen Sie es später erneut.'
         );
     }
 }
@@ -545,7 +545,7 @@ export async function createTemporaryChannel(guild, member, options = {}) {
         throw new TitanBotError(
             `Failed to create temporary channel: ${error.message}`,
             ErrorTypes.DISCORD_API,
-            'Failed to create your temporary voice channel. Please contact an administrator.'
+            'Failed to create Dein temporary voice channel. Please contact an administrator.'
         );
     }
 }
@@ -565,3 +565,5 @@ export default {
     logConfigurationChange,
     createTemporaryChannel
 };
+
+

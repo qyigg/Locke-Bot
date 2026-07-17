@@ -1,4 +1,4 @@
-import { createEmbed, successEmbed } from '../utils/embeds.js';
+﻿import { createEmbed, successEmbed } from '../utils/embeds.js';
 import { InteractionHelper } from '../utils/interactionHelper.js';
 import { MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
@@ -114,10 +114,10 @@ const wipedataConfirmHandler = {
       }
 
       const successMessage =
-        `✅ **Your data has been successfully wiped!**\n\n` +
+        `✅ **Dein data has been successfully wiped!**\n\n` +
         `**Records Deleted:** ${deletedCount}\n\n` +
-        `Your account has been reset to default values. You can now start fresh!\n\n` +
-        `*All your economy balance, levels, items, and personal data have been removed.*`;
+        `Dein account has been reset to default values. You can now start fresh!\n\n` +
+        `*All Dein economy balance, levels, items, and personal data have been removed.*`;
 
       await interaction.editReply({
         embeds: [successEmbed('Data Wipe Complete', successMessage)],
@@ -132,7 +132,7 @@ const wipedataConfirmHandler = {
     } catch (error) {
       logger.error('Wipedata confirm button handler error:', error);
       
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while wiping your data. Please try again later or contact support.' });
+      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while wiping Dein data. Bitte versuchen Sie es später erneut later or contact support.' });
     }
   }
 };
@@ -145,7 +145,7 @@ const wipedataCancelHandler = {
         embeds: [
           createEmbed({
             title: '❌ Data Wipe Cancelled',
-            description: 'Your data has been preserved. Your account remains unchanged.',
+            description: 'Dein data has been preserved. Dein account remains unchanged.',
             color: 'info'
           })
         ],
@@ -164,3 +164,4 @@ const wipedataCancelHandler = {
 };
 
 export { wipedataConfirmHandler, wipedataCancelHandler };
+

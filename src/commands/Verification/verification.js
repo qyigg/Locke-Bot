@@ -1,4 +1,4 @@
-import { botConfig, getColor } from '../../config/bot.js';
+﻿import { botConfig, getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { createEmbed, infoEmbed, successEmbed } from '../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../services/config/guildConfig.js';
@@ -106,9 +106,9 @@ async function handleSetup(interaction, guild, client) {
 
     if (!botMember) {
         throw createError(
-            'Bot member not found in guild cache',
+            'Bot member Nicht gefunden in guild cache',
             ErrorTypes.CONFIGURATION,
-            'I could not verify my permissions in this server. Please try again in a moment.',
+            'I could not verify my permissions in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
             { guildId: guild.id }
         );
     }
@@ -168,7 +168,7 @@ async function handleSetup(interaction, guild, client) {
         throw createError(
             'Verification setup blocked by conflicting onboarding system',
             ErrorTypes.CONFIGURATION,
-            'You cannot enable the verification system while **AutoVerify** or **AutoRole** is configured. Disable those first.',
+            'Du kannst nicht enable the verification system while **AutoVerify** or **AutoRole** is configured. Disable those first.',
             {
                 guildId: guild.id,
                 hasAutoVerifyEnabled,
@@ -233,7 +233,7 @@ async function handleRemove(interaction, guild, client) {
 
     if (result.status === 'not_verified') {
         return await InteractionHelper.safeReply(interaction, {
-            embeds: [infoEmbed('Not Verified', `${targetUser.tag} does not currently have the verified role.`)],
+            embeds: [infoEmbed('Nicht verifiziert', `${targetUser.tag} does not currently have the verified role.`)],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -248,3 +248,5 @@ async function handleRemove(interaction, guild, client) {
         embeds: [successEmbed('Verification Removed', `Verification removed from ${targetUser.tag}.`)]
     });
 }
+
+

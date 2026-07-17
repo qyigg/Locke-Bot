@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, addMoney, removeMoney, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -9,7 +9,7 @@ import EconomyService from '../../services/economyService.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('pay')
-        .setDescription('Pay another user some of your cash')
+        .setDescription('Zahle einem anderen Benutzer etwas von deinem Bargeld')
         .addUserOption(option =>
             option
                 .setName('user')
@@ -44,7 +44,7 @@ export default {
                 throw createError(
                     "Cannot pay bot",
                     ErrorTypes.VALIDATION,
-                    "You cannot pay a bot.",
+                    "Du kannst einem Bot kein Geld geben.",
                     { receiverId: receiver.id, isBot: true }
                 );
             }
@@ -53,7 +53,7 @@ export default {
                 throw createError(
                     "Cannot pay self",
                     ErrorTypes.VALIDATION,
-                    "You cannot pay yourself.",
+                    "Du kannst dir selbst kein Geld geben.",
                     { senderId, receiverId: receiver.id }
                 );
             }
@@ -76,7 +76,7 @@ export default {
                 throw createError(
                     "Failed to load sender economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId: senderId, guildId }
                 );
             }
@@ -85,7 +85,7 @@ export default {
                 throw createError(
                     "Failed to load receiver economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load the receiver's economy data. Please try again later.",
+                    "Failed to load the receiver's economy data. Bitte versuchen Sie es später erneut later.",
                     { userId: receiver.id, guildId }
                 );
             }
@@ -102,23 +102,23 @@ export default {
             const updatedReceiverData = await getEconomyData(client, guildId, receiver.id);
 
             const embed = successEmbed(
-                'Payment Successful',
-                `You successfully paid **${receiver.username}** the amount of **$${amount.toLocaleString()}**!`
+                'Zahlung erfolgreich',
+                `Du hast erfolgreich **${receiver.username}** den Betrag von **$${amount.toLocaleString()}** gezahlt!`
             )
                 .addFields(
                     {
-                        name: "Payment Amount",
+                        name: "Zahlungsbetrag",
                         value: `$${amount.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "Your New Balance",
+                        name: "Dein neuer Kontostand",
                         value: `$${updatedSenderData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                 )
                 .setFooter({
-                    text: `Paid to ${receiver.tag}`,
+                    text: `Bezahlt an ${receiver.tag}`,
                     iconURL: receiver.displayAvatarURL(),
                 });
 
@@ -134,10 +134,10 @@ export default {
 
             try {
                 const receiverEmbed = createEmbed({ 
-                    title: "Incoming Payment!", 
-                    description: `${interaction.user.username} paid you **$${amount.toLocaleString()}**.` 
+                    title: "Eingehende Zahlung!", 
+                    description: `${interaction.user.username} hat dir **$${amount.toLocaleString()}** gezahlt.` 
                 }).addFields({
-                    name: "Your New Cash",
+                    name: "Dein neues Bargeld",
                     value: `$${updatedReceiverData.wallet.toLocaleString()}`,
                     inline: true,
                 });
@@ -147,3 +147,4 @@ export default {
             }
     }, { command: 'pay' })
 };
+

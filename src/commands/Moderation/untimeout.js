@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
@@ -34,18 +34,18 @@ export default {
 
         if (!targetUser) {
             throw new TitanBotError(
-                'Missing target user',
+                'Zielbenutzer fehlt',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to untimeout.',
+                'Du musst angeben a user to untimeout.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (!member) {
             throw new TitanBotError(
-                "Target not found",
+                "Target Nicht gefunden",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server.",
+                "The target user is not currently in Dieser Server.",
             );
         }
 
@@ -64,3 +64,6 @@ export default {
         });
     },
 };
+
+
+

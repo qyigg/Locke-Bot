@@ -1,4 +1,4 @@
-import { EmbedBuilder, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+﻿import { EmbedBuilder, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { getTicketData, saveTicketData } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 import { getColor } from '../../../config/bot.js';
@@ -51,7 +51,7 @@ const feedbackHandler = {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('⚠️ Ticket Not Found')
+                        .setTitle('⚠️ Ticket Nicht gefunden')
                         .setDescription('Could not find the ticket associated with this survey.')
                         .setColor(getColor('error')),
                 ],
@@ -78,7 +78,7 @@ const feedbackHandler = {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('✅ Already Submitted')
-                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for your feedback!`)
+                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for Dein feedback!`)
                         .setColor(getColor('success')),
                 ],
                 components: [],
@@ -115,8 +115,8 @@ const feedbackHandler = {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 new EmbedBuilder()
-                    .setTitle('✅ Thanks for your feedback!')
-                    .setDescription(`You rated your support experience **${ratingLabel}**.\n\nYour feedback has been recorded and helps us improve!`)
+                    .setTitle('✅ Thanks for Dein feedback!')
+                    .setDescription(`You rated Dein support experience **${ratingLabel}**.\n\nDein feedback has been recorded and helps us improve!`)
                     .setColor(getColor('success'))
                     .setFooter({ text: 'Thank you for using our support system.' })
                     .setTimestamp(),
@@ -158,7 +158,7 @@ const commentHandler = {
 
         const commentInput = new TextInputBuilder()
             .setCustomId('feedback_comment')
-            .setLabel('Your feedback')
+            .setLabel('Dein feedback')
             .setStyle(TextInputStyle.Paragraph)
             .setPlaceholder('Share what went well or how we can improve...')
             .setRequired(true)
@@ -187,3 +187,4 @@ const declineHandler = {
 };
 
 export default [feedbackHandler, commentHandler, declineHandler];
+

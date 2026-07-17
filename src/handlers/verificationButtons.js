@@ -1,4 +1,4 @@
-import { MessageFlags } from 'discord.js';
+﻿import { MessageFlags } from 'discord.js';
 import { successEmbed } from '../utils/embeds.js';
 import { verifyUser } from '../services/verificationService.js';
 import { handleInteractionError, replyUserError, ErrorTypes } from '../utils/errorHandler.js';
@@ -28,7 +28,7 @@ export async function handleVerificationButton(interaction, client) {
         });
 
         if (result.status === 'already_verified') {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'You are already verified and have access to all server channels.' });
+            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'You are Bereits verifiziert and have access to all server channels.' });
         }
 
         logger.info('User verified via button', {
@@ -40,7 +40,7 @@ export async function handleVerificationButton(interaction, client) {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [successEmbed(
                 "✅ Verification Successful!",
-                `You have been verified and given the **${result.roleName}** role!\n\nYou now have access to all server channels and features. Welcome! 🎉`
+                `You have been verified and given the **${result.roleName}** role!\n\nYou now have access to all server channels and features. Willkommen! 🎉`
             )],
         });
 

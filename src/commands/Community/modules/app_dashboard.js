@@ -1,4 +1,4 @@
-import { getColor, getDefaultApplicationQuestions, botConfig } from '../../../config/bot.js';
+﻿import { getColor, getDefaultApplicationQuestions, botConfig } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -83,12 +83,12 @@ function buildSelectMenu(guildId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Log Channel')
-                .setDescription('Set the channel where new applications are logged')
+                .setDescription('Set Der Kanal where new applications are logged')
                 .setValue('log_channel')
                 .setEmoji('📢'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Manager Roles')
-                .setDescription('Add or remove a role that can manage applications')
+                .setDescription('Add or remove a role that can Verwalte Bewerbungen')
                 .setValue('manager_role')
                 .setEmoji('🛡️'),
             new StringSelectMenuOptionBuilder()
@@ -162,7 +162,7 @@ export default {
                 throw new TitanBotError(
                     'Applications system not set up',
                     ErrorTypes.CONFIGURATION,
-                    'The applications system has not been configured yet. Please run `/app-admin setup` to create your first application.',
+                    'The applications system has not been configured yet. Please run `/app-admin setup` to create Dein first application.',
                 );
             }
 
@@ -397,7 +397,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
 
             const errorMessage =
                 error instanceof TitanBotError
-                    ? error.userMessage || 'An error occurred while processing your selection.'
+                    ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
                     : 'An unexpected error occurred while updating the configuration.';
 
             if (!selectInteraction.replied && !selectInteraction.deferred) {
@@ -464,7 +464,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 logger.error('Error toggling global application status:', error);
                 await replyUserError(toggleInteraction, {
                     type: ErrorTypes.UNKNOWN,
-                    message: 'An error occurred while toggling the application status.',
+                    message: 'Ein Fehler ist aufgetreten while toggling the application status.',
                 });
             }
         });
@@ -473,7 +473,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
             if (reason === 'time') {
                 const timeoutEmbed = new EmbedBuilder()
                     .setTitle('Configuration Timeout')
-                    .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring your applications, please run the command again.')
+                    .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring Dein applications, please run the command again.')
                     .setColor(getColor('warning'));
                     
                 await InteractionHelper.safeEditReply(interaction, {
@@ -523,7 +523,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 logger.error('Error showing delete confirmation modal:', error);
                 await replyUserError(btnInteraction, {
                     type: ErrorTypes.UNKNOWN,
-                    message: 'Failed to show confirmation modal. Please try again.',
+                    message: 'Failed to show confirmation modal. Bitte versuchen Sie es später erneut.',
                 }).catch(() => {});
                 return;
             }
@@ -557,7 +557,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 logger.error('Error confirming application deletion:', error);
                 await replyUserError(btnInteraction, {
                     type: ErrorTypes.UNKNOWN,
-                    message: 'An error occurred while deleting the application.',
+                    message: 'Ein Fehler ist aufgetreten while deleting the application.',
                 });
             }
         });
@@ -566,7 +566,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
             if (reason === 'time') {
                 const timeoutEmbed = new EmbedBuilder()
                     .setTitle('Configuration Timeout')
-                    .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring your applications, please run the command again.')
+                    .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring Dein applications, please run the command again.')
                     .setColor(getColor('warning'));
                     
                 await InteractionHelper.safeEditReply(interaction, {
@@ -594,7 +594,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 if (roleIndex === -1) {
                     await replyUserError(toggleInteraction, {
                         type: ErrorTypes.USER_INPUT,
-                        message: 'Application role not found.',
+                        message: 'Application Rolle nicht gefunden.',
                     });
                     return;
                 }
@@ -624,7 +624,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
                 logger.error('Error toggling application status:', error);
                 await replyUserError(toggleInteraction, {
                     type: ErrorTypes.UNKNOWN,
-                    message: 'An error occurred while toggling the application status.',
+                    message: 'Ein Fehler ist aufgetreten while toggling the application status.',
                 });
             }
         });
@@ -633,7 +633,7 @@ function setupCollectors(interaction, settings, roles, guildId, client, selected
             if (reason === 'time') {
                 const timeoutEmbed = new EmbedBuilder()
                     .setTitle('Configuration Timeout')
-                    .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring your applications, please run the command again.')
+                    .setDescription('This dashboard session has timed out due to inactivity (10 minutes).\n\nTo continue configuring Dein applications, please run the command again.')
                     .setColor(getColor('warning'));
                     
                 await InteractionHelper.safeEditReply(interaction, {
@@ -652,12 +652,12 @@ function buildApplicationSelectMenu(guildId, roleId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Log Channel')
-                .setDescription('Set the channel where applications are logged')
+                .setDescription('Set Der Kanal where applications are logged')
                 .setValue('log_channel')
                 .setEmoji('📢'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Manager Roles')
-                .setDescription('Add or remove a role that can manage applications')
+                .setDescription('Add or remove a role that can Verwalte Bewerbungen')
                 .setValue('manager_role')
                 .setEmoji('🛡️'),
             new StringSelectMenuOptionBuilder()
@@ -731,7 +731,7 @@ async function handleLogChannel(selectInteraction, rootInteraction, settings, ro
         logger.error('Error in log channel modal:', error);
         await replyUserError(selectInteraction, {
             type: ErrorTypes.UNKNOWN,
-            message: 'An error occurred while updating the log channel.',
+            message: 'Ein Fehler ist aufgetreten while updating the log channel.',
         });
     }
 }
@@ -792,7 +792,7 @@ async function handleManagerRole(selectInteraction, rootInteraction, settings, r
         logger.error('Error in manager role modal:', error);
         await replyUserError(selectInteraction, {
             type: ErrorTypes.UNKNOWN,
-            message: 'An error occurred while updating manager roles.',
+            message: 'Ein Fehler ist aufgetreten while updating manager roles.',
         });
     }
 }
@@ -807,7 +807,7 @@ async function handleQuestions(selectInteraction, rootInteraction, settings, rol
 
     const modal = new ModalBuilder()
         .setCustomId('app_cfg_questions')
-        .setTitle('Edit Application Questions')
+        .setTitle('Bearbeite Bewerbungsfragen')
         .addComponents(
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
@@ -909,7 +909,7 @@ async function handleRoleAdd(selectInteraction, rootInteraction, settings, roles
 
     const roleSelect = new RoleSelectMenuBuilder()
         .setCustomId('application_role')
-        .setPlaceholder('Select the role members can apply for...')
+        .setPlaceholder('Select Die Rolle members can apply for...')
         .setMinValues(1)
         .setMaxValues(1)
         .setRequired(true);
@@ -963,7 +963,7 @@ async function handleRoleAdd(selectInteraction, rootInteraction, settings, roles
         logger.error('Error in role add modal:', error);
         await replyUserError(selectInteraction, {
             type: ErrorTypes.UNKNOWN,
-            message: 'An error occurred while adding the application role.',
+            message: 'Ein Fehler ist aufgetreten while adding the application role.',
         });
     }
 }
@@ -983,14 +983,14 @@ async function handleRoleRemove(selectInteraction, rootInteraction, settings, ro
 
     const roleSelect = new RoleSelectMenuBuilder()
         .setCustomId('remove_role')
-        .setPlaceholder('Select the role to remove...')
+        .setPlaceholder('Select Die Rolle to remove...')
         .setMinValues(1)
         .setMaxValues(1)
         .setRequired(true);
 
     const roleLabel = new LabelBuilder()
         .setLabel('Remove Application Role')
-        .setDescription('Select the role to remove from the applications list')
+        .setDescription('Select Die Rolle to remove from the applications list')
         .setRoleSelectMenuComponent(roleSelect);
 
     modal.addLabelComponents(roleLabel);
@@ -1025,7 +1025,7 @@ async function handleRoleRemove(selectInteraction, rootInteraction, settings, ro
         logger.error('Error in role remove modal:', error);
         await replyUserError(selectInteraction, {
             type: ErrorTypes.UNKNOWN,
-            message: 'An error occurred while removing the application role.',
+            message: 'Ein Fehler ist aufgetreten while removing the application role.',
         });
     }
 }
@@ -1117,7 +1117,7 @@ async function handleDeleteApplication(confirmSubmit, selectedRoleId, guildId, r
         
         const roleIndex = roles.findIndex(r => r.roleId === selectedRoleId);
         if (roleIndex === -1) {
-            await replyUserError(confirmSubmit, { type: ErrorTypes.USER_INPUT, message: 'Application role not found.' });
+            await replyUserError(confirmSubmit, { type: ErrorTypes.USER_INPUT, message: 'Application Rolle nicht gefunden.' });
             return;
         }
 
@@ -1149,6 +1149,8 @@ async function handleDeleteApplication(confirmSubmit, selectedRoleId, guildId, r
 
     } catch (error) {
         logger.error('Error in handleDeleteApplication:', error);
-        await replyUserError(confirmSubmit, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while deleting the application. Please try again.' });
+        await replyUserError(confirmSubmit, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while deleting the application. Bitte versuchen Sie es später erneut.' });
     }
 }
+
+

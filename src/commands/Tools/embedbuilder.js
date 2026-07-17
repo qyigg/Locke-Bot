@@ -1,4 +1,4 @@
-import {
+﻿import {
     SlashCommandBuilder,
     PermissionFlagsBits,
     ActionRowBuilder,
@@ -237,7 +237,7 @@ async function handleEditContent(selectInteraction, rootInteraction, state) {
                     .setValue(state.description ? state.description.substring(0, 4000) : '')
                     .setMaxLength(4000)
                     .setRequired(false)
-                    .setPlaceholder('Write your embed description here...'),
+                    .setPlaceholder('Write Dein embed description here...'),
             ),
         );
 
@@ -273,7 +273,7 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
                     .setLabel(c.label)
                     .setValue(c.value)
                     .setEmoji(c.emoji)
-                    .setDescription(c.value !== '__custom__' ? c.value : 'Enter your own #RRGGBB value'),
+                    .setDescription(c.value !== '__custom__' ? c.value : 'Enter Dein own #RRGGBB value'),
             ),
         );
 
@@ -282,7 +282,7 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
             new EmbedBuilder()
                 .setTitle('Set Color')
                 .setDescription(
-                    'Select a preset color or choose **Custom Hex** to enter your own `#RRGGBB` value.',
+                    'Select a preset color or choose **Custom Hex** to enter Dein own `#RRGGBB` value.',
                 )
                 .setColor(getColor('info')),
         ],
@@ -368,7 +368,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
                     .setValue(state.author?.name || '')
                     .setMaxLength(256)
                     .setRequired(false)
-                    .setPlaceholder('Your Name'),
+                    .setPlaceholder('Dein Name'),
             ),
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
@@ -961,7 +961,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         embeds: [
             new EmbedBuilder()
                 .setTitle('Post Embed')
-                .setDescription('Select the channel where this embed will be sent.')
+                .setDescription('Select Der Kanal where this embed will be sent.')
                 .setColor(getColor('info')),
         ],
         components: [new ActionRowBuilder().addComponents(chanSelect)],
@@ -1006,7 +1006,7 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         await channel.send({ embeds: [finalEmbed] });
 
         await chanInter.followUp({
-            embeds: [successEmbed('Embed Sent', `Your embed has been posted to ${channel}.`)],
+            embeds: [successEmbed('Embed Sent', `Dein embed has been posted to ${channel}.`)],
             flags: MessageFlags.Ephemeral,
         });
     });
@@ -1145,7 +1145,7 @@ export default {
                     logger.error('Error in embedbuilder collector:', error);
                     const msg =
                         error instanceof TitanBotError
-                            ? error.userMessage || 'An error occurred.'
+                            ? error.userMessage || 'Ein Fehler ist aufgetreten.'
                             : 'Ein unerwarteter Fehler ist aufgetreten.';
                     if (!ci.replied && !ci.deferred) await ci.deferUpdate().catch(() => {});
                     await replyUserError(ci, {
@@ -1171,3 +1171,4 @@ export default {
         }
     },
 };
+

@@ -1,4 +1,4 @@
-// birthdayService.js
+﻿// birthdayService.js
 
 import { getGuildConfig } from './config/guildConfig.js';
 import { getGuildBirthdays, setBirthday as dbSetBirthday, deleteBirthday as dbDeleteBirthday, getMonthName, getBirthdayTrackingKey } from '../utils/database.js';
@@ -68,7 +68,7 @@ export async function setBirthday(client, guildId, userId, month, day) {
       throw new TitanBotError(
         'Failed to save birthday to database',
         ErrorTypes.DATABASE,
-        'Failed to set your birthday. Please try again later.',
+        'Failed to set Dein birthday. Bitte versuchen Sie es später erneut later.',
         { userId, guildId, month, day }
       );
     }
@@ -173,7 +173,7 @@ export async function deleteBirthday(client, guildId, userId) {
       throw new TitanBotError(
         'Failed to delete birthday from database',
         ErrorTypes.DATABASE,
-        'Failed to remove your birthday. Please try again.',
+        'Failed to remove Dein birthday. Bitte versuchen Sie es später erneut.',
         { userId, guildId }
       );
     }
@@ -357,3 +357,4 @@ export async function checkBirthdays(client) {
     }
   }
 }
+

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
@@ -13,7 +13,7 @@ export default {
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to add levels to')
+        .setDescription('Der Benutzer to add levels to')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('The leveling system is currently disabled on Dieser Server.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -56,9 +56,9 @@ export default {
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
     if (!member) {
       throw new TitanBotError(
-        `User ${targetUser.id} not found in this guild`,
+        `User ${targetUser.id} Nicht gefunden in Diese Gilde`,
         ErrorTypes.USER_INPUT,
-        'The specified user is not in this server.'
+        'The specified user is not in Dieser Server.'
       );
     }
 
@@ -79,3 +79,4 @@ export default {
     );
   }
 };
+

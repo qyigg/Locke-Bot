@@ -1,4 +1,4 @@
-// prefixParser.js
+﻿// prefixParser.js
 
 import { resolveSubcommandAlias } from '../config/commands/commandAliases.js';
 import { logger } from './logger.js';
@@ -119,10 +119,10 @@ export function mapArgumentsToOptions(args, commandData) {
           optionDefs = sub.options?.filter((opt) => opt.type !== 1 && opt.type !== 2) || [];
           currentArgs = args.slice(2);
         } else {
-          logger.debug(`Subcommand ${subcommandName} not found in group ${subcommandGroupName}`);
+          logger.debug(`Subcommand ${subcommandName} Nicht gefunden in group ${subcommandGroupName}`);
         }
       } else if (!group) {
-        logger.debug(`Subcommand group ${subcommandGroupName} not found`);
+        logger.debug(`Subcommand group ${subcommandGroupName} Nicht gefunden`);
       }
     }
   } else if (hasSubcommands) {
@@ -138,7 +138,7 @@ export function mapArgumentsToOptions(args, commandData) {
         currentArgs = args.slice(1);
         logger.debug(`Found subcommand ${subcommandName}, optionDefs: ${optionDefs.length}`);
       } else {
-        logger.debug(`Subcommand ${resolvedSubcommand} not found`);
+        logger.debug(`Subcommand ${resolvedSubcommand} Nicht gefunden`);
       }
     }
   } else {

@@ -1,4 +1,4 @@
-import { createEmbed } from '../../utils/embeds.js';
+﻿import { createEmbed } from '../../utils/embeds.js';
 import { createAllCommandsMenu } from './helpSelectMenus.js';
 import { createInitialHelpMenu } from '../../commands/Core/help.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
@@ -54,7 +54,7 @@ export const helpBugReportButton = {
                 '• 📝 Detailed description of the issue\n' +
                 '• 📋 Steps to reproduce the problem\n' +
                 '• 📸 Screenshots if applicable\n' +
-                '• 💻 Your bot version and environment\n\n' +
+                '• 💻 Dein bot version and environment\n\n' +
                 'This helps us fix issues faster and more effectively!',
             color: 'error'
         });

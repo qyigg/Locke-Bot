@@ -12,16 +12,16 @@ import birthdaySetchannel from './modules/birthday_setchannel.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
-        .setName('birthday')
-        .setDescription('Birthday system commands')
+        .setName('geburtstag')
+        .setDescription('Geburtstagssystem-Befehle')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('set')
-                .setDescription('Set your birthday')
+                .setDescription('Lege deinen Geburtstag fest')
                 .addIntegerOption(option =>
                     option
                         .setName('month')
-                        .setDescription('Birth month (1-12)')
+                        .setDescription('Geburtsmonat (1-12)')
                         .setRequired(true)
                         .setMinValue(1)
                         .setMaxValue(12)
@@ -29,7 +29,7 @@ export default {
                 .addIntegerOption(option =>
                     option
                         .setName('day')
-                        .setDescription('Birth day (1-31)')
+                        .setDescription('Geburtstag (1-31)')
                         .setRequired(true)
                         .setMinValue(1)
                         .setMaxValue(31)
@@ -38,37 +38,37 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('info')
-                .setDescription('View birthday information')
+                .setDescription('Zeige Geburtstagsangaben an')
                 .addUserOption(option =>
                     option
                         .setName('user')
-                        .setDescription('User to check birthday for')
+                        .setDescription('Benutzer, dessen Geburtstag angezeigt werden soll')
                         .setRequired(false)
                 )
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('List all birthdays in the server')
+                .setDescription('Liste alle Geburtstage im Server auf')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('remove')
-                .setDescription('Remove your birthday')
+                .setDescription('Entferne deinen Geburtstag')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('next')
-                .setDescription('Show upcoming birthdays')
+                .setDescription('Zeige bevorstehende Geburtstage')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('setchannel')
-                .setDescription('Set or disable the channel for birthday announcements. (Manage Server required)')
+                .setDescription('Lege den Kanal für Geburtstagsankündigungen fest oder deaktiviere ihn. (Server verwalten erforderlich)')
                 .addChannelOption(option =>
                     option
                         .setName('channel')
-                        .setDescription('The text channel for announcements. Leave empty to disable.')
+                        .setDescription('Der Textkanal für Ankündigungen. Leerlassen zum Deaktivieren.')
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(false)
                 )
@@ -91,7 +91,7 @@ export default {
             case 'setchannel':
                 return await birthdaySetchannel.execute(interaction, config, client);
             default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unknown subcommand' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unbekannter Unterkommando' });
         }
     }
 };

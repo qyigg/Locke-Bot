@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
@@ -9,7 +9,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("warn")
-        .setDescription("Warn a user")
+        .setDescription("Verwarne einen Benutzer")
         .addUserOption((o) =>
             o
                 .setName("target")
@@ -44,9 +44,9 @@ export default {
 
         if (!target) {
             throw new TitanBotError(
-                'Missing target user',
+                'Zielbenutzer fehlt',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to warn.',
+                'Du musst angeben a user to warn.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -62,9 +62,9 @@ export default {
 
         if (!member) {
             throw new TitanBotError(
-                "Target not found",
+                "Target Nicht gefunden",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server."
+                "The target user is not currently in Dieser Server."
             );
         }
 
@@ -106,3 +106,6 @@ export default {
         });
     }
 };
+
+
+

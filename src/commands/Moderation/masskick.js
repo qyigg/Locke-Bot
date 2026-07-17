@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
@@ -37,7 +37,7 @@ export default {
         }
 
         const usersInput = interaction.options.getString("users");
-        const reason = interaction.options.getString("reason") || "Mass kick - No reason provided";
+        const reason = interaction.options.getString("reason") || "Mass kick - Kein Grund angegeben";
 
         try {
             const userIds = usersInput
@@ -51,11 +51,11 @@ export default {
             }
 
             if (userIds.includes(interaction.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include yourself in a mass kick.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht include Deinself in a mass kick.' });
             }
 
             if (userIds.includes(client.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include the bot in a mass kick.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht include the bot in a mass kick.' });
             }
 
             const results = {
@@ -175,7 +175,8 @@ export default {
 
         } catch (error) {
             logger.error("Error in masskick command:", error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing the mass kick. Please try again later.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while processing the mass kick. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
+

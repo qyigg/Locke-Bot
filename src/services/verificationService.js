@@ -1,4 +1,4 @@
-// verificationService.js
+﻿// verificationService.js
 
 import { PermissionFlagsBits } from 'discord.js';
 import { botConfig } from '../config/bot.js';
@@ -36,9 +36,9 @@ export async function verifyUser(client, guildId, userId, options = {}) {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
             throw createError(
-                `Guild ${guildId} not found`,
+                `Guild ${guildId} Nicht gefunden`,
                 ErrorTypes.CONFIGURATION,
-                "Guild not found in bot cache.",
+                "Guild Nicht gefunden in bot cache.",
                 { guildId }
             );
         }
@@ -48,9 +48,9 @@ export async function verifyUser(client, guildId, userId, options = {}) {
             member = await guild.members.fetch(userId);
         } catch (error) {
             throw createError(
-                `Member ${userId} not found in guild`,
+                `Member ${userId} Nicht gefunden in guild`,
                 ErrorTypes.USER_INPUT,
-                "User is not in this server.",
+                "User is not in Dieser Server.",
                 { userId, guildId }
             );
         }
@@ -61,7 +61,7 @@ export async function verifyUser(client, guildId, userId, options = {}) {
             throw createError(
                 "Verification system disabled",
                 ErrorTypes.CONFIGURATION,
-                "The verification system is not enabled on this server.",
+                "The verification system is not enabled on Dieser Server.",
                 { guildId }
             );
         }
@@ -121,7 +121,7 @@ export async function verifyUser(client, guildId, userId, options = {}) {
             operation: 'verifyUser',
             type: ErrorTypes.UNKNOWN,
             message: 'Verification operation failed: verifyUser',
-            userMessage: 'Verification failed. Please try again in a moment.',
+            userMessage: 'Verification failed. Bitte versuchen Sie es später erneut in a moment.',
             context: { guildId, userId, source: options.source }
         });
         logger.error('Error verifying user', {
@@ -296,9 +296,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
             throw createError(
-                `Guild ${guildId} not found`,
+                `Guild ${guildId} Nicht gefunden`,
                 ErrorTypes.CONFIGURATION,
-                "Guild not found.",
+                "Guild Nicht gefunden.",
                 { guildId }
             );
         }
@@ -308,9 +308,9 @@ export async function removeVerification(client, guildId, userId, options = {}) 
             member = await guild.members.fetch(userId);
         } catch (error) {
             throw createError(
-                `Member ${userId} not found`,
+                `Member ${userId} Nicht gefunden`,
                 ErrorTypes.USER_INPUT,
-                "User is not in this server.",
+                "User is not in Dieser Server.",
                 { userId }
             );
         }
@@ -329,7 +329,7 @@ export async function removeVerification(client, guildId, userId, options = {}) 
         const verifiedRole = guild.roles.cache.get(guildConfig.verification.roleId);
         if (!verifiedRole) {
             throw createError(
-                "Verified role not found",
+                "Verified Rolle nicht gefunden",
                 ErrorTypes.CONFIGURATION,
                 "The verified role no longer exists.",
                 { roleId: guildConfig.verification.roleId }
@@ -384,7 +384,7 @@ export async function removeVerification(client, guildId, userId, options = {}) 
             operation: 'removeVerification',
             type: ErrorTypes.UNKNOWN,
             message: 'Verification operation failed: removeVerification',
-            userMessage: 'Failed to remove verification. Please try again in a moment.',
+            userMessage: 'Failed to remove verification. Bitte versuchen Sie es später erneut in a moment.',
             context: { guildId, userId, reason }
         });
         logger.error('Error removing verification', {
@@ -403,7 +403,7 @@ export async function validateVerificationSetup(guild, verificationConfig) {
         throw createError(
             'Bot member not available in guild cache',
             ErrorTypes.CONFIGURATION,
-            "I couldn't verify my server permissions. Please try again.",
+            "I couldn't verify my server permissions. Bitte versuchen Sie es später erneut.",
             { guildId: guild.id }
         );
     }
@@ -411,7 +411,7 @@ export async function validateVerificationSetup(guild, verificationConfig) {
     const verifiedRole = guild.roles.cache.get(verificationConfig.roleId);
     if (!verifiedRole) {
         throw createError(
-            "Verified role not found",
+            "Verified Rolle nicht gefunden",
             ErrorTypes.CONFIGURATION,
             "The verified role was deleted. Please run `/verification setup` again.",
             { roleId: verificationConfig.roleId, guildId: guild.id }
@@ -422,7 +422,7 @@ export async function validateVerificationSetup(guild, verificationConfig) {
         const channel = guild.channels.cache.get(verificationConfig.channelId);
         if (!channel) {
             throw createError(
-                "Verification channel not found",
+                "Verification Kanal nicht gefunden",
                 ErrorTypes.CONFIGURATION,
                 "The verification channel was deleted.",
                 { channelId: verificationConfig.channelId, guildId: guild.id }
@@ -450,7 +450,7 @@ export async function validateBotCanAssignRole(guild, roleId) {
     const role = guild.roles.cache.get(roleId);
     
     if (!role) {
-        logger.warn('Cannot assign role - role not found', {
+        logger.warn('Cannot assign role - Rolle nicht gefunden', {
             guildId: guild.id,
             roleId
         });
@@ -459,7 +459,7 @@ export async function validateBotCanAssignRole(guild, roleId) {
 
     const botMember = guild.members.me;
     if (!botMember) {
-        logger.warn('Cannot assign role - bot member not found in guild cache', {
+        logger.warn('Cannot assign role - bot member Nicht gefunden in guild cache', {
             guildId: guild.id,
             roleId
         });
@@ -684,3 +684,5 @@ export default {
     trackVerificationAttempt,
     validateAutoVerifyCriteria
 };
+
+

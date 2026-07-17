@@ -1,4 +1,4 @@
-import { botConfig, getColor } from '../../../config/bot.js';
+﻿import { botConfig, getColor } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -94,12 +94,12 @@ function buildSelectMenu(guildId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Change Verification Channel')
-                .setDescription('Set the channel where the Verifizierungs-Panel is posted')
+                .setDescription('Set Der Kanal where the Verifizierungs-Panel is posted')
                 .setValue('channel')
                 .setEmoji('📢'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Change Verified Role')
-                .setDescription('Set the role assigned when a user verifies')
+                .setDescription('Set Die Rolle assigned when a user verifies')
                 .setValue('role')
                 .setEmoji('🏷️'),
             new StringSelectMenuOptionBuilder()
@@ -235,7 +235,7 @@ export default {
 
             if (!cfg?.channelId) {
                 throw new TitanBotError(
-                    'Verification not configured',
+                    'Verifizierung nicht konfiguriert',
                     ErrorTypes.CONFIGURATION,
                     'The verification system has not been set up yet. Run `/verification setup` first.',
                 );
@@ -409,7 +409,7 @@ async function handleChannel(selectInteraction, rootInteraction, cfg, guildId, c
             new EmbedBuilder()
                 .setTitle('Change Verification Channel')
                 .setDescription(
-                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect the channel where the Verifizierungs-Panel will be posted.\n\n> ⚠️ The existing panel will be deleted and re-posted in the new channel.`,
+                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect Der Kanal where the Verifizierungs-Panel will be posted.\n\n> ⚠️ The existing panel will be deleted and re-posted in the new channel.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -507,7 +507,7 @@ async function handleRole(selectInteraction, rootInteraction, cfg, guildId, clie
             new EmbedBuilder()
                 .setTitle('Change Verified Role')
                 .setDescription(
-                    `**Current:** ${cfg.roleId ?`<@&${cfg.roleId}>`: '`Not set`'}\n\nSelect the role to assign when a user verifies.`,
+                    `**Current:** ${cfg.roleId ?`<@&${cfg.roleId}>`: '`Not set`'}\n\nSelect Die Rolle to assign when a user verifies.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -667,3 +667,4 @@ async function handleButtonText(selectInteraction, rootInteraction, cfg, guildId
         
     }
 }
+

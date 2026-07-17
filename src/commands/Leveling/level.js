@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { getLevelingConfig, saveLevelingConfig } from '../../services/leveling/leveling.js';
@@ -106,7 +106,7 @@ export default {
             const existingConfig = await getLevelingConfig(client, interaction.guildId);
 
             if (existingConfig.configured) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `The leveling system is already set up on this server (level-up notifications go to <#${existingConfig.levelUpChannel}>).\n\nUse \`/level dashboard\` to adjust any settings.` });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `The leveling system is already set up on Dieser Server (level-up notifications go to <#${existingConfig.levelUpChannel}>).\n\nUse \`/level dashboard\` to adjust any settings.` });
             }
 
             const newConfig = {

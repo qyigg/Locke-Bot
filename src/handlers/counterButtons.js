@@ -1,4 +1,4 @@
-import { MessageFlags } from 'discord.js';
+﻿import { MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed } from '../utils/embeds.js';
 import { performDeletionByCounterId } from '../commands/ServerStats/modules/serverstats_delete.js';
 import { logger } from '../utils/logger.js';
@@ -29,7 +29,7 @@ export const counterDeleteActionHandler = {
       }
 
       if (ownerId && interaction.user.id !== ownerId) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only the user who initiated this deletion can use these buttons.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only Der Benutzer who initiated this deletion can use these buttons.' }).catch(logger.error);
         return;
       }
 

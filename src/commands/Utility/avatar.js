@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
@@ -11,7 +11,7 @@ export default {
       option
         .setName("target")
         .setDescription(
-          "The user whose avatar you want to see (defaults to you)",
+          "Der Benutzer whose avatar you want to see (defaults to you)",
         ),
     ),
 

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
@@ -15,7 +15,7 @@ const PREMIUM_BONUS_PERCENTAGE = 0.1;
 export default {
     data: new SlashCommandBuilder()
         .setName('daily')
-        .setDescription('Claim your daily cash reward'),
+        .setDescription('Fordere deine tägliche Geldprämie an'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -33,7 +33,7 @@ export default {
                 throw createError(
                     "Failed to load economy data for daily",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -45,7 +45,7 @@ export default {
                 throw createError(
                     "Daily cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You need to wait before claiming daily again. Try again in **${formatDuration(timeRemaining)}**.`,
+                    `Du musst warten, bevor du deine tägliche Auszahlung einfordest. Versuche es in **${formatDuration(timeRemaining)}** erneut.`,
                     { timeRemaining, cooldownType: 'daily' }
                 );
             }
@@ -85,20 +85,21 @@ export default {
             });
 
             const embed = successEmbed(
-                "✅ Daily Claimed!",
-                `You have claimed your daily **$${earned.toLocaleString()}**!${bonusMessage}`
+                "✅ Täglich eingefordert!",
+                `Du hast deine tägliche **$${earned.toLocaleString()}** eingefordert!${bonusMessage}`
             )
                 .addFields({
-                    name: "New Cash Balance",
+                    name: "Neuer Bargeldkontostand",
                     value: `$${userData.wallet.toLocaleString()}`,
                     inline: true,
                 })
                 .setFooter({
                     text: hasPremiumRole
-                        ? `Next claim in 24 hours. (Premium Active)`
-                        : `Next claim in 24 hours.`,
+                        ? `Nächster Anspruch in 24 Stunden. (Premium aktiv)`
+                        : `Nächster Anspruch in 24 Stunden.`,
                 });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'daily' })
 };
+

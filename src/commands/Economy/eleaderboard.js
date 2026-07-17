@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { logger } from '../../utils/logger.js';
@@ -8,7 +8,7 @@ import { getEconomyPrefix } from '../../utils/database.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("eleaderboard")
-        .setDescription("View the server's top 10 richest users.")
+        .setDescription("Sieh dir die Top 10 reichsten Benutzer des Servers an.")
         .setDMPermission(false),
 
     execute: withErrorHandling(async (interaction, config, client) => {
@@ -31,7 +31,7 @@ export default {
                 throw createError(
                     "No economy data found",
                     ErrorTypes.VALIDATION,
-                    "No economy data found for this server."
+                    "No economy data found for Dieser Server."
                 );
             }
 
@@ -76,12 +76,12 @@ export default {
 
             const description = leaderboardEntries.length > 0
                 ? leaderboardEntries.join("\n")
-                : "No economy data is available for this server yet.";
+                : "No economy data is available for Dieser Server yet.";
 
             const embed = createEmbed({
-                title: `Economy Leaderboard`,
+                title: `Wirtschafts-Rangliste`,
                 description,
-                footer: `Your Rank: ${userRank > 0 ?`#${userRank}`: "No ranking data available"}`,
+                footer: `Dein Rang: ${userRank > 0 ?`#${userRank}`: "Keine Ranglistendaten verfügbar"}`,
             });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });

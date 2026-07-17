@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
@@ -64,7 +64,7 @@ export default {
 
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             },
-            'Failed to generate color information. Please try again.',
+            'Failed to generate color information. Bitte versuchen Sie es später erneut.',
             {
                 autoDefer: true,
                 deferOptions: { flags: MessageFlags.Ephemeral }

@@ -1,4 +1,4 @@
-import { getColor } from '../../../config/bot.js';
+﻿import { getColor } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -133,8 +133,8 @@ time: 60000
                 }
                 
                 const errorMessage = error instanceof TitanBotError 
-                    ? error.userMessage || 'An error occurred while processing your selection.'
-                    : 'An error occurred while processing your selection.';
+                    ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
+                    : 'Ein Fehler ist aufgetreten while processing Dein selection.';
                     
                 await replyUserError(selectInteraction, {
                     type: ErrorTypes.CONFIGURATION,
@@ -185,7 +185,7 @@ async function handleNameTemplateChange(interaction, triggerChannel, currentConf
             }
         )
         .setColor(getColor('info'))
-        .setFooter({ text: 'Type your new template in the chat below' });
+        .setFooter({ text: 'Type Dein new template in the chat below' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
@@ -231,8 +231,8 @@ time: 600_000,
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update the channel name template.'
-                : 'Could not update the channel name template.';
+                ? error.userMessage || 'Could not update Der Kanal name template.'
+                : 'Could not update Der Kanal name template.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -309,8 +309,8 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update the user limit.'
-                : 'Could not update the user limit.';
+                ? error.userMessage || 'Could not update Der Benutzer limit.'
+                : 'Could not update Der Benutzer limit.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -470,8 +470,8 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
                 }
                 
                 const errorMessage = error instanceof TitanBotError
-                    ? error.userMessage || 'An error occurred while removing the trigger channel.'
-                    : 'An error occurred while removing the trigger channel.';
+                    ? error.userMessage || 'Ein Fehler ist aufgetreten while removing the trigger channel.'
+                    : 'Ein Fehler ist aufgetreten while removing the trigger channel.';
                     
                 await replyUserError(buttonInteraction, {
                     type: ErrorTypes.CONFIGURATION,
@@ -547,3 +547,4 @@ async function handleViewSettings(interaction, triggerChannel, currentConfig, cl
         flags: MessageFlags.Ephemeral 
     });
 }
+

@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
@@ -54,7 +54,7 @@ export default {
             ],
         });
 
-        logger.info('Ticket priority updated successfully', {
+        logger.info('Ticket priority Erfolgreich aktualisiert', {
             userId: interaction.user.id,
             userTag: interaction.user.tag,
             channelId: interaction.channel.id,
@@ -65,3 +65,4 @@ export default {
         });
     },
 };
+

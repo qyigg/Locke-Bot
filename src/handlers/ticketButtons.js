@@ -1,4 +1,4 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, AttachmentBuilder, MessageFlags } from 'discord.js';
+﻿import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, AttachmentBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed } from '../utils/embeds.js';
 import { createTicket, closeTicket, claimTicket, updateTicketPriority } from '../services/ticket.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
@@ -70,9 +70,9 @@ async function assertTicketPermission(interaction, client, actionLabel, options 
       ? 'Du musst **Kanäle verwalten**, die konfigurierte **Ticket-Staff-Rolle** oder der **Ticket-Ersteller** sein.'
       : 'Du musst **Kanäle verwalten** oder die konfigurierte **Ticket-Staff-Rolle** haben.';
     throw createError(
-      'Ticket permission denied',
+      'Ticket Berechtigung verweigert',
       ErrorTypes.PERMISSION,
-      `${permissionMessage}\n\nYou cannot ${actionLabel}.`
+      `${permissionMessage}\n\nDu kannst nicht ${actionLabel}.`
     );
   }
 
@@ -95,7 +95,7 @@ async function ensureTicketPermission(interaction, client, actionLabel, options 
       ? 'Du musst **Kanäle verwalten**, die konfigurierte **Ticket-Staff-Rolle** oder der **Ticket-Ersteller** sein.'
       : 'Du musst **Kanäle verwalten** oder die konfigurierte **Ticket-Staff-Rolle** haben.';
 
-    await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: `${permissionMessage}\n\nYou cannot ${actionLabel}.` });
+    await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: `${permissionMessage}\n\nDu kannst nicht ${actionLabel}.` });
     return null;
   }
 
@@ -133,7 +133,7 @@ const createTicketHandler = {
         .setCustomId('reason')
         .setLabel('Why are you creating this ticket?')
         .setStyle(TextInputStyle.Paragraph)
-        .setPlaceholder('Describe your issue...')
+        .setPlaceholder('Describe Dein issue...')
         .setRequired(true)
         .setMaxLength(1000);
 
@@ -172,7 +172,7 @@ const createTicketModalHandler = {
       await interaction.editReply({
         embeds: [successEmbed(
           'Ticket Created',
-          `Your ticket has been created in ${channel}!`
+          `Dein ticket has been created in ${channel}!`
         )]
       });
     } catch (error) {
@@ -508,3 +508,4 @@ export {
   reopenTicketHandler,
   deleteTicketHandler 
 };
+

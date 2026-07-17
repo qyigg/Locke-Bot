@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { shopItems } from '../../config/shop/items.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
@@ -11,7 +11,7 @@ const SHOP_ITEMS = shopItems;
 export default {
     data: new SlashCommandBuilder()
         .setName('buy')
-        .setDescription('Buy an item from the shop')
+        .setDescription('Kaufe einen Gegenstand aus dem Shop')
         .addStringOption(option =>
             option
                 .setName('item_id')
@@ -40,7 +40,7 @@ export default {
 
             if (!item) {
                 throw createError(
-                    `Item ${itemId} not found`,
+                    `Item ${itemId} Nicht gefunden`,
                     ErrorTypes.VALIDATION,
                     `The item ID \`${itemId}\` does not exist in the shop.`,
                     { itemId }
@@ -67,7 +67,7 @@ export default {
                 throw createError(
                     "Insufficient funds",
                     ErrorTypes.VALIDATION,
-                    `You need **$${totalCost.toLocaleString()}** to purchase ${quantity}x **${item.name}**, but you only have **$${userData.wallet.toLocaleString()}** in cash.`,
+                    `Du brauchst **$${totalCost.toLocaleString()}** um ${quantity}x **${item.name}** zu kaufen, aber du hast nur **$${userData.wallet.toLocaleString()}** in Bargeld.`,
                     { required: totalCost, current: userData.wallet, itemId, quantity }
                 );
             }
@@ -101,7 +101,7 @@ export default {
 
             userData.wallet -= totalCost;
 
-            let successDescription = `You successfully purchased ${quantity}x **${item.name}** for **$${totalCost.toLocaleString()}**!`;
+            let successDescription = `Du hast erfolgreich ${quantity}x **${item.name}** für **$${totalCost.toLocaleString()}** gekauft!`;
 
             if (item.type === "role" && itemId === "premium_role") {
                 const member = interaction.member;
@@ -110,9 +110,9 @@ export default {
 
                 if (!role) {
                     throw createError(
-                        "Role not found",
+                        "Rolle nicht gefunden",
                         ErrorTypes.CONFIGURATION,
-                        "The configured premium role no longer exists in this guild.",
+                        "The configured premium role no longer exists in Diese Gilde.",
                         { roleId: PREMIUM_ROLE_ID }
                     );
                 }
@@ -122,35 +122,35 @@ export default {
                         role,
                         `Purchased role: ${item.name}`,
                     );
-                    successDescription += `\n\n**👑 The role ${role.toString()} has been granted to you!**`;
+                    successDescription += `\n\n**👑 Die Rolle ${role.toString()} has been granted to you!**`;
                 } catch (roleError) {
                     userData.wallet += totalCost;
                     await setEconomyData(client, guildId, userId, userData);
                     throw createError(
                         "Role assignment failed",
                         ErrorTypes.DISCORD_API,
-                        "Successfully deducted money, but failed to grant the role. Your cash has been refunded.",
+                        "Successfully deducted money, but failed to grant Die Rolle. Dein cash has been refunded.",
                         { roleId: PREMIUM_ROLE_ID, originalError: roleError.message }
                     );
                 }
             } else if (item.type === "upgrade") {
                 userData.upgrades[itemId] = true;
-                successDescription += `\n\n**✨ Your upgrade is now active!**`;
+                successDescription += `\n\n**✨ Dein upgrade is now active!**`;
             } else if (item.type === "consumable" || item.type === "tool") {
                 userData.inventory[itemId] =
                     (userData.inventory[itemId] || 0) + quantity;
                 if (item.type === "tool") {
-                    successDescription += `\n\n**🛠️ ${item.name} added to your inventory!**`;
+                    successDescription += `\n\n**🛠️ ${item.name} added to Dein inventory!**`;
                 }
             }
 
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                "💰 Purchase Successful",
+                "💰 Kauf erfolgreich",
                 successDescription,
             ).addFields({
-                name: "New Balance",
+                name: "Neuer Kontostand",
                 value: `$${userData.wallet.toLocaleString()}`,
                 inline: true,
             });
@@ -158,3 +158,5 @@ export default {
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
     }, { command: 'buy' })
 };
+
+

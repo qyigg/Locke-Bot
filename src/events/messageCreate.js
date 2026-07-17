@@ -1,4 +1,4 @@
-import { Events } from 'discord.js';
+﻿import { Events } from 'discord.js';
 import { logger } from '../utils/logger.js';
 import { getLevelingConfig, getUserLevelData } from '../services/leveling/leveling.js';
 import { addXp } from '../services/leveling/xpSystem.js';
@@ -69,7 +69,7 @@ async function handlePrefixCommand(message, client) {
     const command = client.commands.get(resolvedCommandName);
 
     if (!command) {
-      logger.warn(`Command not found: ${resolvedCommandName}`);
+      logger.warn(`Command Nicht gefunden: ${resolvedCommandName}`);
       return; 
     }
 
@@ -131,7 +131,7 @@ async function handlePrefixCommand(message, client) {
       const formattedCooldown = formatCooldownDuration(abuseProtection.remainingMs);
       const embed = createEmbed({
         title: 'Command Cooldown',
-        description: `This command is on cooldown. Please wait ${formattedCooldown} before trying again.`,
+        description: `This command ist im Cooldown. Please wait ${formattedCooldown} before trying again.`,
         color: 'error',
       });
       await message.channel.send({ embeds: [embed] }).catch(() => {});
@@ -251,3 +251,4 @@ async function handleLeveling(message, client) {
     logger.error('Error handling leveling for message:', error);
   }
 }
+

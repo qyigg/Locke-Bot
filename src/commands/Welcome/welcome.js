@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder, MessageFlags } from 'discord.js';
 import { getWelcomeConfig, updateWelcomeConfig } from '../../utils/database.js';
 import { formatWelcomeMessage, truncateForEmbedField } from '../../utils/welcome.js';
@@ -17,7 +17,7 @@ export default {
                 .setDescription('Set up the welcome message')
                 .addChannelOption(option =>
                     option.setName('channel')
-                        .setDescription('The channel to send welcome messages to')
+                        .setDescription('Der Kanal to send welcome messages to')
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true))
                 .addStringOption(option =>
@@ -30,7 +30,7 @@ export default {
                         .setRequired(false))
                 .addBooleanOption(option =>
                     option.setName('ping')
-                        .setDescription('Whether to ping the user in the welcome message')
+                        .setDescription('Whether to ping Der Benutzer in the welcome message')
                         .setRequired(false))),
 
     async execute(interaction) {
@@ -65,7 +65,7 @@ export default {
 
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.channelId) {
-                logger.info(`[Welcome] Setup blocked because config already exists in channel ${existingConfig.channelId} for guild ${guild.id}`);
+                logger.info(`[Welcome] Setup blocked because config Existiert bereits in channel ${existingConfig.channelId} for guild ${guild.id}`);
                 return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Welcome is already configured for <#${existingConfig.channelId}>. Use **/greet dashboard** to customize channel, message, ping, or image.` });
             }
             
@@ -117,8 +117,10 @@ export default {
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             } catch (error) {
                 logger.error(`[Welcome] Failed to setup welcome system for guild ${guild.id}:`, error);
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while configuring the welcome system. Please try again.' });
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while configuring the welcome system. Bitte versuchen Sie es später erneut.' });
             }
         }
     },
 };
+
+

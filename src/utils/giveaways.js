@@ -1,4 +1,4 @@
-// giveaways.js
+﻿// giveaways.js
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { logger } from './logger.js';
@@ -104,7 +104,7 @@ export async function deleteGiveaway(client, guildId, messageId) {
         const giveawayMap = arrayToGiveawayMap(giveaways);
         
         if (!giveawayMap[messageId]) {
-            logger.debug(`Giveaway not found for deletion: ${messageId} in guild ${guildId}`);
+            logger.debug(`Giveaway Nicht gefunden for deletion: ${messageId} in guild ${guildId}`);
             return false;
         }
         

@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+﻿import { logger } from '../utils/logger.js';
 
 export const botConfig = {
   // =========================
@@ -61,7 +61,7 @@ export const botConfig = {
   applications: {
     // Default questions shown when someone fills out an application.
     defaultQuestions: [
-      { question: "What is your name?", required: true },
+      { question: "What is Dein name?", required: true },
       { question: "How old are you?", required: true },
       { question: "Why do you want to join?", required: true },
     ],
@@ -82,7 +82,7 @@ export const botConfig = {
     // Auto-delete approved applications after this many days.
     deleteApprovedAfter: 30,
 
-    // Role IDs allowed to manage applications.
+    // Role IDs allowed to Verwalte Bewerbungen.
     managerRoles: [], // Will be populated from environment or database
   },
 
@@ -302,7 +302,7 @@ export const botConfig = {
   // =========================
   verification: {
     // Message shown when posting the Verifizierungs-Panel.
-    defaultMessage: "Click the button below to verify yourself and gain access to the server!",
+    defaultMessage: "Click the button below to Verifiziere dich selbst and gain access to the server!",
 
     // Text on the verification button.
     defaultButtonText: "Verifizieren",
@@ -372,7 +372,7 @@ export const botConfig = {
     // Welcome template posted when a user joins.
     // Placeholders: {user}, {server}, {memberCount}
     defaultWelcomeMessage:
-      "Welcome {user} to {server}! We now have {memberCount} members!",
+      "Willkommen {user} in {server}! We now have {memberCount} members!",
     // Goodbye template posted when a user leaves.
     // Placeholders: {user}, {memberCount}
     defaultGoodbyeMessage:
@@ -649,3 +649,5 @@ export function getRandomColor() {
 }
 
 export default botConfig;
+
+

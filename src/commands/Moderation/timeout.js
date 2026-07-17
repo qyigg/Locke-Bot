@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -18,7 +18,7 @@ const durationChoices = [
 export default {
     data: new SlashCommandBuilder()
         .setName("timeout")
-        .setDescription("Timeout a user for a specific duration.")
+        .setDescription("Gib einen Timeout für einen Benutzer for a specific duration.")
         .addUserOption((option) =>
             option
                 .setName("target")
@@ -53,13 +53,13 @@ export default {
         const targetUser = interaction.options.getUser("target");
         const member = interaction.options.getMember("target");
         const durationMinutes = interaction.options.getInteger("duration");
-        const reason = interaction.options.getString("reason") || "No reason provided";
+        const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!targetUser) {
             throw new TitanBotError(
-                'Missing target user',
+                'Zielbenutzer fehlt',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to timeout.',
+                'Du musst angeben a user to timeout.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -68,21 +68,21 @@ export default {
             throw new TitanBotError(
                 "Cannot timeout self",
                 ErrorTypes.VALIDATION,
-                "You cannot timeout yourself.",
+                "Du kannst nicht timeout Deinself.",
             );
         }
         if (targetUser.id === client.user.id) {
             throw new TitanBotError(
                 "Cannot timeout bot",
                 ErrorTypes.VALIDATION,
-                "You cannot timeout the bot.",
+                "Du kannst nicht timeout the bot.",
             );
         }
         if (!member) {
             throw new TitanBotError(
-                "Target not found",
+                "Target Nicht gefunden",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server.",
+                "The target user is not currently in Dieser Server.",
             );
         }
 
@@ -109,3 +109,7 @@ export default {
         });
     },
 };
+
+
+
+

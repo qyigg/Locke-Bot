@@ -1,4 +1,4 @@
-import { shopItems, getItemById, getItemsByType, getItemPrice, validatePurchase } from './items.js';
+﻿import { shopItems, getItemById, getItemsByType, getItemPrice, validatePurchase } from './items.js';
 import { botConfig } from '../bot.js';
 
 const { currency } = botConfig.economy;
@@ -21,7 +21,7 @@ export const shopConfig = {
         {
             id: 'upgrades',
             name: 'Upgrades',
-            description: 'Permanent upgrades that enhance your abilities',
+            description: 'Permanent upgrades that enhance Dein abilities',
             icon: '⚡',
             itemTypes: ['upgrade']
         },

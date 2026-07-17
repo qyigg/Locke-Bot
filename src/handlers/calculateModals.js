@@ -1,4 +1,4 @@
-import { successEmbed } from '../utils/embeds.js';
+﻿import { successEmbed } from '../utils/embeds.js';
 import { logger } from '../utils/logger.js';
 import { evaluateMathExpression } from '../utils/safeMathParser.js';
 
@@ -59,7 +59,7 @@ async function calculateModalHandler(interaction, client, args) {
                 "🧮 Calculation Result",
                 `**Expression:** \`${newExpression.replace(/`/g, "\`")}\`\n` +
                     `**Result:** \`${formattedNewResult}\`\n\n` +
-                    `*Use the buttons in the channel message to perform more operations.*`,
+                    `*Use the buttons in Der Kanal message to perform more operations.*`,
             );
 
             try {
@@ -88,9 +88,9 @@ async function calculateModalHandler(interaction, client, args) {
         logger.error('Calculate modal handler error:', error);
         try {
             if (!interaction.replied && !interaction.deferred) {
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred processing your calculation.' });
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten processing Dein calculation.' });
             } else {
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred processing your calculation.' });
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten processing Dein calculation.' });
             }
         } catch (err) {
             logger.error('Failed to send error message:', err);
@@ -101,3 +101,4 @@ async function calculateModalHandler(interaction, client, args) {
 export default {
     execute: calculateModalHandler
 };
+

@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, MessageFlags } from 'discord.js';
 import { shopItems } from '../../../config/shop/items.js';
 import { getColor } from '../../../config/bot.js';
 import { logger } from '../../../utils/logger.js';
@@ -61,7 +61,7 @@ export default {
 
             collector.on('collect', async (buttonInteraction) => {
                 if (buttonInteraction.user.id !== interaction.user.id) {
-                    await buttonInteraction.reply({ content: '❌ You cannot use these buttons. Run `/shop` to get your own shop view.', flags: 64 });
+                    await buttonInteraction.reply({ content: '❌ Du kannst nicht use these buttons. Run `/shop` to get Dein own shop view.', flags: 64 });
                     return;
                 }
                 const { customId } = buttonInteraction;

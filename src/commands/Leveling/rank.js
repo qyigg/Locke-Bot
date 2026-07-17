@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getUserLevelData, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
@@ -7,11 +7,11 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
-    .setDescription("Check your or another user's rank and level")
+    .setDescription("Check Dein or another user's rank and level")
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to check the rank of')
+        .setDescription('Der Benutzer to check the rank of')
         .setRequired(false)
     )
     .setDMPermission(false),
@@ -26,7 +26,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('The leveling system is currently disabled on Dieser Server.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -40,9 +40,9 @@ export default {
 
     if (!member) {
       throw new TitanBotError(
-        `User ${targetUser.id} not found in guild`,
+        `User ${targetUser.id} Nicht gefunden in guild`,
         ErrorTypes.USER_INPUT,
-        'Could not find the specified user in this server.'
+        'Could not find the specified user in Dieser Server.'
       );
     }
 
@@ -97,3 +97,4 @@ function createProgressBar(percentage, length = 10) {
   const filled = Math.round((percentage / 100) * length);
   return '█'.repeat(filled) + '░'.repeat(length - filled);
 }
+

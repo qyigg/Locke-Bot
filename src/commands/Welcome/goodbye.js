@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder, MessageFlags } from 'discord.js';
 import { getWelcomeConfig, updateWelcomeConfig } from '../../utils/database.js';
 import { formatWelcomeMessage, truncateForEmbedField } from '../../utils/welcome.js';
@@ -17,7 +17,7 @@ export default {
                 .setDescription('Set up the goodbye message')
                 .addChannelOption(option =>
                     option.setName('channel')
-                        .setDescription('The channel to send goodbye messages to')
+                        .setDescription('Der Kanal to send goodbye messages to')
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true))
                 .addStringOption(option =>
@@ -30,7 +30,7 @@ export default {
                         .setRequired(false))
                 .addBooleanOption(option =>
                     option.setName('ping')
-                        .setDescription('Whether to ping the user in the goodbye message')
+                        .setDescription('Whether to ping Der Benutzer in the goodbye message')
                         .setRequired(false))),
 
     async execute(interaction) {
@@ -60,7 +60,7 @@ export default {
 
             const existingConfig = await getWelcomeConfig(client, guild.id);
             if (existingConfig?.goodbyeChannelId) {
-                logger.info(`[Goodbye] Setup blocked because config already exists in channel ${existingConfig.goodbyeChannelId} for guild ${guild.id}`);
+                logger.info(`[Goodbye] Setup blocked because config Existiert bereits in channel ${existingConfig.goodbyeChannelId} for guild ${guild.id}`);
                 return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Goodbye is already configured for <#${existingConfig.goodbyeChannelId}>. Use **/greet dashboard** to customize channel, message, ping, or image.` });
             }
 
@@ -118,8 +118,10 @@ export default {
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             } catch (error) {
                 logger.error(`[Goodbye] Failed to setup goodbye system for guild ${guild.id}:`, error);
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while configuring the goodbye system. Please try again.' });
+                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while configuring the goodbye system. Bitte versuchen Sie es später erneut.' });
             }
         }
     },
 };
+
+

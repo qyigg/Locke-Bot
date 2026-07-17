@@ -1,4 +1,4 @@
-import { getColor } from '../../config/bot.js';
+﻿import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, RoleSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, MessageFlags, ComponentType, EmbedBuilder, LabelBuilder, CheckboxBuilder, TextDisplayBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
@@ -33,7 +33,7 @@ export default {
                 .setDescription('Set up a new reaction role panel')
                 .addChannelOption(option => 
                     option.setName('channel')
-                        .setDescription('The channel to send the reaction role message to')
+                        .setDescription('Der Kanal to send the reaction role message to')
                         .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
                         .setRequired(true)
                 )
@@ -76,7 +76,7 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('dashboard')
-                .setDescription('Manage and configure your reaction role panels')
+                .setDescription('Manage and configure Dein reaction role panels')
                 .addStringOption(option =>
                     option
                         .setName('panel')
@@ -185,9 +185,9 @@ async function handleSetup(interaction) {
     const existingPanels = await getAllReactionRoleMessages(interaction.client, interaction.guildId);
     if (existingPanels && existingPanels.length >= 5) {
         throw createError(
-            'Panel limit reached',
+            'Panel Limit erreicht',
             ErrorTypes.VALIDATION,
-            'Your guild has reached the maximum of 5 reaction role panels. Delete an existing panel to create a new one.',
+            'Dein guild has reached the maximum of 5 reaction role panels. Delete an existing panel to create a new one.',
             { maxPanels: 5, currentPanels: existingPanels.length }
         );
     }
@@ -205,7 +205,7 @@ async function handleSetup(interaction) {
             }
 
             if (role.position >= interaction.guild.members.me.roles.highest.position) {
-                roleValidationErrors.push(`**${role.name}** - My bot's role is positioned lower than this role in your server's role hierarchy and cannot assign it`);
+                roleValidationErrors.push(`**${role.name}** - My bot's role is positioned lower than this role in Dein server's role hierarchy and cannot assign it`);
                 continue;
             }
             
@@ -259,7 +259,7 @@ async function handleSetup(interaction) {
     const row = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId('reaction_roles')
-            .setPlaceholder('Select your roles')
+            .setPlaceholder('Select Dein roles')
             .setMinValues(0)
             .setMaxValues(roles.length)
             .addOptions(
@@ -390,7 +390,7 @@ async function rebuildLivePanelMessage(guild, panelData) {
         const selectRow = new ActionRowBuilder().addComponents(
             new StringSelectMenuBuilder()
                 .setCustomId('reaction_roles')
-                .setPlaceholder('Select your roles')
+                .setPlaceholder('Select Dein roles')
                 .setMinValues(0)
                 .setMaxValues(roleObjects.length)
                 .addOptions(
@@ -440,7 +440,7 @@ function buildReactionRoleDashboardPayload(panelData, discordMsg, guildId, guild
         .setColor(getColor('info'))
         .addFields(
             { name: 'Panelstatus', value: formatPanelStatusField(panelStatus), inline: false },
-            { name: 'Channel', value: channel ? `<#${channel.id}>` : '`Not found`', inline: true },
+            { name: 'Channel', value: channel ? `<#${channel.id}>` : '`Nicht gefunden`', inline: true },
             { name: 'Roles', value: `\`${panelData.roles.length} / 25\``, inline: true },
             { name: '\u200B', value: '\u200B', inline: true },
             { name: 'Role List', value: roleList, inline: false },
@@ -530,7 +530,7 @@ async function repostReactionRolePanel(guild, panelData, client, guildId, fallba
     }
 
     const title = fallbackEmbed?.title || 'Reaction Roles';
-    const description = fallbackEmbed?.description || 'Select your roles using the menu below.';
+    const description = fallbackEmbed?.description || 'Select Dein roles using the menu below.';
 
     const panelEmbed = new EmbedBuilder()
         .setTitle(title)
@@ -544,7 +544,7 @@ async function repostReactionRolePanel(guild, panelData, client, guildId, fallba
     const row = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId('reaction_roles')
-            .setPlaceholder('Select your roles')
+            .setPlaceholder('Select Dein roles')
             .setMinValues(0)
             .setMaxValues(roleObjects.length)
             .addOptions(
@@ -698,7 +698,7 @@ async function handleEditText(buttonInteraction, rootInteraction, panelData, gui
         logger.error('Error showing edit text modal:', error);
         await replyUserError(buttonInteraction, {
             type: ErrorTypes.UNKNOWN,
-            message: 'Failed to show the edit panel text modal. Please try again.',
+            message: 'Failed to show the edit panel text modal. Bitte versuchen Sie es später erneut.',
         }).catch(() => {});
         return;
     }
@@ -798,7 +798,7 @@ async function handleAddRole(selectInteraction, rootInteraction, panelData, guil
         if (role.id === guild.id) {
             await replyUserError(roleInteraction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'You cannot use @everyone.',
+                message: 'Du kannst nicht use @everyone.',
             });
             return;
         }
@@ -865,7 +865,7 @@ async function handleRemoveRole(selectInteraction, rootInteraction, panelData, p
     if (roleOptions.length === 0) {
         await replyUserError(selectInteraction, {
             type: ErrorTypes.USER_INPUT,
-            message: 'The roles on this panel no longer exist in the server.',
+            message: 'Die Rolles on this panel no longer exist in the server.',
         });
         return;
     }
@@ -884,7 +884,7 @@ async function handleRemoveRole(selectInteraction, rootInteraction, panelData, p
         embeds: [
             new EmbedBuilder()
                 .setTitle('Remove Role')
-                .setDescription('Select the role you want to remove from this panel.')
+                .setDescription('Select Die Rolle you want to remove from this panel.')
                 .setColor(getColor('info')),
         ],
         components: [new ActionRowBuilder().addComponents(removeSelect)],
@@ -1094,3 +1094,5 @@ async function handleDeletePanel(btnInteraction, rootInteraction, panelData, pan
         });
     }
 }
+
+

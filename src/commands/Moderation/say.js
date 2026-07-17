@@ -1,4 +1,4 @@
-import {
+﻿import {
     SlashCommandBuilder,
     PermissionFlagsBits,
     ChannelType,
@@ -89,7 +89,7 @@ export default {
         if (!memberPermissions?.has(PermissionFlagsBits.SendMessages)) {
             return replyUserError(interaction, {
                 type: ErrorTypes.PERMISSION,
-                message: `You do not have permission to send messages in ${channel}.`,
+                message: `Du hast keine Berechtigung to send messages in ${channel}.`,
             });
         }
 
@@ -132,3 +132,4 @@ export default {
         });
     },
 };
+

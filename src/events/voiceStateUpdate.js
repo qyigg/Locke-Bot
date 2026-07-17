@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits } from 'discord.js';
+﻿import { ChannelType, PermissionFlagsBits } from 'discord.js';
 import {
     getJoinToCreateConfig, 
     registerTemporaryChannel, 
@@ -63,7 +63,7 @@ export default {
             if (channelCreationCooldown.has(cooldownKey)) {
                 const lastCreation = channelCreationCooldown.get(cooldownKey);
 if (now - lastCreation < VOICE_CREATE_COOLDOWN_MS) {
-                    logger.warn(`User ${member.id} is on cooldown for channel creation`);
+                    logger.warn(`User ${member.id} ist im Cooldown for channel creation`);
                     return;
                 }
             }
@@ -231,7 +231,7 @@ userLimit: userLimit === 0 ? undefined : userLimit,
                 
                 try {
                     await member.send({
-                        content: `❌ Failed to create your temporary voice channel. Please contact a server administrator.`
+                        content: `❌ Failed to create Dein temporary voice channel. Please contact a server administrator.`
                     });
                 } catch (dmError) {
                     logger.debug(`Unable to send temporary channel failure DM to user ${member.id}:`, dmError);

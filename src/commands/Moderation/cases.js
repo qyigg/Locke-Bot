@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { getModerationCases } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
@@ -61,7 +61,7 @@ export default {
             if (cases.length === 0) {
                 throw new Error(targetUser 
                     ? `No moderation cases found for ${targetUser.tag}`
-                    : `No ${filterType === 'all' ? '' : filterType} cases found in this server.`
+                    : `No ${filterType === 'all' ? '' : filterType} cases found in Dieser Server.`
                 );
             }
 
@@ -85,7 +85,7 @@ export default {
                     
                     embed.addFields({
                         name: `Case #${case_.caseId} - ${case_.action}`,
-                        value: `**Target:** ${case_.target}\n**Moderator:** ${case_.executor}\n**Date:** ${date} at ${time}\n**Reason:** ${case_.reason || 'No reason provided'}`,
+                        value: `**Target:** ${case_.target}\n**Moderator:** ${case_.executor}\n**Date:** ${date} at ${time}\n**Reason:** ${case_.reason || 'Kein Grund angegeben'}`,
                         inline: false
                     });
                 });
@@ -137,7 +137,7 @@ time: 120000
 
                 if (buttonInteraction.user.id !== interaction.user.id) {
                     await buttonInteraction.followUp({
-                        content: 'You cannot use these buttons. Run `/cases` to get your own case view.',
+                        content: 'Du kannst nicht use these buttons. Run `/cases` to get Dein own case view.',
                         flags: MessageFlags.Ephemeral
                     });
                     return;
@@ -171,7 +171,8 @@ time: 120000
 
         } catch (error) {
             logger.error('Error in cases command:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while retrieving moderation cases. Please try again later.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while retrieving moderation cases. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
+

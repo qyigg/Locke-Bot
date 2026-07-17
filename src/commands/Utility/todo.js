@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getFromDb, setInDb } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
@@ -13,11 +13,11 @@ function generateShareId() {
 export default {
     data: new SlashCommandBuilder()
         .setName("todo")
-        .setDescription("Manage your personal to-do list")
+        .setDescription("Manage Dein personal to-do list")
         .addSubcommand(subcommand =>
             subcommand
                 .setName("add")
-                .setDescription("Add a task to your to-do list")
+                .setDescription("Add a task to Dein to-do list")
                 .addStringOption(option =>
                     option
                         .setName("task")
@@ -28,7 +28,7 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("list")
-                .setDescription("View your to-do list")
+                .setDescription("View Dein to-do list")
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -44,7 +44,7 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("remove")
-                .setDescription("Remove a task from your to-do list")
+                .setDescription("Remove a task from Dein to-do list")
                 .addIntegerOption(option =>
                     option
                         .setName("number")
@@ -211,7 +211,7 @@ export default {
 
                     const listData = await getOrCreateSharedList(listId);
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
                     if (listData.creatorId !== userId) {
@@ -246,7 +246,7 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
                     if (!listData.members.includes(userId)) {
@@ -342,7 +342,7 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
                     if (!listData.members.includes(userId)) {
@@ -374,7 +374,7 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
                     if (!listData.members.includes(userId)) {
@@ -383,7 +383,7 @@ export default {
 
                     const taskIndex = listData.tasks.findIndex(task => task.id === taskNumber);
                     if (taskIndex === -1) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
                     }
 
                     const [removedTask] = listData.tasks.splice(taskIndex, 1);
@@ -427,7 +427,7 @@ export default {
                     embeds: [
                         successEmbed(
                             "Task Added",
-                            `Added "${taskText}" to your to-do list.`
+                            `Added "${taskText}" to Dein to-do list.`
                         ),
                     ],
                 });
@@ -436,7 +436,7 @@ export default {
             case 'list': {
                 if (userData.tasks.length === 0) {
                     return await InteractionHelper.safeEditReply(interaction, {
-                        embeds: [successEmbed('Your to-do list is empty!', "Your To-Do List")],
+                        embeds: [successEmbed('Dein to-do list is empty!', "Dein To-Do List")],
                     });
                 }
 
@@ -449,7 +449,7 @@ export default {
 
                 return await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
-                        successEmbed('Your To-Do List', taskList)
+                        successEmbed('Dein To-Do List', taskList)
                     ],
                 });
             }
@@ -459,7 +459,7 @@ export default {
                 const task = userData.tasks.find(t => t.id === taskNumber);
 
                 if (!task) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
                 }
 
                 if (task.completed) {
@@ -481,7 +481,7 @@ export default {
                 const taskIndex = userData.tasks.findIndex(t => t.id === taskNumber);
 
                 if (taskIndex === -1) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
                 }
 
                 const [removedTask] = userData.tasks.splice(taskIndex, 1);
@@ -489,7 +489,7 @@ export default {
 
                 return await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
-                        successEmbed('Task Removed', `Removed "${removedTask.text}" from your to-do list.`)
+                        successEmbed('Task Removed', `Removed "${removedTask.text}" from Dein to-do list.`)
                     ],
                 });
             }
@@ -499,3 +499,4 @@ export default {
         }
     },
 };
+

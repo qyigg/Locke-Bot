@@ -7,16 +7,16 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("flip")
-    .setDescription("Flips a coin (Heads or Tails)."),
+    .setDescription("Werfe eine Münze (Kopf oder Zahl)."),
   category: 'Fun',
 
   async execute(interaction, config, client) {
-    const result = Math.random() < 0.5 ? "Heads" : "Tails";
-    const emoji = result === "Heads" ? "🪙" : "🔮";
+    const result = Math.random() < 0.5 ? "Kopf" : "Zahl";
+    const emoji = result === "Kopf" ? "🪙" : "🔮";
 
     const embed = successEmbed(
-      "Heads or Tails?",
-      `The coin landed on... **${result}** ${emoji}!`,
+      "Kopf oder Zahl?",
+      `Die Münze landete auf... **${result}** ${emoji}!`,
     );
 
     await InteractionHelper.safeReply(interaction, { embeds: [embed] });

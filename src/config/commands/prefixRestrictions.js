@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Prefix command restrictions — dashboard and advanced setup flows stay slash-only.
  */
 
@@ -66,7 +66,7 @@ function isSubcommandBlocked(commandName, subcommandName) {
 
 /**
  * Returns whether a prefix invocation should be rejected.
- * @param {object} command - Loaded command module
+ * @param {object} command - Geladen command module
  * @param {string[]} args - Parsed prefix arguments (after command name)
  * @param {(name: string) => string} resolveSubcommandAlias
  * @returns {{ blocked: boolean, reason?: string }}
@@ -129,3 +129,4 @@ export function getPrefixRestriction(command, args, resolveSubcommandAlias) {
 export function isPrefixRestrictedCommand(command, args, resolveSubcommandAlias) {
   return getPrefixRestriction(command, args, resolveSubcommandAlias).blocked;
 }
+

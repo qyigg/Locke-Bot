@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getLeaderboard, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
@@ -21,7 +21,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('The leveling system is currently disabled on Dieser Server.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -41,7 +41,7 @@ export default {
     const embed = new EmbedBuilder()
       .setTitle('Level Leaderboard')
       .setColor('#2ecc71')
-      .setDescription("Top 10 most active members in this server:")
+      .setDescription("Top 10 most active members in Dieser Server:")
       .setTimestamp();
 
     const leaderboardText = await Promise.all(

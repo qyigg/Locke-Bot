@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+﻿import { EmbedBuilder } from 'discord.js';
 import { getTicketData, saveTicketData } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 import { getColor } from '../../../config/bot.js';
@@ -43,7 +43,7 @@ export default {
             await interaction.update({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('⚠️ Ticket Not Found')
+                        .setTitle('⚠️ Ticket Nicht gefunden')
                         .setDescription('Could not find the ticket associated with this survey.')
                         .setColor(getColor('error')),
                 ],
@@ -70,7 +70,7 @@ export default {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('✅ Already Submitted')
-                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for your feedback!`)
+                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for Dein feedback!`)
                         .setColor(getColor('success')),
                 ],
                 components: [],
@@ -105,8 +105,8 @@ export default {
         }
 
         const thankYouEmbed = new EmbedBuilder()
-            .setTitle('✅ Thanks for your feedback!')
-            .setDescription(`You rated your support experience **${ratingLabel}**.\n\nYour feedback has been recorded and helps us improve!`)
+            .setTitle('✅ Thanks for Dein feedback!')
+            .setDescription(`You rated Dein support experience **${ratingLabel}**.\n\nDein feedback has been recorded and helps us improve!`)
             .setColor(getColor('success'))
             .setFooter({ text: 'Thank you for using our support system.' })
             .setTimestamp();
@@ -124,3 +124,4 @@ export default {
         });
     },
 };
+

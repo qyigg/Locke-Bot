@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -193,7 +193,7 @@ export default {
                             .join("\n\n");
 
                         await i.followUp({
-                            content: `📜 **Your Calculation History**\n\n${historyText}`,
+                            content: `📜 **Dein Calculation History**\n\n${historyText}`,
                             flags: ["Ephemeral"],
                         });
                         return;
@@ -251,7 +251,7 @@ export default {
                         logger.error("Failed to show modal:", modalError);
                         if (!i.replied && !i.deferred) {
                             await i.reply({
-                                content: "Failed to open calculator. Please try again.",
+                                content: "Failed to open calculator. Bitte versuchen Sie es später erneut.",
                                 flags: ["Ephemeral"],
                             }).catch(console.error);
                         }
@@ -262,7 +262,7 @@ export default {
                     logger.error("Button interaction error:", error);
                     if (!i.deferred && !i.replied) {
                         await i.followUp({
-                            content: "An error occurred while processing your request.",
+                            content: "Ein Fehler ist aufgetreten while processing Dein request.",
                             flags: ["Ephemeral"],
                         }).catch(console.error);
                     }
@@ -333,3 +333,4 @@ export default {
         }
     },
 };
+

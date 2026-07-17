@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
@@ -106,7 +106,7 @@ export default {
         }
 
         await InteractionHelper.safeEditReply(interaction, {
-            content: '✅ Poll created successfully!',
+            content: '✅ Poll Erfolgreich erstellt!',
         });
     },
 };

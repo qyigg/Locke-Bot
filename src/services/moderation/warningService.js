@@ -1,4 +1,4 @@
-// warningService.js
+﻿// warningService.js
 
 import { db, getFromDb, setInDb, getWarningsKey, getWarningsPrefix } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
@@ -22,7 +22,7 @@ class WarningService {
       throw createError(
         'Corrupted warning data',
         ErrorTypes.DATABASE,
-        'Warning data was corrupted and has been reset. Please try again.',
+        'Warning data was corrupted and has been reset. Bitte versuchen Sie es später erneut.',
         { guildId, userId, service: 'warningService', operation: 'addWarning' }
       );
     }
@@ -69,7 +69,7 @@ class WarningService {
     const index = warnings.findIndex(w => w.id === warningId);
     if (index === -1) {
       throw createError(
-        'Warning not found',
+        'Warning Nicht gefunden',
         ErrorTypes.USER_INPUT,
         'That warning could not be found. It may have already been removed.',
         { guildId, userId, warningId, service: 'warningService', operation: 'removeWarning' }
@@ -122,3 +122,5 @@ class WarningService {
 wrapServiceClassMethods(WarningService);
 
 export { WarningService };
+
+

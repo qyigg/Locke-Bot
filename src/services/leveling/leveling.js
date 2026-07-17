@@ -1,4 +1,4 @@
-// leveling.js
+﻿// leveling.js
 
 import { EmbedBuilder } from 'discord.js';
 import { logger } from '../../utils/logger.js';
@@ -73,7 +73,7 @@ export async function getLeaderboard(client, guildId, limit = 10) {
 
     const guild = client.guilds.cache.get(guildId);
     if (!guild) {
-      logger.warn(`Guild ${guildId} not found in cache`);
+      logger.warn(`Guild ${guildId} Nicht gefunden in cache`);
       return [];
     }
     
@@ -305,9 +305,9 @@ export async function addLevels(client, guildId, userId, levels) {
     const levelingConfig = await getLevelingConfig(client, guildId);
     if (!levelingConfig?.enabled) {
       throw new TitanBotError(
-        'Leveling system is disabled on this server',
+        'Leveling system is disabled on Dieser Server',
         ErrorTypes.CONFIGURATION,
-        'The leveling system is currently disabled on this server.'
+        'The leveling system is currently disabled on Dieser Server.'
       );
     }
 
@@ -357,9 +357,9 @@ export async function removeLevels(client, guildId, userId, levels) {
     const levelingConfig = await getLevelingConfig(client, guildId);
     if (!levelingConfig?.enabled) {
       throw new TitanBotError(
-        'Leveling system is disabled on this server',
+        'Leveling system is disabled on Dieser Server',
         ErrorTypes.CONFIGURATION,
-        'The leveling system is currently disabled on this server.'
+        'The leveling system is currently disabled on Dieser Server.'
       );
     }
 
@@ -401,9 +401,9 @@ export async function setUserLevel(client, guildId, userId, level) {
     const levelingConfig = await getLevelingConfig(client, guildId);
     if (!levelingConfig?.enabled) {
       throw new TitanBotError(
-        'Leveling system is disabled on this server',
+        'Leveling system is disabled on Dieser Server',
         ErrorTypes.CONFIGURATION,
-        'The leveling system is currently disabled on this server.'
+        'The leveling system is currently disabled on Dieser Server.'
       );
     }
 
@@ -458,3 +458,4 @@ export async function deleteUserLevelData(client, guildId, userId) {
     logger.warn(`Could not delete level data for user ${userId} in guild ${guildId}`);
   }
 }
+

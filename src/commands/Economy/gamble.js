@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -13,7 +13,7 @@ const GAMBLE_COOLDOWN = 5 * 60 * 1000;
 export default {
     data: new SlashCommandBuilder()
         .setName('gamble')
-        .setDescription('Gamble your money for a chance to win more')
+        .setDescription('Spiele um dein Geld um eine Chance zu gewinnen, mehr zu verdienen')
         .addIntegerOption(option =>
             option
                 .setName('amount')
@@ -44,7 +44,7 @@ export default {
                 throw createError(
                     "Gamble cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You need to cool down before gambling again. Wait **${minutes}m ${seconds}s**.`,
+                    `Du musst dich abkühlen, bevor du wieder spielst. Warte **${minutes}m ${seconds}s**.`,
                     { remaining, cooldownType: 'gamble' }
                 );
             }
@@ -53,7 +53,7 @@ export default {
                 throw createError(
                     "Insufficient cash for gamble",
                     ErrorTypes.VALIDATION,
-                    `You only have $${userData.wallet.toLocaleString()} cash, but you are trying to bet $${betAmount.toLocaleString()}.`,
+                    `Du hast nur $${userData.wallet.toLocaleString()} Bargeld, aber du versuchst zu wetten $${betAmount.toLocaleString()}.`,
                     { required: betAmount, current: userData.wallet }
                 );
             }
@@ -66,14 +66,14 @@ export default {
             if (cloverCount > 0) {
                 winChance += CLOVER_WIN_BONUS;
                 userData.inventory["lucky_clover"] -= 1;
-                cloverMessage = `\n🍀 **Lucky Clover Consumed:** Your win chance was boosted!`;
+                cloverMessage = `\n🍀 **Lucky Clover Consumed:** Dein win chance was boosted!`;
                 usedClover = true;
             }
             
             else if (charmCount > 0) {
                 winChance += CHARM_WIN_BONUS;
                 userData.inventory["lucky_charm"] -= 1;
-                cloverMessage = `\n🍀 **Lucky Charm Used (${charmCount - 1} uses remaining):** Your win chance was boosted!`;
+                cloverMessage = `\n🍀 **Lucky Charm Used (${charmCount - 1} uses remaining):** Dein win chance was boosted!`;
                 usedCharm = true;
             }
 
@@ -87,15 +87,15 @@ export default {
                 cashChange = amountWon - betAmount;
 
                 resultEmbed = successEmbed(
-                    "🎉 You Won!",
-                    `You successfully gambled and turned your **$${betAmount.toLocaleString()}** bet into **$${amountWon.toLocaleString()}**!${cloverMessage}`,
+                    "🎉 Du hast gewonnen!",
+                    `Du hast erfolgreich gespielt und deine **$${betAmount.toLocaleString()}** Wette in **$${amountWon.toLocaleString()}** verwandelt!${cloverMessage}`,
                 );
             } else {
 cashChange = -betAmount;
 
                 resultEmbed = warningEmbed(
-                    "💔 You Lost...",
-                    `The dice rolled against you. You lost your **$${betAmount.toLocaleString()}** bet.`,
+                    "💔 Du hast verloren...",
+                    `Die Würfel haben gegen dich gerollt. Du hast deine **$${betAmount.toLocaleString()}** Wette verloren.`,
                 );
             }
 
@@ -107,7 +107,7 @@ userData.lastGamble = now;
             const newCash = userData.wallet;
 
             resultEmbed.addFields({
-                name: "New Cash Balance",
+                name: "Neuer Bargeldkontostand",
                 value: `$${newCash.toLocaleString()}`,
                 inline: true,
             });

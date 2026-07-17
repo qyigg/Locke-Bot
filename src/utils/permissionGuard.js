@@ -1,4 +1,4 @@
-// permissionGuard.js
+﻿// permissionGuard.js
 
 import { PermissionFlagsBits } from 'discord.js';
 import { logger } from './logger.js';
@@ -248,7 +248,7 @@ export async function checkBotPermissions(
   if (!targetChannel || !targetChannel.guild) {
     await replyUserError(interaction, {
       type: ErrorTypes.UNKNOWN,
-      message: 'Could not determine channel.',
+      message: 'Konnte den Kanal nicht bestimmen.',
       context: { source: 'permissionGuard.checkBotPermissions' }
     });
     return false;
@@ -258,7 +258,7 @@ export async function checkBotPermissions(
   if (!botMember) {
     await replyUserError(interaction, {
       type: ErrorTypes.UNKNOWN,
-      message: 'Could not find bot member in this guild.',
+      message: 'Konnte das Bot-Mitglied in dieser Gilde nicht finden.',
       context: { source: 'permissionGuard.checkBotPermissions' }
     });
     return false;
@@ -277,7 +277,7 @@ export async function checkBotPermissions(
   if (missingPerms.length > 0) {
     await replyUserError(interaction, {
       type: ErrorTypes.PERMISSION,
-      message: `I need the following permissions in ${targetChannel}: ${missingPerms.join(', ')}`,
+      message: `Ich benötige die folgenden Berechtigungen in ${targetChannel}: ${missingPerms.join(', ')}`,
       context: { source: 'permissionGuard.checkBotPermissions', subtype: 'bot_permission' }
     });
 
@@ -309,7 +309,7 @@ export function auditPermissionCheck(userId, action, allowed, reason = null) {
     logger.debug('[PERMISSION_AUDIT] Permission granted', { action, userHash });
   } else {
     const denyReason = reason || 'insufficient_permissions';
-    logger.warn('[PERMISSION_AUDIT] Permission denied', { action, userHash, reason: denyReason });
+    logger.warn('[PERMISSION_AUDIT] Berechtigung verweigert', { action, userHash, reason: denyReason });
   }
 }
 
@@ -328,3 +328,5 @@ export default {
   checkBotPermissions,
   auditPermissionCheck
 };
+
+

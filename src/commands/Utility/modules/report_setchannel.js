@@ -1,4 +1,4 @@
-import { PermissionsBitField } from 'discord.js';
+﻿import { PermissionsBitField } from 'discord.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { setLogChannel } from '../../../services/loggingService.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
@@ -26,7 +26,8 @@ export default {
             });
         } catch (error) {
             logger.error('report_setchannel error:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not save the channel configuration.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not save Der Kanal configuration.' });
         }
     },
 };
+

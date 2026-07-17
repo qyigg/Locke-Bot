@@ -1,4 +1,4 @@
-import { readdir } from 'fs/promises';
+﻿import { readdir } from 'fs/promises';
 import { join } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname } from 'path';
@@ -34,7 +34,7 @@ export default async (client) => {
 
       try {
         const interactionFiles = await getAllInteractionFiles(typePath);
-        let loadedCount = 0;
+        let GeladenCount = 0;
 
         for (const filePath of interactionFiles) {
           const relativePath = filePath.slice(interactionsPath.length + 1).replace(/\\/g, '/');
@@ -52,15 +52,15 @@ export default async (client) => {
               }
 
               client[type].set(interaction.name, interaction);
-              loadedCount += 1;
-              logger.info(`Loaded ${type.slice(0, -1)}: ${interaction.name} (${fileName})`);
+              GeladenCount += 1;
+              logger.info(`Geladen ${type.slice(0, -1)}: ${interaction.name} (${fileName})`);
             }
           } catch (error) {
             logger.error(`Error loading interaction ${relativePath} in ${type}:`, error);
           }
         }
 
-        logger.info(`Loaded ${loadedCount} ${type}`);
+        logger.info(`Geladen ${GeladenCount} ${type}`);
       } catch (error) {
         if (error.code !== 'ENOENT') {
           logger.error(`Error loading ${type}:`, error);
@@ -73,3 +73,4 @@ export default async (client) => {
     logger.error('Error loading interactions:', error);
   }
 };
+

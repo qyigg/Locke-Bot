@@ -1,10 +1,10 @@
-// welcome.js
+﻿// welcome.js
 
 import { logger } from './logger.js';
 
 const DEFAULT_TEMPLATES = {
-    welcome: 'Welcome {user} to {server}!',
-    goodbye: '{user.tag} has left the server.'
+    welcome: 'Willkommen {user} in {server}!',
+    goodbye: '{user.tag} hat den Server verlassen.'
 };
 
 function replaceAll(message, token, value) {

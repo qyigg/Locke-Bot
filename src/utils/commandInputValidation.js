@@ -1,4 +1,4 @@
-// commandInputValidation.js
+﻿// commandInputValidation.js
 
 import { z } from 'zod';
 import { createError, ErrorTypes } from './errorHandler.js';
@@ -38,7 +38,7 @@ export function validateChatInputPayloadOrThrow(interaction, context = {}) {
   throw createError(
     'Invalid command input payload',
     ErrorTypes.VALIDATION,
-    'One or more command inputs are invalid. Please review your options and try again.',
+    'One or more command inputs are invalid. Please review Dein options and try again.',
     {
       ...context,
       errorCode: 'VALIDATION_FAILED',

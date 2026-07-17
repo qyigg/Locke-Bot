@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, warningEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -13,7 +13,7 @@ const FINE_PERCENTAGE = 0.1;
 export default {
     data: new SlashCommandBuilder()
         .setName('rob')
-        .setDescription('Attempt to rob another user (very risky)')
+        .setDescription('Versuche, einen anderen Benutzer zu berauben (sehr riskant)')
         .addUserOption(option =>
             option
                 .setName('user')
@@ -34,7 +34,7 @@ export default {
                 throw createError(
                     "Cannot rob self",
                     ErrorTypes.VALIDATION,
-                    "You cannot rob yourself.",
+                    "Du kannst dich selbst nicht berauben.",
                     { robberId, victimId: victimUser.id }
                 );
             }
@@ -43,7 +43,7 @@ export default {
                 throw createError(
                     "Cannot rob bot",
                     ErrorTypes.VALIDATION,
-                    "You cannot rob a bot.",
+                    "Du kannst einen Bot nicht berauben.",
                     { victimId: victimUser.id, isBot: true }
                 );
             }
@@ -55,7 +55,7 @@ export default {
                 throw createError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load economy data. Please try again later.",
+                    "Failed to load economy data. Bitte versuchen Sie es später erneut later.",
                     { robberId: !!robberData, victimId: !!victimData, guildId }
                 );
             }
@@ -70,7 +70,7 @@ export default {
                 throw createError(
                     "Robbery cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You need to lay low. Wait **${hours}h ${minutes}m** before attempting another robbery.`,
+                    `Du musst dich verstecken. Warte **${hours}h ${minutes}m** bevor du einen weiteren Raub versuchst.`,
                     { remaining, hours, minutes, cooldownType: 'rob' }
                 );
             }
@@ -93,8 +93,8 @@ export default {
                 return await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
                         warningEmbed(
-                            'Robbery Blocked',
-                            `${victimUser.username} was prepared! Your attempt failed because they own a **Personal Safe**. You got away clean but didn't gain anything.`
+                            'Raub blockiert',
+                            `${victimUser.username} war vorbereitet! Dein Versuch scheiterte, da er einen **persönlichen Safe** besitzt. Du bist sauber davongekommen, hast aber nichts gewonnen.`
                         )
                     ],
                 });
@@ -110,8 +110,8 @@ export default {
                 victimData.wallet = (victimData.wallet || 0) - amountStolen;
 
                 resultEmbed = successEmbed(
-                    'Robbery Successful',
-                    `You successfully stole **$${amountStolen.toLocaleString()}** from ${victimUser.username}!`
+                    'Raub erfolgreich',
+                    `Du hast erfolgreich **$${amountStolen.toLocaleString()}** von ${victimUser.username} gestohlen!`
                 );
             } else {
                 const fineAmount = Math.floor((robberData.wallet || 0) * FINE_PERCENTAGE);
@@ -124,8 +124,8 @@ export default {
 
                 resultEmbed = buildUserErrorEmbed(
                     'unknown',
-                    `You failed the robbery and were caught! You were fined **$${fineAmount.toLocaleString()}** of your own cash.`,
-                    { titleOverride: 'Robbery Failed' }
+                    `Du hast den Raub gescheitert und wurdest gefangen! Du wurdest mit **$${fineAmount.toLocaleString()}** deines eigenen Geldes Geldstrafe belegt.`,
+                    { titleOverride: 'Raub gescheitert' }
                 );
             }
 
@@ -137,17 +137,17 @@ export default {
             resultEmbed
                 .addFields(
                     {
-                        name: `Your New Cash (${interaction.user.username})`,
+                        name: `Dein neues Bargeld (${interaction.user.username})`,
                         value: `$${robberData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: `Victim's New Cash (${victimUser.username})`,
+                        name: `Bargeld des Opfers (${victimUser.username})`,
                         value: `$${victimData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                 )
-                .setFooter({ text: `Next robbery available in ${Math.ceil(ROB_COOLDOWN / (60 * 60 * 1000))} hours.` });
+                .setFooter({ text: `Nächster Raub verfügbar in ${Math.ceil(ROB_COOLDOWN / (60 * 60 * 1000))} Stunden.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [resultEmbed] });
     }, { command: 'rob' })

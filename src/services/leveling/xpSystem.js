@@ -1,4 +1,4 @@
-// xpSystem.js
+﻿// xpSystem.js
 
 import { logger } from '../../utils/logger.js';
 import { getLevelingConfig, getXpForLevel, getUserLevelData, saveUserLevelData } from './leveling.js';
@@ -8,7 +8,7 @@ import { Mutex } from '../../utils/mutex.js';
 import { wrapServiceBoundary } from '../../utils/errorHandler.js';
 
 /**
- * Award XP to a member. Returns null when XP is skipped (disabled/invalid amount).
+ * Award XP to a member. Returns null when XP is skipped (disabled/Ungültiger Betrag).
  * Throws on storage or unexpected failures.
  */
 export const addXp = wrapServiceBoundary(async function addXp(client, guild, member, xpToAdd) {
@@ -86,7 +86,7 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
 }, {
   service: 'xpSystem',
   operation: 'addXp',
-  userMessage: 'Failed to award XP. Please try again.',
+  userMessage: 'Failed to award XP. Bitte versuchen Sie es später erneut.',
 });
 
 async function awardRoleReward(guild, member, roleId, level) {
@@ -94,7 +94,7 @@ async function awardRoleReward(guild, member, roleId, level) {
     const role = guild.roles.cache.get(roleId);
 
     if (!role) {
-      logger.warn(`Role ${roleId} not found for level ${level} reward in guild ${guild.id}`);
+      logger.warn(`Role ${roleId} Nicht gefunden for level ${level} reward in guild ${guild.id}`);
       return;
     }
 
@@ -138,3 +138,5 @@ async function sendLevelUpAnnouncement(guild, member, levelData, config) {
     logger.error('Error sending level up announcement:', error);
   }
 }
+
+

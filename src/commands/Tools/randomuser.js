@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+﻿import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -66,14 +66,14 @@ export default {
         }
 
         if (memberArray.length === 0) {
-            let errorMessage = 'Could not find any users matching your filters:';
+            let errorMessage = 'Could not find any users matching Dein filters:';
             if (role) errorMessage = `No users have the **${role.name}** role.`;
             if (onlineOnly) errorMessage = 'No users are currently online.';
             if (role && onlineOnly) errorMessage = `No **${role.name}** members are online.`;
 
             return replyUserError(interaction, {
                 type: ErrorTypes.USER_INPUT,
-                message: errorMessage + '\n\nTry adjusting your filters.',
+                message: errorMessage + '\n\nTry adjusting Dein filters.',
             });
         }
 
@@ -176,7 +176,7 @@ export default {
             } catch (error) {
                 logger.error('Button interaction error:', error);
                 await i.reply({
-                    content: 'An error occurred while selecting another user.',
+                    content: 'Ein Fehler ist aufgetreten while selecting another user.',
                     flags: ['Ephemeral']
                 });
             }
@@ -191,3 +191,4 @@ export default {
         });
     },
 };
+

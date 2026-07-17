@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -26,7 +26,7 @@ const WORK_JOBS = [
 export default {
     data: new SlashCommandBuilder()
         .setName('work')
-        .setDescription('Work to earn some money'),
+        .setDescription('Arbeite um Geld zu verdienen'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -42,7 +42,7 @@ export default {
                 throw createError(
                     "Failed to load economy data for work",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -66,7 +66,7 @@ export default {
                     throw createError(
                         "Work cooldown active",
                         ErrorTypes.RATE_LIMIT,
-                        `You're working too fast! Wait **${Math.floor(remaining / 3600000)}h ${Math.floor((remaining % 3600000) / 60000)}m** before working again.`,
+                        `Du arbeitest zu schnell! Warte **${Math.floor(remaining / 3600000)}h ${Math.floor((remaining % 3600000) / 60000)}m** bevor du wieder arbeitest.`,
                         { timeRemaining: remaining, cooldownType: 'work' }
                     );
                 }
@@ -98,26 +98,27 @@ export default {
             });
 
             const embed = successEmbed(
-                "💼 Work Complete!",
-                `You worked as a **${job}** and earned **$${earned.toLocaleString()}**!${multiplierMessage}`
+                "💼 Arbeit abgeschlossen!",
+                `Du hast als **${job}** gearbeitet und verdient **$${earned.toLocaleString()}**!${multiplierMessage}`
             )
                 .addFields(
                     {
-                        name: "New Balance",
+                        name: "Neuer Kontostand",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "Next Work",
+                        name: "Nächste Arbeit",
                         value: `<t:${Math.floor((now + WORK_COOLDOWN) / 1000)}:R>`,
                         inline: true,
                     }
                 )
                 .setFooter({
-                    text: `Requested by ${interaction.user.tag}`,
+                    text: `Angefordert von ${interaction.user.tag}`,
                     iconURL: interaction.user.displayAvatarURL(),
                 });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'work' })
 };
+

@@ -1,4 +1,4 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags } from 'discord.js';
+﻿import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags } from 'discord.js';
 import { successEmbed } from '../utils/embeds.js';
 import { WarningService } from '../services/moderation/warningService.js';
 import { InteractionHelper } from '../utils/interactionHelper.js';
@@ -104,7 +104,7 @@ async function warningDeleteModalHandler(interaction, client) {
     await WarningService.removeWarning(guildId, targetUserId, warningToDelete.id);
 
     const targetUser = await client.users.fetch(targetUserId).catch(() => null);
-    const targetName = targetUser ? targetUser.username : 'the user';
+    const targetName = targetUser ? targetUser.username : 'Der Benutzer';
 
     logger.info(`[MODERATION] Warning deleted for ${targetUserId} in ${guildId} by ${interaction.user.id}`, {
       warningId: warningToDelete.id,
@@ -141,7 +141,7 @@ async function warningClearConfirmModalHandler(interaction, client) {
     const { count } = await WarningService.clearWarnings(guildId, targetUserId);
 
     const targetUser = await client.users.fetch(targetUserId).catch(() => null);
-    const targetName = targetUser ? targetUser.username : 'the user';
+    const targetName = targetUser ? targetUser.username : 'Der Benutzer';
 
     logger.info(`[MODERATION] All warnings cleared for ${targetUserId} in ${guildId} by ${interaction.user.id}`);
 
@@ -169,3 +169,4 @@ export default {
   name: 'warning_delete_modal',
   execute: warningDeleteModalHandler
 };
+

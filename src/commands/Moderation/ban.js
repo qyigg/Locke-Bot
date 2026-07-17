@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
@@ -7,11 +7,11 @@ import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("ban")
-        .setDescription("Ban a user from the server")
+        .setDescription("Verbanne einen Benutzer vom Server")
         .addUserOption((option) =>
             option
                 .setName("target")
-                .setDescription("The user to ban")
+                .setDescription("Der Benutzer to ban")
                 .setRequired(true),
         )
         .addStringOption((option) =>
@@ -22,13 +22,13 @@ export default {
 
     async execute(interaction, config, client) {
         const user = interaction.options.getUser("target");
-        const reason = interaction.options.getString("reason") || "No reason provided";
+        const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!user) {
             throw new TitanBotError(
-                'Missing target user',
+                'Zielbenutzer fehlt',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to ban.',
+                'Du musst angeben a user to ban.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -37,14 +37,14 @@ export default {
             throw new TitanBotError(
                 'Cannot ban self',
                 ErrorTypes.VALIDATION,
-                'You cannot ban yourself.',
+                'Du kannst dich nicht selbst verbannen.',
             );
         }
         if (user.id === client.user.id) {
             throw new TitanBotError(
                 'Cannot ban bot',
                 ErrorTypes.VALIDATION,
-                'You cannot ban the bot.',
+                'Du kannst nicht ban the bot.',
             );
         }
 
@@ -65,3 +65,6 @@ export default {
         });
     },
 };
+
+
+

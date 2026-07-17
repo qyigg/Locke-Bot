@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
@@ -45,7 +45,7 @@ export default {
         }
 
         const usersInput = interaction.options.getString("users");
-        const reason = interaction.options.getString("reason") || "Mass ban - No reason provided";
+        const reason = interaction.options.getString("reason") || "Mass ban - Kein Grund angegeben";
         const deleteDays = interaction.options.getInteger("delete_days") || 0;
 
         try {
@@ -60,11 +60,11 @@ export default {
             }
 
             if (userIds.includes(interaction.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include yourself in a mass ban.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht include Deinself in a mass ban.' });
             }
 
             if (userIds.includes(client.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include the bot in a mass ban.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht include the bot in a mass ban.' });
             }
 
             const results = {
@@ -78,7 +78,7 @@ export default {
                     const user = await client.users.fetch(userId).catch(() => null);
                     
                     if (!user) {
-                        results.failed.push({ userId, reason: "User not found" });
+                        results.failed.push({ userId, reason: "Benutzer nicht gefunden" });
                         continue;
                     }
 
@@ -183,7 +183,8 @@ export default {
 
         } catch (error) {
             logger.error("Error in massban command:", error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing the mass ban. Please try again later.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while processing the mass ban. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
+

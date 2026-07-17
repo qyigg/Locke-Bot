@@ -19,7 +19,7 @@ const CRIME_TYPES = [
 export default {
     data: new SlashCommandBuilder()
         .setName('crime')
-        .setDescription('Commit a crime to earn money (risky)')
+        .setDescription('Begehe ein Verbrechen um Geld zu verdienen (risiko)')
         .addStringOption(option =>
             option
                 .setName('type')
@@ -50,7 +50,7 @@ export default {
                 throw createError(
                     "User is in jail",
                     ErrorTypes.RATE_LIMIT,
-                    `You're in jail for ${timeLeft} more minutes!`,
+                    `Du bist im Gefängnis noch ${timeLeft} Minuten lang!`,
                     { jailTimeRemaining: userData.jailedUntil - now }
                 );
             }
@@ -60,7 +60,7 @@ export default {
                 throw createError(
                     "Crime cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You need to wait ${timeLeft} more minutes before committing another crime.`,
+                    `Du musst noch ${timeLeft} Minuten warten, bevor du ein weiteres Verbrechen begehst.`,
                     { remaining: lastCrime + CRIME_COOLDOWN - now, cooldownType: 'crime' }
                 );
             }
@@ -93,8 +93,8 @@ export default {
                 await setEconomyData(client, guildId, userId, userData);
                 
                 const embed = successEmbed(
-                    "🕵️ Crime Successful!",
-                    `You successfully committed ${crime.name} and earned **${amountEarned}** coins!`
+                    "🕵️ Verbrechen erfolgreich!",
+                    `Du hast erfolgreich ${crime.name} begangen und verdienst **${amountEarned}** Münzen!`
                 );
                 
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
@@ -108,9 +108,9 @@ export default {
                 await setEconomyData(client, guildId, userId, userData);
                 
                 const embed = warningEmbed(
-                    "🚔 Crime Failed!",
-                    `You were caught while attempting ${crime.name} and have been sent to jail! ` +
-                    `You were fined ${fine.toLocaleString()} coins and will be in jail for 2 hours.`
+                    "🚔 Verbrechen gescheitert!",
+                    `Du wurdest beim Versuch, ${crime.name} zu begehen, erwischt und bist ins Gefängnis gegangen! ` +
+                    `Du wurdest mit ${fine.toLocaleString()} Münzen Geldstrafe belegt und wirst 2 Stunden im Gefängnis sein.`
                 );
                 
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });

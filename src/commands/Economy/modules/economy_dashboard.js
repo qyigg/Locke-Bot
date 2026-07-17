@@ -1,4 +1,4 @@
-import {
+﻿import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
@@ -131,7 +131,7 @@ async function updateConfigFile(currencySymbol, currencyName) {
         );
         
         await fs.writeFile(configPath, configContent, 'utf-8');
-        logger.info('Config file updated successfully');
+        logger.info('Config file Erfolgreich aktualisiert');
         return true;
     } catch (error) {
         logger.error('Error updating config file:', error);
@@ -185,8 +185,8 @@ export default {
 
                     const errorMessage =
                         error instanceof TitanBotError
-                            ? error.userMessage || 'An error occurred while processing your selection.'
-                            : 'An unexpected error occurred while processing your request.';
+                            ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
+                            : 'An unexpected error occurred while processing Dein request.';
 
                     if (!selectInteraction.replied && !selectInteraction.deferred) {
                         await selectInteraction.deferUpdate().catch(() => {});
@@ -281,7 +281,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
     const type = submitted.fields.getTextInputValue('type').trim().toLowerCase();
 
     if (isNaN(amount) || amount <= 0) {
-        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Amount must be a positive number.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Der Betrag muss eine positive Zahl sein.' });
         return;
     }
 
@@ -292,7 +292,7 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
 
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) {
-        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in this server.' });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in Dieser Server.' });
         return;
     }
 
@@ -378,7 +378,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
     const type = submitted.fields.getTextInputValue('type').trim().toLowerCase();
 
     if (isNaN(amount) || amount <= 0) {
-        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Amount must be a positive number.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'Der Betrag muss eine positive Zahl sein.' });
         return;
     }
 
@@ -389,7 +389,7 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
 
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) {
-        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in this server.' });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in Dieser Server.' });
         return;
     }
 
@@ -525,3 +525,5 @@ async function handleChangeName(selectInteraction, rootInteraction, guild) {
         newName
     });
 }
+
+

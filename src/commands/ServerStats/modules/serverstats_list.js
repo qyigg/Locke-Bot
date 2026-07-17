@@ -1,4 +1,4 @@
-import { getColor } from '../../../config/bot.js';
+﻿import { getColor } from '../../../config/bot.js';
 import { PermissionFlagsBits } from 'discord.js';
 import { createEmbed } from '../../../utils/embeds.js';
 import { getServerCounters, saveServerCounters, getCounterEmoji as getCounterTypeEmoji, getCounterTypeLabel, getGuildCounterStats } from '../../../services/serverstatsService.js';
@@ -46,7 +46,7 @@ export async function handleList(interaction, client) {
         if (validCounters.length === 0) {
             const embed = createEmbed({
                 title: "Server Counters",
-                description: "No counters have been set up for this server yet.\n\nUse `/serverstats create` to set up your first counter!",
+                description: "No counters have been set up for Dieser Server yet.\n\nUse `/serverstats create` to set up Dein first counter!",
                 color: getColor('warning')
             });
 
@@ -72,7 +72,7 @@ export async function handleList(interaction, client) {
 
         const embed = createEmbed({
             title: `Server Counters (${validCounters.length})`,
-            description: "Here are all the active counters for this server.\n\nCounters automatically update every 15 minutes.",
+            description: "Here are all the active counters for Dieser Server.\n\nCounters automatically update every 15 minutes.",
             color: getColor('info')
         });
 
@@ -120,7 +120,7 @@ export async function handleList(interaction, client) {
 
     } catch (error) {
         logger.error("Error displaying counters:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while fetching counters. Bitte versuchen Sie es später erneut.' }).catch(logger.error);
     }
 }
 
@@ -144,3 +144,4 @@ function getCurrentCount(stats, type) {
             return 0;
     }
 }
+

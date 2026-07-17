@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
@@ -8,11 +8,11 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("unban")
-        .setDescription("Unban a user from the server")
+        .setDescription("UnVerbanne einen Benutzer vom Server")
         .addStringOption(option =>
             option
                 .setName("target")
-                .setDescription("The ID (or mention) of the user to unban")
+                .setDescription("The ID (or mention) of Der Benutzer to unban")
                 .setRequired(true),
         )
         .addStringOption(option =>
@@ -52,7 +52,7 @@ export default {
             });
         }
 
-        const reason = interaction.options.getString("reason") || "No reason provided";
+        const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         const result = await ModerationService.unbanUser({
             guild: interaction.guild,
@@ -71,3 +71,6 @@ export default {
         });
     },
 };
+
+
+

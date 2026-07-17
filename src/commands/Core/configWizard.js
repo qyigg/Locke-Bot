@@ -1,4 +1,4 @@
-import {
+﻿import {
     SlashCommandBuilder,
     PermissionFlagsBits,
     ActionRowBuilder,
@@ -28,7 +28,7 @@ const WIZARD_BUTTON_ID = 'config_wizard';
 const activeWizardSessions = new Set();
 
 const DM_DISABLED_HELP = [
-    '1. Right-click this server\'s name (mobile: tap the server name at the top).',
+    '1. Right-click Dieser Server\'s name (mobile: tap the server name at the top).',
     '2. Open **Privacy Settings**.',
     '3. Turn on **Allow direct messages from server members**.',
     '4. Click **Start Setup Wizard** again.',
@@ -38,7 +38,7 @@ async function notifyWizardStarted(buttonInteraction) {
     await buttonInteraction.followUp({
         embeds: [infoEmbed(
             'Setup Wizard Started',
-            'Check your DMs — I sent you the first setup question there.\n\nAnswer each question in that DM. Type `skip` to keep the current value.',
+            'Check Dein DMs — I sent you the first setup question there.\n\nAnswer each question in that DM. Type `skip` to keep the current value.',
         )],
         flags: MessageFlags.Ephemeral,
     }).catch(() => {});
@@ -47,7 +47,7 @@ async function notifyWizardStarted(buttonInteraction) {
 async function notifyWizardDmBlocked(buttonInteraction) {
     await replyUserError(buttonInteraction, {
         type: ErrorTypes.USER_INPUT,
-        message: `I couldn't send you a DM. Enable DMs from this server, then try again.\n\n${DM_DISABLED_HELP}`,
+        message: `I couldn't send you a DM. Enable DMs from Dieser Server, then try again.\n\n${DM_DISABLED_HELP}`,
     }).catch(() => {});
 }
 
@@ -132,7 +132,7 @@ function buildDashboardEmbed(config, guild) {
                 name: `${setupDone ? '✅' : '📝'} Setup`,
                 value: setupDone
                     ? 'Setup wizard completed — re-run anytime to update settings.'
-                    : 'Run the setup wizard to configure your server quickly.',
+                    : 'Run the setup wizard to configure Dein server quickly.',
                 inline: false,
             },
         ],
@@ -215,7 +215,7 @@ async function askQuestion(dmChannel, userId, prompt, stepNumber, totalSteps) {
     const answer = collected.first().content.trim();
     if (answer.toLowerCase() === 'cancel') {
         await dmChannel.send({
-            embeds: [infoEmbed('Setup Cancelled', 'Setup wizard stopped. Your saved answers are still applied.')],
+            embeds: [infoEmbed('Setup Cancelled', 'Setup wizard stopped. Dein saved answers are still applied.')],
         });
         return { cancelled: true };
     }
@@ -250,7 +250,7 @@ function formatSavedAck(key, value, guild) {
 async function validateGuildChannelId(guild, channelId) {
     const channel = guild.channels.cache.get(channelId) ?? await guild.channels.fetch(channelId).catch(() => null);
     if (!channel || !channel.isTextBased()) {
-        throw new Error('That channel was not found in this server or is not a text channel.');
+        throw new Error('That channel was Nicht gefunden in Dieser Server or is not a text channel.');
     }
     return channel.id;
 }
@@ -258,7 +258,7 @@ async function validateGuildChannelId(guild, channelId) {
 async function validateGuildRoleId(guild, roleId) {
     const role = guild.roles.cache.get(roleId) ?? await guild.roles.fetch(roleId).catch(() => null);
     if (!role) {
-        throw new Error('That role was not found in this server.');
+        throw new Error('That role was Nicht gefunden in Dieser Server.');
     }
     return role.id;
 }
@@ -274,7 +274,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
 
     if (activeWizardSessions.has(user.id)) {
         await buttonInteraction.followUp({
-            embeds: [warningEmbed('Setup Already Running', 'You already have a setup wizard open in your DMs. Reply there to continue, or type `cancel` to stop it.')],
+            embeds: [warningEmbed('Setup Already Running', 'You already have a setup wizard open in Dein DMs. Reply there to continue, or type `cancel` to stop it.')],
             flags: MessageFlags.Ephemeral,
         }).catch(() => {});
         return;
@@ -300,7 +300,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
         {
             key: 'prefix',
             skipMessage: 'Keeping the current server prefix.',
-            question: 'What command prefix should this server use?\nCurrent: `' + (config.prefix || getCommandPrefix()) + '`\nReply `skip` to keep it, or `cancel` to stop.',
+            question: 'What command prefix should Dieser Server use?\nCurrent: `' + (config.prefix || getCommandPrefix()) + '`\nReply `skip` to keep it, or `cancel` to stop.',
             parse: async (answer) => {
                 const normalized = answer.trim();
                 if (normalized.toLowerCase() === 'skip') return undefined;
@@ -319,7 +319,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
                 if (normalized.toLowerCase() === 'skip') return undefined;
                 if (normalized.toLowerCase() === 'none') return null;
                 const id = extractId(normalized);
-                if (!id) throw new Error('Provide a valid channel mention or ID from this server.');
+                if (!id) throw new Error('Provide a valid channel mention or ID from Dieser Server.');
                 return validateGuildChannelId(guild, id);
             },
         },
@@ -332,7 +332,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
                 if (normalized.toLowerCase() === 'skip') return undefined;
                 if (normalized.toLowerCase() === 'none') return null;
                 const id = extractId(normalized);
-                if (!id) throw new Error('Provide a valid role mention or ID from this server.');
+                if (!id) throw new Error('Provide a valid role mention or ID from Dieser Server.');
                 return validateGuildRoleId(guild, id);
             },
         },
@@ -430,7 +430,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
 
         const summaryTitle = wizardCancelled
             ? (Object.keys(changes).length > 0 ? 'Setup Stopped' : 'Setup Cancelled')
-            : (errors.length > 0 ? 'Setup Complete' : 'Setup Complete');
+            : (errors.length > 0 ? 'Einrichtung abgeschlossen' : 'Einrichtung abgeschlossen');
 
         const summaryBody = wizardCancelled
             ? (Object.keys(changes).length > 0
@@ -597,7 +597,7 @@ async function handleSettingModalSubmit(selectInteraction, rootInteraction, sett
         logger.error('Config wizard modal submit error:', error);
         await replyUserError(submitted, {
             type: ErrorTypes.CONFIGURATION,
-            message: error.message || 'Please try again.',
+            message: error.message || 'Bitte versuchen Sie es später erneut.',
         }).catch(() => {});
     }
 }
@@ -672,7 +672,7 @@ export default {
                     logger.error('Config dashboard interaction error:', error);
                     await replyUserError(componentInteraction, {
                         type: ErrorTypes.UNKNOWN,
-                        message: 'Failed to process your selection. Please try again.',
+                        message: 'Failed to process Dein selection. Bitte versuchen Sie es später erneut.',
                     }).catch(() => {});
                 }
             });
@@ -680,8 +680,11 @@ export default {
             logger.error('Config command error:', error);
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
-                message: 'Failed to open configuration dashboard. Please try again.',
+                message: 'Failed to open configuration dashboard. Bitte versuchen Sie es später erneut.',
             });
         }
     },
 };
+
+
+

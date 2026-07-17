@@ -1,4 +1,4 @@
-// guildConfig.js — the only module that should read/write guild configuration.
+﻿// guildConfig.js — the only module that should read/write guild configuration.
 
 import { GUILD_CONFIG_DEFAULTS } from '../../config/guild/guildConfigDefaults.js';
 import { readGuildConfig, writeGuildConfig } from '../../utils/database/guildConfigStorage.js';
@@ -14,7 +14,7 @@ export const getGuildConfig = wrapServiceBoundary(async function getGuildConfig(
     service: 'guildConfigService',
     operation: 'getGuildConfig',
     message: 'Failed to fetch guild configuration',
-    userMessage: 'Failed to load server configuration. Please try again.',
+    userMessage: 'Failed to load server configuration. Bitte versuchen Sie es später erneut.',
 });
 
 export const setGuildConfig = wrapServiceBoundary(async function setGuildConfig(client, guildId, config, context = {}) {
@@ -24,7 +24,7 @@ export const setGuildConfig = wrapServiceBoundary(async function setGuildConfig(
     service: 'guildConfigService',
     operation: 'setGuildConfig',
     message: 'Failed to save guild configuration',
-    userMessage: 'Failed to save server configuration. Please try again.',
+    userMessage: 'Failed to save server configuration. Bitte versuchen Sie es später erneut.',
 });
 
 export const updateGuildConfig = wrapServiceBoundary(async function updateGuildConfig(client, guildId, updates, context = {}) {
@@ -36,7 +36,7 @@ export const updateGuildConfig = wrapServiceBoundary(async function updateGuildC
     service: 'guildConfigService',
     operation: 'updateGuildConfig',
     message: 'Failed to update guild configuration',
-    userMessage: 'Failed to update server configuration. Please try again.',
+    userMessage: 'Failed to update server configuration. Bitte versuchen Sie es später erneut.',
 });
 
 export const getConfigValue = wrapServiceBoundary(async function getConfigValue(client, guildId, key, defaultValue = null, context = {}) {
@@ -46,7 +46,7 @@ export const getConfigValue = wrapServiceBoundary(async function getConfigValue(
     service: 'guildConfigService',
     operation: 'getConfigValue',
     message: 'Failed to read guild configuration value',
-    userMessage: 'Failed to read a server setting. Please try again.',
+    userMessage: 'Failed to read a server setting. Bitte versuchen Sie es später erneut.',
 });
 
 export const setConfigValue = wrapServiceBoundary(async function setConfigValue(client, guildId, key, value, context = {}) {
@@ -55,7 +55,7 @@ export const setConfigValue = wrapServiceBoundary(async function setConfigValue(
     service: 'guildConfigService',
     operation: 'setConfigValue',
     message: 'Failed to update guild configuration value',
-    userMessage: 'Failed to update a server setting. Please try again.',
+    userMessage: 'Failed to update a server setting. Bitte versuchen Sie es später erneut.',
 });
 
 /**
@@ -80,7 +80,7 @@ export const patchGuildConfig = wrapServiceBoundary(async function patchGuildCon
     service: 'guildConfigService',
     operation: 'patchGuildConfig',
     message: 'Failed to patch guild configuration',
-    userMessage: 'Failed to update server configuration. Please try again.',
+    userMessage: 'Failed to update server configuration. Bitte versuchen Sie es später erneut.',
 });
 
 function deepMergeGuildConfig(base, patch) {
@@ -103,3 +103,4 @@ function deepMergeGuildConfig(base, patch) {
 
     return result;
 }
+

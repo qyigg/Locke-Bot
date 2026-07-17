@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
@@ -28,7 +28,7 @@ export default {
                     embeds: [embed],
                 });
             },
-            'Failed to get unix timestamp. Please try again.',
+            'Failed to get unix timestamp. Bitte versuchen Sie es später erneut.',
             {
                 autoDefer: true,
                 deferOptions: { flags: MessageFlags.Ephemeral }

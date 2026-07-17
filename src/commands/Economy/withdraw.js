@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -7,7 +7,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('withdraw')
-        .setDescription('Withdraw money from your bank to your wallet')
+        .setDescription('Hebe Geld von deiner Bank in deinen Geldbeutel ab')
         .addIntegerOption(option =>
             option
                 .setName('amount')
@@ -29,7 +29,7 @@ export default {
                 throw createError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -53,7 +53,7 @@ export default {
                 throw createError(
                     "Empty bank account",
                     ErrorTypes.VALIDATION,
-                    "Your bank account is empty.",
+                    "Dein bank account is empty.",
                     { userId, bankBalance: userData.bank }
                 );
             }
@@ -64,17 +64,17 @@ export default {
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                'Withdrawal Successful',
-                `You successfully withdrew **$${withdrawAmount.toLocaleString()}** from your bank.`
+                'Abhebung erfolgreich',
+                `Du hast erfolgreich **$${withdrawAmount.toLocaleString()}** von deiner Bank abgehoben.`
             )
                 .addFields(
                     {
-                        name: "New Cash Balance",
+                        name: "Neuer Bargeldkontostand",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "New Bank Balance",
+                        name: "Neuer Bankkontostand",
                         value: `$${userData.bank.toLocaleString()}`,
                         inline: true,
                     },
@@ -83,3 +83,4 @@ export default {
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'withdraw' })
 };
+

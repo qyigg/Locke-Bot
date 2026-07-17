@@ -1,4 +1,4 @@
-// loggingService.js
+﻿// loggingService.js
 
 import { ChannelType } from 'discord.js';
 import { getGuildConfig, updateGuildConfig } from './config/guildConfig.js';
@@ -209,7 +209,7 @@ export async function logEvent({
       await client.guilds.fetch(guildId).catch(() => null);
 
     if (!guild) {
-      logger.warn(`logEvent: Guild not found: ${guildId}`);
+      logger.warn(`logEvent: Guild Nicht gefunden: ${guildId}`);
       return null;
     }
 
@@ -468,3 +468,4 @@ export function resolveApplicationLogChannel(config, roleSettings = {}, appSetti
 }
 
 export { EVENT_TYPES, EVENT_COLORS, EVENT_ICONS, LOG_DESTINATIONS };
+

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getFromDb, setInDb, deleteFromDb, getUserNotesKey, getUserNotesListKey } from '../../utils/database.js';
@@ -18,7 +18,7 @@ export default {
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to add a note for")
+                        .setDescription("Der Benutzer to add a note for")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
@@ -47,7 +47,7 @@ export default {
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to view notes for")
+                        .setDescription("Der Benutzer to view notes for")
                         .setRequired(true)
                 )
         )
@@ -58,7 +58,7 @@ export default {
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to remove a note from")
+                        .setDescription("Der Benutzer to remove a note from")
                         .setRequired(true)
                 )
                 .addIntegerOption(option =>
@@ -76,7 +76,7 @@ export default {
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to clear notes for")
+                        .setDescription("Der Benutzer to clear notes for")
                         .setRequired(true)
                 )
         )
@@ -113,7 +113,7 @@ export default {
             }
         } catch (error) {
             logger.error(`Error in usernotes command (${subcommand}):`, error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing your request. Please try again later.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while processing Dein request. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
@@ -207,7 +207,7 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
     }
 
     // The view command displays notes sorted newest-first, so resolve the index
-    // against the same ordering to delete the note the user actually sees.
+    // against the same ordering to delete the note Der Benutzer actually sees.
     const sortedNotes = [...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const removedNote = sortedNotes[index];
     const originalIndex = notes.indexOf(removedNote);
@@ -269,3 +269,4 @@ function getNoteTypeInfo(type) {
     
     return types[type] || types.neutral;
 }
+

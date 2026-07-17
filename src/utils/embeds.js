@@ -1,4 +1,4 @@
-// embeds.js
+﻿// embeds.js
 
 import { EmbedBuilder } from 'discord.js';
 import { getColor, botConfig } from '../config/bot.js';
@@ -231,19 +231,19 @@ const NOTIFICATION_DEFAULT_TITLES = {
   error: 'Fehler',
   info: 'Information',
   warning: 'Warnung',
-  primary: 'Notice',
+  primary: 'Mitteilung',
 };
 
 export const USER_ERROR_TITLES = {
-  validation: 'Invalid Input',
-  permission: 'Permission Denied',
+  validation: 'Ungültige Eingabe',
+  permission: 'Zugriff verweigert',
   configuration: 'Konfigurationsfehler',
-  database: 'Database Error',
-  network: 'Network Error',
-  discord_api: 'Discord API Error',
-  user_input: 'Input Error',
-  rate_limit: 'Too Fast',
-  unknown: 'Something Went Wrong',
+  database: 'Datenbankfehler',
+  network: 'Netzwerkfehler',
+  discord_api: 'Discord-API-Fehler',
+  user_input: 'Eingabefehler',
+  rate_limit: 'Zu schnell',
+  unknown: 'Etwas ist schief gelaufen',
 };
 
 const USER_ERROR_COLORS = {
@@ -253,7 +253,7 @@ const USER_ERROR_COLORS = {
 /**
  * Build a consistent user-facing error embed.
  * @param {string} errorType - Error category key (e.g. validation, permission)
- * @param {string} [description] - Specific, actionable message for the user
+ * @param {string} [description] - Specific, actionable message for Der Benutzer
  * @param {{ titleOverride?: string }} [options]
  */
 export function buildUserErrorEmbed(errorType, description = '', options = {}) {

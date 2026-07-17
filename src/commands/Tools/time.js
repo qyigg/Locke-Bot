@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -6,7 +6,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('time')
-        .setDescription('Get the current time in different timezones')
+        .setDescription('Bekomme die aktuelle Uhrzeit in different timezones')
         .addStringOption(option =>
             option.setName('timezone')
                 .setDescription('The timezone to display (e.g., UTC, America/New_York)')
@@ -52,7 +52,7 @@ export default {
 
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             },
-            'Failed to get current time. Please try again.',
+            'Failed to get current time. Bitte versuchen Sie es später erneut.',
             {
                 autoDefer: true,
                 deferOptions: { flags: MessageFlags.Ephemeral }
@@ -60,3 +60,4 @@ export default {
         );
     },
 };
+

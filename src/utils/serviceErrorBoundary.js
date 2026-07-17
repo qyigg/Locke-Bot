@@ -1,4 +1,4 @@
-// serviceErrorBoundary.js
+﻿// serviceErrorBoundary.js
 
 import { createError, ErrorTypes, TitanBotError, categorizeError } from './errorHandler.js';
 import { resolveErrorCode, getErrorMetadata } from './errorRegistry.js';
@@ -31,7 +31,7 @@ export function ensureTypedServiceError(error, options = {}) {
   });
   const errorMetadata = getErrorMetadata(errorCode);
   const message = options.message || `${service}.${operation} failed`;
-  const userMessage = options.userMessage || 'Something went wrong while processing your request.';
+  const userMessage = options.userMessage || 'Etwas ist schief gelaufen while processing Dein request.';
 
   return createError(message, type, userMessage, {
     ...context,
@@ -89,3 +89,5 @@ export function wrapServiceClassMethods(ServiceClass, optionsFactory) {
 
   return ServiceClass;
 }
+
+

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
@@ -9,7 +9,7 @@ export default {
     .addUserOption((option) =>
       option
         .setName("target")
-        .setDescription("The user to inspect (defaults to you)"),
+        .setDescription("Der Benutzer to inspect (defaults to you)"),
     ),
 
   async execute(interaction) {

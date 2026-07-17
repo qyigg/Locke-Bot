@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+﻿import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Collection } from 'discord.js';
@@ -89,7 +89,7 @@ export async function loadCommands(client) {
             
             const subcommands = getSubcommandInfo(command.data.toJSON());
             
-            logger.info(`Loaded command: ${primaryCommandName} from ${normalizedPath} (category: ${category})`);
+            logger.info(`Geladen command: ${primaryCommandName} from ${normalizedPath} (category: ${category})`);
             
             if (subcommands.length > 0) {
                 logger.info(`  - Subcommands: ${subcommands.join(', ')}`);
@@ -116,7 +116,7 @@ export async function loadCommands(client) {
         }
     }
     
-    logger.info(`Loaded ${uniqueCommands.size} commands`);
+    logger.info(`Geladen ${uniqueCommands.size} commands`);
     return client.commands;
 }
 
@@ -279,7 +279,7 @@ export async function reloadCommand(client, commandName) {
     const command = client.commands.get(commandName);
     
     if (!command) {
-        return { success: false, message: `Command "${commandName}" not found` };
+        return { success: false, message: `Command "${commandName}" Nicht gefunden` };
     }
     
     try {
@@ -291,10 +291,11 @@ export async function reloadCommand(client, commandName) {
         
         client.commands.set(commandName, newCommand);
         
-        logger.info(`Reloaded command: ${commandName}`);
-        return { success: true, message: `Successfully reloaded command "${commandName}"` };
+        logger.info(`ReGeladen command: ${commandName}`);
+        return { success: true, message: `Successfully reGeladen command "${commandName}"` };
     } catch (error) {
         logger.error(`Error reloading command "${commandName}":`, error);
         return { success: false, message: `Error reloading command: ${error.message}` };
     }
 }
+

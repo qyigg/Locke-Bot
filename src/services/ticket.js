@@ -1,4 +1,4 @@
-// ticket.js
+﻿// ticket.js
 
 import {
   ChannelType,
@@ -79,7 +79,7 @@ export const getUserTicketCount = wrapServiceBoundary(async function getUserTick
   context: {},
 });
 
-export async function createTicket(guild, member, categoryId, reason = 'No reason provided', priority = 'none') {
+export async function createTicket(guild, member, categoryId, reason = 'Kein Grund angegeben', priority = 'none') {
   try {
     const config = await getGuildConfig(guild.client, guild.id);
     const ticketConfig = config.tickets || {};
@@ -90,7 +90,7 @@ export async function createTicket(guild, member, categoryId, reason = 'No reaso
     if (currentTicketCount >= maxTicketsPerUser) {
       ticketUserError(
         `Max open tickets reached for ${member.id}`,
-        `You have reached the maximum number of open tickets (${maxTicketsPerUser}). Please close your existing tickets before creating a new one.`,
+        `You have reached the maximum number of open tickets (${maxTicketsPerUser}). Please close Dein existing tickets before creating a new one.`,
         ErrorTypes.VALIDATION,
         { guildId: guild.id, userId: member.id, operation: 'createTicket' }
       );
@@ -232,11 +232,11 @@ export async function createTicket(guild, member, categoryId, reason = 'No reaso
     return { channel, ticketData };
     
   } catch (error) {
-    rethrowTicketError(error, 'createTicket', 'Failed to create ticket. Please try again in a moment.', { guildId: guild?.id, userId: member?.id });
+    rethrowTicketError(error, 'createTicket', 'Failed to create ticket. Bitte versuchen Sie es später erneut in a moment.', { guildId: guild?.id, userId: member?.id });
   }
 }
 
-export async function closeTicket(channel, closer, reason = 'No reason provided') {
+export async function closeTicket(channel, closer, reason = 'Kein Grund angegeben') {
   try {
     const ticketData = requireTicket(await getTicketData(channel.guild.id, channel.id), channel);
     
@@ -273,8 +273,8 @@ export async function closeTicket(channel, closer, reason = 'No reason provided'
         const ticketCreator = await channel.client.users.fetch(ticketData.userId).catch(() => null);
         if (ticketCreator) {
           const dmEmbed = createEmbed({
-            title: '🎫 Your Ticket Has Been Closed',
-            description: `Your ticket **${channel.name}** has been closed.\n\n**Reason:** ${reason}\n**Closed by:** ${closer.tag}\n**Closed at:** <t:${Math.floor(Date.now() / 1000)}:F>\n\nThank you for using our support system! If you have any further questions, feel free to create a new ticket.`,
+            title: '🎫 Dein Ticket Has Been Closed',
+            description: `Dein ticket **${channel.name}** has been closed.\n\n**Reason:** ${reason}\n**Closed by:** ${closer.tag}\n**Closed at:** <t:${Math.floor(Date.now() / 1000)}:F>\n\nThank you for using our support system! If you have any further questions, feel free to create a new ticket.`,
             color: '#e74c3c',
             footer: { text: `Ticket ID: ${ticketData.id}` }
           });
@@ -283,10 +283,10 @@ export async function closeTicket(channel, closer, reason = 'No reason provided'
 
           try {
             const feedbackEmbed = createEmbed({
-              title: '⭐ How was your support experience?',
+              title: '⭐ How was Dein support experience?',
               description: `We'd love to know how we did with **${channel.name}**.\nSelect a rating below — it only takes a second!`,
               color: '#F1C40F',
-              footer: { text: 'Your feedback helps us improve.' },
+              footer: { text: 'Dein feedback helps us improve.' },
             });
 
             const base = `ticket_feedback:${channel.guild.id}:${channel.id}`;
@@ -414,7 +414,7 @@ components: []
     return ticketData;
     
   } catch (error) {
-    rethrowTicketError(error, 'closeTicket', 'Failed to close ticket. Please try again in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, closerId: closer?.id });
+    rethrowTicketError(error, 'closeTicket', 'Failed to close ticket. Bitte versuchen Sie es später erneut in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, closerId: closer?.id });
   }
 }
 
@@ -501,7 +501,7 @@ export async function claimTicket(channel, claimer) {
     return ticketData;
     
   } catch (error) {
-    rethrowTicketError(error, 'claimTicket', 'Failed to claim ticket. Please try again in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, claimerId: claimer?.id });
+    rethrowTicketError(error, 'claimTicket', 'Failed to claim ticket. Bitte versuchen Sie es später erneut in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, claimerId: claimer?.id });
   }
 }
 
@@ -606,7 +606,7 @@ export async function reopenTicket(channel, reopener) {
     return { ticketData, movedToOpenCategory, openCategoryMoveFailed };
     
   } catch (error) {
-    rethrowTicketError(error, 'reopenTicket', 'Failed to reopen ticket. Please try again in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, reopenerId: reopener?.id });
+    rethrowTicketError(error, 'reopenTicket', 'Failed to reopen ticket. Bitte versuchen Sie es später erneut in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, reopenerId: reopener?.id });
   }
 }
 
@@ -852,7 +852,7 @@ export async function deleteTicket(channel, deleter) {
     return ticketData;
     
   } catch (error) {
-    rethrowTicketError(error, 'deleteTicket', 'Failed to delete ticket. Please try again in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, deleterId: deleter?.id });
+    rethrowTicketError(error, 'deleteTicket', 'Failed to delete ticket. Bitte versuchen Sie es später erneut in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, deleterId: deleter?.id });
   }
 }
 
@@ -872,7 +872,7 @@ export async function unclaimTicket(channel, unclaimer) {
     if (ticketData.claimedBy !== unclaimer.id && !unclaimer.permissions.has(PermissionFlagsBits.ManageChannels)) {
       ticketUserError(
         'Cannot unclaim ticket',
-        'You can only unclaim your own tickets or need Manage Channels permission.',
+        'You can only unclaim Dein own tickets or need Manage Channels permission.',
         ErrorTypes.PERMISSION,
         { channelId: channel.id, operation: 'unclaimTicket' }
       );
@@ -950,7 +950,7 @@ export async function unclaimTicket(channel, unclaimer) {
     return ticketData;
     
   } catch (error) {
-    rethrowTicketError(error, 'unclaimTicket', 'Failed to unclaim ticket. Please try again in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, unclaimerId: unclaimer?.id });
+    rethrowTicketError(error, 'unclaimTicket', 'Failed to unclaim ticket. Bitte versuchen Sie es später erneut in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, unclaimerId: unclaimer?.id });
   }
 }
 
@@ -1042,6 +1042,7 @@ export async function updateTicketPriority(channel, priority, updater) {
     return ticketData;
     
   } catch (error) {
-    rethrowTicketError(error, 'updateTicketPriority', 'Failed to update ticket priority. Please try again in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, updaterId: updater?.id, priority });
+    rethrowTicketError(error, 'updateTicketPriority', 'Failed to update ticket priority. Bitte versuchen Sie es später erneut in a moment.', { guildId: channel?.guild?.id, channelId: channel?.id, updaterId: updater?.id, priority });
   }
 }
+

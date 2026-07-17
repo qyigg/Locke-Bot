@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChannelType } from 'discord.js';
+﻿import { SlashCommandBuilder, ChannelType } from 'discord.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -17,7 +17,7 @@ export default {
                 .addUserOption(option =>
                     option
                         .setName('user')
-                        .setDescription('The user you want to report.')
+                        .setDescription('Der Benutzer you want to report.')
                         .setRequired(true),
                 )
                 .addStringOption(option =>
@@ -31,7 +31,7 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('setchannel')
-                .setDescription('Set the channel where user reports are sent. (Manage Server required)')
+                .setDescription('Set Der Kanal where user reports are sent. (Manage Server required)')
                 .addChannelOption(option =>
                     option
                         .setName('channel')

@@ -1,4 +1,4 @@
-import { getColor } from '../../../config/bot.js';
+﻿import { getColor } from '../../../config/bot.js';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -53,8 +53,8 @@ function buildDashboardEmbed(cfg, guild) {
     const welcomeChannel = cfg.channelId ? `<#${cfg.channelId}>` : '`Not set`';
     const goodbyeChannel = cfg.goodbyeChannelId ? `<#${cfg.goodbyeChannelId}>` : '`Not set`';
 
-    const rawWelcome = cfg.welcomeMessage || 'Welcome {user} to {server}!';
-    const rawGoodbye = cfg.leaveMessage || '{user.tag} has left the server.';
+    const rawWelcome = cfg.welcomeMessage || 'Willkommen {user} in {server}!';
+    const rawGoodbye = cfg.leaveMessage || '{user.tag} hat den Server verlassen.';
     const welcomePreview = `\`${rawWelcome.length > 55 ? rawWelcome.substring(0, 55) + '…' : rawWelcome}\``;
     const goodbyePreview = `\`${rawGoodbye.length > 55 ? rawGoodbye.substring(0, 55) + '…' : rawGoodbye}\``;
 
@@ -85,7 +85,7 @@ function buildSelectMenu(guildId) {
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel('Welcome Channel')
-                .setDescription('Set the channel where welcome messages are sent')
+                .setDescription('Set Der Kanal where welcome messages are sent')
                 .setValue('welcome_channel')
                 .setEmoji('🟢'),
             new StringSelectMenuOptionBuilder()
@@ -100,7 +100,7 @@ function buildSelectMenu(guildId) {
                 .setEmoji('🖼️'),
             new StringSelectMenuOptionBuilder()
                 .setLabel('Goodbye Channel')
-                .setDescription('Set the channel where goodbye messages are sent')
+                .setDescription('Set Der Kanal where goodbye messages are sent')
                 .setValue('goodbye_channel')
                 .setEmoji('🔴'),
             new StringSelectMenuOptionBuilder()
@@ -238,7 +238,7 @@ export default {
 
                     const errorMessage =
                         error instanceof TitanBotError
-                            ? error.userMessage || 'An error occurred while processing your selection.'
+                            ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
                             : 'An unexpected error occurred while updating the configuration.';
 
                     if (!selectInteraction.replied && !selectInteraction.deferred) {
@@ -369,7 +369,7 @@ async function handleWelcomeChannel(selectInteraction, rootInteraction, cfg, gui
             new EmbedBuilder()
                 .setTitle('🟢 Welcome Channel')
                 .setDescription(
-                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect the channel where welcome messages will be sent.`,
+                    `**Current:** ${cfg.channelId ?`<#${cfg.channelId}>`: '`Not set`'}\n\nSelect Der Kanal where welcome messages will be sent.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -428,7 +428,7 @@ async function handleWelcomeMessage(selectInteraction, rootInteraction, cfg, gui
                     .setCustomId('message_input')
                     .setLabel('Message (variables: {user}, {server}, etc)')
                     .setStyle(TextInputStyle.Paragraph)
-                    .setValue(cfg.welcomeMessage || 'Welcome {user} to {server}!')
+                    .setValue(cfg.welcomeMessage || 'Willkommen {user} in {server}!')
                     .setMaxLength(2000)
                     .setMinLength(1)
                     .setRequired(true),
@@ -468,7 +468,7 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
         .setTitle('Set Welcome Image');
 
     const imageHint = new TextDisplayBuilder()
-        .setContent('Provide a direct image URL **or** upload a file below. If both are given, the uploaded file takes priority. Leave the URL blank and skip the upload to remove the image.');
+        .setContent('Provide a direct image URL **or** upload a file below. If both are given, the upGeladen file takes priority. Leave the URL blank and skip the upload to remove the image.');
 
     const urlLabel = new LabelBuilder()
         .setLabel('Image URL (optional)')
@@ -509,8 +509,8 @@ async function handleWelcomeImage(selectInteraction, rootInteraction, cfg, guild
 
     if (!submitted) return;
 
-    const uploadedFiles = submitted.fields.getUploadedFiles('image_upload');
-    let imageUrl = uploadedFiles?.at(0)?.url ?? submitted.fields.getTextInputValue('image_input').trim();
+    const upGeladenFiles = submitted.fields.getUpGeladenFiles('image_upload');
+    let imageUrl = upGeladenFiles?.at(0)?.url ?? submitted.fields.getTextInputValue('image_input').trim();
 
     if (imageUrl) {
         try {
@@ -572,7 +572,7 @@ async function handleGoodbyeChannel(selectInteraction, rootInteraction, cfg, gui
             new EmbedBuilder()
                 .setTitle('🔴 Goodbye Channel')
                 .setDescription(
-                    `**Current:** ${cfg.goodbyeChannelId ?`<#${cfg.goodbyeChannelId}>`: '`Not set`'}\n\nSelect the channel where goodbye messages will be sent.`,
+                    `**Current:** ${cfg.goodbyeChannelId ?`<#${cfg.goodbyeChannelId}>`: '`Not set`'}\n\nSelect Der Kanal where goodbye messages will be sent.`,
                 )
                 .setColor(getColor('info')),
         ],
@@ -631,7 +631,7 @@ async function handleGoodbyeMessage(selectInteraction, rootInteraction, cfg, gui
                     .setCustomId('message_input')
                     .setLabel('Message (variables: {user}, {server}, etc)')
                     .setStyle(TextInputStyle.Paragraph)
-                    .setValue(cfg.leaveMessage || '{user.tag} has left the server.')
+                    .setValue(cfg.leaveMessage || '{user.tag} hat den Server verlassen.')
                     .setMaxLength(2000)
                     .setMinLength(1)
                     .setRequired(true),
@@ -671,7 +671,7 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
         .setTitle('Set Goodbye Image');
 
     const imageHint = new TextDisplayBuilder()
-        .setContent('Provide a direct image URL **or** upload a file below. If both are given, the uploaded file takes priority. Leave the URL blank and skip the upload to remove the image.');
+        .setContent('Provide a direct image URL **or** upload a file below. If both are given, the upGeladen file takes priority. Leave the URL blank and skip the upload to remove the image.');
 
     const urlLabel = new LabelBuilder()
         .setLabel('Image URL (optional)')
@@ -716,8 +716,8 @@ async function handleGoodbyeImage(selectInteraction, rootInteraction, cfg, guild
 
     if (!submitted) return;
 
-    const uploadedFiles = submitted.fields.getUploadedFiles('image_upload');
-    let imageUrl = uploadedFiles?.at(0)?.url ?? submitted.fields.getTextInputValue('image_input').trim();
+    const upGeladenFiles = submitted.fields.getUpGeladenFiles('image_upload');
+    let imageUrl = upGeladenFiles?.at(0)?.url ?? submitted.fields.getTextInputValue('image_input').trim();
 
     if (imageUrl) {
         try {
@@ -769,3 +769,5 @@ async function handleGoodbyePing(selectInteraction, rootInteraction, cfg, guildI
 
     await refreshDashboard(rootInteraction, cfg, guildId);
 }
+
+

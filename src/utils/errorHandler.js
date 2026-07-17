@@ -1,4 +1,4 @@
-// errorHandler.js — the single entry point for all error handling.
+﻿// errorHandler.js — the single entry point for all error handling.
 //
 // Rules:
 // 1. Commands/handlers: throw TitanBotError (via createError) or let errors propagate;
@@ -108,7 +108,7 @@ export function categorizeError(error) {
         return ErrorTypes.VALIDATION;
     }
 
-    if (message.includes('config') || message.includes('not found')) {
+    if (message.includes('config') || message.includes('Nicht gefunden')) {
         return ErrorTypes.CONFIGURATION;
     }
 
@@ -117,7 +117,7 @@ export function categorizeError(error) {
 
 const UserMessages = {
     [ErrorTypes.VALIDATION]: {
-        default: 'Please check your input and try again.',
+        default: 'Please check Dein input and try again.',
         missing_required: "You're missing some required information. Check the command options and try again.",
         invalid_format: 'The format you provided is incorrect. Check the command usage and try again.'
     },
@@ -132,33 +132,33 @@ const UserMessages = {
         invalid_config: 'The server configuration for this feature is invalid. Ask a server administrator to review it.'
     },
     [ErrorTypes.DATABASE]: {
-        default: 'Something went wrong while saving data. Please try again in a moment.',
-        connection_failed: 'I could not reach the database. Please try again later.',
-        timeout: 'That took too long to complete. Please try again.'
+        default: 'Etwas ist schief gelaufen while saving data. Bitte versuchen Sie es später erneut in a moment.',
+        connection_failed: 'I could not reach the database. Bitte versuchen Sie es später erneut later.',
+        timeout: 'That took too long to complete. Bitte versuchen Sie es später erneut.'
     },
     [ErrorTypes.NETWORK]: {
-        default: 'I could not reach an external service. Please try again in a moment.',
-        timeout: 'The request timed out. Please try again.',
-        unreachable: 'The service is unavailable right now. Please try again later.'
+        default: 'I could not reach an external service. Bitte versuchen Sie es später erneut in a moment.',
+        timeout: 'The request timed out. Bitte versuchen Sie es später erneut.',
+        unreachable: 'The service is unavailable right now. Bitte versuchen Sie es später erneut later.'
     },
     [ErrorTypes.DISCORD_API]: {
-        default: 'Discord rejected that request. Please try again in a moment.',
+        default: 'Discord rejected that request. Bitte versuchen Sie es später erneut in a moment.',
         rate_limit: "You're doing that too quickly. Wait a moment and try again.",
         forbidden: "I'm not allowed to do that here. Check my role permissions."
     },
     [ErrorTypes.USER_INPUT]: {
-        default: 'There was a problem with your request. Check your input and try again.',
+        default: 'There was a problem with Dein request. Check Dein input and try again.',
         invalid_user: 'I could not find that user. Check the mention or ID and try again.',
         invalid_channel: 'I could not find that channel. Check the mention or ID and try again.'
     },
     [ErrorTypes.RATE_LIMIT]: {
         default: "You're doing that too quickly. Wait a moment and try again.",
-        command_cooldown: 'This command is on cooldown. Wait before using it again.',
+        command_cooldown: 'This command ist im Cooldown. Wait before using it again.',
         global_rate_limit: 'Discord is rate limiting requests. Wait a moment and try again.'
     },
     [ErrorTypes.UNKNOWN]: {
-        default: 'Something went wrong. Please try again in a moment.',
-        unexpected: 'An unexpected error occurred. Please try again later.',
+        default: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut in a moment.',
+        unexpected: 'An unexpected error occurred. Bitte versuchen Sie es später erneut later.',
         warn_failed: 'I could not warn that member. Check my permissions and role hierarchy, then try again.',
         kick_failed: 'I could not kick that member. Check my permissions and role hierarchy, then try again.',
         ban_failed: 'I could not ban that member. Check my permissions and role hierarchy, then try again.',
@@ -230,7 +230,7 @@ function logInteractionError(error, errorType, logData) {
             logger.debug(`User Error [${errorType.toUpperCase()}]: ${error.userMessage || error.message}`, logData);
         }
     } else {
-        logger.error(`System Error [${errorType.toUpperCase()}]`, {
+        logger.error(`Systemfehler [${errorType.toUpperCase()}]`, {
             ...logData,
             stack: error.stack
         });
@@ -281,7 +281,7 @@ async function sendErrorResponse(interaction, embed, context = {}) {
         const useEphemeral = context.ephemeral !== false;
 
         if (interaction.replied) {
-            // A visible reply already exists; don't overwrite it — follow up ephemerally.
+            // A visible reply Existiert bereits; don't overwrite it — follow up ephemerally.
             await interaction.followUp({ ...errorMessage, flags: MessageFlags.Ephemeral });
         } else if (interaction.deferred) {
             await interaction.editReply(errorMessage);
@@ -368,7 +368,7 @@ export async function handleInteractionError(interaction, error, context = {}) {
 
     logInteractionError(error, errorType, logData);
 
-    // System errors get a reference code so users can report them and we can grep logs.
+    // Systemfehlers get a reference code so users can report them and we can grep logs.
     const isUserError = USER_ERROR_TYPES.has(errorType) || error?.context?.expected === true;
     const description = isUserError
         ? userMessage
@@ -464,3 +464,6 @@ export default {
     withErrorHandling,
     createError
 };
+
+
+

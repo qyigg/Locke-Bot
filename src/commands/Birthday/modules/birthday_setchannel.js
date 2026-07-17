@@ -8,8 +8,8 @@ export default {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('Permission Denied')
-                .setDescription('You need **Manage Server** permissions to configure the birthday channel.');
+                .setTitle('Berechtigung verweigert')
+                .setDescription('Du benötigst die Berechtigung **Server verwalten** um den Geburtstagskanal zu konfigurieren.');
             return InteractionHelper.safeReply(interaction, {
                 embeds: [embed],
                 flags: MessageFlags.Ephemeral,
@@ -26,8 +26,8 @@ export default {
                 await setGuildConfig(client, guildId, guildConfig);
                 const embed = new EmbedBuilder()
                     .setColor(0x00FF00)
-                    .setTitle('Birthday Announcements Enabled')
-                    .setDescription(`Birthday announcements will now be posted in ${channel}.`);
+                    .setTitle('Geburtstagsankündigungen aktiviert')
+                    .setDescription(`Geburtstagsankündigungen werden jetzt in ${channel} gepostet.`);
                 return InteractionHelper.safeReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral,
@@ -37,8 +37,8 @@ export default {
                 await setGuildConfig(client, guildId, guildConfig);
                 const embed = new EmbedBuilder()
                     .setColor(0xFFFF00)
-                    .setTitle('Birthday Announcements Disabled')
-                    .setDescription('No channel provided — birthday announcements have been disabled.');
+                    .setTitle('Geburtstagsankündigungen deaktiviert')
+                    .setDescription('Kein Kanal angegeben — Geburtstagsankündigungen wurden deaktiviert.');
                 return InteractionHelper.safeReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral,
@@ -48,8 +48,8 @@ export default {
             logger.error('birthday_setchannel error:', error);
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('⚠️ Configuration Error')
-                .setDescription('Could not save the birthday channel configuration.');
+                .setTitle('⚠️ Konfigurationsfehler')
+                .setDescription('Die Geburtstagskanal-Konfiguration konnte nicht gespeichert werden.');
             return InteractionHelper.safeReply(interaction, {
                 embeds: [embed],
                 flags: MessageFlags.Ephemeral,

@@ -1,4 +1,4 @@
-import { EmbedBuilder, MessageFlags, PermissionsBitField } from 'discord.js';
+﻿import { EmbedBuilder, MessageFlags, PermissionsBitField } from 'discord.js';
 import { getColor } from '../../../config/bot.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
 import { getLoggingStatus } from '../../../services/loggingService.js';
@@ -111,7 +111,7 @@ export async function buildLoggingCategoriesView(interaction, client) {
     .setTitle('📋 Event Categories')
     .setDescription(
       auditEnabled
-        ? 'Toggle which types of events are logged to your audit channel.'
+        ? 'Toggle which types of events are logged to Dein audit channel.'
         : '⚠️ Logging is disabled. Enable it from the main dashboard to send logs.',
     )
     .setColor(getColor('info'))
@@ -192,3 +192,4 @@ export default {
     }
   },
 };
+
