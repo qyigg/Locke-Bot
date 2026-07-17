@@ -32,18 +32,18 @@ function resolveTargetChannel(interaction) {
 export default {
     data: new SlashCommandBuilder()
         .setName('say')
-        .setDescription('Send a plain message as the bot')
+        .setDescription('Sende eine einfache Nachricht als Bot')
         .addStringOption((option) =>
             option
                 .setName('message')
-                .setDescription('The message the bot should send')
+                .setDescription('Die Nachricht, die der Bot senden soll')
                 .setRequired(true)
                 .setMaxLength(2000),
         )
         .addChannelOption((option) =>
             option
                 .setName('channel')
-                .setDescription('Channel to send in (defaults to the current channel)')
+                .setDescription('Kanal zum Senden (standardmäßig aktueller Kanal)')
                 .addChannelTypes(...TEXT_CHANNEL_TYPES)
                 .setRequired(false),
         )
@@ -71,7 +71,7 @@ export default {
         if (!message) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'Message cannot be empty.',
+                message: 'Die Nachricht darf nicht leer sein.',
             });
         }
 
@@ -79,7 +79,7 @@ export default {
         if (!channel) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'Choose a text channel or run this command in one.',
+                message: 'Wähle einen Textkanal oder führe den Befehl in einem Textkanal aus.',
             });
         }
 
@@ -89,14 +89,14 @@ export default {
         if (!memberPermissions?.has(PermissionFlagsBits.SendMessages)) {
             return replyUserError(interaction, {
                 type: ErrorTypes.PERMISSION,
-                message: `You do not have permission to send messages in ${channel}.`,
+                message: `Du hast keine Berechtigung, in ${channel} Nachrichten zu senden.`,
             });
         }
 
         if (!botPermissions?.has(PermissionFlagsBits.SendMessages)) {
             return replyUserError(interaction, {
                 type: ErrorTypes.PERMISSION,
-                message: `I do not have permission to send messages in ${channel}.`,
+                message: `Ich habe keine Berechtigung, in ${channel} Nachrichten zu senden.`,
             });
         }
 
@@ -106,7 +106,7 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: 'Bot Message Sent',
+                action: 'Bot-Nachricht gesendet',
                 target: `${channel} (${channel.id})`,
                 executor: `${interaction.user.tag} (${interaction.user.id})`,
                 reason: message.length > 200
@@ -124,8 +124,8 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    'Message Sent',
-                    `Posted in ${channel}. [Jump to message](${sentMessage.url})`,
+                    'Nachricht gesendet',
+                    `Gesendet in ${channel}. [Zur Nachricht springen](${sentMessage.url})`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,

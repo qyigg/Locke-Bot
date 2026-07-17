@@ -10,7 +10,7 @@ export default {
     data: new SlashCommandBuilder()
     .setName("lock")
     .setDescription(
-      "Locks the current channel (prevents @everyone from sending messages).",
+      "Sperrt den aktuellen Kanal (verhindert Nachrichten von @everyone).",
     )
 .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
   category: "moderation",
@@ -32,25 +32,25 @@ export default {
     try {
       const currentPermissions = channel.permissionsFor(everyoneRole);
       if (currentPermissions.has(PermissionFlagsBits.SendMessages) === false) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} is already locked.` });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} ist bereits gesperrt.` });
       }
 
       await channel.permissionOverwrites.edit(
         everyoneRole,
         { SendMessages: false },
-{ type: 0, reason: `Channel locked by ${interaction.user.tag}` },
+{ type: 0, reason: `Kanal gesperrt von ${interaction.user.tag}` },
       );
 
       await logEvent({
         client,
         guild: interaction.guild,
         event: {
-          action: "Channel Locked",
+          action: "Kanal gesperrt",
           target: channel.toString(),
           executor: `${interaction.user.tag} (${interaction.user.id})`,
           metadata: {
             channelId: channel.id,
-            category: channel.parent?.name || 'None',
+            category: channel.parent?.name || 'Keine',
             moderatorId: interaction.user.id
           }
         }
@@ -59,14 +59,14 @@ export default {
       await InteractionHelper.safeEditReply(interaction, {
         embeds: [
           successEmbed(
-            `🔒 **Channel Locked**`,
-            `${channel} is now locked down. No one can speak here now.`,
+            `🔒 **Kanal gesperrt**`,
+            `${channel} ist jetzt gesperrt. Hier kann aktuell niemand schreiben.`,
           ),
         ],
       });
     } catch (error) {
       logger.error('Lock command error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'An unexpected error occurred while trying to lock the channel. Check my permissions (I need \'Manage Channels\').' });
+      await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Beim Sperren des Kanals ist ein unerwarteter Fehler aufgetreten. Prüfe meine Berechtigungen (ich brauche „Kanäle verwalten“).' });
     }
   }
 };

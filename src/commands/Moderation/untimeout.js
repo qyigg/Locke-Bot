@@ -8,11 +8,11 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("untimeout")
-        .setDescription("Remove timeout from a user")
+        .setDescription("Entferne den Timeout eines Benutzers")
         .addUserOption((option) =>
             option
                 .setName("target")
-                .setDescription("User to untimeout")
+                .setDescription("Benutzer, dessen Timeout entfernt wird")
                 .setRequired(true),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
@@ -36,7 +36,7 @@ export default {
             throw new TitanBotError(
                 'Missing target user',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to untimeout.',
+                'Du musst einen Benutzer angeben, dessen Timeout entfernt werden soll.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -45,7 +45,7 @@ export default {
             throw new TitanBotError(
                 "Target not found",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server.",
+                "Der Zielbenutzer ist aktuell nicht auf diesem Server.",
             );
         }
 
@@ -58,7 +58,7 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    `🔓 **Removed timeout** from ${targetUser.tag}`,
+                    `🔓 **Timeout entfernt** für ${targetUser.tag}`,
                 ),
             ],
         });

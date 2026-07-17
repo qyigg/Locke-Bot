@@ -9,12 +9,12 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("warnings")
-        .setDescription("View all warnings for a user")
+        .setDescription("Zeige alle Verwarnungen eines Benutzers an")
         .addUserOption((o) =>
             o
                 .setName("target")
                 .setRequired(true)
-                .setDescription("User to check warnings for"),
+                .setDescription("Benutzer, dessen Verwarnungen geprüft werden"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     category: "moderation",
@@ -40,8 +40,8 @@ export default {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     createEmbed({
-                        title: `Warnings: ${target.tag}`,
-                        description: "This user has no recorded warnings.",
+                        title: `Verwarnungen: ${target.tag}`,
+                        description: "Dieser Benutzer hat keine gespeicherten Verwarnungen.",
                     }).setColor(getColor('success')),
                 ],
             });
@@ -49,16 +49,16 @@ export default {
         }
 
         const embed = createEmbed({
-            title: `Warnings: ${target.tag}`,
-            description: `Total Warnings: **${totalWarns}**`,
+            title: `Verwarnungen: ${target.tag}`,
+            description: `Verwarnungen gesamt: **${totalWarns}**`,
         }).setColor(getColor('warning'));
 
         const warningFields = validWarnings
             .map((w, i) => {
                 const discordTimestamp = Math.floor(w.timestamp / 1000);
                 return {
-                    name: `[#${i + 1}] Reason: ${w.reason.substring(0, 100)}`,
-                    value: `**Moderator:** <@${w.moderatorId}>\n**Date:** <t:${discordTimestamp}:F> (<t:${discordTimestamp}:R>)`,
+                    name: `[#${i + 1}] Grund: ${w.reason.substring(0, 100)}`,
+                    value: `**Moderator:** <@${w.moderatorId}>\n**Datum:** <t:${discordTimestamp}:F> (<t:${discordTimestamp}:R>)`,
                     inline: false,
                 };
             })
@@ -69,11 +69,11 @@ export default {
         const actionRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`warning_delete_specific:${target.id}:${interaction.user.id}`)
-                .setLabel('Delete Specific Warning')
+                .setLabel('Bestimmte Verwarnung löschen')
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId(`warning_clear_all:${target.id}:${interaction.user.id}`)
-                .setLabel('Clear All Warnings')
+                .setLabel('Alle Verwarnungen löschen')
                 .setStyle(ButtonStyle.Danger),
         );
 
@@ -81,10 +81,10 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: "Warnings Viewed",
+                action: "Verwarnungen angesehen",
                 target: `${target.tag} (${target.id})`,
                 executor: `${interaction.user.tag} (${interaction.user.id})`,
-                reason: `Viewed ${totalWarns} warnings`,
+                reason: `${totalWarns} Verwarnungen angezeigt`,
                 metadata: {
                     userId: target.id,
                     moderatorId: interaction.user.id,

@@ -9,23 +9,23 @@ import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("dm")
-        .setDescription("Send a direct message to a user (Staff only)")
+        .setDescription("Sende eine Direktnachricht an einen Benutzer (nur Team)")
         .addUserOption(option =>
             option
                 .setName("user")
-                .setDescription("The user to send a DM to")
+                .setDescription("Benutzer, der eine DM erhalten soll")
                 .setRequired(true)
         )
         .addStringOption(option =>
             option
                 .setName("message")
-                .setDescription("The message to send")
+                .setDescription("Nachricht, die gesendet werden soll")
                 .setRequired(true)
         )
         .addBooleanOption(option =>
             option
                 .setName("anonymous")
-                .setDescription("Send the message anonymously (default: false)")
+                .setDescription("Nachricht anonym senden (Standard: nein)")
                 .setRequired(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
@@ -50,11 +50,11 @@ export default {
         try {
             
             if (message.length > 2000) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Messages must be under 2000 characters.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Nachrichten müssen unter 2000 Zeichen bleiben.' });
             }
 
             if (targetUser.bot) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot send DMs to bot accounts.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst keine DMs an Bot-Konten senden.' });
             }
 
             const sanitized = sanitizeMarkdown(message);
@@ -64,10 +64,10 @@ export default {
             await dmChannel.send({
                 embeds: [
                     successEmbed(
-                        anonymous ? "Message from the Staff Team" : `Message from ${interaction.user.tag}`,
+                        anonymous ? "Nachricht vom Team" : `Nachricht von ${interaction.user.tag}`,
                         sanitized
                     ).setFooter({
-                        text: `You cannot reply to this message. | Logger ID: ${interaction.id}`
+                        text: `Du kannst auf diese Nachricht nicht antworten. | Logger-ID: ${interaction.id}`
                     })
                 ]
             });
@@ -76,10 +76,10 @@ export default {
                 client: interaction.client,
                 guild: interaction.guild,
                 event: {
-                    action: "DM Sent",
+                    action: "DM gesendet",
                     target: `${targetUser.tag} (${targetUser.id})`,
                     executor: `${interaction.user.tag} (${interaction.user.id})`,
-                    reason: `Anonymous: ${anonymous ? 'Yes' : 'No'}`,
+                    reason: `Anonym: ${anonymous ? 'Ja' : 'Nein'}`,
                     metadata: {
                         userId: targetUser.id,
                         moderatorId: interaction.user.id,
@@ -92,8 +92,8 @@ export default {
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     successEmbed(
-                        "DM Sent",
-                        `Successfully sent a message to ${targetUser.tag}`
+                        "DM gesendet",
+                        `Nachricht an ${targetUser.tag} erfolgreich gesendet.`
                     ),
                 ],
             });
@@ -101,10 +101,10 @@ export default {
             logger.error('DM command error:', error);
             
 if (error.code === 50007) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Could not send a DM to ${targetUser.tag}. They may have DMs disabled.` });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `DM an ${targetUser.tag} konnte nicht gesendet werden. Möglicherweise sind DMs deaktiviert.` });
             }
             
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Failed to send DM: ${error.message}` });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Fehler beim Senden der DM: ${error.message}` });
         }
     }
 };

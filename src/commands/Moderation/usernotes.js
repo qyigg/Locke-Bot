@@ -10,32 +10,32 @@ import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("usernotes")
-        .setDescription("Manage user notes for moderation purposes")
+        .setDescription("Verwalte Benutzernotizen für Moderationszwecke")
         .addSubcommand(subcommand =>
             subcommand
                 .setName("add")
-                .setDescription("Add a note to a user")
+                .setDescription("Füge einem Benutzer eine Notiz hinzu")
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to add a note for")
+                        .setDescription("Benutzer, für den eine Notiz hinzugefügt wird")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option
                         .setName("note")
-                        .setDescription("The note to add")
+                        .setDescription("Die hinzuzufügende Notiz")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option
                         .setName("type")
-                        .setDescription("Type of note")
+                        .setDescription("Art der Notiz")
                         .addChoices(
                             { name: "Warnung", value: "warning" },
-                            { name: "Positive", value: "positive" },
+                            { name: "Positiv", value: "positive" },
                             { name: "Neutral", value: "neutral" },
-                            { name: "Alert", value: "alert" }
+                            { name: "Alarm", value: "alert" }
                         )
                         .setRequired(false)
                 )
@@ -43,28 +43,28 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("view")
-                .setDescription("View notes for a user")
+                .setDescription("Zeige Notizen eines Benutzers an")
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to view notes for")
+                        .setDescription("Benutzer, dessen Notizen angezeigt werden")
                         .setRequired(true)
                 )
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName("remove")
-                .setDescription("Remove a specific note from a user")
+                .setDescription("Entferne eine bestimmte Notiz eines Benutzers")
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to remove a note from")
+                        .setDescription("Benutzer, von dem eine Notiz entfernt wird")
                         .setRequired(true)
                 )
                 .addIntegerOption(option =>
                     option
                         .setName("index")
-                        .setDescription("The index of the note to remove")
+                        .setDescription("Index der zu entfernenden Notiz")
                         .setRequired(true)
                         .setMinValue(1)
                 )
@@ -72,11 +72,11 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("clear")
-                .setDescription("Clear all notes for a user")
+                .setDescription("Lösche alle Notizen eines Benutzers")
                 .addUserOption(option =>
                     option
                         .setName("target")
-                        .setDescription("The user to clear notes for")
+                        .setDescription("Benutzer, dessen Notizen gelöscht werden")
                         .setRequired(true)
                 )
         )
@@ -89,7 +89,7 @@ export default {
         const guildId = interaction.guild.id;
 
         if (subcommand !== "view" && subcommand !== "remove" && subcommand !== "clear" && subcommand !== "add") {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please select a valid subcommand.' });
+            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte wähle einen gültigen Unterbefehl.' });
         }
 
         let notes = [];
@@ -109,11 +109,11 @@ export default {
                 case "clear":
                     return await handleClearNotes(interaction, targetUser, notes, guildId);
                 default:
-                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please select a valid subcommand.' });
+                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte wähle einen gültigen Unterbefehl.' });
             }
         } catch (error) {
             logger.error(`Error in usernotes command (${subcommand}):`, error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing your request. Please try again later.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Beim Verarbeiten deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es später erneut.' });
         }
     }
 };
@@ -123,11 +123,11 @@ async function handleAddNote(interaction, targetUser, notes, guildId) {
     const type = interaction.options.getString("type") || "neutral";
 
     if (note.length > 1000) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Notes must be 1000 characters or less.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Notizen dürfen maximal 1000 Zeichen lang sein.' });
     }
 
     if (note.length === 0) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Note cannot be empty.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Die Notiz darf nicht leer sein.' });
     }
 
     note = sanitizeInput(note);
@@ -151,11 +151,11 @@ async function handleAddNote(interaction, targetUser, notes, guildId) {
     return InteractionHelper.safeReply(interaction, {
         embeds: [
             successEmbed(
-                `${typeInfo.emoji} Note Added`,
-                `Added a **${type}** note for **${targetUser.tag}**:\n\n` +
+                `${typeInfo.emoji} Notiz hinzugefügt`,
+                `Eine **${type}**-Notiz wurde für **${targetUser.tag}** hinzugefügt:\n\n` +
                 `> ${note}\n\n` +
                 `**Moderator:** ${interaction.user.tag}\n` +
-                `**Total Notes:** ${notes.length}`
+                `**Notizen gesamt:** ${notes.length}`
             )
         ]
     });
@@ -166,8 +166,8 @@ async function handleViewNotes(interaction, targetUser, notes) {
         return InteractionHelper.safeReply(interaction, {
             embeds: [
                 infoEmbed(
-                    "📝 No Notes",
-                    `There are no notes for **${targetUser.tag}**.`
+                    "📝 Keine Notizen",
+                    `Für **${targetUser.tag}** sind keine Notizen vorhanden.`
                 ),
             ],
         });
@@ -175,24 +175,24 @@ async function handleViewNotes(interaction, targetUser, notes) {
 
     const sortedNotes = [...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    let description = `**Notes for ${targetUser.tag} (${targetUser.id}):**\n\n`;
+    let description = `**Notizen für ${targetUser.tag} (${targetUser.id}):**\n\n`;
     
     sortedNotes.forEach((note, index) => {
         const typeInfo = getNoteTypeInfo(note.type);
         const date = new Date(note.timestamp).toLocaleDateString();
-        description += `${typeInfo.emoji} **Note #${index + 1}** (${note.type}) - ${date}\n`;
+        description += `${typeInfo.emoji} **Notiz #${index + 1}** (${note.type}) - ${date}\n`;
         description += `> ${note.content}\n`;
-        description += `*Added by ${note.author}*\n\n`;
+        description += `*Hinzugefügt von ${note.author}*\n\n`;
     });
 
     if (description.length > 4000) {
-        description = description.substring(0, 3900) + "\n... *(truncated)*";
+        description = description.substring(0, 3900) + "\n... *(gekürzt)*";
     }
 
     return InteractionHelper.safeReply(interaction, {
         embeds: [
             infoEmbed(
-                `📝 User Notes (${notes.length})`,
+                `📝 Benutzernotizen (${notes.length})`,
                 description
             )
         ]
@@ -203,7 +203,7 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
     const index = interaction.options.getInteger("index") - 1;
 
     if (index < 0 || index >= notes.length) {
-        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Please provide a valid note index (1-${notes.length}).` });
+        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Bitte gib einen gültigen Notiz-Index an (1-${notes.length}).` });
     }
 
     // The view command displays notes sorted newest-first, so resolve the index
@@ -221,10 +221,10 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
     return InteractionHelper.safeReply(interaction, {
         embeds: [
             successEmbed(
-                `${typeInfo.emoji} Note Removed`,
-                `Removed note #${index + 1} from **${targetUser.tag}**:\n\n` +
+                `${typeInfo.emoji} Notiz entfernt`,
+                `Notiz #${index + 1} wurde von **${targetUser.tag}** entfernt:\n\n` +
                 `> ${removedNote.content}\n\n` +
-                `**Remaining Notes:** ${notes.length}`
+                `**Verbleibende Notizen:** ${notes.length}`
             )
         ]
     });
@@ -237,8 +237,8 @@ async function handleClearNotes(interaction, targetUser, notes, guildId) {
         return InteractionHelper.safeReply(interaction, {
             embeds: [
                 infoEmbed(
-                    "No Notes to Clear",
-                    `There are no notes for **${targetUser.tag}** to clear.`
+                    "Keine Notizen zum Löschen",
+                    `Für **${targetUser.tag}** gibt es keine Notizen zum Löschen.`
                 ),
             ],
         });
@@ -252,8 +252,8 @@ async function handleClearNotes(interaction, targetUser, notes, guildId) {
     return InteractionHelper.safeReply(interaction, {
         embeds: [
             successEmbed(
-                "🗑️ Notes Cleared",
-                `Cleared **${noteCount}** notes from **${targetUser.tag}**.`
+                "🗑️ Notizen gelöscht",
+                `Es wurden **${noteCount}** Notizen von **${targetUser.tag}** gelöscht.`
             )
         ]
     });

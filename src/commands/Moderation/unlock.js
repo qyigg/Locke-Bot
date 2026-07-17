@@ -10,7 +10,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("unlock")
         .setDescription(
-            "Unlocks the current channel (allows @everyone to send messages again).",
+            "Entsperrt den aktuellen Kanal (erlaubt @everyone wieder Nachrichten).",
         )
 .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     category: "moderation",
@@ -37,7 +37,7 @@ export default {
                 currentPermissions.has(PermissionFlagsBits.SendMessages) ===
                     null
             ) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} is not explicitly locked (everyone can already send messages).` });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} ist nicht explizit gesperrt (jeder kann bereits Nachrichten senden).` });
             }
 
             await channel.permissionOverwrites.edit(
@@ -45,7 +45,7 @@ export default {
                 { SendMessages: true },
                 {
                     type: 0,
-                    reason: `Channel unlocked by ${interaction.user.tag}`,
+                    reason: `Kanal entsperrt von ${interaction.user.tag}`,
 },
             );
 
@@ -53,12 +53,12 @@ export default {
                 client,
                 guild: interaction.guild,
                 event: {
-                    action: "Channel Unlocked",
+                    action: "Kanal entsperrt",
                     target: channel.toString(),
                     executor: `${interaction.user.tag} (${interaction.user.id})`,
                     metadata: {
                         channelId: channel.id,
-                        category: channel.parent?.name || 'None'
+                        category: channel.parent?.name || 'Keine'
                     }
                 }
             });
@@ -66,14 +66,14 @@ export default {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     successEmbed(
-                        `🔓 **Channel Unlocked**`,
-                        `${channel} is now unlocked. You may speak now.`,
+                        `🔓 **Kanal entsperrt**`,
+                        `${channel} ist jetzt entsperrt. Du kannst wieder schreiben.`,
                     ),
                 ],
             });
         } catch (error) {
             logger.error('Unlock command error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'An unexpected error occurred while trying to unlock the channel. Check my permissions (I need \'Manage Channels\').' });
+            await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Beim Entsperren des Kanals ist ein unerwarteter Fehler aufgetreten. Prüfe meine Berechtigungen (ich brauche „Kanäle verwalten“).' });
         }
     }
 };
