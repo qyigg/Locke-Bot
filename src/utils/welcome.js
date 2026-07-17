@@ -3,8 +3,8 @@
 import { logger } from './logger.js';
 
 const DEFAULT_TEMPLATES = {
-    welcome: 'Welcome {user} to {server}!',
-    goodbye: '{user.tag} has left the server.'
+    welcome: 'Willkommen {user} auf {server}!',
+    goodbye: '{user.tag} hat den Server verlassen.'
 };
 
 function replaceAll(message, token, value) {
@@ -39,9 +39,9 @@ export function formatWelcomeMessage(message, data) {
     }
 
     const tokens = {
-        '{user}': user?.toString?.() || 'User',
-        '{user.mention}': user?.toString?.() || 'User',
-        '{user.tag}': user?.tag || 'Unknown#0000',
+        '{user}': user?.toString?.() || 'Benutzer',
+        '{user.mention}': user?.toString?.() || 'Benutzer',
+        '{user.tag}': user?.tag || 'Unbekannt#0000',
         '{user.username}': user?.username || 'Unbekannt',
         '{username}': user?.username || 'Unbekannt',
         '{user.discriminator}': user?.discriminator || '0000',
