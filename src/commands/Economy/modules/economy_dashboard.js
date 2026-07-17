@@ -14,10 +14,10 @@
     EmbedBuilder,
 } from 'discord.js';
 import { getColor, BotConfig } from '../../../config/bot.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
-import { successEmbed } from '../../../utils/embeds.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
+import { ErfolgEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { TitanBotError, ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from '../../../utils/FehlerHandler.js';
 import { getEconomyPrefix } from '../../../utils/database.js';
 import { getEconomyData, addMoney, removeMoney, getMaxBankCapacity } from '../../../utils/economy.js';
 import fs from 'fs/promises';
@@ -41,8 +41,8 @@ async function buildDashboardEmbed(guild, client) {
             for (const key of economyKeys) {
                 const userId = key.split(':').pop();
 
-                const member = await guild.members.fetch(userId).catch(() => null);
-                if (member?.user?.bot) continue;
+                const Mitglied = await guild.Mitglieds.fetch(userId).catch(() => null);
+                if (Mitglied?.user?.bot) continue;
 
                 const userData = await client.db.get(key, {});
                 if (userData) {
@@ -51,8 +51,8 @@ async function buildDashboardEmbed(guild, client) {
                 }
             }
         }
-    } catch (error) {
-        logger.error('Error calculating economy stats:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler calculating economy stats:', Fehler);
     }
 
     const avgBalance = userCount > 0 ? Math.floor(totalInCirculation / userCount) : 0;
@@ -102,7 +102,7 @@ function buildSelectMenu(guildId) {
 
 async function refreshDashboard(rootInteraction, guild, client) {
     const selectMenu = buildSelectMenu(guild.id);
-    await InteractionHelper.safeBearbeitenReply(rootInteraction, {
+    await InteractionHilfeer.safeBearbeitenReply(rootInteraction, {
         embeds: [await buildDashboardEmbed(guild, client)],
         components: [
             new ActionRowBuilder().addComponents(selectMenu),
@@ -131,10 +131,10 @@ async function AktualisierenConfigFile(currencySymbol, currencyName) {
         );
         
         await fs.writeFile(configPath, configContent, 'utf-8');
-        logger.info('Config file Erfolgreich aktualisiert');
+        logger.Info('Config file Erfolgreich aktualisiert');
         return true;
-    } catch (error) {
-        logger.error('Error updating config file:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler updating config file:', Fehler);
         return false;
     }
 }
@@ -147,12 +147,12 @@ export default {
             const selectMenu = buildSelectMenu(guild.id);
             const selectRow = new ActionRowBuilder().addComponents(selectMenu);
 
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [await buildDashboardEmbed(guild, client)],
                 components: [selectRow],
             });
 
-            const collector = interaction.channel.ErstellenMessageComponentCollector({
+            const collector = interaction.Kanal.ErstellenMessageComponentCollector({
                 componentType: ComponentType.StringSelect,
                 filter: i =>
                     i.user.id === interaction.user.id && i.customId === `economy_dashboard_${guild.id}`,
@@ -176,25 +176,25 @@ export default {
                             await handleChangeName(selectInteraction, interaction, guild);
                             break;
                     }
-                } catch (error) {
-                    if (error instanceof TitanBotError) {
-                        logger.debug(`Economy dashboard validation error: ${error.message}`);
+                } catch (Fehler) {
+                    if (Fehler instanceof TitanBotFehler) {
+                        logger.debug(`Economy dashboard validation Fehler: ${Fehler.message}`);
                     } else {
-                        logger.error('Unexpected economy dashboard error:', error);
+                        logger.Fehler('Unexpected economy dashboard Fehler:', Fehler);
                     }
 
-                    const errorMessage =
-                        error instanceof TitanBotError
-                            ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
-                            : 'An unexpected error occurred while processing Dein request.';
+                    const FehlerMessage =
+                        Fehler instanceof TitanBotFehler
+                            ? Fehler.userMessage || 'Ein Fehler ist aufgetreten while Wird verarbeitet Dein selection.'
+                            : 'An unexpected Fehler occurred while Wird verarbeitet Dein request.';
 
                     if (!selectInteraction.replied && !selectInteraction.deferred) {
                         await selectInteraction.deferAktualisieren().catch(() => {});
                     }
 
-                    await replyUserError(selectInteraction, {
-                        type: ErrorTypes.UNKNOWN,
-                        message: errorMessage,
+                    await replyUserFehler(selectInteraction, {
+                        type: FehlerTypes.UNKNOWN,
+                        message: FehlerMessage,
                     }).catch(() => {});
                 }
             });
@@ -204,21 +204,21 @@ export default {
                     const timeoutEmbed = new EmbedBuilder()
                         .setTitle('Dashboard Timed Out')
                         .setDescription('This dashboard has been Schließend due to inactivity. Please run the command again to continue.')
-                        .setColor(getColor('error'));
+                        .setColor(getColor('Fehler'));
                     
-                    await InteractionHelper.safeBearbeitenReply(interaction, {
+                    await InteractionHilfeer.safeBearbeitenReply(interaction, {
                         embeds: [timeoutEmbed],
                         components: [],
                     }).catch(() => {});
                 }
             });
-        } catch (error) {
-            if (error instanceof TitanBotError) throw error;
-            logger.error('Unexpected error in economy_dashboard:', error);
-            throw new TitanBotError(
-                `Economy dashboard failed: ${error.message}`,
-                ErrorTypes.UNKNOWN,
-                'Failed to open the economy dashboard.',
+        } catch (Fehler) {
+            if (Fehler instanceof TitanBotFehler) throw Fehler;
+            logger.Fehler('Unexpected Fehler in economy_dashboard:', Fehler);
+            throw new TitanBotFehler(
+                `Economy dashboard Fehlgeschlagen: ${Fehler.message}`,
+                FehlerTypes.UNKNOWN,
+                'Fehlgeschlagen to open the economy dashboard.',
             );
         }
     },
@@ -281,23 +281,23 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
     const type = Absendented.fields.getTextInputValue('type').trim().toLowerCase();
 
     if (isNaN(amount) || amount <= 0) {
-        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Der Betrag muss eine positive Zahl sein.' });
+        await replyUserFehler(Absendented, { type: FehlerTypes.VALIDATION, message: 'Der Betrag muss eine positive Zahl sein.' });
         return;
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
+        await replyUserFehler(Absendented, { type: FehlerTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
         return;
     }
 
-    const member = await guild.members.fetch(userId).catch(() => null);
-    if (!member) {
-        await replyUserError(Absendented, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in Dieser Server.' });
+    const Mitglied = await guild.Mitglieds.fetch(userId).catch(() => null);
+    if (!Mitglied) {
+        await replyUserFehler(Absendented, { type: FehlerTypes.USER_INPUT, message: 'The specified user is not in Dieser Server.' });
         return;
     }
 
-    if (member.user.bot) {
-        await replyUserError(Absendented, { type: ErrorTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
+    if (Mitglied.user.bot) {
+        await replyUserFehler(Absendented, { type: FehlerTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
         return;
     }
 
@@ -306,11 +306,11 @@ async function handleAddCurrency(selectInteraction, rootInteraction, guild, clie
     const currencySymbol = BotConfig.economy.currency.symbol;
 
     await Absendented.reply({
-        embeds: [successEmbed('Currency Added', `Successfully added ${currencySymbol}${amount.toLocaleString()} to ${member.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
+        embeds: [ErfolgEmbed('Currency Added', `Erfolgfully added ${currencySymbol}${amount.toLocaleString()} to ${Mitglied.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
         flags: MessageFlags.Ephemeral,
     });
 
-    logger.info(`[ECONOMY_DASHBOARD] Currency added`, {
+    logger.Info(`[ECONOMY_DASHBOARD] Currency added`, {
         adminId: Absendented.user.id,
         targetUserId: userId,
         amount,
@@ -378,23 +378,23 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
     const type = Absendented.fields.getTextInputValue('type').trim().toLowerCase();
 
     if (isNaN(amount) || amount <= 0) {
-        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Der Betrag muss eine positive Zahl sein.' });
+        await replyUserFehler(Absendented, { type: FehlerTypes.VALIDATION, message: 'Der Betrag muss eine positive Zahl sein.' });
         return;
     }
 
     if (type !== 'wallet' && type !== 'bank') {
-        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
+        await replyUserFehler(Absendented, { type: FehlerTypes.VALIDATION, message: 'Type must be either "wallet" or "bank".' });
         return;
     }
 
-    const member = await guild.members.fetch(userId).catch(() => null);
-    if (!member) {
-        await replyUserError(Absendented, { type: ErrorTypes.USER_INPUT, message: 'The specified user is not in Dieser Server.' });
+    const Mitglied = await guild.Mitglieds.fetch(userId).catch(() => null);
+    if (!Mitglied) {
+        await replyUserFehler(Absendented, { type: FehlerTypes.USER_INPUT, message: 'The specified user is not in Dieser Server.' });
         return;
     }
 
-    if (member.user.bot) {
-        await replyUserError(Absendented, { type: ErrorTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
+    if (Mitglied.user.bot) {
+        await replyUserFehler(Absendented, { type: FehlerTypes.UNKNOWN, message: 'Bots do not have economy accounts.' });
         return;
     }
 
@@ -403,11 +403,11 @@ async function handleRemoveCurrency(selectInteraction, rootInteraction, guild, c
     const currencySymbol = BotConfig.economy.currency.symbol;
 
     await Absendented.reply({
-        embeds: [successEmbed('Currency Removed', `Successfully removed ${currencySymbol}${amount.toLocaleString()} from ${member.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
+        embeds: [ErfolgEmbed('Currency Removed', `Erfolgfully removed ${currencySymbol}${amount.toLocaleString()} from ${Mitglied.user.tag}'s ${type}.\n**New Balance:** ${currencySymbol}${newBalance.toLocaleString()}`)],
         flags: MessageFlags.Ephemeral,
     });
 
-    logger.info(`[ECONOMY_DASHBOARD] Currency removed`, {
+    logger.Info(`[ECONOMY_DASHBOARD] Currency removed`, {
         adminId: Absendented.user.id,
         targetUserId: userId,
         amount,
@@ -449,23 +449,23 @@ async function handleChangeCurrency(selectInteraction, rootInteraction, guild) {
     const newSymbol = Absendented.fields.getTextInputValue('currency_symbol').trim();
 
     if (newSymbol.length === 0 || newSymbol.length > 3) {
-        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Currency symbol must be 1-3 characters long.' });
+        await replyUserFehler(Absendented, { type: FehlerTypes.VALIDATION, message: 'Currency symbol must be 1-3 characters long.' });
         return;
     }
 
-    const success = await AktualisierenConfigFile(newSymbol, BotConfig.economy.currency.name);
+    const Erfolg = await AktualisierenConfigFile(newSymbol, BotConfig.economy.currency.name);
 
-    if (!success) {
-        await replyUserError(Absendented, { type: ErrorTypes.UNKNOWN, message: 'Could not Aktualisieren the config file. Please check the logs.' });
+    if (!Erfolg) {
+        await replyUserFehler(Absendented, { type: FehlerTypes.UNKNOWN, message: 'Could not Aktualisieren the config file. Please check the logs.' });
         return;
     }
 
     await Absendented.reply({
-        embeds: [successEmbed('Currency Symbol Aktualisierend', `Currency symbol changed to **${newSymbol}**.\n\n**Note:** The bot needs to be restarted for changes to take effect.`)],
+        embeds: [ErfolgEmbed('Currency Symbol Aktualisierend', `Currency symbol changed to **${newSymbol}**.\n\n**Note:** The bot needs to be restarted for changes to take effect.`)],
         flags: MessageFlags.Ephemeral,
     });
 
-    logger.info(`[ECONOMY_DASHBOARD] Currency symbol changed`, {
+    logger.Info(`[ECONOMY_DASHBOARD] Currency symbol changed`, {
         adminId: Absendented.user.id,
         oldSymbol: BotConfig.economy.currency.symbol,
         newSymbol
@@ -503,28 +503,29 @@ async function handleChangeName(selectInteraction, rootInteraction, guild) {
     const newName = Absendented.fields.getTextInputValue('currency_name').trim();
 
     if (newName.length === 0 || newName.length > 20) {
-        await replyUserError(Absendented, { type: ErrorTypes.VALIDATION, message: 'Currency name must be 1-20 characters long.' });
+        await replyUserFehler(Absendented, { type: FehlerTypes.VALIDATION, message: 'Currency name must be 1-20 characters long.' });
         return;
     }
 
-    const success = await AktualisierenConfigFile(BotConfig.economy.currency.symbol, newName);
+    const Erfolg = await AktualisierenConfigFile(BotConfig.economy.currency.symbol, newName);
 
-    if (!success) {
-        await replyUserError(Absendented, { type: ErrorTypes.UNKNOWN, message: 'Could not Aktualisieren the config file. Please check the logs.' });
+    if (!Erfolg) {
+        await replyUserFehler(Absendented, { type: FehlerTypes.UNKNOWN, message: 'Could not Aktualisieren the config file. Please check the logs.' });
         return;
     }
 
     await Absendented.reply({
-        embeds: [successEmbed('Currency Name Aktualisierend', `Currency name changed to **${newName}**.\n\n**Note:** The bot needs to be restarted for changes to take effect.`)],
+        embeds: [ErfolgEmbed('Currency Name Aktualisierend', `Currency name changed to **${newName}**.\n\n**Note:** The bot needs to be restarted for changes to take effect.`)],
         flags: MessageFlags.Ephemeral,
     });
 
-    logger.info(`[ECONOMY_DASHBOARD] Currency name changed`, {
+    logger.Info(`[ECONOMY_DASHBOARD] Currency name changed`, {
         adminId: Absendented.user.id,
         oldName: BotConfig.economy.currency.name,
         newName
     });
 }
+
 
 
 

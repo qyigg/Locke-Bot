@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, addMoney, removeMoney, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import EconomyService from '../../services/economyService.js';
 
 export default {
@@ -24,8 +24,8 @@ export default {
                 .setMinValue(1)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const senderId = interaction.user.id;
@@ -41,27 +41,27 @@ export default {
             });
 
             if (receiver.bot) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Cannot pay bot",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Du kannst einem Bot kein Geld geben.",
                     { receiverId: receiver.id, isBot: true }
                 );
             }
             
             if (receiver.id === senderId) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Cannot pay self",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Du kannst dir selbst kein Geld geben.",
                     { senderId, receiverId: receiver.id }
                 );
             }
             
             if (amount <= 0) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Invalid payment amount",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Amount must be greater than zero.",
                     { amount, senderId }
                 );
@@ -73,19 +73,19 @@ export default {
             ]);
 
             if (!senderData) {
-                throw ErstellenError(
-                    "Failed to load sender economy data",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load sender economy data",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId: senderId, guildId }
                 );
             }
             
             if (!receiverData) {
-                throw ErstellenError(
-                    "Failed to load receiver economy data",
-                    ErrorTypes.DATABASE,
-                    "Failed to load the receiver's economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load receiver economy data",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load the receiver's economy data. Bitte versuchen Sie es später erneut later.",
                     { userId: receiver.id, guildId }
                 );
             }
@@ -101,7 +101,7 @@ export default {
             const AktualisierendSenderData = await getEconomyData(client, guildId, senderId);
             const AktualisierendReceiverData = await getEconomyData(client, guildId, receiver.id);
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 'Zahlung erfolgreich',
                 `Du hast erfolgreich **${receiver.username}** den Betrag von **$${amount.toLocaleString()}** gezahlt!`
             )
@@ -122,9 +122,9 @@ export default {
                     iconURL: receiver.displayAvatarURL(),
                 });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
 
-            logger.info(`[ECONOMY] Payment sent successfully`, {
+            logger.Info(`[ECONOMY] Payment sent Erfolgfully`, {
                 senderId,
                 receiverId: receiver.id,
                 amount,
@@ -147,5 +147,6 @@ export default {
             }
     }, { command: 'pay' })
 };
+
 
 

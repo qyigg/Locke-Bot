@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('time')
@@ -13,7 +13,7 @@ export default {
                 .setRequired(false)),
 
     async execute(interaction) {
-        await InteractionHelper.safeExecute(
+        await InteractionHilfeer.safeExecute(
             interaction,
             async () => {
                 const timezone = interaction.options.getString('timezone') || 'UTC';
@@ -31,10 +31,10 @@ export default {
                         second: '2-digit',
                         timeZoneName: 'short'
                     });
-                } catch (error) {
+                } catch (Fehler) {
                     logger.warn(`Invalid timezone requested: ${timezone}`);
-                    await replyUserError(interaction, {
-                        type: ErrorTypes.VALIDATION,
+                    await replyUserFehler(interaction, {
+                        type: FehlerTypes.VALIDATION,
                         message: 'Invalid timezone. Please use a valid timezone identifier (e.g., UTC, America/New_York, Europe/London)',
                     });
                     return;
@@ -43,16 +43,16 @@ export default {
                 const now = new Date();
                 const unixTimestamp = Math.floor(now.getTime() / 1000);
 
-                const embed = successEmbed(
+                const embed = ErfolgEmbed(
                     '🕒 Current Time',
                     `**${timezone}:** ${timeString}\n` +
                     `**Unix Timestamp:** \`${unixTimestamp}\`\n` +
                     `**ISO String:** \`${now.toISOString()}\``
                 );
 
-                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+                await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
             },
-            'Failed to get current time. Bitte versuchen Sie es später erneut.',
+            'Fehlgeschlagen to get current time. Bitte versuchen Sie es später erneut.',
             {
                 autoDefer: true,
                 deferOptions: { flags: MessageFlags.Ephemeral }
@@ -60,5 +60,6 @@ export default {
         );
     },
 };
+
 
 

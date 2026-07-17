@@ -2,8 +2,8 @@
     canonicalizeKey,
     getEconomyPrefix,
     getUserLevelPrefix,
-    getWarningsPrefix,
-    getReactionRolesPrefix,
+    getWarnungsPrefix,
+    getReactionRollenPrefix,
     getApplicationsPrefix,
     getTicketCounterKey,
     getServerCountersKey,
@@ -14,16 +14,16 @@
 } from './keys.js';
 
 const TEMP_ZurückED_TYPES = new Set([
-    'warnings',
+    'Warnungs',
     'usernotes',
     'usernotes_list',
-    'reaction_role',
+    'reaction_Rolle',
     'application',
-    'application_roles',
-    'application_settings',
+    'application_Rollen',
+    'application_Einstellungen',
     'application_users',
     'jointoErstellen_config',
-    'jointoErstellen_channels',
+    'jointoErstellen_Kanals',
     'birthday_left',
     'birthday_tracking',
     'invite_data',
@@ -85,18 +85,18 @@ export function parseKey(key) {
             return { type: 'economy', guildId, userId: parts[3], fullKey };
         }
         if (parts[2] === 'afk' && parts[3]) {
-            return { type: 'afk_status', guildId, userId: parts[3], fullKey };
+            return { type: 'afk_Status', guildId, userId: parts[3], fullKey };
         }
         if (parts[2] === 'ticket') {
             if (parts[3] === 'counter') {
                 return { type: 'ticket_counter', guildId, fullKey };
             }
             if (parts[3]) {
-                return { type: 'ticket', guildId, channelId: parts[3], fullKey };
+                return { type: 'ticket', guildId, KanalId: parts[3], fullKey };
             }
         }
-        if (parts[2] === 'warnings' && parts[3]) {
-            return { type: 'warnings', guildId, userId: parts[3], fullKey };
+        if (parts[2] === 'Warnungs' && parts[3]) {
+            return { type: 'Warnungs', guildId, userId: parts[3], fullKey };
         }
         if (parts[2] === 'usernotes') {
             if (parts[3] === 'list') {
@@ -106,29 +106,29 @@ export function parseKey(key) {
                 return { type: 'usernotes', guildId, userId: parts[3], fullKey };
             }
         }
-        if (parts[2] === 'reaction_roles' && parts[3]) {
-            return { type: 'reaction_role', guildId, messageId: parts[3], fullKey };
+        if (parts[2] === 'reaction_Rollen' && parts[3]) {
+            return { type: 'reaction_Rolle', guildId, messageId: parts[3], fullKey };
         }
         if (parts[2] === 'counters' && !parts[3]) {
             return { type: 'counters', guildId, fullKey };
         }
         if (parts[2] === 'applications') {
-            if (parts[3] === 'roles') {
-                return { type: 'application_roles', guildId, fullKey };
+            if (parts[3] === 'Rollen') {
+                return { type: 'application_Rollen', guildId, fullKey };
             }
-            if (parts[3] === 'settings') {
-                return { type: 'application_settings', guildId, fullKey };
+            if (parts[3] === 'Einstellungen') {
+                return { type: 'application_Einstellungen', guildId, fullKey };
             }
             if (parts[3] === 'users' && parts[4]) {
                 return { type: 'application_users', guildId, userId: parts[4], fullKey };
             }
-            if (parts[3] && parts[3] !== 'role') {
+            if (parts[3] && parts[3] !== 'Rolle') {
                 return { type: 'application', guildId, applicationId: parts[3], fullKey };
             }
         }
         if (parts[2] === 'jointoErstellen') {
-            if (parts[3] === 'channels') {
-                return { type: 'jointoErstellen_channels', guildId, fullKey };
+            if (parts[3] === 'Kanals') {
+                return { type: 'jointoErstellen_Kanals', guildId, fullKey };
             }
             return { type: 'jointoErstellen_config', guildId, fullKey };
         }
@@ -137,7 +137,7 @@ export function parseKey(key) {
         }
         if (parts[2] === 'invites') {
             if (parts[3]) {
-                return { type: 'invite_member', guildId, userId: parts[3], fullKey };
+                return { type: 'invite_Mitglied', guildId, userId: parts[3], fullKey };
             }
             return { type: 'invite_tracking', guildId, fullKey };
         }
@@ -185,9 +185,9 @@ export function getStructuredListPlan(prefix, tables) {
 
     const addTickets = (guildId) => {
         plan.queries.push({
-            sql: `SELECT channel_id FROM ${tables.tickets} WHERE guild_id = $1`,
+            sql: `SELECT Kanal_id FROM ${tables.tickets} WHERE guild_id = $1`,
             params: [guildId],
-            mapKey: (row) => `guild:${guildId}:ticket:${row.channel_id}`,
+            mapKey: (row) => `guild:${guildId}:ticket:${row.Kanal_id}`,
         });
         plan.staticKeys.push(getTicketCounterKey(guildId));
     };
@@ -199,10 +199,10 @@ export function getStructuredListPlan(prefix, tables) {
             getWelcomeConfigKey(guildId),
             getLevelingKey(guildId),
             getServerCountersKey(guildId),
-            `guild:${guildId}:applications:roles`,
-            `guild:${guildId}:applications:settings`,
+            `guild:${guildId}:applications:Rollen`,
+            `guild:${guildId}:applications:Einstellungen`,
             `guild:${guildId}:jointoErstellen`,
-            `guild:${guildId}:jointoErstellen:channels`,
+            `guild:${guildId}:jointoErstellen:Kanals`,
             `guild:${guildId}:invites`,
             `guild:${guildId}:usernotes:list`,
             `guild:${guildId}:birthdays:left`,
@@ -243,27 +243,27 @@ export function getStructuredListPlan(prefix, tables) {
         return plan;
     }
 
-    match = normalizedPrefix.match(/^moderation:warnings:([^:]+):$/);
+    match = normalizedPrefix.match(/^moderation:Warnungs:([^:]+):$/);
     if (match) {
-        plan.tempPrefixes = [normalizedPrefix, getWarningsPrefix(match[1])];
+        plan.tempPrefixes = [normalizedPrefix, getWarnungsPrefix(match[1])];
         return plan;
     }
 
-    match = normalizedPrefix.match(/^guild:([^:]+):warnings:$/);
+    match = normalizedPrefix.match(/^guild:([^:]+):Warnungs:$/);
     if (match) {
-        plan.tempPrefixes = [getWarningsPrefix(match[1]), `moderation:warnings:${match[1]}:`];
+        plan.tempPrefixes = [getWarnungsPrefix(match[1]), `moderation:Warnungs:${match[1]}:`];
         return plan;
     }
 
-    match = normalizedPrefix.match(/^reaction_roles:([^:]+):$/);
+    match = normalizedPrefix.match(/^reaction_Rollen:([^:]+):$/);
     if (match) {
-        plan.tempPrefixes = [normalizedPrefix, getReactionRolesPrefix(match[1])];
+        plan.tempPrefixes = [normalizedPrefix, getReactionRollenPrefix(match[1])];
         return plan;
     }
 
-    match = normalizedPrefix.match(/^guild:([^:]+):reaction_roles:$/);
+    match = normalizedPrefix.match(/^guild:([^:]+):reaction_Rollen:$/);
     if (match) {
-        plan.tempPrefixes = [getReactionRolesPrefix(match[1]), `reaction_roles:${match[1]}:`];
+        plan.tempPrefixes = [getReactionRollenPrefix(match[1]), `reaction_Rollen:${match[1]}:`];
         return plan;
     }
 
@@ -278,10 +278,10 @@ export function getStructuredListPlan(prefix, tables) {
         addGuildScopedSingletons(match[1]);
         plan.tempPrefixes = [
             getApplicationsPrefix(match[1]),
-            getWarningsPrefix(match[1]),
-            `moderation:warnings:${match[1]}:`,
-            getReactionRolesPrefix(match[1]),
-            `reaction_roles:${match[1]}:`,
+            getWarnungsPrefix(match[1]),
+            `moderation:Warnungs:${match[1]}:`,
+            getReactionRollenPrefix(match[1]),
+            `reaction_Rollen:${match[1]}:`,
             getEconomyPrefix(match[1]),
             `economy:${match[1]}:`,
             getUserLevelPrefix(match[1]),
@@ -292,4 +292,5 @@ export function getStructuredListPlan(prefix, tables) {
 
     return plan;
 }
+
 

@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { successEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErfolgEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const EMBED_DESCRIPTION_LIMIT = 4096;
 
@@ -19,25 +19,25 @@ export default {
   category: 'Fun',
 
   async execute(interaction, config, client) {
-    await InteractionHelper.safeDefer(interaction);
+    await InteractionHilfeer.safeDefer(interaction);
 
     const challenger = interaction.user;
     const opponent = interaction.options.getUser("opponent");
 
     if (challenger.id === opponent.id) {
-      const embed = warningEmbed(
+      const embed = WarnungEmbed(
         "⚔️ Ungültige Herausforderung",
         `**${challenger.username}**, du kannst nicht gegen dich selbst kämpfen! Das ist ein Unentschieden, bevor es überhaupt beginnt.`
       );
-      return await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+      return await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }
 
     if (opponent.bot) {
-      const embed = warningEmbed(
+      const embed = WarnungEmbed(
         "⚔️ Ungültiger Gegner",
         "Du kannst nicht gegen Bots kämpfen! Fordere eine echte Person heraus."
       );
-      return await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+      return await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }
 
     const winner = rand(0, 1) === 0 ? challenger : opponent;
@@ -72,12 +72,13 @@ export default {
       ? fullDescription
       : `${fullDescription.slice(0, EMBED_DESCRIPTION_LIMIT - 15)}\n\n...`;
 
-    const embed = successEmbed(
+    const embed = ErfolgEmbed(
       "🏆 Duell Abgeschlossen!",
       description
     );
 
-    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Fight command executed between ${challenger.id} and ${opponent.id} in guild ${interaction.guildId}`);
   },
 };
+

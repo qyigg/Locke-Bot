@@ -1,16 +1,16 @@
 ﻿import { MessageFlags } from 'discord.js';
-import { successEmbed } from '../utils/embeds.js';
+import { ErfolgEmbed } from '../utils/embeds.js';
 import { VerifizierenUser } from '../services/verificationService.js';
-import { handleInteractionError, replyUserError, ErrorTypes } from '../utils/errorHandler.js';
+import { handleInteractionFehler, replyUserFehler, FehlerTypes } from '../utils/FehlerHandler.js';
 import { logger } from '../utils/logger.js';
-import { InteractionHelper } from '../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../utils/interactionHilfeer.js';
 
 export async function handleVerificationButton(interaction, client) {
     try {
-        await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
 
         if (!interaction.guild) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Diese Schaltfläche kann nur auf einem Server verwendet werden.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Diese Schaltfläche kann nur auf einem Server verwendet werden.' });
         }
 
         const guild = interaction.guild;
@@ -27,33 +27,33 @@ export async function handleVerificationButton(interaction, client) {
             moderatorId: null
         });
 
-        if (result.status === 'already_verified') {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Du bist bereits verifiziert und hast Zugriff auf alle Server-Kanäle.' });
+        if (result.Status === 'already_verified') {
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Du bist bereits verifiziert und hast Zugriff auf alle Server-Kanäle.' });
         }
 
-        logger.info('Benutzer verifiziert via button', {
+        logger.Info('Benutzer verifiziert via button', {
             guildId: guild.id,
             userId,
-            roleName: result.roleName
+            RolleName: result.RolleName
         });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
-            embeds: [successEmbed(
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
+            embeds: [ErfolgEmbed(
                 "✅ Verifizierung erfolgreich!",
-                `Du wurdest verifiziert und hast die Rolle **${result.roleName}** erhalten!\n\nDu hast jetzt Zugriff auf alle Server-Kanäle und Funktionen. Willkommen! 🎉`
+                `Du wurdest verifiziert und hast die Rolle **${result.RolleName}** erhalten!\n\nDu hast jetzt Zugriff auf alle Server-Kanäle und Funktionen. Willkommen! 🎉`
             )],
         });
 
-    } catch (error) {
-        logger.error('Error in verification button handler', {
-            error: error.message,
+    } catch (Fehler) {
+        logger.Fehler('Fehler in verification button handler', {
+            Fehler: Fehler.message,
             guildId: interaction.guild?.id,
             userId: interaction.user.id
         });
 
-        await handleInteractionError(
+        await handleInteractionFehler(
             interaction,
-            error,
+            Fehler,
             { command: 'Verifizieren_button', action: 'verification' }
         );
     }
@@ -63,4 +63,5 @@ export default {
     customId: "Verifizieren_user",
     execute: handleVerificationButton
 };
+
 

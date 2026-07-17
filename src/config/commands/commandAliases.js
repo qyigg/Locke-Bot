@@ -1,5 +1,5 @@
 ﻿/**
- * Command Aliases Configuration
+ * Command Aliases Konfiguration
  * Maps shortened command names to their full command names
  */
 
@@ -21,9 +21,9 @@ export const commandAliases = {
     'send': 'pay',
 
     'ping': 'ping',
-    'help': 'help',
-    'h': 'help',
-    'info': 'help',
+    'Hilfe': 'Hilfe',
+    'h': 'Hilfe',
+    'Info': 'Hilfe',
 
     'ban': 'ban',
     'kick': 'kick',
@@ -47,7 +47,7 @@ export const commandAliases = {
     'inv': 'inventory',
     'items': 'inventory',
 
-    'user': 'userinfo',
+    'user': 'userInfo',
     'avatar': 'avatar',
     'pfp': 'avatar',
     'icon': 'avatar',
@@ -81,23 +81,23 @@ export const commandAliases = {
     'welcome': 'welcome',
     'greet': 'greet',
     'goodbye': 'goodbye',
-    'autorole': 'autorole',
+    'autoRolle': 'autoRolle',
 
     'calc': 'calculate',
     'math': 'calculate',
     'weather': 'weather',
     'todo': 'todo',
     'report': 'report',
-    'userinfo': 'userinfo',
-    'whois': 'userinfo',
-    'ui': 'userinfo',
+    'userInfo': 'userInfo',
+    'whois': 'userInfo',
+    'ui': 'userInfo',
 
     'serverstats': 'serverstats',
     'ss': 'serverstats',
     'sstats': 'serverstats',
 
-    'rr': 'reactroles',
-    'reactionroles': 'reactroles',
+    'rr': 'reactRollen',
+    'reactionRollen': 'reactRollen',
 
     'jtc': 'jointoErstellen',
     'jointoErstellen': 'jointoErstellen',
@@ -110,12 +110,12 @@ export const subcommandAliases = {
     'l': 'list',
     'ls': 'list',
     's': 'set',
-    'i': 'info',
+    'i': 'Info',
     'r': 'remove',
     'rm': 'remove',
     'del': 'remove',
     'n': 'Nächste',
-    'sc': 'setchannel',
+    'sc': 'setKanal',
 
     'a': 'add',
     'c': 'complete',
@@ -150,4 +150,5 @@ export function resolveSubcommandAlias(subcommandName) {
     const normalized = subcommandName.toLowerCase();
     return subcommandAliases[normalized] || subcommandName;
 }
+
 

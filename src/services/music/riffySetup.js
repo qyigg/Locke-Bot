@@ -9,7 +9,7 @@ const { Riffy } = require('riffy');
 
 export function initializeMusic(client) {
     if (!lavalinkConfig.nodes?.length) {
-        logger.error('No Lavalink nodes configured. Add lavalink/nodes.json, set LAVALINK_NODES, or set LAVALINK_HOST in Dein environment.');
+        logger.Fehler('No Lavalink nodes configured. Add lavalink/nodes.json, set LAVALINK_NODES, or set LAVALINK_HOST in Dein environment.');
         return;
     }
 
@@ -41,18 +41,19 @@ export function initializeMusic(client) {
         client.riffy.AktualisierenVoiceState(packet);
     });
 
-    client.riffy.on('playerError', (player, error) => {
-        logger.error(`Music player error in guild ${player.guildId}:`, error);
+    client.riffy.on('playerFehler', (player, Fehler) => {
+        logger.Fehler(`Music player Fehler in guild ${player.guildId}:`, Fehler);
     });
 
-    logger.info(`Music initialized with ${lavalinkConfig.nodes.length} Lavalink node(s).`);
+    logger.Info(`Music initialized with ${lavalinkConfig.nodes.length} Lavalink node(s).`);
 }
 
 export function initRiffyAfterReady(client) {
     if (client.riffy && client.user?.id) {
         client.riffy.init(client.user.id);
-        logger.info('Riffy voice connection manager initialized.');
+        logger.Info('Riffy voice connection manager initialized.');
     }
 }
+
 
 

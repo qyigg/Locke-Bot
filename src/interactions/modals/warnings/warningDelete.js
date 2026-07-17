@@ -1,20 +1,21 @@
-﻿import { warningLöschenModalHandler, warningClearBestätigenModalHandler } from '../../../handlers/warningHandlers.js';
+﻿import { WarnungLöschenModalHandler, WarnungClearBestätigenModalHandler } from '../../../handlers/WarnungHandlers.js';
 
-const LöschenExecute = typeof warningLöschenModalHandler === 'function'
-  ? warningLöschenModalHandler
-  : warningLöschenModalHandler.execute;
+const LöschenExecute = typeof WarnungLöschenModalHandler === 'function'
+  ? WarnungLöschenModalHandler
+  : WarnungLöschenModalHandler.execute;
 
-const clearExecute = typeof warningClearBestätigenModalHandler === 'function'
-  ? warningClearBestätigenModalHandler
-  : warningClearBestätigenModalHandler.execute;
+const clearExecute = typeof WarnungClearBestätigenModalHandler === 'function'
+  ? WarnungClearBestätigenModalHandler
+  : WarnungClearBestätigenModalHandler.execute;
 
 export default [
   {
-    name: 'warning_Löschen_modal',
+    name: 'Warnung_Löschen_modal',
     execute: LöschenExecute
   },
   {
-    name: 'warning_clear_Bestätigen_modal',
+    name: 'Warnung_clear_Bestätigen_modal',
     execute: clearExecute
   }
 ];
+

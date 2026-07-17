@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const SLUT_COOLDOWN = 45 * 60 * 1000;
 
@@ -49,12 +49,12 @@ function randomChoice(items) {
 }
 
 function resolveOutcome(activity, wallet) {
-    const successChance = Math.max(0.35, 0.55 - activity.risk * 0.2);
+    const ErfolgChance = Math.max(0.35, 0.55 - activity.risk * 0.2);
     const fineChance = 0.22;
     const robbedChance = 0.2;
     const roll = Math.random();
 
-    if (roll < successChance) {
+    if (roll < ErfolgChance) {
         const amount = randomInt(activity.min, activity.max);
         return {
             type: 'payout',
@@ -64,9 +64,9 @@ function resolveOutcome(activity, wallet) {
         };
     }
 
-    const remainingAfterSuccess = roll - successChance;
+    const remainingAfterErfolg = roll - ErfolgChance;
 
-    if (remainingAfterSuccess < fineChance) {
+    if (remainingAfterErfolg < fineChance) {
         const maxFine = Math.min(wallet, Math.max(150, Math.floor(activity.max * 0.4)));
         const minFine = Math.min(maxFine, Math.max(50, Math.floor(activity.min * 0.2)));
         const amount = maxFine > 0 ? randomInt(minFine, maxFine) : 0;
@@ -78,7 +78,7 @@ function resolveOutcome(activity, wallet) {
         };
     }
 
-    if (remainingAfterSuccess < fineChance + robbedChance) {
+    if (remainingAfterErfolg < fineChance + robbedChance) {
         const maxRobbed = Math.min(wallet, Math.max(200, Math.floor(wallet * 0.35)));
         const minRobbed = Math.min(maxRobbed, Math.max(75, Math.floor(wallet * 0.1)));
         const amount = maxRobbed > 0 ? randomInt(minRobbed, maxRobbed) : 0;
@@ -106,8 +106,8 @@ export default {
         .setName('slut')
         .setDescription('Nimm einen riskanten, provokanten Job für zufällige Auszahlung oder Verlust an'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
 
             const userId = interaction.user.id;
@@ -119,10 +119,10 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (!userData) {
-                throw ErstellenError(
-                    "Failed to load economy data for slut command",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load economy data for slut command",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -131,9 +131,9 @@ export default {
 
             if (now - lastSlut < SLUT_COOLDOWN) {
                 const remainingTime = lastSlut + SLUT_COOLDOWN - now;
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Slut cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Du musst warten, bevor du wieder arbeiten kannst! Versuche es in **${Math.ceil(remainingTime / 60000)}** Minuten erneut.`,
                     { timeRemaining: remainingTime, cooldownType: 'slut' }
                 );
@@ -149,14 +149,14 @@ export default {
             userData.totalSlutLosses = (userData.totalSlutLosses || 0) + Math.max(0, -outcome.delta);
 
             if (outcome.type !== 'payout') {
-                userData.failedSluts = (userData.failedSluts || 0) + 1;
+                userData.FehlgeschlagenSluts = (userData.FehlgeschlagenSluts || 0) + 1;
             }
 
             userData.wallet = Math.max(0, (userData.wallet || 0) + outcome.delta);
 
             await setEconomyData(client, guildId, userId, userData);
 
-            logger.info(`[ECONOMY_TRANSACTION] Slut activity resolved`, {
+            logger.Info(`[ECONOMY_TRANSACTION] Slut activity resolved`, {
                 userId,
                 guildId,
                 activity: activity.name,
@@ -179,12 +179,13 @@ export default {
             const embed = ErstellenEmbed({
                 title: outcome.title,
                 description: summaryLines.join('\n'),
-                color: outcome.delta >= 0 ? 'success' : 'error',
+                color: outcome.delta >= 0 ? 'Erfolg' : 'Fehler',
                 timestamp: true
             });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'slut' })
 };
+
 
 

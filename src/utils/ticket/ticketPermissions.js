@@ -1,21 +1,21 @@
-// ticketPermissions.js
+﻿// ticketBerechtigungs.js
 
-import { PermissionFlagsBits } from 'discord.js';
+import { BerechtigungFlagsBits } from 'discord.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { getTicketData } from '../database.js';
 
-export async function getTicketPermissionContext({ client, interaction }) {
+export async function getTicketBerechtigungContext({ client, interaction }) {
   const guildId = interaction.guildId;
-  const channelId = interaction.channelId;
+  const KanalId = interaction.KanalId;
 
   const [config, ticketData] = await Promise.all([
     getGuildConfig(client, guildId),
-    getTicketData(guildId, channelId)
+    getTicketData(guildId, KanalId)
   ]);
 
-  const hasManageChannels = interaction.member.permissions.has(PermissionFlagsBits.ManageChannels);
-  const staffRoleId = config.ticketStaffRoleId || null;
-  const hasTicketStaffRole = Boolean(staffRoleId && interaction.member.roles?.cache?.has(staffRoleId));
+  const hasManageKanals = interaction.Mitglied.Berechtigungs.has(BerechtigungFlagsBits.ManageKanals);
+  const staffRolleId = config.ticketStaffRolleId || null;
+  const hasTicketStaffRolle = Boolean(staffRolleId && interaction.Mitglied.Rollen?.cache?.has(staffRolleId));
   const isTicketCreator = Boolean(
     ticketData?.userId && String(ticketData.userId) === String(interaction.user.id),
   );
@@ -23,10 +23,10 @@ export async function getTicketPermissionContext({ client, interaction }) {
   return {
     config,
     ticketData,
-    hasManageChannels,
-    hasTicketStaffRole,
+    hasManageKanals,
+    hasTicketStaffRolle,
     isTicketCreator,
-    canManageTicket: hasManageChannels || hasTicketStaffRole,
-    canSchließenTicket: hasManageChannels || hasTicketStaffRole || isTicketCreator,
+    canManageTicket: hasManageKanals || hasTicketStaffRolle,
+    canSchließenTicket: hasManageKanals || hasTicketStaffRolle || isTicketCreator,
   };
 }

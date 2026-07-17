@@ -1,4 +1,4 @@
-import { readdir } from 'fs/promises';
+﻿import { readdir } from 'fs/promises';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -11,7 +11,7 @@ export default async function loadEvents(client) {
     const eventsPath = join(__dirname, '../../events');
     const eventFiles = await readdir(eventsPath).then(files => files.filter(file => file.endsWith('.js')));
 
-    logger.info(`Found ${eventFiles.length} event files to load`);
+    logger.Info(`Found ${eventFiles.length} event files to load`);
 
     for (const file of eventFiles) {
         const filePath = join(eventsPath, file);
@@ -26,20 +26,20 @@ export default async function loadEvents(client) {
             const safeExecute = async (...args) => {
                 try {
                     await event.execute(...args, client);
-                } catch (error) {
-                    logger.error(`Error executing event ${event.name}:`, error);
+                } catch (Fehler) {
+                    logger.Fehler(`Fehler executing event ${event.name}:`, Fehler);
                 }
             };
 
             if (event.once) {
                 client.once(event.name, safeExecute);
-                logger.info(`✅ Registered once event: ${event.name}`);
+                logger.Info(`✅ Registered once event: ${event.name}`);
             } else {
                 client.on(event.name, safeExecute);
-                logger.info(`✅ Registered event: ${event.name}`);
+                logger.Info(`✅ Registered event: ${event.name}`);
             }
-        } catch (error) {
-            logger.error(`Error loading event ${file}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler Wird geladen event ${file}:`, Fehler);
         }
     }
 }

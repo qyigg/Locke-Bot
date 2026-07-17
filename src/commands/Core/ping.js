@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -22,22 +22,22 @@ export default {
             );
 
             await pingingMessage.Bearbeiten({ content: null, embeds: [embed] });
-        } catch (error) {
-            logger.error('Ping-Präfix-Befehlsfehler:', error);
+        } catch (Fehler) {
+            logger.Fehler('Ping-Präfix-Befehlsfehler:', Fehler);
             if (!interaction.replied && !interaction._replyMessage) {
-                await interaction.channel.send({
-                    embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'error' })],
+                await interaction.Kanal.send({
+                    embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'Fehler' })],
                 }).catch(() => {});
             }
         }
     },
 
     async execute(interaction) {
-        logger.info('execute aufgerufen - überprüfe ob Slash-Befehl oder Präfix-Befehl');
-        logger.info(`execute - hat _commandStartTime: ${!!interaction._commandStartTime}, ErstellendTimestamp: ${interaction.ErstellendTimestamp}`);
+        logger.Info('execute aufgerufen - überprüfe ob Slash-Befehl oder Präfix-Befehl');
+        logger.Info(`execute - hat _BefehletartTime: ${!!interaction._BefehletartTime}, ErstellendTimestamp: ${interaction.ErstellendTimestamp}`);
         
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
             logger.warn(`Ping-Interaktion aufgeschoben fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
@@ -47,35 +47,36 @@ export default {
         }
 
         try {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 content: "Wird gepingt...",
             });
 
-            const startTime = interaction._commandStartTime || interaction.ErstellendTimestamp;
-            logger.info(`execute - verwende startTime: ${startTime}, Typ: ${interaction._commandStartTime ? 'Präfix' : 'Slash'}`);
+            const startTime = interaction._BefehletartTime || interaction.ErstellendTimestamp;
+            logger.Info(`execute - verwende startTime: ${startTime}, Typ: ${interaction._BefehletartTime ? 'Präfix' : 'Slash'}`);
             const latency = Math.max(0, Date.now() - startTime);
             const apiLatency = Math.max(0, Math.round(interaction.client.ws.ping));
-            logger.info(`execute - berechnete Latenz: ${latency}ms, apiLatenz: ${apiLatency}ms`);
+            logger.Info(`execute - berechnete Latenz: ${latency}ms, apiLatenz: ${apiLatency}ms`);
 
             const embed = ErstellenEmbed({ title: "Pong!", description: null }).addFields(
                 { name: "Bot-Latenz", value: `${latency}ms`, inline: true },
                 { name: "API-Latenz", value: `${apiLatency}ms`, inline: true },
             );
 
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 content: null,
                 embeds: [embed],
             });
-        } catch (error) {
-            logger.error('Ping-Befehlsfehler:', error);
+        } catch (Fehler) {
+            logger.Fehler('Ping-Befehlsfehler:', Fehler);
             try {
-                return await InteractionHelper.safeReply(interaction, {
-                    embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'error' })],
+                return await InteractionHilfeer.safeReply(interaction, {
+                    embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte die Latenz zu diesem Zeitpunkt nicht bestimmen.', color: 'Fehler' })],
                     flags: MessageFlags.Ephemeral,
                 });
-            } catch (replyError) {
-                logger.error('Fehler beim Senden der Fehlerantwort:', replyError);
+            } catch (replyFehler) {
+                logger.Fehler('Fehler beim Senden der Fehlerantwort:', replyFehler);
             }
         }
     },
 };
+

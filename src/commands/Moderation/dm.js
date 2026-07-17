@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType, MessageFlags } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { sanitizeMarkdown } from '../../utils/validation.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("dm")
@@ -28,14 +28,14 @@ export default {
                 .setDescription("Send the message anonymously (default: false)")
                 .setRequired(false)
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-        .setDMPermission(false),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ModerateMitglieds)
+        .setDMBerechtigung(false),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`DM interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`DM interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'dm'
@@ -50,20 +50,20 @@ export default {
         try {
             
             if (message.length > 2000) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Messages must be under 2000 characters.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Messages must be under 2000 characters.' });
             }
 
             if (targetUser.bot) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht send DMs to bot accounts.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Du kannst nicht send DMs to bot accounts.' });
             }
 
             const sanitized = sanitizeMarkdown(message);
 
-            const dmChannel = await targetUser.ErstellenDM();
+            const dmKanal = await targetUser.ErstellenDM();
             
-            await dmChannel.send({
+            await dmKanal.send({
                 embeds: [
-                    successEmbed(
+                    ErfolgEmbed(
                         anonymous ? "Message from the Staff Team" : `Message from ${interaction.user.tag}`,
                         sanitized
                     ).setFooter({
@@ -89,23 +89,24 @@ export default {
                 }
             });
 
-            return await InteractionHelper.safeBearbeitenReply(interaction, {
+            return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
-                    successEmbed(
+                    ErfolgEmbed(
                         "DM Sent",
-                        `Successfully sent a message to ${targetUser.tag}`
+                        `Erfolgfully sent a message to ${targetUser.tag}`
                     ),
                 ],
             });
-        } catch (error) {
-            logger.error('DM command error:', error);
+        } catch (Fehler) {
+            logger.Fehler('DM command Fehler:', Fehler);
             
-if (error.code === 50007) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Could not send a DM to ${targetUser.tag}. They may have DMs disabled.` });
+if (Fehler.code === 50007) {
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Could not send a DM to ${targetUser.tag}. They may have DMs disabled.` });
             }
             
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Failed to send DM: ${error.message}` });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Fehlgeschlagen to send DM: ${Fehler.message}` });
         }
     }
 };
+
 

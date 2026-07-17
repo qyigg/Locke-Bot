@@ -1,8 +1,8 @@
 ﻿import axios from 'axios';
 import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { handleInteractionError, replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { handleInteractionFehler, replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 
 export default {
     async execute(interaction) {
@@ -15,7 +15,7 @@ export default {
                     term: term,
                     guildId: interaction.guildId
                 });
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Please enter a term with at least 2 characters.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Please enter a term with at least 2 characters.' });
             }
 
             let deferTimer = null;
@@ -27,9 +27,9 @@ export default {
             };
 
             deferTimer = setTimeout(() => {
-                InteractionHelper.safeDefer(interaction).catch((deferError) => {
-                    logger.debug('Urban command defer fallZurück failed', {
-                        error: deferError?.message,
+                InteractionHilfeer.safeDefer(interaction).catch((deferFehler) => {
+                    logger.debug('Urban command defer fallZurück Fehlgeschlagen', {
+                        Fehler: deferFehler?.message,
                         interactionId: interaction.id,
                         commandName: 'urban'
                     });
@@ -43,7 +43,7 @@ export default {
             clearDeferTimer();
 
             if (!response.data?.list?.length) {
-                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${term}" on Urban Dictionary.` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `No definitions found for "${term}" on Urban Dictionary.` });
             }
 
             const definition = response.data.list[0];
@@ -61,7 +61,7 @@ export default {
             const embed = ErstellenEmbed({
                 title: definition.word,
                 description: formattedDefinition,
-                color: 'info'
+                color: 'Info'
             })
             .setURL(definition.permalink)
             .addFields(
@@ -86,32 +86,32 @@ export default {
                 iconURL: 'https://i.imgur.com/8aQrX3a.png'
             });
 
-            await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeReply(interaction, { embeds: [embed] });
 
-            logger.info('Urban Dictionary definition retrieved', {
+            logger.Info('Urban Dictionary definition retrieved', {
                 userId: interaction.user.id,
                 term: term,
                 guildId: interaction.guildId,
                 commandName: 'urban'
             });
 
-        } catch (error) {
-            logger.error('Urban Dictionary error', {
-                error: error.message,
-                stack: error.stack,
+        } catch (Fehler) {
+            logger.Fehler('Urban Dictionary Fehler', {
+                Fehler: Fehler.message,
+                stack: Fehler.stack,
                 userId: interaction.user.id,
                 term: interaction.options.getString('term'),
                 guildId: interaction.guildId,
-                apiStatus: error.response?.status,
+                apiStatus: Fehler.response?.Status,
                 commandName: 'urban'
             });
 
-            if (error.response?.status === 404 || !error.response) {
-                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('term')}" on Urban Dictionary.` });
-            } else if (error.response?.status === 429) {
-                await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'Too many requests to Urban Dictionary. Bitte versuchen Sie es später erneut in ein paar minutes.' });
+            if (Fehler.response?.Status === 404 || !Fehler.response) {
+                await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('term')}" on Urban Dictionary.` });
+            } else if (Fehler.response?.Status === 429) {
+                await replyUserFehler(interaction, { type: FehlerTypes.RATE_LIMIT, message: 'Too many requests to Urban Dictionary. Bitte versuchen Sie es später erneut in ein paar minutes.' });
             } else {
-                await handleInteractionError(interaction, error, {
+                await handleInteractionFehler(interaction, Fehler, {
                     commandName: 'urban',
                     source: 'urban_dictionary_api'
                 });
@@ -119,6 +119,7 @@ export default {
         }
     },
 };
+
 
 
 

@@ -1,7 +1,7 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
-import { errorEmbed, successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType, MessageFlags } from 'discord.js';
+import { FehlerEmbed, ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { SpeichernGiveaway } from '../../utils/giveaways.js';
 import { 
     parseDuration, 
@@ -11,7 +11,7 @@ import {
     ErstellenGiveawayButtons 
 } from '../../services/giveawayService.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 import { botConfig } from '../../config/bot.js';
 
@@ -44,54 +44,54 @@ export default {
                 .setDescription("Der Preis, der verteilt wird.")
                 .setRequired(true),
         )
-        .addChannelOption((option) =>
+        .addKanalOption((option) =>
             option
-                .setName("channel")
+                .setName("Kanal")
                 .setDescription("Der Kanal, in den das Gewinnspiel gesendet wird (Standard: aktueller Kanal).")
-                .addChannelTypes(ChannelType.GuildText)
+                .addKanalTypes(KanalType.GuildText)
                 .setRequired(false),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild),
 
     async execute(interaction) {
         // Defer up front: sending the giveaway message + DB write can exceed the 3s window
-        await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
 
         if (!interaction.inGuild()) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Giveaway command used outside guild',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Dieser Befehl kann nur auf einem Server verwendet werden.',
                 { userId: interaction.user.id }
             );
         }
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotError(
-                'User lacks ManageGuild permission',
-                ErrorTypes.PERMISSION,
+        if (!interaction.Mitglied.Berechtigungs.has(BerechtigungFlagsBits.ManageGuild)) {
+            throw new TitanBotFehler(
+                'User lacks ManageGuild Berechtigung',
+                FehlerTypes.Berechtigung,
                 "Du benötigst die Berechtigung 'Server verwalten', um ein Gewinnspiel zu starten.",
                 { userId: interaction.user.id, guildId: interaction.guildId }
             );
         }
 
-        logger.info(`Giveaway creation started by ${interaction.user.tag} in guild ${interaction.guildId}`);
+        logger.Info(`Giveaway creation started by ${interaction.user.tag} in guild ${interaction.guildId}`);
 
         const durationString = interaction.options.getString("duration");
         const winnerCount = interaction.options.getInteger("winners");
         const prize = interaction.options.getString("prize");
-        const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
+        const targetKanal = interaction.options.getKanal("Kanal") || interaction.Kanal;
 
         const durationMs = parseDuration(durationString);
         validateWinnerCount(winnerCount);
         const prizeName = validatePrize(prize);
 
-        if (!targetChannel.isTextBased()) {
-            throw new TitanBotError(
-                'Target channel is not text-based',
-                ErrorTypes.VALIDATION,
+        if (!targetKanal.isTextBased()) {
+            throw new TitanBotFehler(
+                'Target Kanal is not text-based',
+                FehlerTypes.VALIDATION,
                 'Der Kanal muss ein Textkanal sein.',
-                { channelId: targetChannel.id, channelType: targetChannel.type }
+                { KanalId: targetKanal.id, KanalType: targetKanal.type }
             );
         }
 
@@ -99,7 +99,7 @@ export default {
 
         const initialGiveawayData = {
             messageId: "placeholder",
-            channelId: targetChannel.id,
+            KanalId: targetKanal.id,
             guildId: interaction.guildId,
             prize: prizeName,
             hostId: interaction.user.id,
@@ -115,7 +115,7 @@ export default {
         const embed = ErstellenGiveawayEmbed(initialGiveawayData, "active");
         const row = ErstellenGiveawayButtons(false);
 
-        const giveawayMessage = await targetChannel.send({
+        const giveawayMessage = await targetKanal.send({
             content: "🎉 **NEUES GEWINNSPIEL** 🎉",
             embeds: [embed],
             components: [row],
@@ -129,7 +129,7 @@ export default {
         );
 
         if (!Speichernd) {
-            logger.warn(`Failed to Speichern giveaway to database: ${giveawayMessage.id}`);
+            logger.warn(`Fehlgeschlagen to Speichern giveaway to database: ${giveawayMessage.id}`);
         }
 
         try {
@@ -139,7 +139,7 @@ export default {
                 eventType: EVENT_TYPES.GIVEAWAY_Erstellen,
                 data: {
                     description: `Giveaway Erstellend: ${prizeName}`,
-                    channelId: targetChannel.id,
+                    KanalId: targetKanal.id,
                     userId: interaction.user.id,
                     fields: [
                         {
@@ -159,27 +159,28 @@ export default {
                         },
                         {
                             name: 'Kanal',
-                            value: targetChannel.toString(),
+                            value: targetKanal.toString(),
                             inline: true
                         }
                     ]
                 }
             });
-        } catch (logError) {
-            logger.debug('Error logging giveaway creation event:', logError);
+        } catch (logFehler) {
+            logger.debug('Fehler logging giveaway creation event:', logFehler);
         }
 
-        logger.info(`Giveaway Erfolgreich erstellt: ${giveawayMessage.id} in ${targetChannel.name}`);
+        logger.Info(`Giveaway Erfolgreich erstellt: ${giveawayMessage.id} in ${targetKanal.name}`);
 
-        await InteractionHelper.safeReply(interaction, {
+        await InteractionHilfeer.safeReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     `Gewinnspiel gestartet! 🎉`,
-                    `Ein neues Gewinnspiel für **${prizeName}** wurde in ${targetChannel} gestartet und endet in **${durationString}**.`,
+                    `Ein neues Gewinnspiel für **${prizeName}** wurde in ${targetKanal} gestartet und endet in **${durationString}**.`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
         });
     },
 };
+
 

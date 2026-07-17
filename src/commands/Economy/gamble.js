@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const BASE_WIN_CHANCE = 0.4;
 const CLOVER_WIN_BONUS = 0.1;
@@ -22,8 +22,8 @@ export default {
                 .setMinValue(1)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const userId = interaction.user.id;
@@ -41,18 +41,18 @@ export default {
                 const minutes = Math.floor(remaining / (1000 * 60));
                 const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Gamble cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Du musst dich abkühlen, bevor du wieder spielst. Warte **${minutes}m ${seconds}s**.`,
                     { remaining, cooldownType: 'gamble' }
                 );
             }
 
             if (userData.wallet < betAmount) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Insufficient cash for gamble",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     `Du hast nur $${userData.wallet.toLocaleString()} Bargeld, aber du versuchst zu wetten $${betAmount.toLocaleString()}.`,
                     { required: betAmount, current: userData.wallet }
                 );
@@ -86,14 +86,14 @@ export default {
                 // Net change: the bet is replaced by the payout (bet was at stake, not pre-deducted)
                 cashChange = amountWon - betAmount;
 
-                resultEmbed = successEmbed(
+                resultEmbed = ErfolgEmbed(
                     "🎉 Du hast gewonnen!",
                     `Du hast erfolgreich gespielt und deine **$${betAmount.toLocaleString()}** Wette in **$${amountWon.toLocaleString()}** verwandelt!${cloverMessage}`,
                 );
             } else {
 cashChange = -betAmount;
 
-                resultEmbed = warningEmbed(
+                resultEmbed = WarnungEmbed(
                     "💔 Du hast verloren...",
                     `Die Würfel haben gegen dich gerollt. Du hast deine **$${betAmount.toLocaleString()}** Wette verloren.`,
                 );
@@ -126,7 +126,8 @@ userData.lastGamble = now;
                 });
             }
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [resultEmbed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [resultEmbed] });
     }, { command: 'gamble' })
 };
+
 

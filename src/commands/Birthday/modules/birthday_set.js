@@ -1,10 +1,10 @@
 ﻿import { EmbedBuilder } from 'discord.js';
 import { setBirthday } from '../../../services/birthdayService.js';
 
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 export default {
     async execute(interaction, config, client) {
-        await InteractionHelper.safeDefer(interaction);
+        await InteractionHilfeer.safeDefer(interaction);
 
         const month = interaction.options.getInteger("month");
         const day = interaction.options.getInteger("day");
@@ -18,8 +18,9 @@ export default {
             .setTitle('Geburtstag eingestellt!')
             .setDescription(`Dein Geburtstag wurde auf **${result.data.monthName} ${result.data.day}** eingestellt!`);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [embed]
         });
     }
 };
+

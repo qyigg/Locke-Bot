@@ -5,14 +5,14 @@ import { getLevelingConfig, getXpForLevel, getUserLevelData, SpeichernUserLevelD
 import { logEvent, EVENT_TYPES } from '../loggingService.js';
 import { formatLogLine } from '../../utils/logging/logEmbeds.js';
 import { Mutex } from '../../utils/mutex.js';
-import { wrapServiceBoundary } from '../../utils/errorHandler.js';
+import { wrapServiceBoundary } from '../../utils/FehlerHandler.js';
 
 /**
- * Award XP to a member. Returns null when XP is skipped (disabled/Ungültiger Betrag).
+ * Award XP to a Mitglied. Returns null when XP is skipped (disabled/Ungültiger Betrag).
  * Throws on storage or unexpected failures.
  */
-export const addXp = wrapServiceBoundary(async function addXp(client, guild, member, xpToAdd) {
-  const lockKey = `leveling:${guild.id}:${member.user.id}`;
+export const addXp = wrapServiceBoundary(async function addXp(client, guild, Mitglied, xpToAdd) {
+  const lockKey = `leveling:${guild.id}:${Mitglied.user.id}`;
   return await Mutex.runExclusive(lockKey, async () => {
     if (!xpToAdd || xpToAdd <= 0) {
       return null;
@@ -24,7 +24,7 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
       return null;
     }
 
-    const levelData = await getUserLevelData(client, guild.id, member.user.id);
+    const levelData = await getUserLevelData(client, guild.id, Mitglied.user.id);
 
     levelData.xp += xpToAdd;
     levelData.totalXp += xpToAdd;
@@ -40,16 +40,16 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
       didLevelUp = true;
       xpNeededForNächsteLevel = getXpForLevel(levelData.level);
 
-      logger.info(`🎉 ${member.user.tag} leveled up to level ${levelData.level} in ${guild.name}`);
+      logger.Info(`🎉 ${Mitglied.user.tag} leveled up to level ${levelData.level} in ${guild.name}`);
 
-      if (config.roleRewards && config.roleRewards[levelData.level]) {
-        await awardRoleReward(guild, member, config.roleRewards[levelData.level], levelData.level);
+      if (config.RolleRewards && config.RolleRewards[levelData.level]) {
+        await awardRolleReward(guild, Mitglied, config.RolleRewards[levelData.level], levelData.level);
       }
     }
 
     if (didLevelUp) {
       if (config.announceLevelUp) {
-        await sendLevelUpAnnouncement(guild, member, levelData, config);
+        await sendLevelUpAnnouncement(guild, Mitglied, levelData, config);
       }
 
       try {
@@ -60,20 +60,20 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
           data: {
             title: 'Level Up',
             lines: [
-              formatLogLine('Member', `${member.user.tag} (\`${member.user.id}\`)`),
+              formatLogLine('Mitglied', `${Mitglied.user.tag} (\`${Mitglied.user.id}\`)`),
               formatLogLine('New Level', levelData.level.toString()),
               formatLogLine('Levels Gained', (levelData.level - initialLevel).toString()),
               formatLogLine('Total XP', levelData.totalXp.toString()),
             ],
-            userId: member.user.id,
+            userId: Mitglied.user.id,
           },
         });
-      } catch (logError) {
-        logger.debug('Failed to log leveling event:', logError.message);
+      } catch (logFehler) {
+        logger.debug('Fehlgeschlagen to log leveling event:', logFehler.message);
       }
     }
 
-    await SpeichernUserLevelData(client, guild.id, member.user.id, levelData);
+    await SpeichernUserLevelData(client, guild.id, Mitglied.user.id, levelData);
 
     return {
       level: levelData.level,
@@ -86,58 +86,59 @@ export const addXp = wrapServiceBoundary(async function addXp(client, guild, mem
 }, {
   service: 'xpSystem',
   operation: 'addXp',
-  userMessage: 'Failed to award XP. Bitte versuchen Sie es später erneut.',
+  userMessage: 'Fehlgeschlagen to award XP. Bitte versuchen Sie es später erneut.',
 });
 
-async function awardRoleReward(guild, member, roleId, level) {
+async function awardRolleReward(guild, Mitglied, RolleId, level) {
   try {
-    const role = guild.roles.cache.get(roleId);
+    const Rolle = guild.Rollen.cache.get(RolleId);
 
-    if (!role) {
-      logger.warn(`Role ${roleId} Nicht gefunden for level ${level} reward in guild ${guild.id}`);
+    if (!Rolle) {
+      logger.warn(`Rolle ${RolleId} Nicht gefunden for level ${level} reward in guild ${guild.id}`);
       return;
     }
 
-    if (member.roles.cache.has(roleId)) {
+    if (Mitglied.Rollen.cache.has(RolleId)) {
       return;
     }
 
-    await member.roles.add(role, `Level ${level} reward`);
-    logger.info(`✅ Awarded role ${role.name} to ${member.user.tag} for reaching level ${level}`);
-  } catch (error) {
-    logger.error(`Failed to award role reward to ${member.user.id}:`, error);
+    await Mitglied.Rollen.add(Rolle, `Level ${level} reward`);
+    logger.Info(`✅ Awarded Rolle ${Rolle.name} to ${Mitglied.user.tag} for reaching level ${level}`);
+  } catch (Fehler) {
+    logger.Fehler(`Fehlgeschlagen to award Rolle reward to ${Mitglied.user.id}:`, Fehler);
   }
 }
 
-async function sendLevelUpAnnouncement(guild, member, levelData, config) {
+async function sendLevelUpAnnouncement(guild, Mitglied, levelData, config) {
   try {
-    const levelUpChannel = config.levelUpChannel
-      ? guild.channels.cache.get(config.levelUpChannel)
-      : guild.systemChannel;
+    const levelUpKanal = config.levelUpKanal
+      ? guild.Kanals.cache.get(config.levelUpKanal)
+      : guild.systemKanal;
 
-    if (!levelUpChannel || !levelUpChannel.isTextBased()) {
+    if (!levelUpKanal || !levelUpKanal.isTextBased()) {
       return;
     }
 
-    const permissions = levelUpChannel.permissionsFor(guild.members.me);
-    if (!permissions || !permissions.has(['SendMessages', 'EmbedLinks'])) {
-      logger.warn(`Missing permissions to send levelup message in ${levelUpChannel.id}`);
+    const Berechtigungs = levelUpKanal.BerechtigungsFor(guild.Mitglieds.me);
+    if (!Berechtigungs || !Berechtigungs.has(['SendMessages', 'EmbedLinks'])) {
+      logger.warn(`Missing Berechtigungs to send levelup message in ${levelUpKanal.id}`);
       return;
     }
 
     const message = config.levelUpMessage
-      .replace(/{user}/g, member.toString())
+      .replace(/{user}/g, Mitglied.toString())
       .replace(/{level}/g, levelData.level)
       .replace(/{xp}/g, levelData.xp)
       .replace(/{xpNeeded}/g, getXpForLevel(levelData.level + 1));
 
-    await levelUpChannel.send(message).catch(error => {
-      logger.error(`Failed to send level up message in channel ${levelUpChannel.id}:`, error);
+    await levelUpKanal.send(message).catch(Fehler => {
+      logger.Fehler(`Fehlgeschlagen to send level up message in Kanal ${levelUpKanal.id}:`, Fehler);
     });
-  } catch (error) {
-    logger.error('Error sending level up announcement:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler sending level up announcement:', Fehler);
   }
 }
+
 
 
 

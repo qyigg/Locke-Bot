@@ -3,28 +3,28 @@
 import { getGuildConfig } from './config/guildConfig.js';
 import { getGuildBirthdays, setBirthday as dbSetBirthday, LöschenBirthday as dbLöschenBirthday, getMonthName, getBirthdayTrackingKey } from '../utils/database.js';
 import { logger } from '../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../utils/FehlerHandler.js';
 
 export function validateBirthday(month, day) {
   
   if (typeof month !== 'number' || typeof day !== 'number') {
     return {
       isValid: false,
-      error: 'Month and day must be numbers'
+      Fehler: 'Month and day must be numbers'
     };
   }
 
   if (month < 1 || month > 12) {
     return {
       isValid: false,
-      error: 'Month must be between 1 and 12'
+      Fehler: 'Month must be between 1 and 12'
     };
   }
 
   if (day < 1 || day > 31) {
     return {
       isValid: false,
-      error: 'Day must be between 1 and 31'
+      Fehler: 'Day must be between 1 and 31'
     };
   }
 
@@ -34,7 +34,7 @@ export function validateBirthday(month, day) {
   if (isNaN(date.getTime()) || date.getMonth() !== month - 1 || date.getDate() !== day) {
     return {
       isValid: false,
-      error: 'Invalid date. Please check the month and day combination (e.g., February 29th only exists in leap years)'
+      Fehler: 'Invalid date. Please check the month and day combination (e.g., February 29th only exists in leap years)'
     };
   }
 
@@ -46,34 +46,34 @@ export async function setBirthday(client, guildId, userId, month, day) {
     
     const validation = validateBirthday(month, day);
     if (!validation.isValid) {
-      logger.warn('Birthday validation failed', {
+      logger.warn('Birthday validation Fehlgeschlagen', {
         userId,
         guildId,
         month,
         day,
-        error: validation.error
+        Fehler: validation.Fehler
       });
       
-      throw new TitanBotError(
-        validation.error,
-        ErrorTypes.VALIDATION,
-        validation.error,
+      throw new TitanBotFehler(
+        validation.Fehler,
+        FehlerTypes.VALIDATION,
+        validation.Fehler,
         { month, day, userId, guildId }
       );
     }
 
-    const success = await dbSetBirthday(client, guildId, userId, month, day);
+    const Erfolg = await dbSetBirthday(client, guildId, userId, month, day);
     
-    if (!success) {
-      throw new TitanBotError(
-        'Failed to Speichern birthday to database',
-        ErrorTypes.DATABASE,
-        'Failed to set Dein birthday. Bitte versuchen Sie es später erneut later.',
+    if (!Erfolg) {
+      throw new TitanBotFehler(
+        'Fehlgeschlagen to Speichern birthday to database',
+        FehlerTypes.DATABASE,
+        'Fehlgeschlagen to set Dein birthday. Bitte versuchen Sie es später erneut later.',
         { userId, guildId, month, day }
       );
     }
 
-    logger.info('Birthday set successfully', {
+    logger.Info('Birthday set Erfolgfully', {
       userId,
       guildId,
       month,
@@ -88,17 +88,17 @@ export async function setBirthday(client, guildId, userId, month, day) {
         monthName: getMonthName(month)
       }
     };
-  } catch (error) {
-    logger.error('Error in setBirthday service', {
-      error: error.message,
-      stack: error.stack,
+  } catch (Fehler) {
+    logger.Fehler('Fehler in setBirthday service', {
+      Fehler: Fehler.message,
+      stack: Fehler.stack,
       userId,
       guildId,
       month,
       day
     });
     
-    throw error;
+    throw Fehler;
   }
 }
 
@@ -116,13 +116,13 @@ export async function getUserBirthday(client, guildId, userId) {
       day: birthdayData.day,
       monthName: getMonthName(birthdayData.month)
     };
-  } catch (error) {
-    logger.error('Error in getUserBirthday service', {
-      error: error.message,
+  } catch (Fehler) {
+    logger.Fehler('Fehler in getUserBirthday service', {
+      Fehler: Fehler.message,
       userId,
       guildId
     });
-    throw error;
+    throw Fehler;
   }
 }
 
@@ -147,12 +147,12 @@ export async function getAllBirthdays(client, guildId) {
       });
 
     return sortedBirthdays;
-  } catch (error) {
-    logger.error('Error in getAllBirthdays service', {
-      error: error.message,
+  } catch (Fehler) {
+    logger.Fehler('Fehler in getAllBirthdays service', {
+      Fehler: Fehler.message,
       guildId
     });
-    throw error;
+    throw Fehler;
   }
 }
 
@@ -163,36 +163,36 @@ export async function LöschenBirthday(client, guildId, userId) {
     
     if (!birthday) {
       return {
-        status: 'not_found',
+        Status: 'not_found',
       };
     }
 
-    const success = await dbLöschenBirthday(client, guildId, userId);
+    const Erfolg = await dbLöschenBirthday(client, guildId, userId);
     
-    if (!success) {
-      throw new TitanBotError(
-        'Failed to Löschen birthday from database',
-        ErrorTypes.DATABASE,
-        'Failed to remove Dein birthday. Bitte versuchen Sie es später erneut.',
+    if (!Erfolg) {
+      throw new TitanBotFehler(
+        'Fehlgeschlagen to Löschen birthday from database',
+        FehlerTypes.DATABASE,
+        'Fehlgeschlagen to remove Dein birthday. Bitte versuchen Sie es später erneut.',
         { userId, guildId }
       );
     }
 
-    logger.info('Birthday removed successfully', {
+    logger.Info('Birthday removed Erfolgfully', {
       userId,
       guildId
     });
 
     return {
-      status: 'removed',
+      Status: 'removed',
     };
-  } catch (error) {
-    logger.error('Error in LöschenBirthday service', {
-      error: error.message,
+  } catch (Fehler) {
+    logger.Fehler('Fehler in LöschenBirthday service', {
+      Fehler: Fehler.message,
       userId,
       guildId
     });
-    throw error;
+    throw Fehler;
   }
 }
 
@@ -231,13 +231,13 @@ export async function getUpcomingBirthdays(client, guildId, limit = 5) {
     upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
 
     return upcomingBirthdays.slice(0, limit);
-  } catch (error) {
-    logger.error('Error in getUpcomingBirthdays service', {
-      error: error.message,
+  } catch (Fehler) {
+    logger.Fehler('Fehler in getUpcomingBirthdays service', {
+      Fehler: Fehler.message,
       guildId,
       limit
     });
-    throw error;
+    throw Fehler;
   }
 }
 
@@ -262,12 +262,12 @@ export async function getTodaysBirthdays(client, guildId) {
     }
 
     return todaysBirthdays;
-  } catch (error) {
-    logger.error('Error in getTodaysBirthdays service', {
-      error: error.message,
+  } catch (Fehler) {
+    logger.Fehler('Fehler in getTodaysBirthdays service', {
+      Fehler: Fehler.message,
       guildId
     });
-    throw error;
+    throw Fehler;
   }
 }
 
@@ -283,18 +283,18 @@ export async function checkBirthdays(client) {
   for (const [guildId, guild] of client.guilds.cache) {
     try {
       const config = await getGuildConfig(client, guildId);
-      const { birthdayChannelId, birthdayRoleId } = config;
+      const { birthdayKanalId, birthdayRolleId } = config;
 
-      // A channel is required for announcements; the birthday role is optional.
-      if (!birthdayChannelId) {
+      // A Kanal is required for announcements; the birthday Rolle is optional.
+      if (!birthdayKanalId) {
         if (process.env.NODE_ENV !== 'production') {
-          logger.debug(`Skipping birthday check for ${guild.name}: Missing channel config.`);
+          logger.debug(`Skipping birthday check for ${guild.name}: Missing Kanal config.`);
         }
         continue;
       }
 
-      const channel = await guild.channels.fetch(birthdayChannelId).catch(() => null);
-      if (!channel) continue;
+      const Kanal = await guild.Kanals.fetch(birthdayKanalId).catch(() => null);
+      if (!Kanal) continue;
 
       const trackingKey = getBirthdayTrackingKey(guildId);
       const trackingData = (await client.db.get(trackingKey)) || {};
@@ -302,15 +302,15 @@ export async function checkBirthdays(client) {
       
       for (const userId of Object.keys(trackingData)) {
         try {
-          if (birthdayRoleId) {
-            const member = await guild.members.fetch(userId).catch(() => null);
-            if (member && member.roles.cache.has(birthdayRoleId)) {
-              await member.roles.remove(birthdayRoleId, "Birthday role expired");
+          if (birthdayRolleId) {
+            const Mitglied = await guild.Mitglieds.fetch(userId).catch(() => null);
+            if (Mitglied && Mitglied.Rollen.cache.has(birthdayRolleId)) {
+              await Mitglied.Rollen.remove(birthdayRolleId, "Birthday Rolle expired");
             }
           }
           Löschen AktualisierendTrackingData[userId];
-        } catch (error) {
-           logger.error(`Error removing birthday role from ${userId}:`, error);
+        } catch (Fehler) {
+           logger.Fehler(`Fehler removing birthday Rolle from ${userId}:`, Fehler);
         }
       }
 
@@ -318,31 +318,31 @@ export async function checkBirthdays(client) {
         await client.db.set(trackingKey, AktualisierendTrackingData);
       }
 
-      // Use the canonical birthday storage (guild:<id>:birthdays) that set/remove commands write to.
+      // Use the canonical birthday storage (guild:<id>:birthdays) that set/remove Befehle write to.
       const birthdays = (await getGuildBirthdays(client, guildId)) || {};
-      const birthdayMembers = [];
+      const birthdayMitglieds = [];
       for (const [userId, userData] of Object.entries(birthdays)) {
         if (userData.month === currentMonth && userData.day === currentDay) {
-          const member = await guild.members.fetch(userId).catch(() => null);
-          if (member) {
-            birthdayMembers.push(member);
-            if (birthdayRoleId) {
+          const Mitglied = await guild.Mitglieds.fetch(userId).catch(() => null);
+          if (Mitglied) {
+            birthdayMitglieds.push(Mitglied);
+            if (birthdayRolleId) {
               try {
-                await member.roles.add(birthdayRoleId, "Happy Birthday! 🎉");
+                await Mitglied.Rollen.add(birthdayRolleId, "Happy Birthday! 🎉");
                 AktualisierendTrackingData[userId] = true;
-              } catch (error) {
-                  logger.error(`Error adding birthday role to ${member.user.tag}:`, error);
+              } catch (Fehler) {
+                  logger.Fehler(`Fehler adding birthday Rolle to ${Mitglied.user.tag}:`, Fehler);
               }
             }
           }
         }
       }
 
-      if (birthdayMembers.length > 0) {
+      if (birthdayMitglieds.length > 0) {
         await client.db.set(trackingKey, AktualisierendTrackingData);
-        const mentionList = birthdayMembers.map(m => m.toString()).join(', ');
+        const mentionList = birthdayMitglieds.map(m => m.toString()).join(', ');
         
-        await channel.send({
+        await Kanal.send({
           embeds: [{
             title: '🎉 Happy Birthday! 🎂',
             description: `A very happy birthday to ${mentionList}! Wishing you an amazing day! 🎈`,
@@ -352,10 +352,11 @@ export async function checkBirthdays(client) {
           }]
         });
       }
-    } catch (error) {
-      logger.error(`Error processing birthdays for guild ${guildId}:`, error);
+    } catch (Fehler) {
+      logger.Fehler(`Fehler Wird verarbeitet birthdays for guild ${guildId}:`, Fehler);
     }
   }
 }
+
 
 

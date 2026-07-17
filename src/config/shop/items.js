@@ -38,12 +38,12 @@ cooldown: 86400000,
         }
     },
     {
-        id: 'premium_role',
-        name: 'Premium Server Role',
+        id: 'premium_Rolle',
+        name: 'Premium Server Rolle',
         price: 15000,
-        description: 'A special role granting a fancy color and a 10% daily bonus.',
-        type: 'role',
-roleId: null,
+        description: 'A special Rolle granting a fancy color and a 10% daily bonus.',
+        type: 'Rolle',
+RolleId: null,
         effect: {
             type: 'daily_bonus',
             multiplier: 1.1
@@ -66,7 +66,7 @@ roleId: null,
         id: 'fishing_rod',
         name: '🎣 Fishing Rod',
         price: 5000,
-        description: 'Used for fishing commands',
+        description: 'Used for fishing Befehle',
         type: 'tool',
         durability: 100,
         effect: {
@@ -78,7 +78,7 @@ roleId: null,
         id: 'pickaxe',
         name: '⛏️ Pickaxe',
         price: 7500,
-        description: 'Used for mining commands',
+        description: 'Used for mining Befehle',
         type: 'tool',
         durability: 100,
         effect: {
@@ -190,15 +190,16 @@ export function validatePurchase(itemId, userData) {
         }
     }
 
-    if (item.type === 'role' && item.roleId) {
-        if (userData.roles?.includes(item.roleId)) {
+    if (item.type === 'Rolle' && item.RolleId) {
+        if (userData.Rollen?.includes(item.RolleId)) {
             return { 
                 valid: false, 
-                reason: `You already have the ${item.name} role` 
+                reason: `You already have the ${item.name} Rolle` 
             };
         }
     }
 
     return { valid: true };
 }
+
 

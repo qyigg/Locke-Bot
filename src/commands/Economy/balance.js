@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -16,35 +16,35 @@ export default {
                 .setRequired(false)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
 
         const userOption = interaction.options.getUser("user");
         const targetUser = userOption || interaction.user;
         const guildId = interaction.guildId;
 
-        logger.info(`[ECONOMY] Balance check - userOption: ${userOption?.id || 'null'}, targetUser: ${targetUser.id}, guildId: ${guildId}, isPrefix: ${!!interaction._commandStartTime}`);
+        logger.Info(`[ECONOMY] Balance check - userOption: ${userOption?.id || 'null'}, targetUser: ${targetUser.id}, guildId: ${guildId}, isPrefix: ${!!interaction._BefehletartTime}`);
 
         logger.debug(`[ECONOMY] Balance check for ${targetUser.id}`, { userId: targetUser.id, guildId });
 
         if (targetUser.bot) {
-            throw ErstellenError(
+            throw ErstellenFehler(
                 "Bot user queried for balance",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Bots haben keinen Wirtschaftskontostand."
             );
         }
 
         const userData = await getEconomyData(client, guildId, targetUser.id);
 
-        logger.info(`[ECONOMY] Economy data retrieved - userData:`, userData);
+        logger.Info(`[ECONOMY] Economy data retrieved - userData:`, userData);
 
         if (!userData) {
-            throw ErstellenError(
-                "Failed to load economy data",
-                ErrorTypes.DATABASE,
-                "Failed to load economy data. Bitte versuchen Sie es später erneut later.",
+            throw ErstellenFehler(
+                "Fehlgeschlagen to load economy data",
+                FehlerTypes.DATABASE,
+                "Fehlgeschlagen to load economy data. Bitte versuchen Sie es später erneut later.",
                 { userId: targetUser.id, guildId }
             );
         }
@@ -80,9 +80,10 @@ export default {
                     iconURL: interaction.user.displayAvatarURL(),
                 });
 
-            logger.info(`[ECONOMY] Balance retrieved`, { userId: targetUser.id, wallet, bank });
+            logger.Info(`[ECONOMY] Balance retrieved`, { userId: targetUser.id, wallet, bank });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'balance' })
 };
+
 

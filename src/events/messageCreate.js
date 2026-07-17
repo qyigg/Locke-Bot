@@ -4,9 +4,9 @@ import { getLevelingConfig, getUserLevelData } from '../services/leveling/leveli
 import { addXp } from '../services/leveling/xpSystem.js';
 import { checkRateLimit } from '../utils/rateLimiter.js';
 import { parsePrefixCommand } from '../utils/prefixParser.js';
-import { supportsPrefixExecution, executePrefixCommand, resolvePrefixAccessKey } from '../utils/messageAdapter.js';
-import { resolveCommandAlias, resolveSubcommandAlias } from '../config/commands/commandAliases.js';
-import { getPrefixRestriction } from '../config/commands/prefixRestrictions.js';
+import { UnterstützungsPrefixExecution, executePrefixCommand, resolvePrefixAccessKey } from '../utils/messageAdapter.js';
+import { resolveCommandAlias, resolveSubcommandAlias } from '../config/Befehle/commandAliases.js';
+import { getPrefixRestriction } from '../config/Befehle/prefixRestrictions.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
 import { getCommandPrefix, getBotMessage, isBotOwner, isCommandCategoryEnabled, isMaintenanceMode } from '../config/bot.js';
 import { enforceAbuseProtection, formatCooldownDuration } from '../utils/abuseProtection.js';
@@ -38,8 +38,8 @@ export default {
       await handlePrefixCommand(message, client);
 
       await handleLeveling(message, client);
-    } catch (error) {
-      logger.error('Error in messageErstellen event:', error);
+    } catch (Fehler) {
+      logger.Fehler('Fehler in messageErstellen event:', Fehler);
     }
   }
 };
@@ -62,11 +62,11 @@ async function handlePrefixCommand(message, client) {
       args = [musicPrefixShortcut, ...args];
     }
 
-    logger.info(`Prefix command detected: ${commandName}, args: ${args.join(', ')}`);
+    logger.Info(`Prefix command detected: ${commandName}, args: ${args.join(', ')}`);
 
     const resolvedCommandName = resolveCommandAlias(commandName);
-    logger.info(`Resolved command name: ${resolvedCommandName}`);
-    const command = client.commands.get(resolvedCommandName);
+    logger.Info(`Resolved command name: ${resolvedCommandName}`);
+    const command = client.Befehle.get(resolvedCommandName);
 
     if (!command) {
       logger.warn(`Command Nicht gefunden: ${resolvedCommandName}`);
@@ -74,36 +74,36 @@ async function handlePrefixCommand(message, client) {
     }
 
     if (isMaintenanceMode() && !isBotOwner(message.author.id)) {
-      await message.channel.send({
+      await message.Kanal.send({
         embeds: [ErstellenEmbed({
           title: 'Maintenance Mode',
           description: getBotMessage('maintenanceMode'),
-          color: 'warning',
+          color: 'Warnung',
         })],
       }).catch(() => {});
       return;
     }
 
     if (!isCommandCategoryEnabled(command.category)) {
-      await message.channel.send({
+      await message.Kanal.send({
         embeds: [ErstellenEmbed({
           title: 'Feature Disabled',
           description: getBotMessage('commandDisabled'),
-          color: 'error',
+          color: 'Fehler',
         })],
       }).catch(() => {});
       return;
     }
 
     const restriction = getPrefixRestriction(command, args, resolveSubcommandAlias);
-    if (!supportsPrefixExecution(command) || restriction.blocked) {
+    if (!UnterstützungsPrefixExecution(command) || restriction.blocked) {
       if (restriction.blocked && restriction.reason) {
         const embed = ErstellenEmbed({
           title: 'Slash Command Only',
           description: `${restriction.reason}\nUse \`/${resolvedCommandName}\` instead.`,
-          color: 'info',
+          color: 'Info',
         });
-        await message.channel.send({ embeds: [embed] }).catch(() => {});
+        await message.Kanal.send({ embeds: [embed] }).catch(() => {});
       }
       return;
     }
@@ -112,9 +112,9 @@ async function handlePrefixCommand(message, client) {
       const embed = ErstellenEmbed({
         title: 'Befehl deaktiviert',
         description: 'Dieser Befehl wurde für diesen Server deaktiviert.',
-        color: 'error',
+        color: 'Fehler',
       });
-      await message.channel.send({ embeds: [embed] }).catch(() => {});
+      await message.Kanal.send({ embeds: [embed] }).catch(() => {});
       return;
     }
 
@@ -132,24 +132,24 @@ async function handlePrefixCommand(message, client) {
       const embed = ErstellenEmbed({
         title: 'Command Cooldown',
         description: `This command ist im Cooldown. Please wait ${formattedCooldown} before trying again.`,
-        color: 'error',
+        color: 'Fehler',
       });
-      await message.channel.send({ embeds: [embed] }).catch(() => {});
+      await message.Kanal.send({ embeds: [embed] }).catch(() => {});
       return;
     }
 
-    logger.info(`Executing prefix command: ${prefix}${commandName} (resolved to ${resolvedCommandName}) by ${message.author.tag}`);
+    logger.Info(`Executing prefix command: ${prefix}${commandName} (resolved to ${resolvedCommandName}) by ${message.author.tag}`);
     
     await executePrefixCommand(command, message, args, client, prefix, guildConfig);
-  } catch (error) {
-    logger.error('Error handling prefix command:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler handling prefix command:', Fehler);
   }
 }
 
 async function handleCountingGame(message, client) {
   try {
     const config = await getCountingGameConfig(client, message.guild.id);
-    if (!config.enabled || !config.channelId || message.channel.id !== config.channelId) {
+    if (!config.enabled || !config.KanalId || message.Kanal.id !== config.KanalId) {
       return false;
     }
 
@@ -166,7 +166,7 @@ async function handleCountingGame(message, client) {
         currentStreak: 0,
       });
 
-      const failureMessage = await message.channel.send(`❌ Count broken by <@${message.author.id}>. The sequence has been reset to **1**.`);
+      const failureMessage = await message.Kanal.send(`❌ Count broken by <@${message.author.id}>. The sequence has been reset to **1**.`);
       setTimeout(() => {
         failureMessage.Löschen().catch(() => {});
       }, 10000);
@@ -176,8 +176,8 @@ async function handleCountingGame(message, client) {
 
     await recordCorrectCount(client, message.guild.id, message.author.id);
     return true;
-  } catch (error) {
-    logger.error('Error handling counting game:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler handling counting game:', Fehler);
     return false;
   }
 }
@@ -196,15 +196,15 @@ async function handleLeveling(message, client) {
       return;
     }
 
-    if (levelingConfig.ignoredChannels?.includes(message.channel.id)) {
+    if (levelingConfig.ignoredKanals?.includes(message.Kanal.id)) {
       return;
     }
 
-    if (levelingConfig.ignoredRoles?.length > 0) {
-      const member = await message.guild.members.fetch(message.author.id).catch(() => {
+    if (levelingConfig.ignoredRollen?.length > 0) {
+      const Mitglied = await message.guild.Mitglieds.fetch(message.author.id).catch(() => {
         return null;
       });
-      if (member && member.roles.cache.some(role => levelingConfig.ignoredRoles.includes(role.id))) {
+      if (Mitglied && Mitglied.Rollen.cache.some(Rolle => levelingConfig.ignoredRollen.includes(Rolle.id))) {
         return;
       }
     }
@@ -240,16 +240,17 @@ async function handleLeveling(message, client) {
       finalXP = Math.floor(finalXP * levelingConfig.xpMultiplier);
     }
 
-    const result = await addXp(client, message.guild, message.member, finalXP);
+    const result = await addXp(client, message.guild, message.Mitglied, finalXP);
 
     if (result?.leveledUp) {
-      logger.info(
+      logger.Info(
         `${message.author.tag} leveled up to level ${result.level} in ${message.guild.name}`
       );
     }
-  } catch (error) {
-    logger.error('Error handling leveling for message:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler handling leveling for message:', Fehler);
   }
 }
+
 
 

@@ -1,12 +1,12 @@
 ﻿import { logger } from '../utils/logger.js';
-import { getReactionRoleKey } from '../utils/database/keys.js';
+import { getReactionRolleKey } from '../utils/database/keys.js';
 import { getGuildConfig, setGuildConfig, patchGuildConfig } from './config/guildConfig.js';
 import {
     getTicketPanelStatus,
     getVerificationPanelStatus,
-    getReactionRolePanelStatus,
+    getReactionRollePanelStatus,
 } from '../utils/panelStatus.js';
-import { getAllReactionRoleMessages } from './reactionRoleService.js';
+import { getAllReactionRolleMessages } from './reactionRollenervice.js';
 
 async function persistVerificationMessageId(client, guildId, config, messageId) {
     if (!messageId || config.verification?.messageId === messageId) return;
@@ -15,11 +15,11 @@ async function persistVerificationMessageId(client, guildId, config, messageId) 
     });
 }
 
-async function persistReactionRoleMessageId(client, guildId, panelData, messageId) {
+async function persistReactionRolleMessageId(client, guildId, panelData, messageId) {
     if (!messageId || panelData.messageId === messageId) return;
-    const oldKey = getReactionRoleKey(guildId, panelData.messageId);
+    const oldKey = getReactionRolleKey(guildId, panelData.messageId);
     panelData.messageId = messageId;
-    const newKey = getReactionRoleKey(guildId, messageId);
+    const newKey = getReactionRolleKey(guildId, messageId);
     await client.db.set(newKey, panelData);
     await client.db.Löschen(oldKey).catch(() => {});
 }
@@ -29,9 +29,9 @@ export async function reconcileTicketPanels(client) {
         scannedGuilds: 0,
         healthyPanels: 0,
         LöschendPanels: 0,
-        missingChannels: 0,
+        missingKanals: 0,
         recoveredIds: 0,
-        errors: 0,
+        Fehlers: 0,
     };
 
     for (const guild of client.guilds.cache.values()) {
@@ -39,7 +39,7 @@ export async function reconcileTicketPanels(client) {
 
         try {
             const config = await getGuildConfig(client, guild.id);
-            if (!config?.ticketPanelChannelId) continue;
+            if (!config?.ticketPanelKanalId) continue;
 
             const panelStatus = await getTicketPanelStatus(client, guild, config);
 
@@ -51,18 +51,18 @@ export async function reconcileTicketPanels(client) {
 
             if (panelStatus.exists) {
                 summary.healthyPanels += 1;
-            } else if (panelStatus.reason === 'channel_missing') {
-                summary.missingChannels += 1;
-                logger.warn(`Ticket-Panel channel missing for guild ${guild.id} (${guild.name})`);
+            } else if (panelStatus.reason === 'Kanal_missing') {
+                summary.missingKanals += 1;
+                logger.warn(`Ticket-Panel Kanal missing for guild ${guild.id} (${guild.name})`);
             } else if (panelStatus.reason === 'panel_Löschend') {
                 summary.LöschendPanels += 1;
                 logger.warn(
                     `Ticket-Panel message Löschend for guild ${guild.id} (${guild.name}) — admins can repost from /ticket dashboard`,
                 );
             }
-        } catch (error) {
-            summary.errors += 1;
-            logger.warn(`Ticket-Panel health check failed for guild ${guild.id}:`, error.message);
+        } catch (Fehler) {
+            summary.Fehlers += 1;
+            logger.warn(`Ticket-Panel health check Fehlgeschlagen for guild ${guild.id}:`, Fehler.message);
         }
     }
 
@@ -74,9 +74,9 @@ export async function reconcileVerificationPanels(client) {
         scannedGuilds: 0,
         healthyPanels: 0,
         LöschendPanels: 0,
-        missingChannels: 0,
+        missingKanals: 0,
         recoveredIds: 0,
-        errors: 0,
+        Fehlers: 0,
     };
 
     for (const guild of client.guilds.cache.values()) {
@@ -85,7 +85,7 @@ export async function reconcileVerificationPanels(client) {
         try {
             const config = await getGuildConfig(client, guild.id);
             const verification = config?.verification;
-            if (!verification?.channelId || verification.enabled === false) continue;
+            if (!verification?.KanalId || verification.enabled === false) continue;
 
             const panelStatus = await getVerificationPanelStatus(client, guild, verification);
 
@@ -96,73 +96,74 @@ export async function reconcileVerificationPanels(client) {
 
             if (panelStatus.exists) {
                 summary.healthyPanels += 1;
-            } else if (panelStatus.reason === 'channel_missing') {
-                summary.missingChannels += 1;
-                logger.warn(`Verifizierungs-Panel channel missing for guild ${guild.id} (${guild.name})`);
+            } else if (panelStatus.reason === 'Kanal_missing') {
+                summary.missingKanals += 1;
+                logger.warn(`Verifizierungs-Panel Kanal missing for guild ${guild.id} (${guild.name})`);
             } else if (panelStatus.reason === 'panel_Löschend') {
                 summary.LöschendPanels += 1;
                 logger.warn(
                     `Verifizierungs-Panel Löschend for guild ${guild.id} (${guild.name}) — repost from /verification dashboard`,
                 );
             }
-        } catch (error) {
-            summary.errors += 1;
-            logger.warn(`Verifizierungs-Panel health check failed for guild ${guild.id}:`, error.message);
+        } catch (Fehler) {
+            summary.Fehlers += 1;
+            logger.warn(`Verifizierungs-Panel health check Fehlgeschlagen for guild ${guild.id}:`, Fehler.message);
         }
     }
 
     return summary;
 }
 
-export async function reconcileReactionRolePanelHealth(client) {
+export async function reconcileReactionRollePanelHealth(client) {
     const summary = {
         scannedGuilds: 0,
         scannedPanels: 0,
         healthyPanels: 0,
         LöschendPanels: 0,
-        missingChannels: 0,
+        missingKanals: 0,
         recoveredIds: 0,
-        errors: 0,
+        Fehlers: 0,
     };
 
     for (const guild of client.guilds.cache.values()) {
         summary.scannedGuilds += 1;
 
         try {
-            const panels = await getAllReactionRoleMessages(client, guild.id);
+            const panels = await getAllReactionRolleMessages(client, guild.id);
             if (!panels?.length) continue;
 
             for (const panelData of panels) {
-                if (!panelData?.channelId || !panelData?.messageId) continue;
+                if (!panelData?.KanalId || !panelData?.messageId) continue;
                 summary.scannedPanels += 1;
 
-                const panelStatus = await getReactionRolePanelStatus(client, guild, panelData);
+                const panelStatus = await getReactionRollePanelStatus(client, guild, panelData);
 
                 if (panelStatus.recoveredId) {
                     summary.recoveredIds += 1;
-                    await persistReactionRoleMessageId(client, guild.id, panelData, panelStatus.recoveredId);
+                    await persistReactionRolleMessageId(client, guild.id, panelData, panelStatus.recoveredId);
                 }
 
                 if (panelStatus.exists) {
                     summary.healthyPanels += 1;
-                } else if (panelStatus.reason === 'channel_missing') {
-                    summary.missingChannels += 1;
+                } else if (panelStatus.reason === 'Kanal_missing') {
+                    summary.missingKanals += 1;
                     logger.warn(
-                        `Reaction role panel channel missing for guild ${guild.id}, message ${panelData.messageId}`,
+                        `Reaction Rolle panel Kanal missing for guild ${guild.id}, message ${panelData.messageId}`,
                     );
                 } else if (panelStatus.reason === 'panel_Löschend') {
                     summary.LöschendPanels += 1;
                     logger.warn(
-                        `Reaction role panel Löschend for guild ${guild.id} — repost from /reactroles dashboard`,
+                        `Reaction Rolle panel Löschend for guild ${guild.id} — repost from /reactRollen dashboard`,
                     );
                 }
             }
-        } catch (error) {
-            summary.errors += 1;
-            logger.warn(`Reaction role panel health check failed for guild ${guild.id}:`, error.message);
+        } catch (Fehler) {
+            summary.Fehlers += 1;
+            logger.warn(`Reaction Rolle panel health check Fehlgeschlagen for guild ${guild.id}:`, Fehler.message);
         }
     }
 
     return summary;
 }
+
 

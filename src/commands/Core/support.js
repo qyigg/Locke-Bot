@@ -2,40 +2,41 @@
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-const SUPPORT_SERVER_URL = "https://discord.gg/QnWNz2dKCE";
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+const Unterstützung_SERVER_URL = "https://discord.gg/QnWNz2dKCE";
 export default {
     data: new SlashCommandBuilder()
-    .setName("support")
-    .setDescription("Hol dir einen Link zum Support-Server"),
+    .setName("Unterstützung")
+    .setDescription("Hol dir einen Link zum Unterstützung-Server"),
 
   async execute(interaction) {
     try {
-      const supportButton = new ButtonBuilder()
-        .setLabel("Support-Server beitreten")
+      const UnterstützungButton = new ButtonBuilder()
+        .setLabel("Unterstützung-Server beitreten")
         .setStyle(ButtonStyle.Link)
-        .setURL(SUPPORT_SERVER_URL);
+        .setURL(Unterstützung_SERVER_URL);
 
-      const actionRow = new ActionRowBuilder().addComponents(supportButton);
+      const actionRow = new ActionRowBuilder().addComponents(UnterstützungButton);
 
-      await InteractionHelper.safeReply(interaction, {
+      await InteractionHilfeer.safeReply(interaction, {
         embeds: [
-          ErstellenEmbed({ title: "Brauchst du Hilfe?", description: "Tritt unserem offiziellen Support-Server bei für Hilfe, Fehlerberichte oder Funktionsvorschläge. Wenn du diesen Bot anpasst, denke daran, den Link im Code zu ändern!" }),
+          ErstellenEmbed({ title: "Brauchst du Hilfe?", description: "Tritt unserem offiziellen Unterstützung-Server bei für Hilfe, Fehlerberichte oder Funktionsvorschläge. Wenn du diesen Bot anpasst, denke daran, den Link im Code zu ändern!" }),
         ],
         components: [actionRow],
         flags: MessageFlags.Ephemeral,
       });
-    } catch (error) {
-      logger.error('Support-Befehlsfehler:', error);
+    } catch (Fehler) {
+      logger.Fehler('Unterstützung-Befehlsfehler:', Fehler);
       
       try {
-        return await InteractionHelper.safeReply(interaction, {
-          embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Support-Informationen nicht anzeigen.', color: 'error' })],
+        return await InteractionHilfeer.safeReply(interaction, {
+          embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Unterstützung-Informationen nicht anzeigen.', color: 'Fehler' })],
           flags: MessageFlags.Ephemeral,
         });
-      } catch (replyError) {
-        logger.error('Fehler beim Senden der Fehlerantwort:', replyError);
+      } catch (replyFehler) {
+        logger.Fehler('Fehler beim Senden der Fehlerantwort:', replyFehler);
       }
     }
   },
 };
+

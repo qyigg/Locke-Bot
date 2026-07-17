@@ -1,4 +1,4 @@
-// helpers.js
+﻿// Hilfeers.js
 
 import { BotConfig } from "../config/bot.js";
 
@@ -19,3 +19,4 @@ export function getPriorityMap() {
 }
 
 export const PRIORITY_MAP = getPriorityMap();
+

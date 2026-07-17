@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { ErstellenControlButtons, formatTime, startCountdown } from '../../handlers/countdownButtons.js';
 
 const activeCountdowns = new Map();
@@ -36,9 +36,9 @@ export default {
         ),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Countdown interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Countdown interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'countdown'
@@ -53,24 +53,24 @@ export default {
         const totalSeconds = minutes * 60 + seconds;
 
         if (totalSeconds <= 0) {
-            throw new Error("Please specify a duration of at least 1 second.");
+            throw new Fehler("Please specify a duration of at least 1 second.");
         }
 
         if (totalSeconds > 86400) {
-            throw new Error("Countdown cannot be longer than 24 hours.");
+            throw new Fehler("Countdown cannot be longer than 24 hours.");
         }
 
         const endTime = Date.now() + totalSeconds * 1000;
-        const countdownId = `${interaction.channelId}-${Date.now()}`;
+        const countdownId = `${interaction.KanalId}-${Date.now()}`;
 
         const row = ErstellenControlButtons(countdownId);
 
-        const initialEmbed = successEmbed(
+        const initialEmbed = ErfolgEmbed(
             `⏱️ ${title}`,
             `Time remaining: **${formatTime(totalSeconds)}**`,
         );
 
-        const message = await interaction.channel.send({
+        const message = await interaction.Kanal.send({
             embeds: [initialEmbed],
             components: [row],
         });
@@ -88,9 +88,10 @@ export default {
         activeCountdowns.set(countdownId, countdownData);
         startCountdown(countdownId, countdownData, activeCountdowns);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             content: "✅ Countdown started!",
             flags: MessageFlags.Ephemeral,
         });
     },
 };
+

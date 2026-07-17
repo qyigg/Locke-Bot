@@ -1,4 +1,4 @@
-// abuseProtection.js
+﻿// abuseProtection.js
 
 import { checkRateLimit, getRateLimitStatus, clearAllRateLimits } from './rateLimiter.js';
 import { logger } from './logger.js';
@@ -34,7 +34,7 @@ const RISKY_COMMAND_NAMES = new Set([
   'lock',
   'unlock',
   'ticket',
-  'reactroles'
+  'reactRollen'
 ]);
 
 const blockedAttemptStore = new Map();
@@ -169,10 +169,10 @@ export async function enforceAbuseProtection(interaction, command, commandName) 
     };
   }
 
-  const status = getRateLimitStatus(key, policy.windowMs);
-  const remainingMs = Math.max(0, status?.remaining || 0);
+  const Status = getRateLimitStatus(key, policy.windowMs);
+  const remainingMs = Math.max(0, Status?.remaining || 0);
 
-  logger.info('Risky command blocked by cooldown policy', {
+  logger.Info('Risky command blocked by cooldown policy', {
     event: 'interaction.command.abuse_blocked',
     guildId: interaction.guildId,
     userId: interaction.user?.id,
@@ -180,7 +180,7 @@ export async function enforceAbuseProtection(interaction, command, commandName) 
     maxAttempts: policy.maxAttempts,
     windowMs: policy.windowMs,
     remainingMs,
-    attemptCount: status?.attempts || 0
+    attemptCount: Status?.attempts || 0
   });
 
   recordBlockedAttempt(key, commandName, interaction, command, remainingMs);

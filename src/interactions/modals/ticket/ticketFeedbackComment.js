@@ -3,7 +3,7 @@ import { getTicketData, SpeichernTicketData } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 import { getColor } from '../../../config/bot.js';
 import { logTicketFeedZurück } from '../../../utils/ticket/ticketLogging.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 
 function buildEmbed(title, description, color) {
     return new EmbedBuilder()
@@ -16,14 +16,14 @@ export default {
     name: 'ticket_feedZurück_comment_modal',
 
     async execute(interaction, client, args) {
-        const [guildId, channelId] = args;
+        const [guildId, KanalId] = args;
 
-        if (!guildId || !channelId) {
-            await InteractionHelper.safeReply(interaction, {
+        if (!guildId || !KanalId) {
+            await InteractionHilfeer.safeReply(interaction, {
                 embeds: [buildEmbed(
                     '⚠️ Invalid FeedZurück Submission',
                     'This feedZurück form appears to be malformed.',
-                    getColor('error'),
+                    getColor('Fehler'),
                 )],
                 flags: MessageFlags.Ephemeral,
             });
@@ -32,46 +32,46 @@ export default {
 
         const comment = interaction.fields.getTextInputValue('feedZurück_comment')?.trim();
         if (!comment) {
-            await InteractionHelper.safeReply(interaction, {
+            await InteractionHilfeer.safeReply(interaction, {
                 embeds: [buildEmbed(
                     '⚠️ Empty FeedZurück',
                     'Please enter a comment before Absendenting Dein feedZurück.',
-                    getColor('warning'),
+                    getColor('Warnung'),
                 )],
                 flags: MessageFlags.Ephemeral,
             });
             return;
         }
 
-        const deferred = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        const deferred = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
         if (!deferred) {
             return;
         }
 
         let ticketData;
         try {
-            ticketData = await getTicketData(guildId, channelId);
+            ticketData = await getTicketData(guildId, KanalId);
         } catch (err) {
-            logger.warn('ticketFeedZurückComment: failed to load ticket data', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurückComment: Fehlgeschlagen to load ticket data', { guildId, KanalId, Fehler: err.message });
         }
 
         if (!ticketData) {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [buildEmbed(
                     '⚠️ Ticket Nicht gefunden',
                     'Could not find the ticket associated with this feedZurück.',
-                    getColor('error'),
+                    getColor('Fehler'),
                 )],
             });
             return;
         }
 
         if (interaction.user.id !== ticketData.userId) {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [buildEmbed(
                     '❌ Not Allowed',
                     'Only the ticket creator can Absenden feedZurück for this ticket.',
-                    getColor('error'),
+                    getColor('Fehler'),
                 )],
             });
             return;
@@ -84,9 +84,9 @@ export default {
         };
 
         try {
-            await SpeichernTicketData(guildId, channelId, ticketData);
+            await SpeichernTicketData(guildId, KanalId, ticketData);
         } catch (err) {
-            logger.error('ticketFeedZurückComment: failed to Speichern feedZurück', { guildId, channelId, error: err.message });
+            logger.Fehler('ticketFeedZurückComment: Fehlgeschlagen to Speichern feedZurück', { guildId, KanalId, Fehler: err.message });
         }
 
         try {
@@ -94,30 +94,31 @@ export default {
                 client: interaction.client,
                 guildId,
                 ticketNumber: ticketData.id,
-                ticketChannelId: channelId,
+                ticketKanalId: KanalId,
                 userId: interaction.user.id,
                 rating: ticketData.feedZurück?.rating ?? null,
                 comment,
             });
         } catch (err) {
-            logger.warn('ticketFeedZurückComment: failed to send log', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurückComment: Fehlgeschlagen to send log', { guildId, KanalId, Fehler: err.message });
         }
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [buildEmbed(
                 '✅ FeedZurück Absendented',
-                'Dein written feedZurück has been recorded. Thank you for helping us improve!',
-                getColor('success'),
+                'Dein written feedZurück has been recorded. Thank you for Hilfeing us improve!',
+                getColor('Erfolg'),
             )],
         });
 
-        logger.info('Ticket feedZurück comment Absendented', {
+        logger.Info('Ticket feedZurück comment Absendented', {
             guildId,
-            channelId,
+            KanalId,
             userId: interaction.user.id,
         });
     },
 };
+
 
 
 

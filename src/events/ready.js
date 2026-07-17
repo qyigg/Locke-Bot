@@ -1,9 +1,9 @@
 ﻿import { Events } from "discord.js";
 import { logger, startupLog } from "../utils/logger.js";
 import config from "../config/application.js";
-import { reconcileReactionRoleMessages } from "../services/reactionRoleService.js";
-import { reconcileTicketPanels, reconcileVerificationPanels, reconcileReactionRolePanelHealth } from "../services/panelHealthService.js";
-import { reconcileLevelRoles } from "../services/leveling/levelRoleSyncService.js";
+import { reconcileReactionRolleMessages } from "../services/reactionRollenervice.js";
+import { reconcileTicketPanels, reconcileVerificationPanels, reconcileReactionRollePanelHealth } from "../services/panelHealthService.js";
+import { reconcileLevelRollen } from "../services/leveling/levelRollenyncService.js";
 import { initRiffyAfterReady } from "../services/music/riffySetup.js";
 
 export default {
@@ -16,39 +16,40 @@ export default {
 
       startupLog(`Ready! Logged in as ${client.user.tag}`);
       startupLog(`Serving ${client.guilds.cache.size} guild(s)`);
-      startupLog(`Geladen ${client.commands.size} commands`);
+      startupLog(`Geladen ${client.Befehle.size} Befehle`);
 
       if (client.config?.features?.music) {
         initRiffyAfterReady(client);
       }
 
-      const reconciliationSummary = await reconcileReactionRoleMessages(client);
+      const reconciliationSummary = await reconcileReactionRolleMessages(client);
       startupLog(
-        `Reaction role reconciliation: scanned ${reconciliationSummary.scannedMessages}, removed ${reconciliationSummary.removedMessages}, errors ${reconciliationSummary.errors}`
+        `Reaction Rolle reconciliation: scanned ${reconciliationSummary.scannedMessages}, removed ${reconciliationSummary.removedMessages}, Fehlers ${reconciliationSummary.Fehlers}`
       );
 
       const ticketPanelSummary = await reconcileTicketPanels(client);
       startupLog(
-        `Ticket-Panel health: scanned ${ticketPanelSummary.scannedGuilds} guilds, healthy ${ticketPanelSummary.healthyPanels}, Löschend ${ticketPanelSummary.LöschendPanels}, missing channel ${ticketPanelSummary.missingChannels}, recovered ${ticketPanelSummary.recoveredIds}, errors ${ticketPanelSummary.errors}`
+        `Ticket-Panel health: scanned ${ticketPanelSummary.scannedGuilds} guilds, healthy ${ticketPanelSummary.healthyPanels}, Löschend ${ticketPanelSummary.LöschendPanels}, missing Kanal ${ticketPanelSummary.missingKanals}, recovered ${ticketPanelSummary.recoveredIds}, Fehlers ${ticketPanelSummary.Fehlers}`
       );
 
       const verificationPanelSummary = await reconcileVerificationPanels(client);
       startupLog(
-        `Verifizierungs-Panel health: scanned ${verificationPanelSummary.scannedGuilds} guilds, healthy ${verificationPanelSummary.healthyPanels}, Löschend ${verificationPanelSummary.LöschendPanels}, missing channel ${verificationPanelSummary.missingChannels}, recovered ${verificationPanelSummary.recoveredIds}, errors ${verificationPanelSummary.errors}`
+        `Verifizierungs-Panel health: scanned ${verificationPanelSummary.scannedGuilds} guilds, healthy ${verificationPanelSummary.healthyPanels}, Löschend ${verificationPanelSummary.LöschendPanels}, missing Kanal ${verificationPanelSummary.missingKanals}, recovered ${verificationPanelSummary.recoveredIds}, Fehlers ${verificationPanelSummary.Fehlers}`
       );
 
-      const reactionRolePanelSummary = await reconcileReactionRolePanelHealth(client);
+      const reactionRollePanelSummary = await reconcileReactionRollePanelHealth(client);
       startupLog(
-        `Reaction role panel health: scanned ${reactionRolePanelSummary.scannedPanels} panels, healthy ${reactionRolePanelSummary.healthyPanels}, Löschend ${reactionRolePanelSummary.LöschendPanels}, missing channel ${reactionRolePanelSummary.missingChannels}, recovered ${reactionRolePanelSummary.recoveredIds}, errors ${reactionRolePanelSummary.errors}`
+        `Reaction Rolle panel health: scanned ${reactionRollePanelSummary.scannedPanels} panels, healthy ${reactionRollePanelSummary.healthyPanels}, Löschend ${reactionRollePanelSummary.LöschendPanels}, missing Kanal ${reactionRollePanelSummary.missingKanals}, recovered ${reactionRollePanelSummary.recoveredIds}, Fehlers ${reactionRollePanelSummary.Fehlers}`
       );
 
-      const levelRoleSummary = await reconcileLevelRoles(client);
+      const levelRollenummary = await reconcileLevelRollen(client);
       startupLog(
-        `Level role sync: scanned ${levelRoleSummary.scannedGuilds} guilds, pruned ${levelRoleSummary.prunedRewardEntries} stale rewards, re-awarded ${levelRoleSummary.rolesReAwarded} roles, errors ${levelRoleSummary.errors}`
+        `Level Rolle sync: scanned ${levelRollenummary.scannedGuilds} guilds, pruned ${levelRollenummary.prunedRewardEntries} stale rewards, re-awarded ${levelRollenummary.RollenReAwarded} Rollen, Fehlers ${levelRollenummary.Fehlers}`
       );
-    } catch (error) {
-      logger.error("Error in ready event:", error);
+    } catch (Fehler) {
+      logger.Fehler("Fehler in ready event:", Fehler);
     }
   },
 };
+
 

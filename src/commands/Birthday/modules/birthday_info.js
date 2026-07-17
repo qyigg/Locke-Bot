@@ -2,10 +2,10 @@
 import { getUserBirthday } from '../../../services/birthdayService.js';
 import { logger } from '../../../utils/logger.js';
 
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 export default {
     async execute(interaction, config, client) {
-        await InteractionHelper.safeDefer(interaction);
+        await InteractionHilfeer.safeDefer(interaction);
 
         const targetUser = interaction.options.getUser("user") || interaction.user;
         const userId = targetUser.id;
@@ -20,7 +20,7 @@ export default {
                 .setDescription(targetUser.id === interaction.user.id 
                     ? "Du hast deinen Geburtstag noch nicht eingestellt. Verwende `/geburtstag set` um ihn hinzuzufügen!"
                     : `${targetUser.username} hat seinen Geburtstag noch nicht eingestellt.`);
-            return await InteractionHelper.safeBearbeitenReply(interaction, {
+            return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [embed]
             });
         }
@@ -30,15 +30,16 @@ export default {
             .setTitle('Geburtstagsangaben')
             .setDescription(`**Datum:** ${birthdayData.monthName} ${birthdayData.day}\n**Benutzer:** ${targetUser.toString()}`);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [embed]
         });
 
-        logger.info('Birthday info retrieved successfully', {
+        logger.Info('Birthday Info retrieved Erfolgfully', {
             userId: interaction.user.id,
             targetUserId: targetUser.id,
             guildId,
-            commandName: 'birthday_info'
+            commandName: 'birthday_Info'
         });
     }
 };
+

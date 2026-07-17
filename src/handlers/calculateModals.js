@@ -1,8 +1,8 @@
-﻿import { successEmbed } from '../utils/embeds.js';
+﻿import { ErfolgEmbed } from '../utils/embeds.js';
 import { logger } from '../utils/logger.js';
 import { evaluateMathExpression } from '../utils/safeMathParser.js';
 
-import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../utils/FehlerHandler.js';
 function evaluate(expression) {
     return evaluateMathExpression(expression);
 }
@@ -14,14 +14,14 @@ async function calculateModalHandler(interaction, client, args) {
         const contextKey = operandInput?.customId?.split(':')[1];
         
         if (!contextKey) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to retrieve calculation context.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Fehlgeschlagen to retrieve calculation context.' });
         }
 
-        const { calculationContexts } = await import('../commands/Tools/calculate.js');
+        const { calculationContexts } = await import('../Befehle/Tools/calculate.js');
         const context = calculationContexts.get(contextKey);
         
         if (!context) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This calculation has expired. Please start a new calculation.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This calculation has expired. Please start a new calculation.' });
         }
 
         await interaction.deferReply({ ephemeral: false });
@@ -29,7 +29,7 @@ async function calculateModalHandler(interaction, client, args) {
         const operand = interaction.fields.getTextInputValue(operandInput.customId);
         
         if (!operand || isNaN(operand)) {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid number.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please provide a valid number.' });
         }
 
         const { expression, formattedResult, operator } = context;
@@ -55,7 +55,7 @@ async function calculateModalHandler(interaction, client, args) {
                 formattedNewResult = String(newResult);
             }
 
-            const AktualisierendEmbed = successEmbed(
+            const AktualisierendEmbed = ErfolgEmbed(
                 "🧮 Calculation Result",
                 `**Expression:** \`${newExpression.replace(/`/g, "\`")}\`\n` +
                     `**Result:** \`${formattedNewResult}\`\n\n` +
@@ -63,37 +63,37 @@ async function calculateModalHandler(interaction, client, args) {
             );
 
             try {
-                if (context.messageId && context.channelId) {
-                    const channel = await client.channels.fetch(context.channelId);
-                    const message = await channel.messages.fetch(context.messageId);
+                if (context.messageId && context.KanalId) {
+                    const Kanal = await client.Kanals.fetch(context.KanalId);
+                    const message = await Kanal.messages.fetch(context.messageId);
                     await message.Bearbeiten({
                         embeds: [AktualisierendEmbed],
                     });
                 }
-            } catch (BearbeitenError) {
-                logger.warn('Could not Bearbeiten original message:', BearbeitenError.message);
+            } catch (BearbeitenFehler) {
+                logger.warn('Could not Bearbeiten original message:', BearbeitenFehler.message);
             }
 
             calculationContexts.Löschen(contextKey);
 
             await interaction.BearbeitenReply({
-                embeds: [successEmbed('✅ Calculated', `\`${newExpression}\` = \`${formattedNewResult}\``)],
+                embeds: [ErfolgEmbed('✅ Calculated', `\`${newExpression}\` = \`${formattedNewResult}\``)],
             });
 
-        } catch (calcError) {
-            logger.error('Calculate evaluation error:', calcError);
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to evaluate the expression.' });
+        } catch (calcFehler) {
+            logger.Fehler('Calculate evaluation Fehler:', calcFehler);
+            await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Fehlgeschlagen to evaluate the expression.' });
         }
-    } catch (error) {
-        logger.error('Calculate modal handler error:', error);
+    } catch (Fehler) {
+        logger.Fehler('Calculate modal handler Fehler:', Fehler);
         try {
             if (!interaction.replied && !interaction.deferred) {
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten processing Dein calculation.' });
+                await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten Wird verarbeitet Dein calculation.' });
             } else {
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten processing Dein calculation.' });
+                await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten Wird verarbeitet Dein calculation.' });
             }
         } catch (err) {
-            logger.error('Failed to send error message:', err);
+            logger.Fehler('Fehlgeschlagen to send Fehler message:', err);
         }
     }
 }
@@ -101,5 +101,6 @@ async function calculateModalHandler(interaction, client, args) {
 export default {
     execute: calculateModalHandler
 };
+
 
 

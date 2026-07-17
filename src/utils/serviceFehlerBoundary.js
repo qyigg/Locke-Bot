@@ -1,2 +1,3 @@
-export * from './serviceErrorBoundary.js';
-export { default } from './serviceErrorBoundary.js';
+﻿export * from './serviceFehlerBoundary.js';
+export { default } from './serviceFehlerBoundary.js';
+

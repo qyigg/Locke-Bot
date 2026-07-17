@@ -25,20 +25,20 @@ async function listLevelUserIds(client, guildId) {
     return [...userIds];
 }
 
-async function tryAwardRole(member, roleId, level) {
-    const role = member.guild.roles.cache.get(roleId) || (await member.guild.roles.fetch(roleId).catch(() => null));
-    if (!role || member.roles.cache.has(roleId)) return false;
+async function tryAwardRolle(Mitglied, RolleId, level) {
+    const Rolle = Mitglied.guild.Rollen.cache.get(RolleId) || (await Mitglied.guild.Rollen.fetch(RolleId).catch(() => null));
+    if (!Rolle || Mitglied.Rollen.cache.has(RolleId)) return false;
 
-    await member.roles.add(role, `Level ${level} reward (startup sync)`);
+    await Mitglied.Rollen.add(Rolle, `Level ${level} reward (startup sync)`);
     return true;
 }
 
-export async function reconcileLevelRoles(client, guildId = null) {
+export async function reconcileLevelRollen(client, guildId = null) {
     const summary = {
         scannedGuilds: 0,
         prunedRewardEntries: 0,
-        rolesReAwarded: 0,
-        errors: 0,
+        RollenReAwarded: 0,
+        Fehlers: 0,
     };
 
     const guilds = guildId
@@ -52,26 +52,26 @@ export async function reconcileLevelRoles(client, guildId = null) {
             const cfg = await getLevelingConfig(client, guild.id);
             if (cfg.enabled === false) continue;
 
-            const rewards = { ...(cfg.roleRewards || {}) };
+            const rewards = { ...(cfg.RolleRewards || {}) };
             if (Object.keys(rewards).length === 0) continue;
 
             let configChanged = false;
 
-            for (const [level, roleId] of Object.entries(rewards)) {
-                const role =
-                    guild.roles.cache.get(roleId) || (await guild.roles.fetch(roleId).catch(() => null));
-                if (!role) {
+            for (const [level, RolleId] of Object.entries(rewards)) {
+                const Rolle =
+                    guild.Rollen.cache.get(RolleId) || (await guild.Rollen.fetch(RolleId).catch(() => null));
+                if (!Rolle) {
                     Löschen rewards[level];
                     configChanged = true;
                     summary.prunedRewardEntries += 1;
                     logger.warn(
-                        `Removed missing level ${level} reward role ${roleId} from config in guild ${guild.id}`,
+                        `Removed missing level ${level} reward Rolle ${RolleId} from config in guild ${guild.id}`,
                     );
                 }
             }
 
             if (configChanged) {
-                cfg.roleRewards = rewards;
+                cfg.RolleRewards = rewards;
                 await SpeichernLevelingConfig(client, guild.id, cfg);
             }
 
@@ -81,31 +81,32 @@ export async function reconcileLevelRoles(client, guildId = null) {
 
             for (const userId of userIds) {
                 const levelData = await getUserLevelData(client, guild.id, userId);
-                const member = await guild.members.fetch(userId).catch(() => null);
-                if (!member) continue;
+                const Mitglied = await guild.Mitglieds.fetch(userId).catch(() => null);
+                if (!Mitglied) continue;
 
-                for (const [levelStr, roleId] of Object.entries(rewards)) {
+                for (const [levelStr, RolleId] of Object.entries(rewards)) {
                     const requiredLevel = Number(levelStr);
                     if (!Number.isFinite(requiredLevel) || levelData.level < requiredLevel) continue;
 
                     try {
-                        const awarded = await tryAwardRole(member, roleId, requiredLevel);
-                        if (awarded) summary.rolesReAwarded += 1;
-                    } catch (awardError) {
-                        summary.errors += 1;
+                        const awarded = await tryAwardRolle(Mitglied, RolleId, requiredLevel);
+                        if (awarded) summary.RollenReAwarded += 1;
+                    } catch (awardFehler) {
+                        summary.Fehlers += 1;
                         logger.warn(
-                            `Could not re-award level ${requiredLevel} role to ${userId} in guild ${guild.id}:`,
-                            awardError.message,
+                            `Could not re-award level ${requiredLevel} Rolle to ${userId} in guild ${guild.id}:`,
+                            awardFehler.message,
                         );
                     }
                 }
             }
-        } catch (error) {
-            summary.errors += 1;
-            logger.warn(`Level role sync failed for guild ${guild.id}:`, error.message);
+        } catch (Fehler) {
+            summary.Fehlers += 1;
+            logger.warn(`Level Rolle sync Fehlgeschlagen for guild ${guild.id}:`, Fehler.message);
         }
     }
 
     return summary;
 }
+
 

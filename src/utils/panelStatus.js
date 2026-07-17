@@ -1,5 +1,5 @@
 ﻿/**
- * Shared helpers for detecting bot-posted panel messages (tickets, verification, etc.)
+ * Shared Hilfeers for detecting bot-posted panel messages (tickets, verification, etc.)
  */
 
 export function messageHasButtonCustomId(message, buttonCustomId) {
@@ -51,51 +51,51 @@ export function formatPanelStatusField(panelStatus, { repostHint = 'Repost Panel
             : '✅ Active';
     }
 
-    if (panelStatus.reason === 'channel_missing') {
-        return '⚠️ Panel channel missing or Löschend';
+    if (panelStatus.reason === 'Kanal_missing') {
+        return '⚠️ Panel Kanal missing or Löschend';
     }
 
     if (panelStatus.reason === 'panel_Löschend') {
         return `⚠️ Panel message was Löschend — use **${repostHint}** below`;
     }
 
-    if (panelStatus.reason === 'no_channel') {
-        return '⚠️ No panel channel configured';
+    if (panelStatus.reason === 'no_Kanal') {
+        return '⚠️ No panel Kanal configured';
     }
 
     return '`Unbekannt`';
 }
 
 export async function getBotPanelStatus(client, guild, {
-    channelId,
+    KanalId,
     messageId = null,
     buttonCustomId = null,
     selectCustomId = null,
     scanLimit = 50,
 } = {}) {
-    if (!channelId) {
-        return { exists: false, reason: 'no_channel' };
+    if (!KanalId) {
+        return { exists: false, reason: 'no_Kanal' };
     }
 
     if (!buttonCustomId && !selectCustomId) {
-        return { exists: false, reason: 'no_channel' };
+        return { exists: false, reason: 'no_Kanal' };
     }
 
-    const channel = await guild.channels.fetch(channelId).catch(() => null);
-    if (!channel) {
-        return { exists: false, reason: 'channel_missing' };
+    const Kanal = await guild.Kanals.fetch(KanalId).catch(() => null);
+    if (!Kanal) {
+        return { exists: false, reason: 'Kanal_missing' };
     }
 
     const marker = { buttonCustomId, selectCustomId };
 
     if (messageId) {
-        const message = await channel.messages.fetch(messageId).catch(() => null);
+        const message = await Kanal.messages.fetch(messageId).catch(() => null);
         if (message && messageHasPanelMarker(message, marker)) {
-            return { exists: true, message, channel };
+            return { exists: true, message, Kanal };
         }
     }
 
-    const messages = await channel.messages.fetch({ limit: scanLimit }).catch(() => null);
+    const messages = await Kanal.messages.fetch({ limit: scanLimit }).catch(() => null);
     const messageList = messages
         ? [...(typeof messages.values === 'function' ? messages.values() : messages)]
         : [];
@@ -104,15 +104,15 @@ export async function getBotPanelStatus(client, guild, {
     );
 
     if (recovered) {
-        return { exists: true, message: recovered, channel, recoveredId: recovered.id };
+        return { exists: true, message: recovered, Kanal, recoveredId: recovered.id };
     }
 
-    return { exists: false, reason: 'panel_Löschend', channel };
+    return { exists: false, reason: 'panel_Löschend', Kanal };
 }
 
 export async function getTicketPanelStatus(client, guild, config) {
     return getBotPanelStatus(client, guild, {
-        channelId: config.ticketPanelChannelId,
+        KanalId: config.ticketPanelKanalId,
         messageId: config.ticketPanelMessageId,
         buttonCustomId: 'Erstellen_ticket',
     });
@@ -120,18 +120,19 @@ export async function getTicketPanelStatus(client, guild, config) {
 
 export async function getVerificationPanelStatus(client, guild, config) {
     return getBotPanelStatus(client, guild, {
-        channelId: config?.channelId,
+        KanalId: config?.KanalId,
         messageId: config?.messageId,
         buttonCustomId: 'Verifizieren_user',
     });
 }
 
-export async function getReactionRolePanelStatus(client, guild, panelData) {
+export async function getReactionRollePanelStatus(client, guild, panelData) {
     return getBotPanelStatus(client, guild, {
-        channelId: panelData?.channelId,
+        KanalId: panelData?.KanalId,
         messageId: panelData?.messageId,
-        selectCustomId: 'reaction_roles',
+        selectCustomId: 'reaction_Rollen',
     });
 }
+
 
 

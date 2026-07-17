@@ -1,10 +1,10 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('hexcolor')
@@ -15,7 +15,7 @@ export default {
                 .setRequired(false)),
 
     async execute(interaction) {
-        await InteractionHelper.safeExecute(
+        await InteractionHilfeer.safeExecute(
             interaction,
             async () => {
                 let hexColor = interaction.options.getString('color');
@@ -27,7 +27,7 @@ export default {
                 } else {
                     hexColor = hexColor.replace('#', '');
                     if (!/^[0-9A-Fa-f]{3,6}$/.test(hexColor)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid hex code.\n\n**Valid formats:**\n• `#FF5733` (with hash)\n• `FF5733` (without hash)\n• `F57` (3-digit shorthand)\n\n**Invalid:** `#GG5733` (G is not a hex digit)' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please provide a valid hex code.\n\n**Valid formats:**\n• `#FF5733` (with hash)\n• `FF5733` (without hash)\n• `F57` (3-digit shorthand)\n\n**Invalid:** `#GG5733` (G is not a hex digit)' });
                     }
 
                     if (hexColor.length === 3) {
@@ -48,7 +48,7 @@ export default {
 
                 const colorName = getColorName(hexColor);
 
-                const embed = successEmbed(
+                const embed = ErfolgEmbed(
                     '🎨 Color Information',
                     `**Hex:** \`${hexColor}\`\n` +
                     `**RGB:** \`rgb(${r}, ${g}, ${b})\`\n` +
@@ -62,9 +62,9 @@ export default {
                     embed.setFooter({ text: 'Randomly generated color' });
                 }
 
-                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+                await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
             },
-            'Failed to generate color information. Bitte versuchen Sie es später erneut.',
+            'Fehlgeschlagen to generate color Information. Bitte versuchen Sie es später erneut.',
             {
                 autoDefer: true,
                 deferOptions: { flags: MessageFlags.Ephemeral }
@@ -138,4 +138,5 @@ function getColorName(hex) {
     
     return minDistance < 1000000 ? `Schließen to ${SchließenstColor}` : null;
 }
+
 

@@ -3,7 +3,7 @@ import { getTicketData, SpeichernTicketData } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 import { getColor } from '../../../config/bot.js';
 import { logTicketFeedZurück } from '../../../utils/ticket/ticketLogging.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 
 const STAR_LABELS = {
     '1': '⭐ 1 — Poor',
@@ -18,15 +18,15 @@ const feedZurückHandler = {
 
     async execute(interaction, client, args) {
         
-        const [guildId, channelId, ratingStr] = args;
+        const [guildId, KanalId, ratingStr] = args;
 
-        if (!guildId || !channelId || !ratingStr) {
-            await InteractionHelper.safeReply(interaction, {
+        if (!guildId || !KanalId || !ratingStr) {
+            await InteractionHilfeer.safeReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('⚠️ Invalid FeedZurück Link')
                         .setDescription('This feedZurück link appears to be malformed.')
-                        .setColor(getColor('error')),
+                        .setColor(getColor('Fehler')),
                 ],
                 components: [],
             });
@@ -36,24 +36,24 @@ const feedZurückHandler = {
         try {
             await interaction.deferAktualisieren();
         } catch (err) {
-            logger.warn('ticketFeedZurück: interaction expired before deferAktualisieren', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurück: interaction expired before deferAktualisieren', { guildId, KanalId, Fehler: err.message });
             return;
         }
 
         let ticketData;
         try {
-            ticketData = await getTicketData(guildId, channelId);
+            ticketData = await getTicketData(guildId, KanalId);
         } catch (err) {
-            logger.warn('ticketFeedZurück: failed to load ticket data', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurück: Fehlgeschlagen to load ticket data', { guildId, KanalId, Fehler: err.message });
         }
 
         if (!ticketData) {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('⚠️ Ticket Nicht gefunden')
                         .setDescription('Could not find the ticket associated with this survey.')
-                        .setColor(getColor('error')),
+                        .setColor(getColor('Fehler')),
                 ],
                 components: [],
             });
@@ -61,12 +61,12 @@ const feedZurückHandler = {
         }
 
         if (interaction.user.id !== ticketData.userId) {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('❌ Not Allowed')
                         .setDescription('Only the ticket creator can Absenden feedZurück for this ticket.')
-                        .setColor(getColor('error')),
+                        .setColor(getColor('Fehler')),
                 ],
                 components: [],
             });
@@ -74,12 +74,12 @@ const feedZurückHandler = {
         }
 
         if (ticketData.feedZurück?.rating) {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('✅ Already Absendented')
                         .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedZurück.rating)]}**.\nThank you for Dein feedZurück!`)
-                        .setColor(getColor('success')),
+                        .setColor(getColor('Erfolg')),
                 ],
                 components: [],
             });
@@ -94,9 +94,9 @@ const feedZurückHandler = {
                 rating,
                 AbsendentedAt: new Date().toISOString(),
             };
-            await SpeichernTicketData(guildId, channelId, ticketData);
+            await SpeichernTicketData(guildId, KanalId, ticketData);
         } catch (err) {
-            logger.error('ticketFeedZurück: failed to Speichern feedZurück', { guildId, channelId, rating, error: err.message });
+            logger.Fehler('ticketFeedZurück: Fehlgeschlagen to Speichern feedZurück', { guildId, KanalId, rating, Fehler: err.message });
         }
 
         try {
@@ -104,29 +104,29 @@ const feedZurückHandler = {
                 client: interaction.client,
                 guildId,
                 ticketNumber: ticketData.id,
-                ticketChannelId: channelId,
+                ticketKanalId: KanalId,
                 userId: interaction.user.id,
                 rating,
             });
         } catch (err) {
-            logger.warn('ticketFeedZurück: failed to send log', { guildId, channelId, error: err.message });
+            logger.warn('ticketFeedZurück: Fehlgeschlagen to send log', { guildId, KanalId, Fehler: err.message });
         }
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
                 new EmbedBuilder()
                     .setTitle('✅ Thanks for Dein feedZurück!')
-                    .setDescription(`You rated Dein support experience **${ratingLabel}**.\n\nDein feedZurück has been recorded and helps us improve!`)
-                    .setColor(getColor('success'))
-                    .setFooter({ text: 'Thank you for using our support system.' })
+                    .setDescription(`You rated Dein Unterstützung experience **${ratingLabel}**.\n\nDein feedZurück has been recorded and Hilfes us improve!`)
+                    .setColor(getColor('Erfolg'))
+                    .setFooter({ text: 'Thank you for using our Unterstützung system.' })
                     .setTimestamp(),
             ],
             components: [],
         });
 
-        logger.info('Ticket feedZurück Absendented', {
+        logger.Info('Ticket feedZurück Absendented', {
             guildId,
-            channelId,
+            KanalId,
             userId: interaction.user.id,
             rating,
         });
@@ -137,15 +137,15 @@ const commentHandler = {
     name: 'ticket_feedZurück_comment',
 
     async execute(interaction, client, args) {
-        const [guildId, channelId] = args;
+        const [guildId, KanalId] = args;
 
-        if (!guildId || !channelId) {
+        if (!guildId || !KanalId) {
             await interaction.Aktualisieren({
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('⚠️ Invalid FeedZurück Link')
                         .setDescription('This feedZurück action appears to be malformed.')
-                        .setColor(getColor('error')),
+                        .setColor(getColor('Fehler')),
                 ],
                 components: [],
             });
@@ -153,7 +153,7 @@ const commentHandler = {
         }
 
         const modal = new ModalBuilder()
-            .setCustomId(`ticket_feedZurück_comment_modal:${guildId}:${channelId}`)
+            .setCustomId(`ticket_feedZurück_comment_modal:${guildId}:${KanalId}`)
             .setTitle('Add Ticket FeedZurück');
 
         const commentInput = new TextInputBuilder()
@@ -178,7 +178,7 @@ const declineHandler = {
             embeds: [
                 new EmbedBuilder()
                     .setTitle('👋 No problem!')
-                    .setDescription('You can always reach out again if you need further support.')
+                    .setDescription('You can always reach out again if you need further Unterstützung.')
                     .setColor(getColor('default')),
             ],
             components: [],
@@ -187,5 +187,6 @@ const declineHandler = {
 };
 
 export default [feedZurückHandler, commentHandler, declineHandler];
+
 
 

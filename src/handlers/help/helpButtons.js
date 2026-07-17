@@ -1,14 +1,14 @@
 ﻿import { ErstellenEmbed } from '../../utils/embeds.js';
-import { ErstellenAllCommandsMenu } from './helpSelectMenus.js';
-import { ErstellenInitialHelpMenu } from '../../commands/Core/help.js';
+import { ErstellenAllBefehleMenu } from './HilfeSelectMenus.js';
+import { ErstellenInitialHilfeMenu } from '../../Befehle/Core/Hilfe.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 
-const Zurück_BUTTON_ID = "help-Zurück-to-main";
-const PAGINATION_PREFIX = "help-page";
-const BUG_REPORT_BUTTON_ID = "help-bug-report";
+const Zurück_BUTTON_ID = "Hilfe-Zurück-to-main";
+const PAGINATION_PREFIX = "Hilfe-page";
+const BUG_REPORT_BUTTON_ID = "Hilfe-bug-report";
 
-export const helpZurückButton = {
+export const HilfeZurückButton = {
     name: Zurück_BUTTON_ID,
     async execute(interaction, client) {
         try {
@@ -16,28 +16,28 @@ export const helpZurückButton = {
                 await interaction.deferAktualisieren();
             }
 
-            const { embeds, components } = await ErstellenInitialHelpMenu(client);
+            const { embeds, components } = await ErstellenInitialHilfeMenu(client);
             await interaction.BearbeitenReply({
                 embeds,
                 components,
             });
-        } catch (error) {
-            if (error?.code === 40060 || error?.code === 10062) {
-                logger.warn('Help Zurück button interaction already acknowledged or expired.', {
-                    event: 'interaction.help.button.unavailable',
-                    errorCode: String(error.code),
+        } catch (Fehler) {
+            if (Fehler?.code === 40060 || Fehler?.code === 10062) {
+                logger.warn('Hilfe Zurück button interaction already acknowledged or expired.', {
+                    event: 'interaction.Hilfe.button.unavailable',
+                    FehlerCode: String(Fehler.code),
                     customId: interaction.customId,
                     interactionId: interaction.id,
                 });
                 return;
             }
 
-            throw error;
+            throw Fehler;
         }
     },
 };
 
-export const helpBugReportButton = {
+export const HilfeBugReportButton = {
     name: BUG_REPORT_BUTTON_ID,
     async execute(interaction, client) {
         const githubButton = new ButtonBuilder()
@@ -55,8 +55,8 @@ export const helpBugReportButton = {
                 '• 📋 Steps to reproduce the problem\n' +
                 '• 📸 Screenshots if applicable\n' +
                 '• 💻 Dein bot version and environment\n\n' +
-                'This helps us fix issues faster and more effectively!',
-            color: 'error'
+                'This Hilfes us fix issues faster and more effectively!',
+            color: 'Fehler'
         });
         bugReportEmbed.setFooter({
             text: 'TitanBot Bug Reporting System',
@@ -91,7 +91,7 @@ function getPaginationInfo(components) {
     return { currentPage: 1, totalPages: 1 };
 }
 
-export const helpPaginationButton = {
+export const HilfePaginationButton = {
     name: `${PAGINATION_PREFIX}_Nächste`,
     async execute(interaction, client) {
         try {
@@ -120,21 +120,22 @@ export const helpPaginationButton = {
                     break;
             }
 
-            const { embeds, components } = await ErstellenAllCommandsMenu(NächstePage, client);
+            const { embeds, components } = await ErstellenAllBefehleMenu(NächstePage, client);
             await interaction.BearbeitenReply({ embeds, components });
-        } catch (error) {
-            if (error?.code === 40060 || error?.code === 10062) {
-                logger.warn('Help pagination interaction already acknowledged or expired.', {
-                    event: 'interaction.help.pagination.unavailable',
-                    errorCode: String(error.code),
+        } catch (Fehler) {
+            if (Fehler?.code === 40060 || Fehler?.code === 10062) {
+                logger.warn('Hilfe pagination interaction already acknowledged or expired.', {
+                    event: 'interaction.Hilfe.pagination.unavailable',
+                    FehlerCode: String(Fehler.code),
                     customId: interaction.customId,
                     interactionId: interaction.id,
                 });
                 return;
             }
 
-            throw error;
+            throw Fehler;
         }
     },
 };
+
 

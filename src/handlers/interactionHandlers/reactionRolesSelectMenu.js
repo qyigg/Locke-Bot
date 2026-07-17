@@ -1,208 +1,209 @@
 ﻿import { EmbedBuilder, MessageFlags } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { handleInteractionFehler, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getColor } from '../../config/bot.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
-import { getReactionRoleMessage } from '../../services/reactionRoleService.js';
+import { getReactionRolleMessage } from '../../services/reactionRollenervice.js';
 
-export async function handleReactionRolesSelectMenu(interaction, client) {
+export async function handleReactionRollenSelectMenu(interaction, client) {
     try {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-        if (!deferSuccess) return;
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        if (!deferErfolg) return;
 
-        if (!interaction.inGuild() || !interaction.guild || !interaction.member) {
-            throw ErstellenError(
-                'Reaction role interaction used outside a guild context',
-                ErrorTypes.VALIDATION,
-                'This reaction role menu can only be used inside a server.',
+        if (!interaction.inGuild() || !interaction.guild || !interaction.Mitglied) {
+            throw ErstellenFehler(
+                'Reaction Rolle interaction used outside a guild context',
+                FehlerTypes.VALIDATION,
+                'This reaction Rolle menu can only be used inside a server.',
                 { userId: interaction.user.id }
             );
         }
 
-        logger.debug(`Reaction role select menu interaction by ${interaction.user.tag} on message ${interaction.message.id}`);
+        logger.debug(`Reaction Rolle select menu interaction by ${interaction.user.tag} on message ${interaction.message.id}`);
 
-        const reactionRoleData = await getReactionRoleMessage(client, interaction.guildId, interaction.message.id);
+        const reactionRolleData = await getReactionRolleMessage(client, interaction.guildId, interaction.message.id);
 
-        if (!reactionRoleData) {
-            logger.warn(`Reaction role data Nicht gefunden for message ${interaction.message.id} in guild ${interaction.guildId}`);
+        if (!reactionRolleData) {
+            logger.warn(`Reaction Rolle data Nicht gefunden for message ${interaction.message.id} in guild ${interaction.guildId}`);
             return interaction.BearbeitenReply({
                 embeds: [
                     new EmbedBuilder()
-                        .setDescription('❌ This reaction role message is no longer active.')
-                        .setColor(getColor('error'))
+                        .setDescription('❌ This reaction Rolle message is no longer active.')
+                        .setColor(getColor('Fehler'))
                 ]
             });
         }
 
-        const member = interaction.member;
-        const selectedRoleIds = interaction.values;
+        const Mitglied = interaction.Mitglied;
+        const selectedRolleIds = interaction.values;
 
-        const me = interaction.guild.members.me ?? await interaction.guild.members.fetchMe().catch(() => null);
+        const me = interaction.guild.Mitglieds.me ?? await interaction.guild.Mitglieds.fetchMe().catch(() => null);
 
         if (!me) {
-            throw ErstellenError(
-                'Unable to fetch bot member for permission validation',
-                ErrorTypes.PERMISSION,
-                'I could not Verifizieren my server permissions. Bitte versuchen Sie es später erneut.',
+            throw ErstellenFehler(
+                'Unable to fetch bot Mitglied for Berechtigung validation',
+                FehlerTypes.Berechtigung,
+                'I could not Verifizieren my server Berechtigungs. Bitte versuchen Sie es später erneut.',
                 { guildId: interaction.guildId }
             );
         }
 
-        if (!me.permissions.has('ManageRoles')) {
-            throw ErstellenError(
-                'Bot missing ManageRoles permission',
-                ErrorTypes.PERMISSION,
-                'I do not have permission to manage roles in Dieser Server.',
+        if (!me.Berechtigungs.has('ManageRollen')) {
+            throw ErstellenFehler(
+                'Bot missing ManageRollen Berechtigung',
+                FehlerTypes.Berechtigung,
+                'I do not have Berechtigung to manage Rollen in Dieser Server.',
                 { guildId: interaction.guildId }
             );
         }
 
-        const botRolePosition = me.roles.highest.position;
+        const botRollePosition = me.Rollen.highest.position;
 
-        const availableRoleIds = Array.isArray(reactionRoleData.roles)
-            ? reactionRoleData.roles
-            : (typeof reactionRoleData.roles === 'object' ? Object.values(reactionRoleData.roles) : []);
+        const availableRolleIds = Array.isArray(reactionRolleData.Rollen)
+            ? reactionRolleData.Rollen
+            : (typeof reactionRolleData.Rollen === 'object' ? Object.values(reactionRolleData.Rollen) : []);
 
-        const addedRoles = [];
-        const removedRoles = [];
-        const skippedRoles = [];
+        const addedRollen = [];
+        const removedRollen = [];
+        const skippedRollen = [];
 
-        for (const roleId of selectedRoleIds) {
-            if (!availableRoleIds.includes(roleId)) {
-                logger.warn(`Role ${roleId} not in available roles for message ${interaction.message.id}`);
+        for (const RolleId of selectedRolleIds) {
+            if (!availableRolleIds.includes(RolleId)) {
+                logger.warn(`Rolle ${RolleId} not in available Rollen for message ${interaction.message.id}`);
                 continue;
             }
 
-            const role = interaction.guild.roles.cache.get(roleId);
-            if (!role) {
-                logger.warn(`Role ${roleId} Nicht gefunden in guild ${interaction.guildId}`);
-                skippedRoles.push(roleId);
+            const Rolle = interaction.guild.Rollen.cache.get(RolleId);
+            if (!Rolle) {
+                logger.warn(`Rolle ${RolleId} Nicht gefunden in guild ${interaction.guildId}`);
+                skippedRollen.push(RolleId);
                 continue;
             }
 
-            const roleHasDangerousPermissions = role.permissions.has([
+            const RolleHasDangerousBerechtigungs = Rolle.Berechtigungs.has([
                 'Administrator',
                 'ManageGuild',
-                'ManageRoles',
-                'ManageChannels',
+                'ManageRollen',
+                'ManageKanals',
                 'ManageWebhooks',
-                'BanMembers',
-                'KickMembers',
+                'BanMitglieds',
+                'KickMitglieds',
                 'MentionEveryone'
             ]);
 
-            if (role.managed || roleHasDangerousPermissions) {
-                logger.warn(`Blocked self-assignment for protected role ${role.name} (${roleId})`);
-                skippedRoles.push(role.name);
+            if (Rolle.managed || RolleHasDangerousBerechtigungs) {
+                logger.warn(`Blocked self-assignment for protected Rolle ${Rolle.name} (${RolleId})`);
+                skippedRollen.push(Rolle.name);
                 continue;
             }
 
-            if (role.position >= botRolePosition) {
-                logger.warn(`Cannot assign role ${role.name} (${roleId}), hierarchy issue`);
-                skippedRoles.push(role.name);
+            if (Rolle.position >= botRollePosition) {
+                logger.warn(`Cannot assign Rolle ${Rolle.name} (${RolleId}), hierarchy issue`);
+                skippedRollen.push(Rolle.name);
                 continue;
             }
 
-            if (!member.roles.cache.has(roleId)) {
+            if (!Mitglied.Rollen.cache.has(RolleId)) {
                 try {
-                    await member.roles.add(role);
-                    addedRoles.push(role.name);
-                    logger.debug(`Added role ${role.name} to ${member.user.tag}`);
-                } catch (roleError) {
-                    logger.error(`Failed to add role ${role.name} to ${member.user.tag}:`, roleError);
-                    skippedRoles.push(role.name);
+                    await Mitglied.Rollen.add(Rolle);
+                    addedRollen.push(Rolle.name);
+                    logger.debug(`Added Rolle ${Rolle.name} to ${Mitglied.user.tag}`);
+                } catch (RolleFehler) {
+                    logger.Fehler(`Fehlgeschlagen to add Rolle ${Rolle.name} to ${Mitglied.user.tag}:`, RolleFehler);
+                    skippedRollen.push(Rolle.name);
                 }
             }
         }
 
-        for (const roleId of availableRoleIds) {
-            if (selectedRoleIds.includes(roleId)) continue;
+        for (const RolleId of availableRolleIds) {
+            if (selectedRolleIds.includes(RolleId)) continue;
 
-            const role = interaction.guild.roles.cache.get(roleId);
-            if (!role) continue;
+            const Rolle = interaction.guild.Rollen.cache.get(RolleId);
+            if (!Rolle) continue;
 
-            if (role.position >= botRolePosition) continue;
+            if (Rolle.position >= botRollePosition) continue;
 
-            if (member.roles.cache.has(roleId)) {
+            if (Mitglied.Rollen.cache.has(RolleId)) {
                 try {
-                    await member.roles.remove(role);
-                    removedRoles.push(role.name);
-                    logger.debug(`Removed role ${role.name} from ${member.user.tag}`);
-                } catch (roleError) {
-                    logger.error(`Failed to remove role ${role.name} from ${member.user.tag}:`, roleError);
+                    await Mitglied.Rollen.remove(Rolle);
+                    removedRollen.push(Rolle.name);
+                    logger.debug(`Removed Rolle ${Rolle.name} from ${Mitglied.user.tag}`);
+                } catch (RolleFehler) {
+                    logger.Fehler(`Fehlgeschlagen to remove Rolle ${Rolle.name} from ${Mitglied.user.tag}:`, RolleFehler);
                 }
             }
         }
 
-        let description = '🎭 **Roles Erfolgreich aktualisiert!**\n\n';
+        let description = '🎭 **Rollen Erfolgreich aktualisiert!**\n\n';
 
-        if (addedRoles.length > 0) {
-            description += `✅ **Added:** ${addedRoles.map(name => `**${name}**`).join(', ')}\n`;
+        if (addedRollen.length > 0) {
+            description += `✅ **Added:** ${addedRollen.map(name => `**${name}**`).join(', ')}\n`;
         }
 
-        if (removedRoles.length > 0) {
-            description += `❌ **Removed:** ${removedRoles.map(name => `**${name}**`).join(', ')}\n`;
+        if (removedRollen.length > 0) {
+            description += `❌ **Removed:** ${removedRollen.map(name => `**${name}**`).join(', ')}\n`;
         }
 
-        if (addedRoles.length === 0 && removedRoles.length === 0) {
-            description += 'No changes were made to Dein roles.';
+        if (addedRollen.length === 0 && removedRollen.length === 0) {
+            description += 'No changes were made to Dein Rollen.';
         }
 
-        if (skippedRoles.length > 0) {
-            description += `\n⚠️ **Skipped:** ${skippedRoles.length} role${skippedRoles.length !== 1 ? 's' : ''} (permission issues)`;
+        if (skippedRollen.length > 0) {
+            description += `\n⚠️ **Skipped:** ${skippedRollen.length} Rolle${skippedRollen.length !== 1 ? 's' : ''} (Berechtigung issues)`;
         }
 
         const responseEmbed = new EmbedBuilder()
             .setDescription(description)
-            .setColor(getColor('success'))
+            .setColor(getColor('Erfolg'))
             .setTimestamp();
 
         await interaction.BearbeitenReply({ embeds: [responseEmbed] });
 
-        if (addedRoles.length > 0 || removedRoles.length > 0) {
+        if (addedRollen.length > 0 || removedRollen.length > 0) {
             try {
                 await logEvent({
                     client,
                     guildId: interaction.guildId,
-                    eventType: EVENT_TYPES.REACTION_ROLE_Aktualisieren,
+                    eventType: EVENT_TYPES.REACTION_Rolle_Aktualisieren,
                     data: {
-                        description: `Reaction roles Aktualisierend for ${member.user.tag}`,
-                        userId: member.user.id,
-                        channelId: interaction.channelId,
+                        description: `Reaction Rollen Aktualisierend for ${Mitglied.user.tag}`,
+                        userId: Mitglied.user.id,
+                        KanalId: interaction.KanalId,
                         fields: [
                             {
-                                name: '👤 Member',
-                                value: `${member.user.tag} (${member.user.id})`,
+                                name: '👤 Mitglied',
+                                value: `${Mitglied.user.tag} (${Mitglied.user.id})`,
                                 inline: false
                             },
-                            ...(addedRoles.length > 0 ? [{
-                                name: '✅ Roles Added',
-                                value: addedRoles.join(', '),
+                            ...(addedRollen.length > 0 ? [{
+                                name: '✅ Rollen Added',
+                                value: addedRollen.join(', '),
                                 inline: false
                             }] : []),
-                            ...(removedRoles.length > 0 ? [{
-                                name: '❌ Roles Removed',
-                                value: removedRoles.join(', '),
+                            ...(removedRollen.length > 0 ? [{
+                                name: '❌ Rollen Removed',
+                                value: removedRollen.join(', '),
                                 inline: false
                             }] : [])
                         ]
                     }
                 });
-            } catch (logError) {
-                logger.warn('Failed to log reaction role Aktualisieren:', logError);
+            } catch (logFehler) {
+                logger.warn('Fehlgeschlagen to log reaction Rolle Aktualisieren:', logFehler);
             }
         }
 
-        logger.info(`Reaction roles Aktualisierend for ${member.user.tag}: +${addedRoles.length}, -${removedRoles.length}`);
+        logger.Info(`Reaction Rollen Aktualisierend for ${Mitglied.user.tag}: +${addedRollen.length}, -${removedRollen.length}`);
 
-    } catch (error) {
-        await handleInteractionError(interaction, error, {
+    } catch (Fehler) {
+        await handleInteractionFehler(interaction, Fehler, {
             type: 'select_menu',
-            customId: 'reaction_roles'
+            customId: 'reaction_Rollen'
         });
     }
 }
+
 
 
 

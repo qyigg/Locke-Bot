@@ -8,13 +8,13 @@ const configuredTables = {
     birthdays: 'birthdays',
     giveaways: 'giveaways',
     tickets: 'ticket_data',
-    afk_status: 'afk_status',
+    afk_Status: 'afk_Status',
     welcome_configs: 'welcome_configs',
     leveling_configs: 'leveling_configs',
     user_levels: 'user_levels',
     economy: 'economy',
     invite_tracking: 'invite_tracking',
-    application_roles: 'application_roles',
+    application_Rollen: 'application_Rollen',
     verification_audit: 'verification_audit',
     temp_data: 'temp_data',
     cache_data: 'cache_data',
@@ -27,13 +27,13 @@ const allowedTableIdentifiers = new Set([
     'birthdays',
     'giveaways',
     'ticket_data',
-    'afk_status',
+    'afk_Status',
     'welcome_configs',
     'leveling_configs',
     'user_levels',
     'economy',
     'invite_tracking',
-    'application_roles',
+    'application_Rollen',
     'verification_audit',
     'temp_data',
     'cache_data',
@@ -194,3 +194,4 @@ export const pgConfig = {
 };
 
 export default pgConfig;
+

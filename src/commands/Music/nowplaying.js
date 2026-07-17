@@ -1,7 +1,7 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { buildNowPlayingReply } from '../../services/music/musicActions.js';
-import { deferMusicCommand } from '../../services/music/prefixSupport.js';
+import { deferMusicCommand } from '../../services/music/prefixUnterstützung.js';
 
 export default {
     category: 'Music',
@@ -12,7 +12,8 @@ export default {
     async execute(interaction, config, client) {
         await deferMusicCommand(interaction);
         const payload = buildNowPlayingReply(client, interaction.guild.id);
-        await InteractionHelper.safeBearbeitenReply(interaction, payload);
+        await InteractionHilfeer.safeBearbeitenReply(interaction, payload);
     },
 };
+
 

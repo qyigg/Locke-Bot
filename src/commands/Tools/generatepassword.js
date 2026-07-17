@@ -1,10 +1,10 @@
 ﻿import { webcrypto as crypto } from 'node:crypto';
 import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('generatepassword')
@@ -29,12 +29,12 @@ export default {
                 .setRequired(false)),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction, {
             flags: MessageFlags.Ephemeral
         });
 
-        if (!deferSuccess) {
-            logger.warn('GeneratePassword interaction defer failed', {
+        if (!deferErfolg) {
+            logger.warn('GeneratePassword interaction defer Fehlgeschlagen', {
                 userId: interaction.user?.id,
                 guildId: interaction.guildId,
                 commandName: 'generatepassword'
@@ -48,7 +48,7 @@ export default {
         const includeSymbols = interaction.options.getBoolean('symbols') ?? true;
 
         if (length < 8 || length > 50) {
-            await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Password must be 8-50 characters. You provided: ${length}` });
+            await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: `Password must be 8-50 characters. You provided: ${length}` });
             return;
         }
 
@@ -91,7 +91,7 @@ export default {
 
         let strength = 'Weak';
         let strengthEmoji = '🔴';
-        let strengthColor = getColor('error');
+        let strengthColor = getColor('Fehler');
 
         const hasLower = /[a-z]/.test(password);
         const hasUpper = /[A-Z]/.test(password);
@@ -116,22 +116,22 @@ export default {
         if (score > 80) {
             strength = 'Very Strong';
             strengthEmoji = '🟢';
-            strengthColor = getColor('success');
+            strengthColor = getColor('Erfolg');
         } else if (score > 60) {
             strength = 'Strong';
             strengthEmoji = '🟢';
-            strengthColor = getColor('success');
+            strengthColor = getColor('Erfolg');
         } else if (score > 40) {
             strength = 'Good';
             strengthEmoji = '🟡';
-            strengthColor = getColor('warning');
+            strengthColor = getColor('Warnung');
         } else if (score > 20) {
             strength = 'Weak';
             strengthEmoji = '🟠';
-            strengthColor = getColor('warning');
+            strengthColor = getColor('Warnung');
         }
 
-        const embed = successEmbed(
+        const embed = ErfolgEmbed(
             '🔑 Generated Password',
             `**Password:** ||\`${password}\`||\n` +
             `**Length:** ${password.length} characters\n` +
@@ -139,8 +139,9 @@ export default {
             `**Contains:** ${hasLower ? 'Lowercase' : ''}${hasUpper ? ', Uppercase' : ''}${hasNumber ? ', Numbers' : ''}${hasSymbol ? ', Symbols' : ''}`
         ).setColor(strengthColor);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [embed],
         });
     },
 };
+

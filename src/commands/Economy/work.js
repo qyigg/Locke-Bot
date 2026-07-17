@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { botConfig } from '../../config/bot.js';
 
 const WORK_COOLDOWN = botConfig.economy?.cooldowns?.work ?? 30 * 60 * 1000;
@@ -28,8 +28,8 @@ export default {
         .setName('work')
         .setDescription('Arbeite um Geld zu verdienen'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const userId = interaction.user.id;
@@ -39,10 +39,10 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (!userData) {
-                throw ErstellenError(
-                    "Failed to load economy data for work",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load economy data for work",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -63,9 +63,9 @@ export default {
                     usedConsumable = true;
                 } else {
                     const remaining = lastWork + WORK_COOLDOWN - now;
-                    throw ErstellenError(
+                    throw ErstellenFehler(
                         "Work cooldown active",
-                        ErrorTypes.RATE_LIMIT,
+                        FehlerTypes.RATE_LIMIT,
                         `Du arbeitest zu schnell! Warte **${Math.floor(remaining / 3600000)}h ${Math.floor((remaining % 3600000) / 60000)}m** bevor du wieder arbeitest.`,
                         { timeRemaining: remaining, cooldownType: 'work' }
                     );
@@ -86,7 +86,7 @@ export default {
 
             await setEconomyData(client, guildId, userId, userData);
 
-            logger.info(`[ECONOMY_TRANSACTION] Work completed`, {
+            logger.Info(`[ECONOMY_TRANSACTION] Work completed`, {
                 userId,
                 guildId,
                 amount: earned,
@@ -97,7 +97,7 @@ export default {
                 timestamp: new Date().toISOString()
             });
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 "💼 Arbeit abgeschlossen!",
                 `Du hast als **${job}** gearbeitet und verdient **$${earned.toLocaleString()}**!${multiplierMessage}`
             )
@@ -118,8 +118,9 @@ export default {
                     iconURL: interaction.user.displayAvatarURL(),
                 });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'work' })
 };
+
 
 

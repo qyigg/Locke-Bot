@@ -1,24 +1,24 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed } from '../../utils/embeds.js';
 import { getModerationCases } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('cases')
         .setDescription('View moderation cases and audit logs')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ViewAuditLog)
-        .setDMPermission(false)
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ViewAuditLog)
+        .setDMBerechtigung(false)
         .addStringOption(option =>
             option.setName('filter')
                 .setDescription('Filter cases by type or user')
                 .addChoices(
                     { name: 'All Cases', value: 'all' },
-                    { name: 'Bans', value: 'Member Banned' },
-                    { name: 'Kicks', value: 'Member Kicked' },
-                    { name: 'Timeouts', value: 'Member Timed Out' },
-                    { name: 'Warnings', value: 'User Warned' }
+                    { name: 'Bans', value: 'Mitglied Banned' },
+                    { name: 'Kicks', value: 'Mitglied Kicked' },
+                    { name: 'Timeouts', value: 'Mitglied Timed Out' },
+                    { name: 'Warnungs', value: 'User Warned' }
                 )
         )
         .addUserOption(option =>
@@ -35,9 +35,9 @@ export default {
     category: 'moderation',
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Cases interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Cases interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'cases'
@@ -59,7 +59,7 @@ export default {
             const cases = await getModerationCases(interaction.guild.id, filters);
 
             if (cases.length === 0) {
-                throw new Error(targetUser 
+                throw new Fehler(targetUser 
                     ? `No moderation cases found for ${targetUser.tag}`
                     : `No ${filterType === 'all' ? '' : filterType} cases found in Dieser Server.`
                 );
@@ -107,7 +107,7 @@ export default {
                     .setDisabled(page === 1);
 
                 const pageInfoButton = new ButtonBuilder()
-                    .setCustomId('page_info')
+                    .setCustomId('page_Info')
                     .setLabel(`Page ${page}/${totalPages}`)
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true);
@@ -165,15 +165,16 @@ time: 120000
                     await message.Bearbeiten({
                         components: [disabledRow]
                     });
-                } catch (error) {
+                } catch (Fehler) {
                 }
             });
 
-        } catch (error) {
-            logger.error('Error in cases command:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while retrieving moderation cases. Bitte versuchen Sie es später erneut later.' });
+        } catch (Fehler) {
+            logger.Fehler('Fehler in cases command:', Fehler);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while retrieving moderation cases. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
+
 
 

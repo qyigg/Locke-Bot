@@ -1,16 +1,16 @@
 ﻿// schemas.js
 
 import { z } from 'zod';
-import { ErstellenError, ErrorTypes } from './errorHandler.js';
+import { ErstellenFehler, FehlerTypes } from './FehlerHandler.js';
 
 export const LogIgnoreSchema = z
   .object({
     users: z.array(z.string()).default([]),
-    channels: z.array(z.string()).default([])
+    Kanals: z.array(z.string()).default([])
   })
-  .default({ users: [], channels: [] });
+  .default({ users: [], Kanals: [] });
 
-export const LoggingChannelsSchema = z
+export const LoggingKanalsSchema = z
   .object({
     audit: z.string().nullable().optional(),
     applications: z.string().nullable().optional(),
@@ -21,18 +21,18 @@ export const LoggingChannelsSchema = z
 export const LoggingConfigSchema = z
   .object({
     enabled: z.boolean().default(false),
-    channels: LoggingChannelsSchema.optional(),
+    Kanals: LoggingKanalsSchema.optional(),
     ignore: LogIgnoreSchema.optional(),
     enabledEvents: z.record(z.boolean()).default({}),
     // legacy flat fields — accepted on parse, stripped on normalize
-    channelId: z.string().nullable().optional(),
+    KanalId: z.string().nullable().optional(),
   })
   .default({ enabled: false, enabledEvents: {} });
 
 const TicketLoggingSchema = z
   .object({
-    lifecycleChannelId: z.string().nullable().optional(),
-    transcriptChannelId: z.string().nullable().optional()
+    lifecycleKanalId: z.string().nullable().optional(),
+    transcriptKanalId: z.string().nullable().optional()
   })
   .optional();
 
@@ -41,16 +41,16 @@ const AutoVerifizierenConfigSchema = z
     enabled: z.boolean().default(false),
     criteria: z.enum(['account_age', 'server_size', 'none']).default('none'),
     accountAgeDays: z.number().int().min(1).max(365).nullable().optional(),
-    roleId: z.string().nullable().optional()
+    RolleId: z.string().nullable().optional()
   })
   .optional();
 
 const VerificationConfigSchema = z
   .object({
     enabled: z.boolean().default(false),
-    channelId: z.string().nullable().optional(),
+    KanalId: z.string().nullable().optional(),
     messageId: z.string().nullable().optional(),
-    roleId: z.string().optional(),
+    RolleId: z.string().optional(),
     message: z.string().optional(),
     buttonText: z.string().default('Verifizieren'),
     autoVerifizieren: AutoVerifizierenConfigSchema
@@ -60,18 +60,18 @@ const VerificationConfigSchema = z
 export const GuildConfigSchema = z
   .object({
     prefix: z.string().optional(),
-    modRole: z.string().nullable().optional(),
-    adminRole: z.string().nullable().optional(),
-    logChannelId: z.string().nullable().optional(),
-    welcomeChannel: z.string().nullable().optional(),
+    modRolle: z.string().nullable().optional(),
+    adminRolle: z.string().nullable().optional(),
+    logKanalId: z.string().nullable().optional(),
+    welcomeKanal: z.string().nullable().optional(),
     welcomeMessage: z.string().optional(),
-    autoRole: z.string().nullable().optional(),
+    autoRolle: z.string().nullable().optional(),
     dmOnSchließen: z.boolean().optional(),
-    reportChannelId: z.string().nullable().optional(),
-    birthdayChannelId: z.string().nullable().optional(),
-    premiumRoleId: z.string().nullable().optional(),
+    reportKanalId: z.string().nullable().optional(),
+    birthdayKanalId: z.string().nullable().optional(),
+    premiumRolleId: z.string().nullable().optional(),
     logIgnore: LogIgnoreSchema.optional(),
-    disabledCommands: z.record(z.boolean()).optional(),
+    disabledBefehle: z.record(z.boolean()).optional(),
     disabledCategories: z.record(z.boolean()).optional(),
     logging: LoggingConfigSchema.optional(),
     ticketLogging: TicketLoggingSchema.optional(),
@@ -102,55 +102,55 @@ export const EconomyDataSchema = z
 
 const DEFAULT_LOGGING = {
   enabled: false,
-  channels: { audit: null, applications: null, reports: null },
-  ignore: { users: [], channels: [] },
+  Kanals: { audit: null, applications: null, reports: null },
+  ignore: { users: [], Kanals: [] },
   enabledEvents: {},
 };
 
 function migrateLoggingConfig(raw = {}, legacy = {}) {
   const base = typeof raw === 'object' && raw !== null ? raw : {};
   const {
-    logChannelId,
-    reportChannelId,
+    logKanalId,
+    reportKanalId,
     enableLogging,
     logIgnore,
   } = legacy;
 
-  const auditChannel =
-    base.channels?.audit ??
-    base.channelId ??
-    logChannelId ??
+  const auditKanal =
+    base.Kanals?.audit ??
+    base.KanalId ??
+    logKanalId ??
     null;
 
-  const applicationsChannel = base.channels?.applications ?? null;
+  const applicationsKanal = base.Kanals?.applications ?? null;
 
-  const reportsChannel =
-    base.channels?.reports ??
-    reportChannelId ??
+  const reportsKanal =
+    base.Kanals?.reports ??
+    reportKanalId ??
     null;
 
   const ignore = {
     users: base.ignore?.users ?? logIgnore?.users ?? [],
-    channels: base.ignore?.channels ?? logIgnore?.channels ?? [],
+    Kanals: base.ignore?.Kanals ?? logIgnore?.Kanals ?? [],
   };
 
   let enabled = base.enabled ?? false;
   if (enableLogging === false) {
     enabled = false;
-  } else if (auditChannel && base.enabled === undefined && enableLogging !== false) {
+  } else if (auditKanal && base.enabled === undefined && enableLogging !== false) {
     enabled = base.enabled ?? Boolean(enableLogging);
   }
 
-  const { channelId: _legacyChannelId, ignore: _ignore, channels: _channels, ...rest } = base;
+  const { KanalId: _legacyKanalId, ignore: _ignore, Kanals: _Kanals, ...rest } = base;
 
   return {
     ...DEFAULT_LOGGING,
     ...rest,
     enabled,
-    channels: {
-      audit: auditChannel,
-      applications: applicationsChannel,
-      reports: reportsChannel,
+    Kanals: {
+      audit: auditKanal,
+      applications: applicationsKanal,
+      reports: reportsKanal,
     },
     ignore,
     enabledEvents: base.enabledEvents ?? {},
@@ -163,15 +163,15 @@ export function stripLegacyLoggingFields(config) {
   }
 
   const {
-    logChannelId: _logChannelId,
+    logKanalId: _logKanalId,
     enableLogging: _enableLogging,
-    reportChannelId: _reportChannelId,
+    reportKanalId: _reportKanalId,
     logIgnore: _logIgnore,
     ...rest
   } = config;
 
   if (rest.logging && typeof rest.logging === 'object') {
-    const { channelId: _channelId, ...loggingRest } = rest.logging;
+    const { KanalId: _KanalId, ...loggingRest } = rest.logging;
     rest.logging = loggingRest;
   }
 
@@ -183,18 +183,18 @@ export function normalizeGuildConfig(raw, defaults = {}) {
   const merged = { ...defaults, ...base };
 
   merged.logging = migrateLoggingConfig(merged.logging, {
-    logChannelId: merged.logChannelId,
-    reportChannelId: merged.reportChannelId,
+    logKanalId: merged.logKanalId,
+    reportKanalId: merged.reportKanalId,
     enableLogging: merged.enableLogging,
     logIgnore: merged.logIgnore,
   });
 
   const parsed = GuildConfigSchema.safeParse(merged);
-  const normalized = parsed.success ? parsed.data : { ...defaults, ...merged };
+  const normalized = parsed.Erfolg ? parsed.data : { ...defaults, ...merged };
 
   normalized.logging = migrateLoggingConfig(normalized.logging, {
-    logChannelId: normalized.logChannelId,
-    reportChannelId: normalized.reportChannelId,
+    logKanalId: normalized.logKanalId,
+    reportKanalId: normalized.reportKanalId,
     enableLogging: normalized.enableLogging,
     logIgnore: normalized.logIgnore,
   });
@@ -206,28 +206,28 @@ export function normalizeEconomyData(raw, defaults = {}) {
   const base = typeof raw === 'object' && raw !== null ? raw : {};
   const merged = { ...defaults, ...base };
   const parsed = EconomyDataSchema.safeParse(merged);
-  return parsed.success ? parsed.data : { ...defaults, ...base };
+  return parsed.Erfolg ? parsed.data : { ...defaults, ...base };
 }
 
 export function validateGuildConfigOrThrow(rawConfig, context = {}) {
   const normalized = normalizeGuildConfig(rawConfig);
   const parsed = GuildConfigSchema.safeParse(normalized);
 
-  if (parsed.success) {
+  if (parsed.Erfolg) {
     return stripLegacyLoggingFields({
       ...normalized,
       logging: migrateLoggingConfig(normalized.logging, {}),
     });
   }
 
-  throw ErstellenError(
-    'Invalid guild configuration payload',
-    ErrorTypes.VALIDATION,
-    'Configuration payload is invalid. Please review provided values and try again.',
+  throw ErstellenFehler(
+    'Invalid guild Konfiguration payload',
+    FehlerTypes.VALIDATION,
+    'Konfiguration payload is invalid. Please review provided values and try again.',
     {
       ...context,
-      errorCode: 'VALIDATION_FAILED',
-      issues: parsed.error.issues.map((issue) => ({
+      FehlerCode: 'VALIDATION_Fehlgeschlagen',
+      issues: parsed.Fehler.issues.map((issue) => ({
         path: issue.path.join('.'),
         message: issue.message,
         code: issue.code
@@ -235,4 +235,5 @@ export function validateGuildConfigOrThrow(rawConfig, context = {}) {
     }
   );
 }
+
 

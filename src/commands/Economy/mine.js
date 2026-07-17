@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const MINE_COOLDOWN = 60 * 60 * 1000;
 const BASE_MIN_REWARD = 400;
@@ -23,8 +23,8 @@ export default {
         .setName('mine')
         .setDescription('Gehe Bergbau betreiben um Geld zu verdienen'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const userId = interaction.user.id;
@@ -43,9 +43,9 @@ export default {
                     (remaining % (1000 * 60 * 60)) / (1000 * 60),
                 );
 
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Mining cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Deine Spitzhacke kühlt ab. Warte **${hours}h ${minutes}m** bevor du wieder Bergbau betreibst.`,
                     { remaining, cooldownType: 'mine' }
                 );
@@ -77,7 +77,7 @@ userData.lastMine = now;
 
             await setEconomyData(client, guildId, userId, userData);
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 "💰 BergbauexpBearbeitenion erfolgreich!",
                 `Du hast einen **${location}** erkundet und schafftest es, Mineralien im Wert von **$${finalEarned.toLocaleString()}** zu finden!${multiplierMessage}`,
             )
@@ -88,6 +88,7 @@ userData.lastMine = now;
                 })
                 .setFooter({ text: `Nächstes Bergbau verfügbar in 1 Stunde.` });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'mine' })
 };
+

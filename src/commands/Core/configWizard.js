@@ -1,6 +1,6 @@
 ﻿import {
     SlashCommandBuilder,
-    PermissionFlagsBits,
+    BerechtigungFlagsBits,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
@@ -10,14 +10,14 @@
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle,
-    ChannelSelectMenuBuilder,
-    RoleSelectMenuBuilder,
+    KanalSelectMenuBuilder,
+    RollenelectMenuBuilder,
     LabelBuilder,
-    ChannelType,
+    KanalType,
 } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed, buildUserFehlerEmbed } from '../../utils/embeds.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getGuildConfig, setConfigValue } from '../../services/config/guildConfig.js';
 import ConfigService from '../../services/config/configService.js';
 import { logger } from '../../utils/logger.js';
@@ -27,16 +27,16 @@ const DASHBOARD_CUSTOM_ID = 'config_select';
 const WIZARD_BUTTON_ID = 'config_wizard';
 const activeWizardSessions = new Set();
 
-const DM_DISABLED_HELP = [
+const DM_DISABLED_Hilfe = [
     '1. Right-click Dieser Server\'s name (mobile: tap the server name at the top).',
-    '2. Open **Privacy Settings**.',
-    '3. Turn on **Allow direct messages from server members**.',
+    '2. Open **Privacy Einstellungen**.',
+    '3. Turn on **Allow direct messages from server Mitglieds**.',
     '4. Click **Start Setup Wizard** again.',
 ].join('\n');
 
 async function notifyWizardStarted(buttonInteraction) {
     await buttonInteraction.followUp({
-        embeds: [infoEmbed(
+        embeds: [InfoEmbed(
             'Setup Wizard Started',
             'Check Dein DMs — I sent you the first setup question there.\n\nAnswer each question in that DM. Type `skip` to keep the current value.',
         )],
@@ -45,26 +45,26 @@ async function notifyWizardStarted(buttonInteraction) {
 }
 
 async function notifyWizardDmBlocked(buttonInteraction) {
-    await replyUserError(buttonInteraction, {
-        type: ErrorTypes.USER_INPUT,
-        message: `I couldn't send you a DM. Enable DMs from Dieser Server, then try again.\n\n${DM_DISABLED_HELP}`,
+    await replyUserFehler(buttonInteraction, {
+        type: FehlerTypes.USER_INPUT,
+        message: `I couldn't send you a DM. Enable DMs from Dieser Server, then try again.\n\n${DM_DISABLED_Hilfe}`,
     }).catch(() => {});
 }
 
-function formatChannelMention(guild, channelId) {
-    if (!channelId) {
+function formatKanalMention(guild, KanalId) {
+    if (!KanalId) {
         return '`Not set`';
     }
-    const channel = guild.channels.cache.get(channelId);
-    return channel ? `<#${channelId}>` : `#${channelId}`;
+    const Kanal = guild.Kanals.cache.get(KanalId);
+    return Kanal ? `<#${KanalId}>` : `#${KanalId}`;
 }
 
-function formatRoleMention(guild, roleId) {
-    if (!roleId) {
+function formatRolleMention(guild, RolleId) {
+    if (!RolleId) {
         return '`Not set`';
     }
-    const role = guild.roles.cache.get(roleId);
-    return role ? `<@&${roleId}>` : `@${roleId}`;
+    const Rolle = guild.Rollen.cache.get(RolleId);
+    return Rolle ? `<@&${RolleId}>` : `@${RolleId}`;
 }
 
 function getBotPresenceText() {
@@ -85,8 +85,8 @@ function getBotPresenceText() {
 function getThemeColorLines() {
     const colors = botConfig.embeds.colors;
     return [
-        `🎨 Primary \`${colors.primary}\` · Success \`${colors.success}\``,
-        `⚠️ Warning \`${colors.warning}\` · Error \`${colors.error}\``,
+        `🎨 Primary \`${colors.primary}\` · Erfolg \`${colors.Erfolg}\``,
+        `⚠️ Warnung \`${colors.Warnung}\` · Fehler \`${colors.Fehler}\``,
     ].join('\n');
 }
 
@@ -94,9 +94,9 @@ function buildDashboardEmbed(config, guild) {
     const setupFertig = config.setupWizardCompleted;
 
     return ErstellenEmbed({
-        title: '⚙️ Server Configuration',
-        description: `Core settings for **${guild.name}**. Pick an option below or run the setup wizard.`,
-        color: 'info',
+        title: '⚙️ Server Konfiguration',
+        description: `Core Einstellungen for **${guild.name}**. Pick an option below or run the setup wizard.`,
+        color: 'Info',
         fields: [
             {
                 name: '⌨️ Server Prefix',
@@ -104,13 +104,13 @@ function buildDashboardEmbed(config, guild) {
                 inline: true,
             },
             {
-                name: '🛡️ Moderator Role',
-                value: formatRoleMention(guild, config.modRole),
+                name: '🛡️ Moderator Rolle',
+                value: formatRolleMention(guild, config.modRolle),
                 inline: true,
             },
             {
-                name: '📋 Log Channel',
-                value: formatChannelMention(guild, config.logging?.channels?.audit),
+                name: '📋 Log Kanal',
+                value: formatKanalMention(guild, config.logging?.Kanals?.audit),
                 inline: true,
             },
             {
@@ -125,13 +125,13 @@ function buildDashboardEmbed(config, guild) {
             },
             {
                 name: '⚡ Command Access',
-                value: 'Use `/commands dashboard` to enable or disable commands and subcommands.',
+                value: 'Use `/Befehle dashboard` to enable or disable Befehle and subBefehle.',
                 inline: false,
             },
             {
                 name: `${setupFertig ? '✅' : '📝'} Setup`,
                 value: setupFertig
-                    ? 'Setup wizard completed — re-run anytime to Aktualisieren settings.'
+                    ? 'Setup wizard completed — re-run anytime to Aktualisieren Einstellungen.'
                     : 'Run the setup wizard to configure Dein server quickly.',
                 inline: false,
             },
@@ -140,7 +140,7 @@ function buildDashboardEmbed(config, guild) {
     });
 }
 
-function buildSettingsSelect(guildId) {
+function buildEinstellungenSelect(guildId) {
     return new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(`${DASHBOARD_CUSTOM_ID}:${guildId}`)
@@ -152,14 +152,14 @@ function buildSettingsSelect(guildId) {
                     .setValue('prefix')
                     .setEmoji('⌨️'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Moderator Role')
-                    .setDescription('Role used for moderation commands')
-                    .setValue('modRole')
+                    .setLabel('Moderator Rolle')
+                    .setDescription('Rolle used for moderation Befehle')
+                    .setValue('modRolle')
                     .setEmoji('🛡️'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Log Channel')
-                    .setDescription('Channel for system log messages')
-                    .setValue('logChannelId')
+                    .setLabel('Log Kanal')
+                    .setDescription('Kanal for system log messages')
+                    .setValue('logKanalId')
                     .setEmoji('📋'),
             ),
     );
@@ -171,18 +171,18 @@ function buildButtonRow(config, guildId) {
             .setCustomId(`${WIZARD_BUTTON_ID}:${guildId}`)
             .setLabel(config.setupWizardCompleted ? 'Re-run Setup Wizard' : 'Start Setup Wizard')
             .setEmoji('📝')
-            .setStyle(config.setupWizardCompleted ? ButtonStyle.Secondary : ButtonStyle.Success),
+            .setStyle(config.setupWizardCompleted ? ButtonStyle.Secondary : ButtonStyle.Erfolg),
     );
 }
 
 function extractId(value) {
     if (!value || typeof value !== 'string') return null;
 
-    const channelMention = value.match(/<#!?(\d{17,19})>/);
-    if (channelMention) return channelMention[1];
+    const KanalMention = value.match(/<#!?(\d{17,19})>/);
+    if (KanalMention) return KanalMention[1];
 
-    const roleMention = value.match(/<@&(\d{17,19})>/);
-    if (roleMention) return roleMention[1];
+    const RolleMention = value.match(/<@&(\d{17,19})>/);
+    if (RolleMention) return RolleMention[1];
 
     const digits = value.match(/^(\d{17,19})$/);
     if (digits) return digits[1];
@@ -190,8 +190,8 @@ function extractId(value) {
     return null;
 }
 
-async function askQuestion(dmChannel, userId, prompt, stepNumber, totalSteps) {
-    await dmChannel.send({
+async function askQuestion(dmKanal, userId, prompt, stepNumber, totalSteps) {
+    await dmKanal.send({
         embeds: [ErstellenEmbed({
             title: `Setup Question ${stepNumber}/${totalSteps}`,
             description: prompt,
@@ -199,23 +199,23 @@ async function askQuestion(dmChannel, userId, prompt, stepNumber, totalSteps) {
         })],
     });
 
-    const collected = await dmChannel.awaitMessages({
+    const collected = await dmKanal.awaitMessages({
         filter: (message) => message.author.id === userId && !message.author.bot,
         max: 1,
         time: 180_000,
     }).catch(() => null);
 
     if (!collected || !collected.size) {
-        await dmChannel.send({
-            embeds: [buildUserErrorEmbed(ErrorTypes.RATE_LIMIT, 'You did not answer in time. Run the setup wizard again when ready.')],
+        await dmKanal.send({
+            embeds: [buildUserFehlerEmbed(FehlerTypes.RATE_LIMIT, 'You did not answer in time. Run the setup wizard again when ready.')],
         });
         return null;
     }
 
     const answer = collected.first().content.trim();
     if (answer.toLowerCase() === 'Abbrechen') {
-        await dmChannel.send({
-            embeds: [infoEmbed('Setup Abbrechenled', 'Setup wizard stopped. Dein Speichernd answers are still applied.')],
+        await dmKanal.send({
+            embeds: [InfoEmbed('Setup Abbrechenled', 'Setup wizard stopped. Dein Speichernd answers are still applied.')],
         });
         return { Abbrechenled: true };
     }
@@ -228,45 +228,45 @@ function formatSpeicherndAck(key, value, guild) {
         return `Server prefix Speichernd as \`${value}\`.`;
     }
 
-    if (key === 'logChannelId') {
+    if (key === 'logKanalId') {
         if (value === null) {
-            return 'Log channel cleared.';
+            return 'Log Kanal cleared.';
         }
-        const channel = guild.channels.cache.get(value);
-        return `Log channel Speichernd as ${channel ?? `<#${value}>`}.`;
+        const Kanal = guild.Kanals.cache.get(value);
+        return `Log Kanal Speichernd as ${Kanal ?? `<#${value}>`}.`;
     }
 
-    if (key === 'modRole') {
+    if (key === 'modRolle') {
         if (value === null) {
-            return 'Moderator role cleared.';
+            return 'Moderator Rolle cleared.';
         }
-        const role = guild.roles.cache.get(value);
-        return `Moderator role Speichernd as ${role ?? `<@&${value}>`}.`;
+        const Rolle = guild.Rollen.cache.get(value);
+        return `Moderator Rolle Speichernd as ${Rolle ?? `<@&${value}>`}.`;
     }
 
     return 'Setting Speichernd.';
 }
 
-async function validateGuildChannelId(guild, channelId) {
-    const channel = guild.channels.cache.get(channelId) ?? await guild.channels.fetch(channelId).catch(() => null);
-    if (!channel || !channel.isTextBased()) {
-        throw new Error('That channel was Nicht gefunden in Dieser Server or is not a text channel.');
+async function validateGuildKanalId(guild, KanalId) {
+    const Kanal = guild.Kanals.cache.get(KanalId) ?? await guild.Kanals.fetch(KanalId).catch(() => null);
+    if (!Kanal || !Kanal.isTextBased()) {
+        throw new Fehler('That Kanal was Nicht gefunden in Dieser Server or is not a text Kanal.');
     }
-    return channel.id;
+    return Kanal.id;
 }
 
-async function validateGuildRoleId(guild, roleId) {
-    const role = guild.roles.cache.get(roleId) ?? await guild.roles.fetch(roleId).catch(() => null);
-    if (!role) {
-        throw new Error('That role was Nicht gefunden in Dieser Server.');
+async function validateGuildRolleId(guild, RolleId) {
+    const Rolle = guild.Rollen.cache.get(RolleId) ?? await guild.Rollen.fetch(RolleId).catch(() => null);
+    if (!Rolle) {
+        throw new Fehler('That Rolle was Nicht gefunden in Dieser Server.');
     }
-    return role.id;
+    return Rolle.id;
 }
 
 async function refreshDashboard(rootInteraction, config, guild) {
     const embed = buildDashboardEmbed(config, guild);
-    const components = [buildButtonRow(config, guild.id), buildSettingsSelect(guild.id)];
-    await InteractionHelper.safeBearbeitenReply(rootInteraction, { embeds: [embed], components }).catch(() => {});
+    const components = [buildButtonRow(config, guild.id), buildEinstellungenSelect(guild.id)];
+    await InteractionHilfeer.safeBearbeitenReply(rootInteraction, { embeds: [embed], components }).catch(() => {});
 }
 
 async function runSetupWizard(buttonInteraction, config, guild, client, rootInteraction) {
@@ -274,7 +274,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
 
     if (activeWizardSessions.has(user.id)) {
         await buttonInteraction.followUp({
-            embeds: [warningEmbed('Setup Already Running', 'You already have a setup wizard open in Dein DMs. Reply there to continue, or type `Abbrechen` to stop it.')],
+            embeds: [WarnungEmbed('Setup Already Running', 'You already have a setup wizard open in Dein DMs. Reply there to continue, or type `Abbrechen` to stop it.')],
             flags: MessageFlags.Ephemeral,
         }).catch(() => {});
         return;
@@ -282,16 +282,16 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
 
     activeWizardSessions.add(user.id);
 
-    let dmChannel;
+    let dmKanal;
 
     try {
-        dmChannel = await user.ErstellenDM();
-    } catch (error) {
-        logger.warn('Failed to Erstellen DM channel for setup wizard', { userId: user.id, error: error.message });
+        dmKanal = await user.ErstellenDM();
+    } catch (Fehler) {
+        logger.warn('Fehlgeschlagen to Erstellen DM Kanal for setup wizard', { userId: user.id, Fehler: Fehler.message });
         await notifyWizardDmBlocked(buttonInteraction);
         return;
     } finally {
-        if (!dmChannel) {
+        if (!dmKanal) {
             activeWizardSessions.Löschen(user.id);
         }
     }
@@ -305,54 +305,54 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
                 const normalized = answer.trim();
                 if (normalized.toLowerCase() === 'skip') return undefined;
                 if (/\s/.test(normalized) || normalized.length < 1 || normalized.length > 10) {
-                    throw new Error('Prefix must be 1-10 characters with no spaces.');
+                    throw new Fehler('Prefix must be 1-10 characters with no spaces.');
                 }
                 return normalized;
             },
         },
         {
-            key: 'logChannelId',
-            skipMessage: 'Keeping the current log channel.',
-            question: 'Which channel should receive bot logs?\nSend a channel mention, channel ID, `none` to clear, `skip` to keep the current value, or `Abbrechen` to stop.',
+            key: 'logKanalId',
+            skipMessage: 'Keeping the current log Kanal.',
+            question: 'Which Kanal should receive bot logs?\nSend a Kanal mention, Kanal ID, `none` to clear, `skip` to keep the current value, or `Abbrechen` to stop.',
             parse: async (answer) => {
                 const normalized = answer.trim();
                 if (normalized.toLowerCase() === 'skip') return undefined;
                 if (normalized.toLowerCase() === 'none') return null;
                 const id = extractId(normalized);
-                if (!id) throw new Error('Provide a valid channel mention or ID from Dieser Server.');
-                return validateGuildChannelId(guild, id);
+                if (!id) throw new Fehler('Provide a valid Kanal mention or ID from Dieser Server.');
+                return validateGuildKanalId(guild, id);
             },
         },
         {
-            key: 'modRole',
-            skipMessage: 'Keeping the current moderator role.',
-            question: 'What role should moderators have?\nSend a role mention, role ID, `none` to clear, `skip` to keep the current value, or `Abbrechen` to stop.',
+            key: 'modRolle',
+            skipMessage: 'Keeping the current moderator Rolle.',
+            question: 'What Rolle should moderators have?\nSend a Rolle mention, Rolle ID, `none` to clear, `skip` to keep the current value, or `Abbrechen` to stop.',
             parse: async (answer) => {
                 const normalized = answer.trim();
                 if (normalized.toLowerCase() === 'skip') return undefined;
                 if (normalized.toLowerCase() === 'none') return null;
                 const id = extractId(normalized);
-                if (!id) throw new Error('Provide a valid role mention or ID from Dieser Server.');
-                return validateGuildRoleId(guild, id);
+                if (!id) throw new Fehler('Provide a valid Rolle mention or ID from Dieser Server.');
+                return validateGuildRolleId(guild, id);
             },
         },
     ];
 
     const changes = {};
-    const errors = [];
+    const Fehlers = [];
     let wizardAbbrechenled = false;
 
     try {
         try {
-            await dmChannel.send({
+            await dmKanal.send({
                 embeds: [ErstellenEmbed({
                     title: '📝 Setup Wizard',
                     description: 'Answer each question in this DM.\n\n• Type `skip` to keep the current value\n• Type `Abbrechen` to stop the wizard',
-                    color: 'info',
+                    color: 'Info',
                 })],
             });
-        } catch (error) {
-            logger.warn('Failed to send setup wizard DM', { userId: user.id, error: error.message });
+        } catch (Fehler) {
+            logger.warn('Fehlgeschlagen to send setup wizard DM', { userId: user.id, Fehler: Fehler.message });
             await notifyWizardDmBlocked(buttonInteraction);
             return;
         }
@@ -365,7 +365,7 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
 
             while (!answered) {
                 const result = await askQuestion(
-                    dmChannel,
+                    dmKanal,
                     user.id,
                     prompt.question,
                     index + 1,
@@ -388,29 +388,29 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
                     const value = await prompt.parse(result.answer);
 
                     if (value === undefined) {
-                        await dmChannel.send({
-                            embeds: [infoEmbed('Skipped', prompt.skipMessage)],
+                        await dmKanal.send({
+                            embeds: [InfoEmbed('Skipped', prompt.skipMessage)],
                         });
                     } else {
                         await ConfigService.AktualisierenSetting(client, guild.id, prompt.key, value, user.id);
                         changes[prompt.key] = value;
-                        await dmChannel.send({
-                            embeds: [successEmbed('Speichernd', formatSpeicherndAck(prompt.key, value, guild))],
+                        await dmKanal.send({
+                            embeds: [ErfolgEmbed('Speichernd', formatSpeicherndAck(prompt.key, value, guild))],
                         });
 
                         try {
                             const AktualisierendConfig = await getGuildConfig(client, guild.id);
                             await refreshDashboard(rootInteraction, AktualisierendConfig, guild);
-                        } catch (refreshError) {
-                            logger.debug('Failed to refresh dashboard during setup wizard', { error: refreshError.message });
+                        } catch (refreshFehler) {
+                            logger.debug('Fehlgeschlagen to refresh dashboard during setup wizard', { Fehler: refreshFehler.message });
                         }
                     }
 
                     answered = true;
-                } catch (error) {
-                    errors.push(`• ${prompt.key}: ${error.message}`);
-                    await dmChannel.send({
-                        embeds: [buildUserErrorEmbed(ErrorTypes.VALIDATION, `${error.message}\n\nPlease reply again with a valid answer, \`skip\`, or \`Abbrechen\`.`)],
+                } catch (Fehler) {
+                    Fehlers.push(`• ${prompt.key}: ${Fehler.message}`);
+                    await dmKanal.send({
+                        embeds: [buildUserFehlerEmbed(FehlerTypes.VALIDATION, `${Fehler.message}\n\nPlease reply again with a valid answer, \`skip\`, or \`Abbrechen\`.`)],
                     });
                 }
             }
@@ -423,41 +423,41 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
         if (!wizardAbbrechenled) {
             try {
                 await setConfigValue(client, guild.id, 'setupWizardCompleted', true);
-            } catch (error) {
-                logger.warn('Failed to persist setupWizardCompleted flag', { guildId: guild.id, error: error.message });
+            } catch (Fehler) {
+                logger.warn('Fehlgeschlagen to persist setupWizardCompleted flag', { guildId: guild.id, Fehler: Fehler.message });
             }
         }
 
         const summaryTitle = wizardAbbrechenled
             ? (Object.keys(changes).length > 0 ? 'Setup Stopped' : 'Setup Abbrechenled')
-            : (errors.length > 0 ? 'Einrichtung abgeschlossen' : 'Einrichtung abgeschlossen');
+            : (Fehlers.length > 0 ? 'Einrichtung abgeschlossen' : 'Einrichtung abgeschlossen');
 
         const summaryBody = wizardAbbrechenled
             ? (Object.keys(changes).length > 0
                 ? `Setup stopped early. Speichernd **${Object.keys(changes).length}** setting(s) before stopping.`
                 : 'Setup wizard stopped before any changes were Speichernd.')
             : (Object.keys(changes).length > 0
-                ? `Aktualisierend **${Object.keys(changes).length}** setting(s).${errors.length > 0 ? ' Some answers needed retries.' : ''}`
+                ? `Aktualisierend **${Object.keys(changes).length}** setting(s).${Fehlers.length > 0 ? ' Some answers needed retries.' : ''}`
                 : 'No changes were applied.');
 
         const summaryEmbed = ErstellenEmbed({
             title: wizardAbbrechenled ? `⚠️ ${summaryTitle}` : `✅ ${summaryTitle}`,
             description: summaryBody,
-            color: wizardAbbrechenled ? 'warning' : (errors.length > 0 ? 'warning' : 'success'),
+            color: wizardAbbrechenled ? 'Warnung' : (Fehlers.length > 0 ? 'Warnung' : 'Erfolg'),
         });
 
-        if (errors.length > 0) {
-            const uniqueErrors = [...new Set(errors)];
-            summaryEmbed.addFields({ name: 'Issues', value: uniqueErrors.join('\n').slice(0, 1024) });
+        if (Fehlers.length > 0) {
+            const uniqueFehlers = [...new Set(Fehlers)];
+            summaryEmbed.addFields({ name: 'Issues', value: uniqueFehlers.join('\n').slice(0, 1024) });
         }
 
-        await dmChannel.send({ embeds: [summaryEmbed] });
+        await dmKanal.send({ embeds: [summaryEmbed] });
 
         try {
             const AktualisierendConfig = await getGuildConfig(client, guild.id);
             await refreshDashboard(rootInteraction, AktualisierendConfig, guild);
-        } catch (error) {
-            logger.debug('Failed to refresh dashboard after wizard completion', { error: error.message });
+        } catch (Fehler) {
+            logger.debug('Fehlgeschlagen to refresh dashboard after wizard completion', { Fehler: Fehler.message });
         }
     } finally {
         activeWizardSessions.Löschen(user.id);
@@ -467,47 +467,47 @@ async function runSetupWizard(buttonInteraction, config, guild, client, rootInte
 async function showSettingModal(selectInteraction, guildId, setting) {
     const modalCustomId = `config_wizard_modal:${setting}:${guildId}`;
 
-    if (setting === 'logChannelId') {
+    if (setting === 'logKanalId') {
         const modal = new ModalBuilder()
             .setCustomId(modalCustomId)
-            .setTitle('📋 Aktualisieren Log Channel');
+            .setTitle('📋 Aktualisieren Log Kanal');
 
-        const channelSelect = new ChannelSelectMenuBuilder()
-            .setCustomId('log_channel')
-            .setPlaceholder('Select a text channel...')
+        const KanalSelect = new KanalSelectMenuBuilder()
+            .setCustomId('log_Kanal')
+            .setPlaceholder('Select a text Kanal...')
             .setMinValues(1)
             .setMaxValues(1)
-            .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+            .addKanalTypes(KanalType.GuildText, KanalType.GuildAnnouncement)
             .setRequired(true);
 
-        const channelLabel = new LabelBuilder()
-            .setLabel('Log Channel')
-            .setDescription('Channel where system log messages will be sent')
-            .setChannelSelectMenuComponent(channelSelect);
+        const KanalLabel = new LabelBuilder()
+            .setLabel('Log Kanal')
+            .setDescription('Kanal where system log messages will be sent')
+            .setKanalSelectMenuComponent(KanalSelect);
 
-        modal.addLabelComponents(channelLabel);
+        modal.addLabelComponents(KanalLabel);
         await selectInteraction.showModal(modal);
         return;
     }
 
-    if (setting === 'modRole') {
+    if (setting === 'modRolle') {
         const modal = new ModalBuilder()
             .setCustomId(modalCustomId)
-            .setTitle('🛡️ Aktualisieren Moderator Role');
+            .setTitle('🛡️ Aktualisieren Moderator Rolle');
 
-        const roleSelect = new RoleSelectMenuBuilder()
-            .setCustomId('mod_role')
-            .setPlaceholder('Select a moderator role...')
+        const Rollenelect = new RollenelectMenuBuilder()
+            .setCustomId('mod_Rolle')
+            .setPlaceholder('Select a moderator Rolle...')
             .setMinValues(1)
             .setMaxValues(1)
             .setRequired(true);
 
-        const roleLabel = new LabelBuilder()
-            .setLabel('Moderator Role')
-            .setDescription('Role used for moderation commands')
-            .setRoleSelectMenuComponent(roleSelect);
+        const RolleLabel = new LabelBuilder()
+            .setLabel('Moderator Rolle')
+            .setDescription('Rolle used for moderation Befehle')
+            .setRollenelectMenuComponent(Rollenelect);
 
-        modal.addLabelComponents(roleLabel);
+        modal.addLabelComponents(RolleLabel);
         await selectInteraction.showModal(modal);
         return;
     }
@@ -529,38 +529,38 @@ async function showSettingModal(selectInteraction, guildId, setting) {
 }
 
 function resolveSettingModalValue(setting, Absendented) {
-    if (setting === 'logChannelId') {
-        const channelId = Absendented.fields.getField('log_channel')?.values?.[0];
-        if (!channelId) {
-            throw new Error('Please select a log channel.');
+    if (setting === 'logKanalId') {
+        const KanalId = Absendented.fields.getField('log_Kanal')?.values?.[0];
+        if (!KanalId) {
+            throw new Fehler('Please select a log Kanal.');
         }
-        return channelId;
+        return KanalId;
     }
 
-    if (setting === 'modRole') {
-        const roleId = Absendented.fields.getField('mod_role')?.values?.[0];
-        if (!roleId) {
-            throw new Error('Please select a moderator role.');
+    if (setting === 'modRolle') {
+        const RolleId = Absendented.fields.getField('mod_Rolle')?.values?.[0];
+        if (!RolleId) {
+            throw new Fehler('Please select a moderator Rolle.');
         }
-        return roleId;
+        return RolleId;
     }
 
     const prefix = Absendented.fields.getTextInputValue('value')?.trim();
     if (!prefix || prefix.length < 1 || prefix.length > 10 || /\s/.test(prefix)) {
-        throw new Error('Prefix must be 1-10 characters with no spaces.');
+        throw new Fehler('Prefix must be 1-10 characters with no spaces.');
     }
     return prefix;
 }
 
-function buildSettingSuccessMessage(setting, value, guild) {
-    if (setting === 'logChannelId') {
-        const channel = guild.channels.cache.get(value);
-        return `Log channel set to ${channel ?? `<#${value}>`}.`;
+function buildEinstellungenuccessMessage(setting, value, guild) {
+    if (setting === 'logKanalId') {
+        const Kanal = guild.Kanals.cache.get(value);
+        return `Log Kanal set to ${Kanal ?? `<#${value}>`}.`;
     }
 
-    if (setting === 'modRole') {
-        const role = guild.roles.cache.get(value);
-        return `Moderator role set to ${role ?? `<@&${value}>`}.`;
+    if (setting === 'modRolle') {
+        const Rolle = guild.Rollen.cache.get(value);
+        return `Moderator Rolle set to ${Rolle ?? `<@&${value}>`}.`;
     }
 
     return `Server prefix set to \`${value}\`.`;
@@ -587,17 +587,17 @@ async function handleSettingModalAbsenden(selectInteraction, rootInteraction, se
         await ConfigService.AktualisierenSetting(client, guildId, setting, value, Absendented.user.id);
 
         await Absendented.reply({
-            embeds: [successEmbed('Configuration Aktualisierend', buildSettingSuccessMessage(setting, value, Absendented.guild))],
+            embeds: [ErfolgEmbed('Konfiguration Aktualisierend', buildEinstellungenuccessMessage(setting, value, Absendented.guild))],
             flags: MessageFlags.Ephemeral,
         });
 
         const AktualisierendConfig = await getGuildConfig(client, guildId);
         await refreshDashboard(rootInteraction, AktualisierendConfig, Absendented.guild);
-    } catch (error) {
-        logger.error('Config wizard modal Absenden error:', error);
-        await replyUserError(Absendented, {
-            type: ErrorTypes.CONFIGURATION,
-            message: error.message || 'Bitte versuchen Sie es später erneut.',
+    } catch (Fehler) {
+        logger.Fehler('Config wizard modal Absenden Fehler:', Fehler);
+        await replyUserFehler(Absendented, {
+            type: FehlerTypes.Konfiguration,
+            message: Fehler.message || 'Bitte versuchen Sie es später erneut.',
         }).catch(() => {});
     }
 }
@@ -606,30 +606,30 @@ export default {
     slashOnly: true,
     data: new SlashCommandBuilder()
         .setName('configwizard')
-        .setDescription('Open the server configuration dashboard and setup wizard')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-        .setDMPermission(false),
+        .setDescription('Open the server Konfiguration dashboard and setup wizard')
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
+        .setDMBerechtigung(false),
     category: 'Core',
 
     async execute(interaction) {
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-            if (!deferSuccess) {
+            const deferErfolg = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+            if (!deferErfolg) {
                 return;
             }
 
-            if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-                return replyUserError(interaction, {
-                    type: ErrorTypes.PERMISSION,
-                    message: 'You need the **Manage Server** permission to use this command.',
+            if (!interaction.MitgliedBerechtigungs?.has(BerechtigungFlagsBits.ManageGuild)) {
+                return replyUserFehler(interaction, {
+                    type: FehlerTypes.Berechtigung,
+                    message: 'You need the **Manage Server** Berechtigung to use this command.',
                 });
             }
 
             const guildConfig = await getGuildConfig(interaction.client, interaction.guildId);
             const embed = buildDashboardEmbed(guildConfig, interaction.guild);
-            const components = [buildButtonRow(guildConfig, interaction.guildId), buildSettingsSelect(interaction.guildId)];
+            const components = [buildButtonRow(guildConfig, interaction.guildId), buildEinstellungenSelect(interaction.guildId)];
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed], components });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed], components });
 
             const replyMessage = await interaction.fetchReply().catch(() => null);
             if (!replyMessage) {
@@ -668,23 +668,24 @@ export default {
                             interaction.client,
                         );
                     }
-                } catch (error) {
-                    logger.error('Config dashboard interaction error:', error);
-                    await replyUserError(componentInteraction, {
-                        type: ErrorTypes.UNKNOWN,
-                        message: 'Failed to process Dein selection. Bitte versuchen Sie es später erneut.',
+                } catch (Fehler) {
+                    logger.Fehler('Config dashboard interaction Fehler:', Fehler);
+                    await replyUserFehler(componentInteraction, {
+                        type: FehlerTypes.UNKNOWN,
+                        message: 'Fehlgeschlagen to process Dein selection. Bitte versuchen Sie es später erneut.',
                     }).catch(() => {});
                 }
             });
-        } catch (error) {
-            logger.error('Config command error:', error);
-            await replyUserError(interaction, {
-                type: ErrorTypes.CONFIGURATION,
-                message: 'Failed to open configuration dashboard. Bitte versuchen Sie es später erneut.',
+        } catch (Fehler) {
+            logger.Fehler('Config command Fehler:', Fehler);
+            await replyUserFehler(interaction, {
+                type: FehlerTypes.Konfiguration,
+                message: 'Fehlgeschlagen to open Konfiguration dashboard. Bitte versuchen Sie es später erneut.',
             });
         }
     },
 };
+
 
 
 

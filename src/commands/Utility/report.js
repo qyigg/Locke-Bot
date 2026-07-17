@@ -1,15 +1,15 @@
-﻿import { SlashCommandBuilder, ChannelType } from 'discord.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, KanalType } from 'discord.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 import report from './modules/report.js';
-import reportSetchannel from './modules/report_setchannel.js';
+import reportSetKanal from './modules/report_setKanal.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('report')
         .setDescription('Report a user to server staff, or configure where reports are sent.')
-        .setDMPermission(false)
+        .setDMBerechtigung(false)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('file')
@@ -30,13 +30,13 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName('setchannel')
+                .setName('setKanal')
                 .setDescription('Set Der Kanal where user reports are sent. (Manage Server required)')
-                .addChannelOption(option =>
+                .addKanalOption(option =>
                     option
-                        .setName('channel')
-                        .setDescription('The text channel to receive reports.')
-                        .addChannelTypes(ChannelType.GuildText)
+                        .setName('Kanal')
+                        .setDescription('The text Kanal to receive reports.')
+                        .addKanalTypes(KanalType.GuildText)
                         .setRequired(true),
                 ),
         ),
@@ -49,10 +49,11 @@ export default {
             return await report.execute(interaction, config, client);
         }
 
-        if (subcommand === 'setchannel') {
-            return await reportSetchannel.execute(interaction, config, client);
+        if (subcommand === 'setKanal') {
+            return await reportSetKanal.execute(interaction, config, client);
         }
 
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unknown subcommand.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Unknown subcommand.' });
     },
 };
+

@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getUserLevelData, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
@@ -14,15 +14,15 @@ export default {
         .setDescription('Der Benutzer to check the rank of')
         .setRequired(false)
     )
-    .setDMPermission(false),
+    .setDMBerechtigung(false),
   category: 'Leveling',
 
   async execute(interaction, config, client) {
-    await InteractionHelper.safeDefer(interaction);
+    await InteractionHilfeer.safeDefer(interaction);
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeBearbeitenReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
@@ -34,14 +34,14 @@ export default {
     }
 
     const targetUser = interaction.options.getUser('user') || interaction.user;
-    const member = await interaction.guild.members
+    const Mitglied = await interaction.guild.Mitglieds
       .fetch(targetUser.id)
       .catch(() => null);
 
-    if (!member) {
-      throw new TitanBotError(
+    if (!Mitglied) {
+      throw new TitanBotFehler(
         `User ${targetUser.id} Nicht gefunden in guild`,
-        ErrorTypes.USER_INPUT,
+        FehlerTypes.USER_INPUT,
         'Could not find the specified user in Dieser Server.'
       );
     }
@@ -59,8 +59,8 @@ export default {
     const progressBar = ErstellenProgressBar(progress, 20);
 
     const embed = new EmbedBuilder()
-      .setTitle(`${member.displayName}'s Rank`)
-      .setThumbnail(member.displayAvatarURL({ dynamic: true }))
+      .setTitle(`${Mitglied.displayName}'s Rank`)
+      .setThumbnail(Mitglied.displayAvatarURL({ dynamic: true }))
       .addFields(
         {
           name: 'Level',
@@ -85,7 +85,7 @@ export default {
       .setColor('#2ecc71')
       .setTimestamp();
 
-    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Rank checked for user ${targetUser.id} in guild ${interaction.guildId}`);
   }
 };
@@ -97,5 +97,6 @@ function ErstellenProgressBar(percentage, length = 10) {
   const filled = Math.round((percentage / 100) * length);
   return '█'.repeat(filled) + '░'.repeat(length - filled);
 }
+
 
 

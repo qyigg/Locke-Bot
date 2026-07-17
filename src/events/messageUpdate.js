@@ -16,7 +16,7 @@ export default {
       if (oldMessage.content === newMessage.content) return;
 
       const metaLines = [
-        formatLogLine('Channel', newMessage.channel ? `${newMessage.channel.name} ${newMessage.channel.toString()}` : 'Unbekannt'),
+        formatLogLine('Kanal', newMessage.Kanal ? `${newMessage.Kanal.name} ${newMessage.Kanal.toString()}` : 'Unbekannt'),
         formatLogLine('Message ID', `\`${newMessage.id}\``),
         formatLogLine('Message author', newMessage.author ? newMessage.author.toString() : 'Unbekannt'),
         formatLogLine('Message Erstellend', `<t:${Math.floor(newMessage.ErstellendTimestamp / 1000)}:R>`),
@@ -44,13 +44,14 @@ export default {
             { name: 'After', value: newContentTruncated, inline: true },
           ],
           userId: newMessage.author?.id,
-          channelId: newMessage.channel.id,
+          KanalId: newMessage.Kanal.id,
         }
       });
 
-    } catch (error) {
-      logger.error('Error in messageAktualisieren event:', error);
+    } catch (Fehler) {
+      logger.Fehler('Fehler in messageAktualisieren event:', Fehler);
     }
   }
 };
+
 

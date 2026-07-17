@@ -1,9 +1,9 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getFromDb, setInDb } from '../../utils/database.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import crypto from 'crypto';
 
 function generateShareId() {
@@ -70,7 +70,7 @@ export default {
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName("add")
-                        .setDescription("Add a member to a shared list")
+                        .setDescription("Add a Mitglied to a shared list")
                         .addStringOption(option =>
                             option
                                 .setName("list_id")
@@ -130,8 +130,8 @@ export default {
                         )
                 )
         )
-        .setDMPermission(false)
-        .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
+        .setDMBerechtigung(false)
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.SendMessages),
     category: "Utility",
 
     async execute(interaction, config, client) {
@@ -143,13 +143,13 @@ export default {
             const listKey = `shared_todo_${listId}`;
             let listData = await getFromDb(listKey, null);
             
-            if (!listData || (listData.ok === false && listData.error)) {
+            if (!listData || (listData.ok === false && listData.Fehler)) {
                 if (creatorId) {
                     listData = {
                         id: listId,
                         name: listName,
                         creatorId,
-                        members: [creatorId],
+                        Mitglieds: [creatorId],
                         tasks: [],
                         NächsteId: 1,
                         ErstellendAt: new Date().toISOString()
@@ -163,15 +163,15 @@ export default {
             if (listData) {
                 if (!Array.isArray(listData.tasks)) listData.tasks = [];
                 if (!listData.NächsteId) listData.NächsteId = 1;
-                if (!Array.isArray(listData.members)) listData.members = [];
+                if (!Array.isArray(listData.Mitglieds)) listData.Mitglieds = [];
             }
             
             return listData;
         }
 
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Todo interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Todo interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'todo'
@@ -194,12 +194,12 @@ export default {
                         await setInDb(`user_shared_lists_${userId}`, sharedListsArray);
                     }
 
-                    return await InteractionHelper.safeBearbeitenReply(interaction, {
+                    return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                         embeds: [
-                            successEmbed(
+                            ErfolgEmbed(
                                 "Shared List Erstellend",
                                 `Erstellend shared list "${listName}" with ID: \`${listId}\`\n` +
-                                `Use \`/todo share add list_id:${listId} user:@username\` to add members.`
+                                `Use \`/todo share add list_id:${listId} user:@username\` to add Mitglieds.`
                             )
                         ]
                     });
@@ -207,37 +207,37 @@ export default {
 
                 case 'add': {
                     const listId = interaction.options.getString('list_id');
-                    const memberToAdd = interaction.options.getUser('user');
+                    const MitgliedToAdd = interaction.options.getUser('user');
 
                     const listData = await getOrErstellenSharedList(listId);
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
                     if (listData.creatorId !== userId) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only the list creator can add members.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Only the list creator can add Mitglieds.' });
                     }
 
-                    if (!listData.members.includes(memberToAdd.id)) {
-                        listData.members.push(memberToAdd.id);
+                    if (!listData.Mitglieds.includes(MitgliedToAdd.id)) {
+                        listData.Mitglieds.push(MitgliedToAdd.id);
                         await setInDb(`shared_todo_${listId}`, listData);
 
-                        const memberLists = await getFromDb(`user_shared_lists_${memberToAdd.id}`, []);
-                        const memberListsArray = Array.isArray(memberLists) ? memberLists : [];
-                        if (!memberListsArray.includes(listId)) {
-                            memberListsArray.push(listId);
-                            await setInDb(`user_shared_lists_${memberToAdd.id}`, memberListsArray);
+                        const MitgliedLists = await getFromDb(`user_shared_lists_${MitgliedToAdd.id}`, []);
+                        const MitgliedListsArray = Array.isArray(MitgliedLists) ? MitgliedLists : [];
+                        if (!MitgliedListsArray.includes(listId)) {
+                            MitgliedListsArray.push(listId);
+                            await setInDb(`user_shared_lists_${MitgliedToAdd.id}`, MitgliedListsArray);
                         }
 
-                        return await InteractionHelper.safeBearbeitenReply(interaction, {
+                        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                             embeds: [
-                                successEmbed('Member Added', 
-                                    `Added ${memberToAdd.username} to the shared list "${listData.name}"`
+                                ErfolgEmbed('Mitglied Added', 
+                                    `Added ${MitgliedToAdd.username} to the shared list "${listData.name}"`
                                 )
                             ]
                         });
                     } else {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'User is already a member of this list.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'User is already a Mitglied of this list.' });
                     }
                 }
 
@@ -246,28 +246,28 @@ export default {
                     const listData = await getOrErstellenSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
-                    if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                    if (!listData.Mitglieds.includes(userId)) {
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
                     }
 
                     if (listData.tasks.length === 0) {
-                        const memberList = listData.members.map(memberId => {
-                            const member = interaction.guild.members.cache.get(memberId);
-                            return member ? member.user.username : `<@${memberId}>`;
+                        const MitgliedList = listData.Mitglieds.map(MitgliedId => {
+                            const Mitglied = interaction.guild.Mitglieds.cache.get(MitgliedId);
+                            return Mitglied ? Mitglied.user.username : `<@${MitgliedId}>`;
                         }).join(',');
 
-                        const owner = interaction.guild.members.cache.get(listData.creatorId);
+                        const owner = interaction.guild.Mitglieds.cache.get(listData.creatorId);
                         const ownerName = owner ? owner.user.username : `<@${listData.creatorId}>`;
 
-                        return await InteractionHelper.safeBearbeitenReply(interaction, {
+                        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                                 embeds: [
-                                    successEmbed(
+                                    ErfolgEmbed(
                                         `📋 **${listData.name}**\n\n` +
                                         `👑 **Owner:** ${ownerName}\n` +
-                                        `👥 **Members:** ${memberList}\n\n` +
+                                        `👥 **Mitglieds:** ${MitgliedList}\n\n` +
                                         `*This list is currently empty. Use the "Add Task" button to add tasks!*`,
                                         `Shared List (ID: \`${listId}\`)`
                                     )
@@ -281,7 +281,7 @@ export default {
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_complete_${listId}`)
                                             .setLabel('Complete Task')
-                                            .setStyle(ButtonStyle.Success),
+                                            .setStyle(ButtonStyle.Erfolg),
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_remove_${listId}`)
                                             .setLabel('Remove Task')
@@ -299,22 +299,22 @@ export default {
                         )
                         .join('\n');
 
-                    const memberList = listData.members.map(memberId => {
-                        const member = interaction.guild.members.cache.get(memberId);
-                        return member ? member.user.username : `<@${memberId}>`;
+                    const MitgliedList = listData.Mitglieds.map(MitgliedId => {
+                        const Mitglied = interaction.guild.Mitglieds.cache.get(MitgliedId);
+                        return Mitglied ? Mitglied.user.username : `<@${MitgliedId}>`;
                     }).join(',');
 
-                    const owner = interaction.guild.members.cache.get(listData.creatorId);
+                    const owner = interaction.guild.Mitglieds.cache.get(listData.creatorId);
                     const ownerName = owner ? owner.user.username : `<@${listData.creatorId}>`;
 
                     const fullListDisplay = `📋 **${listData.name}**\n\n` +
                         `👑 **Owner:** ${ownerName}\n` +
-                        `👥 **Members:** ${memberList}\n\n` +
+                        `👥 **Mitglieds:** ${MitgliedList}\n\n` +
                         `**Tasks:**\n${taskList}`;
 
-                    return await InteractionHelper.safeBearbeitenReply(interaction, {
+                    return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                         embeds: [
-                            successEmbed(`Shared List (ID: \`${listId}\`)`, fullListDisplay)
+                            ErfolgEmbed(`Shared List (ID: \`${listId}\`)`, fullListDisplay)
                         ],
                         components: [
                             new ActionRowBuilder().addComponents(
@@ -325,7 +325,7 @@ export default {
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_complete_${listId}`)
                                     .setLabel('Complete Task')
-                                    .setStyle(ButtonStyle.Success),
+                                    .setStyle(ButtonStyle.Erfolg),
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_remove_${listId}`)
                                     .setLabel('Remove Task')
@@ -342,11 +342,11 @@ export default {
                     const listData = await getOrErstellenSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
-                    if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                    if (!listData.Mitglieds.includes(userId)) {
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
                     }
 
                     const newTask = {
@@ -360,9 +360,9 @@ export default {
                     listData.tasks.push(newTask);
                     await setInDb(`shared_todo_${listId}`, listData);
 
-                    return await InteractionHelper.safeBearbeitenReply(interaction, {
+                    return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                         embeds: [
-                            successEmbed('Task Added', `Added "${taskText}" to the shared list "${listData.name}"`)
+                            ErfolgEmbed('Task Added', `Added "${taskText}" to the shared list "${listData.name}"`)
                         ]
                     });
                 }
@@ -374,24 +374,24 @@ export default {
                     const listData = await getOrErstellenSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
                     }
 
-                    if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                    if (!listData.Mitglieds.includes(userId)) {
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
                     }
 
                     const taskIndex = listData.tasks.findIndex(task => task.id === taskNumber);
                     if (taskIndex === -1) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
+                        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
                     }
 
                     const [removedTask] = listData.tasks.splice(taskIndex, 1);
                     await setInDb(`shared_todo_${listId}`, listData);
 
-                    return await InteractionHelper.safeBearbeitenReply(interaction, {
+                    return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                         embeds: [
-                            successEmbed('Task Removed', `Removed "${removedTask.text}" from the shared list "${listData.name}".`)
+                            ErfolgEmbed('Task Removed', `Removed "${removedTask.text}" from the shared list "${listData.name}".`)
                         ]
                     });
                 }
@@ -423,9 +423,9 @@ export default {
                 userData.tasks.push(newTask);
                 await setInDb(dbKey, userData);
 
-                return await InteractionHelper.safeBearbeitenReply(interaction, {
+                return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                     embeds: [
-                        successEmbed(
+                        ErfolgEmbed(
                             "Task Added",
                             `Added "${taskText}" to Dein to-do list.`
                         ),
@@ -435,8 +435,8 @@ export default {
 
             case 'list': {
                 if (userData.tasks.length === 0) {
-                    return await InteractionHelper.safeBearbeitenReply(interaction, {
-                        embeds: [successEmbed('Dein to-do list is empty!', "Dein To-Do List")],
+                    return await InteractionHilfeer.safeBearbeitenReply(interaction, {
+                        embeds: [ErfolgEmbed('Dein to-do list is empty!', "Dein To-Do List")],
                     });
                 }
 
@@ -447,9 +447,9 @@ export default {
                     )
                     .join('\n');
 
-                return await InteractionHelper.safeBearbeitenReply(interaction, {
+                return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                     embeds: [
-                        successEmbed('Dein To-Do List', taskList)
+                        ErfolgEmbed('Dein To-Do List', taskList)
                     ],
                 });
             }
@@ -459,19 +459,19 @@ export default {
                 const task = userData.tasks.find(t => t.id === taskNumber);
 
                 if (!task) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
                 }
 
                 if (task.completed) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
                 }
 
                 task.completed = true;
                 await setInDb(`todo_${userId}`, userData);
 
-                return await InteractionHelper.safeBearbeitenReply(interaction, {
+                return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                     embeds: [
-                        successEmbed('Task Completed', `Marked "${task.text}" as complete!`)
+                        ErfolgEmbed('Task Completed', `Marked "${task.text}" as complete!`)
                     ],
                 });
             }
@@ -481,23 +481,24 @@ export default {
                 const taskIndex = userData.tasks.findIndex(t => t.id === taskNumber);
 
                 if (taskIndex === -1) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
                 }
 
                 const [removedTask] = userData.tasks.splice(taskIndex, 1);
                 await setInDb(`todo_${userId}`, userData);
 
-                return await InteractionHelper.safeBearbeitenReply(interaction, {
+                return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                     embeds: [
-                        successEmbed('Task Removed', `Removed "${removedTask.text}" from Dein to-do list.`)
+                        ErfolgEmbed('Task Removed', `Removed "${removedTask.text}" from Dein to-do list.`)
                     ],
                 });
             }
 
             default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid subcommand.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid subcommand.' });
         }
     },
 };
+
 
 

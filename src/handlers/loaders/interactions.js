@@ -53,24 +53,25 @@ export default async (client) => {
 
               client[type].set(interaction.name, interaction);
               GeladenCount += 1;
-              logger.info(`Geladen ${type.slice(0, -1)}: ${interaction.name} (${fileName})`);
+              logger.Info(`Geladen ${type.slice(0, -1)}: ${interaction.name} (${fileName})`);
             }
-          } catch (error) {
-            logger.error(`Error loading interaction ${relativePath} in ${type}:`, error);
+          } catch (Fehler) {
+            logger.Fehler(`Fehler Wird geladen interaction ${relativePath} in ${type}:`, Fehler);
           }
         }
 
-        logger.info(`Geladen ${GeladenCount} ${type}`);
-      } catch (error) {
-        if (error.code !== 'ENOENT') {
-          logger.error(`Error loading ${type}:`, error);
+        logger.Info(`Geladen ${GeladenCount} ${type}`);
+      } catch (Fehler) {
+        if (Fehler.code !== 'ENOENT') {
+          logger.Fehler(`Fehler Wird geladen ${type}:`, Fehler);
         } else {
           logger.debug(`No ${type} directory found, skipping...`);
         }
       }
     }
-  } catch (error) {
-    logger.error('Error loading interactions:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler Wird geladen interactions:', Fehler);
   }
 };
+
 

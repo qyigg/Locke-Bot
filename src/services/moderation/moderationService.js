@@ -1,80 +1,80 @@
 ﻿// moderationService.js
 
-import { PermissionFlagsBits } from 'discord.js';
+import { BerechtigungFlagsBits } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logModerationAction } from '../../utils/moderation.js';
 
 function getTargetLabel(target) {
   return target.user?.tag ?? target.displayName ?? 'this user';
 }
 
-function getHighestRole(member) {
-  return member?.roles?.highest ?? null;
+function getHighestRolle(Mitglied) {
+  return Mitglied?.Rollen?.highest ?? null;
 }
 
 export class ModerationService {
 
-  static buildHierarchyMessage({ actor, actorRole, targetRole, targetLabel, action }) {
+  static buildHierarchyMessage({ actor, actorRolle, targetRolle, targetLabel, action }) {
     if (actor === 'moderator') {
       return (
-        `Du kannst nicht ${action} **${targetLabel}** — their role **${targetRole.name}** is equal to or above Deins (**${actorRole.name}**). ` +
-        `In **Server Settings → Roles**, drag Dein moderator role above **${targetRole.name}**.`
+        `Du kannst nicht ${action} **${targetLabel}** — their Rolle **${targetRolle.name}** is equal to or above Deins (**${actorRolle.name}**). ` +
+        `In **Server Einstellungen → Rollen**, drag Dein moderator Rolle above **${targetRolle.name}**.`
       );
     }
 
     return (
-      `I cannot ${action} **${targetLabel}** — my role **${actorRole.name}** is equal to or below theirs (**${targetRole.name}**). ` +
-      `In **Server Settings → Roles**, drag my bot role above **${targetRole.name}**.`
+      `I cannot ${action} **${targetLabel}** — my Rolle **${actorRolle.name}** is equal to or below theirs (**${targetRolle.name}**). ` +
+      `In **Server Einstellungen → Rollen**, drag my bot Rolle above **${targetRolle.name}**.`
     );
   }
 
   static buildHierarchySkipReason(moderator, target, action, actor = 'moderator') {
     const targetLabel = getTargetLabel(target);
-    const targetRole = getHighestRole(target);
+    const targetRolle = getHighestRolle(target);
 
     if (actor === 'bot') {
-      const botMember = target.guild?.members?.me;
-      const botRole = getHighestRole(botMember);
-      if (!botRole || !targetRole) {
-        return `Bot role hierarchy blocked ${action} for ${targetLabel}`;
+      const botMitglied = target.guild?.Mitglieds?.me;
+      const botRolle = getHighestRolle(botMitglied);
+      if (!botRolle || !targetRolle) {
+        return `Bot Rolle hierarchy blocked ${action} for ${targetLabel}`;
       }
-      return `Bot role **${botRole.name}** is too low for **${targetRole.name}** — move the bot role higher`;
+      return `Bot Rolle **${botRolle.name}** is too low for **${targetRolle.name}** — move the bot Rolle higher`;
     }
 
-    const modRole = getHighestRole(moderator);
-    if (!modRole || !targetRole) {
-      return `Role hierarchy blocked ${action} for ${targetLabel}`;
+    const modRolle = getHighestRolle(moderator);
+    if (!modRolle || !targetRolle) {
+      return `Rolle hierarchy blocked ${action} for ${targetLabel}`;
     }
-    return `Dein role **${modRole.name}** is too low for **${targetRole.name}** — move Dein role higher`;
+    return `Dein Rolle **${modRolle.name}** is too low for **${targetRolle.name}** — move Dein Rolle higher`;
   }
 
   static validateHierarchy(moderator, target, action) {
     if (!moderator || !target) {
-      return { valid: false, error: 'Invalid moderator or target' };
+      return { valid: false, Fehler: 'Invalid moderator or target' };
     }
 
     if (moderator.guild?.ownerId === moderator.id) {
       return { valid: true };
     }
 
-    const modRole = getHighestRole(moderator);
-    const targetRole = getHighestRole(target);
+    const modRolle = getHighestRolle(moderator);
+    const targetRolle = getHighestRolle(target);
 
-    if (!modRole || !targetRole) {
+    if (!modRolle || !targetRolle) {
       return {
         valid: false,
-        error: 'Could not resolve role hierarchy. Try mentioning Der Benutzer or use the slash command.',
+        Fehler: 'Could not resolve Rolle hierarchy. Try mentioning Der Benutzer or use the slash command.',
       };
     }
 
-    if (modRole.position <= targetRole.position) {
+    if (modRolle.position <= targetRolle.position) {
       return {
         valid: false,
-        error: this.buildHierarchyMessage({
+        Fehler: this.buildHierarchyMessage({
           actor: 'moderator',
-          actorRole: modRole,
-          targetRole,
+          actorRolle: modRolle,
+          targetRolle,
           targetLabel: getTargetLabel(target),
           action,
         }),
@@ -86,31 +86,31 @@ export class ModerationService {
 
   static validateBotHierarchy(target, action) {
     if (!target) {
-      return { valid: false, error: 'Invalid target' };
+      return { valid: false, Fehler: 'Invalid target' };
     }
 
-    const botMember = target.guild?.members?.me;
-    if (!botMember) {
-      return { valid: false, error: 'Bot is not in the guild' };
+    const botMitglied = target.guild?.Mitglieds?.me;
+    if (!botMitglied) {
+      return { valid: false, Fehler: 'Bot is not in the guild' };
     }
 
-    const botRole = getHighestRole(botMember);
-    const targetRole = getHighestRole(target);
+    const botRolle = getHighestRolle(botMitglied);
+    const targetRolle = getHighestRolle(target);
 
-    if (!botRole || !targetRole) {
+    if (!botRolle || !targetRolle) {
       return {
         valid: false,
-        error: 'Could not resolve bot role hierarchy. Check that my role is configured in Dieser Server.',
+        Fehler: 'Could not resolve bot Rolle hierarchy. Check that my Rolle is configured in Dieser Server.',
       };
     }
 
-    if (botRole.position <= targetRole.position) {
+    if (botRolle.position <= targetRolle.position) {
       return {
         valid: false,
-        error: this.buildHierarchyMessage({
+        Fehler: this.buildHierarchyMessage({
           actor: 'bot',
-          actorRole: botRole,
-          targetRole,
+          actorRolle: botRolle,
+          targetRolle,
           targetLabel: getTargetLabel(target),
           action,
         }),
@@ -123,12 +123,12 @@ export class ModerationService {
   static assertModerationHierarchy(moderator, target, action) {
     const botCheck = this.validateBotHierarchy(target, action);
     if (!botCheck.valid) {
-      throw new TitanBotError(botCheck.error, ErrorTypes.PERMISSION, botCheck.error);
+      throw new TitanBotFehler(botCheck.Fehler, FehlerTypes.Berechtigung, botCheck.Fehler);
     }
 
     const modCheck = this.validateHierarchy(moderator, target, action);
     if (!modCheck.valid) {
-      throw new TitanBotError(modCheck.error, ErrorTypes.PERMISSION, modCheck.error);
+      throw new TitanBotFehler(modCheck.Fehler, FehlerTypes.Berechtigung, modCheck.Fehler);
     }
   }
 
@@ -141,46 +141,46 @@ export class ModerationService {
   }) {
     try {
       if (!guild || !user || !moderator) {
-        throw new TitanBotError(
+        throw new TitanBotFehler(
           'Missing required parameters',
-          ErrorTypes.VALIDATION,
+          FehlerTypes.VALIDATION,
           'Guild, user, and moderator are required'
         );
       }
 
-      let targetMember = null;
+      let targetMitglied = null;
       try {
-        targetMember = await guild.members.fetch(user.id).catch(() => null);
+        targetMitglied = await guild.Mitglieds.fetch(user.id).catch(() => null);
       } catch (err) {
         logger.debug('Target not in guild, proceeding with ban');
       }
 
-      if (targetMember) {
-        this.assertModerationHierarchy(moderator, targetMember, 'ban');
+      if (targetMitglied) {
+        this.assertModerationHierarchy(moderator, targetMitglied, 'ban');
       } else {
 
         const isOwner = guild.ownerId === moderator.id;
-        const hasHighPerms = moderator.permissions.has([
-            PermissionFlagsBits.ManageGuild,
-            PermissionFlagsBits.Administrator
+        const hasHighPerms = moderator.Berechtigungs.has([
+            BerechtigungFlagsBits.ManageGuild,
+            BerechtigungFlagsBits.Administrator
         ]);
 
         if (!isOwner && !hasHighPerms) {
-            throw new TitanBotError(
-                'Du hast keine sufficient permissions to ban users who are not in the server.',
-                ErrorTypes.PERMISSION,
-                'You need "Manage Server" or "Administrator" permissions to ban users not currently in the guild.'
+            throw new TitanBotFehler(
+                'Du hast keine sufficient Berechtigungs to ban users who are not in the server.',
+                FehlerTypes.Berechtigung,
+                'You need "Manage Server" or "Administrator" Berechtigungs to ban users not currently in the guild.'
             );
         }
       }
 
-      await guild.members.ban(user.id, { reason });
+      await guild.Mitglieds.ban(user.id, { reason });
 
       const caseId = await logModerationAction({
         client: guild.client,
         guild,
         event: {
-          action: 'Member Banned',
+          action: 'Mitglied Banned',
           target: `${user.tag} (${user.id})`,
           executor: `${moderator.user.tag} (${moderator.id})`,
           reason,
@@ -193,198 +193,198 @@ export class ModerationService {
         }
       });
 
-      logger.info(`User banned: ${user.tag} by ${moderator.user.tag} in ${guild.name}`);
+      logger.Info(`User banned: ${user.tag} by ${moderator.user.tag} in ${guild.name}`);
       
       return {
         caseId,
         user: user.tag,
         reason
       };
-    } catch (error) {
-      logger.error('Error banning user:', error);
-      throw error;
+    } catch (Fehler) {
+      logger.Fehler('Fehler banning user:', Fehler);
+      throw Fehler;
     }
   }
 
   static async kickUser({
     guild,
-    member,
+    Mitglied,
     moderator,
     reason = 'Kein Grund angegeben'
   }) {
     try {
-      if (!guild || !member || !moderator) {
-        throw new TitanBotError(
+      if (!guild || !Mitglied || !moderator) {
+        throw new TitanBotFehler(
           'Missing required parameters',
-          ErrorTypes.VALIDATION,
-          'Guild, member, and moderator are required'
+          FehlerTypes.VALIDATION,
+          'Guild, Mitglied, and moderator are required'
         );
       }
 
-      this.assertModerationHierarchy(moderator, member, 'kick');
+      this.assertModerationHierarchy(moderator, Mitglied, 'kick');
 
-      if (!member.kickable) {
-        const targetLabel = getTargetLabel(member);
-        throw new TitanBotError(
-          'Cannot kick member',
-          ErrorTypes.PERMISSION,
-          `I cannot kick **${targetLabel}**. They may have **Administrator** permission or a managed/integration role. ` +
-          'Ensure my bot role is above theirs in **Server Settings → Roles** and that they do not have Admin.'
+      if (!Mitglied.kickable) {
+        const targetLabel = getTargetLabel(Mitglied);
+        throw new TitanBotFehler(
+          'Cannot kick Mitglied',
+          FehlerTypes.Berechtigung,
+          `I cannot kick **${targetLabel}**. They may have **Administrator** Berechtigung or a managed/integration Rolle. ` +
+          'Ensure my bot Rolle is above theirs in **Server Einstellungen → Rollen** and that they do not have Admin.'
         );
       }
 
-      await member.kick(reason);
+      await Mitglied.kick(reason);
 
       const caseId = await logModerationAction({
         client: guild.client,
         guild,
         event: {
-          action: 'Member Kicked',
-          target: `${member.user.tag} (${member.id})`,
+          action: 'Mitglied Kicked',
+          target: `${Mitglied.user.tag} (${Mitglied.id})`,
           executor: `${moderator.user.tag} (${moderator.id})`,
           reason,
           metadata: {
-            userId: member.id,
+            userId: Mitglied.id,
             moderatorId: moderator.id
           }
         }
       });
 
-      logger.info(`User kicked: ${member.user.tag} by ${moderator.user.tag} in ${guild.name}`);
+      logger.Info(`User kicked: ${Mitglied.user.tag} by ${moderator.user.tag} in ${guild.name}`);
       
       return {
         caseId,
-        user: member.user.tag,
+        user: Mitglied.user.tag,
         reason
       };
-    } catch (error) {
-      logger.error('Error kicking user:', error);
-      throw error;
+    } catch (Fehler) {
+      logger.Fehler('Fehler kicking user:', Fehler);
+      throw Fehler;
     }
   }
 
   static async timeoutUser({
     guild,
-    member,
+    Mitglied,
     moderator,
     durationMs,
     reason = 'Kein Grund angegeben'
   }) {
     try {
-      if (!guild || !member || !moderator || !durationMs) {
-        throw new TitanBotError(
+      if (!guild || !Mitglied || !moderator || !durationMs) {
+        throw new TitanBotFehler(
           'Missing required parameters',
-          ErrorTypes.VALIDATION,
-          'Guild, member, moderator, and duration are required'
+          FehlerTypes.VALIDATION,
+          'Guild, Mitglied, moderator, and duration are required'
         );
       }
 
-      this.assertModerationHierarchy(moderator, member, 'timeout');
+      this.assertModerationHierarchy(moderator, Mitglied, 'timeout');
 
-      if (!member.moderatable) {
-        const targetLabel = getTargetLabel(member);
-        throw new TitanBotError(
-          'Cannot timeout member',
-          ErrorTypes.PERMISSION,
-          `I cannot timeout **${targetLabel}**. They may have **Administrator** permission or a managed/integration role. ` +
-          'Ensure my bot role is above theirs in **Server Settings → Roles** and that they do not have Admin.'
+      if (!Mitglied.moderatable) {
+        const targetLabel = getTargetLabel(Mitglied);
+        throw new TitanBotFehler(
+          'Cannot timeout Mitglied',
+          FehlerTypes.Berechtigung,
+          `I cannot timeout **${targetLabel}**. They may have **Administrator** Berechtigung or a managed/integration Rolle. ` +
+          'Ensure my bot Rolle is above theirs in **Server Einstellungen → Rollen** and that they do not have Admin.'
         );
       }
 
-      await member.timeout(durationMs, reason);
+      await Mitglied.timeout(durationMs, reason);
 
       const durationMinutes = Math.floor(durationMs / 60000);
       const caseId = await logModerationAction({
         client: guild.client,
         guild,
         event: {
-          action: 'Member Timed Out',
-          target: `${member.user.tag} (${member.id})`,
+          action: 'Mitglied Timed Out',
+          target: `${Mitglied.user.tag} (${Mitglied.id})`,
           executor: `${moderator.user.tag} (${moderator.id})`,
           reason,
           duration: `${durationMinutes} minutes`,
           metadata: {
-            userId: member.id,
+            userId: Mitglied.id,
             moderatorId: moderator.id,
             durationMs
           }
         }
       });
 
-      logger.info(`User timed out: ${member.user.tag} by ${moderator.user.tag} in ${guild.name}`);
+      logger.Info(`User timed out: ${Mitglied.user.tag} by ${moderator.user.tag} in ${guild.name}`);
       
       return {
         caseId,
-        user: member.user.tag,
+        user: Mitglied.user.tag,
         duration: durationMinutes,
         reason
       };
-    } catch (error) {
-      logger.error('Error timing out user:', error);
-      throw error;
+    } catch (Fehler) {
+      logger.Fehler('Fehler timing out user:', Fehler);
+      throw Fehler;
     }
   }
 
   static async removeTimeoutUser({
     guild,
-    member,
+    Mitglied,
     moderator,
     reason = 'Timeout removed by moderator'
   }) {
     try {
-      if (!guild || !member || !moderator) {
-        throw new TitanBotError(
+      if (!guild || !Mitglied || !moderator) {
+        throw new TitanBotFehler(
           'Missing required parameters',
-          ErrorTypes.VALIDATION,
-          'Guild, member, and moderator are required'
+          FehlerTypes.VALIDATION,
+          'Guild, Mitglied, and moderator are required'
         );
       }
 
-      this.assertModerationHierarchy(moderator, member, 'remove the timeout from');
+      this.assertModerationHierarchy(moderator, Mitglied, 'remove the timeout from');
 
-      if (!member.moderatable) {
-        const targetLabel = getTargetLabel(member);
-        throw new TitanBotError(
-          'Cannot modify member',
-          ErrorTypes.PERMISSION,
-          `I cannot modify **${targetLabel}**. They may have **Administrator** permission or a managed/integration role. ` +
-          'Ensure my bot role is above theirs in **Server Settings → Roles**.'
+      if (!Mitglied.moderatable) {
+        const targetLabel = getTargetLabel(Mitglied);
+        throw new TitanBotFehler(
+          'Cannot modify Mitglied',
+          FehlerTypes.Berechtigung,
+          `I cannot modify **${targetLabel}**. They may have **Administrator** Berechtigung or a managed/integration Rolle. ` +
+          'Ensure my bot Rolle is above theirs in **Server Einstellungen → Rollen**.'
         );
       }
 
-      if (!member.isCommunicationDisabled()) {
-        throw new TitanBotError(
+      if (!Mitglied.isCommunicationDisabled()) {
+        throw new TitanBotFehler(
           'User not timed out',
-          ErrorTypes.VALIDATION,
-          `${member.user.tag} is not currently timed out`
+          FehlerTypes.VALIDATION,
+          `${Mitglied.user.tag} is not currently timed out`
         );
       }
 
-      await member.timeout(null, reason);
+      await Mitglied.timeout(null, reason);
 
       await logModerationAction({
         client: guild.client,
         guild,
         event: {
-          action: 'Member Untimeouted',
-          target: `${member.user.tag} (${member.id})`,
+          action: 'Mitglied Untimeouted',
+          target: `${Mitglied.user.tag} (${Mitglied.id})`,
           executor: `${moderator.user.tag} (${moderator.id})`,
           reason,
           metadata: {
-            userId: member.id,
+            userId: Mitglied.id,
             moderatorId: moderator.id
           }
         }
       });
 
-      logger.info(`Timeout removed: ${member.user.tag} by ${moderator.user.tag} in ${guild.name}`);
+      logger.Info(`Timeout removed: ${Mitglied.user.tag} by ${moderator.user.tag} in ${guild.name}`);
       
       return {
-        user: member.user.tag
+        user: Mitglied.user.tag
       };
-    } catch (error) {
-      logger.error('Error removing timeout:', error);
-      throw error;
+    } catch (Fehler) {
+      logger.Fehler('Fehler removing timeout:', Fehler);
+      throw Fehler;
     }
   }
 
@@ -396,9 +396,9 @@ export class ModerationService {
   }) {
     try {
       if (!guild || !user || !moderator) {
-        throw new TitanBotError(
+        throw new TitanBotFehler(
           'Missing required parameters',
-          ErrorTypes.VALIDATION,
+          FehlerTypes.VALIDATION,
           'Guild, user, and moderator are required'
         );
       }
@@ -407,20 +407,20 @@ export class ModerationService {
       const banInfo = bans.get(user.id);
 
       if (!banInfo) {
-        throw new TitanBotError(
+        throw new TitanBotFehler(
           'User not banned',
-          ErrorTypes.VALIDATION,
+          FehlerTypes.VALIDATION,
           `${user.tag} is not currently banned from Dieser Server`
         );
       }
 
-      await guild.members.unban(user.id, reason);
+      await guild.Mitglieds.unban(user.id, reason);
 
       const caseId = await logModerationAction({
         client: guild.client,
         guild,
         event: {
-          action: 'Member Unbanned',
+          action: 'Mitglied Unbanned',
           target: `${user.tag} (${user.id})`,
           executor: `${moderator.user.tag} (${moderator.id})`,
           reason,
@@ -431,19 +431,20 @@ export class ModerationService {
         }
       });
 
-      logger.info(`User unbanned: ${user.tag} by ${moderator.user.tag} in ${guild.name}`);
+      logger.Info(`User unbanned: ${user.tag} by ${moderator.user.tag} in ${guild.name}`);
       
       return {
         caseId,
         user: user.tag,
         reason
       };
-    } catch (error) {
-      logger.error('Error unbanning user:', error);
-      throw error;
+    } catch (Fehler) {
+      logger.Fehler('Fehler unbanning user:', Fehler);
+      throw Fehler;
     }
   }
 }
+
 
 
 

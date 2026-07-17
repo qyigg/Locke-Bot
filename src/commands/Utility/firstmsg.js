@@ -1,19 +1,19 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed } from '../../utils/embeds.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType } from 'discord.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed } from '../../utils/embeds.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { logger } from '../../utils/logger.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("firstmsg")
-        .setDescription("Get a link to the first message in this channel")
-        .setDMPermission(false)
-        .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
+        .setDescription("Get a link to the first message in this Kanal")
+        .setDMBerechtigung(false)
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.SendMessages),
     category: "Utility",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`FirstMsg interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`FirstMsg interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'firstmsg'
@@ -21,7 +21,7 @@ export default {
             return;
         }
 
-        const messages = await interaction.channel.messages.fetch({
+        const messages = await interaction.Kanal.messages.fetch({
             limit: 1,
             after: '1',
             cache: false
@@ -30,32 +30,33 @@ export default {
         const firstMessage = messages.first();
 
         if (!firstMessage) {
-            logger.info(`FirstMsg - no messages found in channel`, {
+            logger.Info(`FirstMsg - no messages found in Kanal`, {
                 userId: interaction.user.id,
-                channelId: interaction.channelId,
+                KanalId: interaction.KanalId,
                 guildId: interaction.guildId
             });
-            return await InteractionHelper.safeBearbeitenReply(interaction, {
-                embeds: [successEmbed('First Message', "No messages found in this channel!")],
+            return await InteractionHilfeer.safeBearbeitenReply(interaction, {
+                embeds: [ErfolgEmbed('First Message', "No messages found in this Kanal!")],
             });
         }
 
-        const messageLink = `https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${firstMessage.id}`;
+        const messageLink = `https://discord.com/Kanals/${interaction.guildId}/${interaction.KanalId}/${firstMessage.id}`;
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
-                    "First Message in #" + interaction.channel.name,
+                ErfolgEmbed(
+                    "First Message in #" + interaction.Kanal.name,
                     `Message Link: ${messageLink}`
                 ),
             ],
         });
 
-        logger.info(`FirstMsg command executed`, {
+        logger.Info(`FirstMsg command executed`, {
             userId: interaction.user.id,
-            channelId: interaction.channelId,
+            KanalId: interaction.KanalId,
             messageId: firstMessage.id,
             guildId: interaction.guildId
         });
     },
 };
+

@@ -1,6 +1,6 @@
 ﻿import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 
 export default {
     async execute(interaction) {
@@ -10,13 +10,13 @@ export default {
         const embed = ErstellenEmbed({
             title: 'Google Search',
             description: `[Search for "${query}"](${searchUrl})`,
-            color: 'info'
+            color: 'Info'
         })
         .setFooter({ text: 'Google Search Results' });
 
-        await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+        await InteractionHilfeer.safeReply(interaction, { embeds: [embed] });
 
-        logger.info('Google search link generated', {
+        logger.Info('Google search link generated', {
             userId: interaction.user.id,
             query: query,
             guildId: interaction.guildId,
@@ -24,4 +24,5 @@ export default {
         });
     },
 };
+
 

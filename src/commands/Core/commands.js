@@ -1,12 +1,12 @@
 ﻿import {
   SlashCommandBuilder,
-  PermissionFlagsBits,
+  BerechtigungFlagsBits,
   MessageFlags,
 } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import {
   disableCategory,
   enableCategory,
@@ -21,7 +21,7 @@ import {
   handleDashboardComponent,
   ErstellenDashboardCollectorFilter,
   isCommandAccessCustomId,
-} from './modules/commands_dashboard.js';
+} from './modules/Befehle_dashboard.js';
 
 const DASHBOARD_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -37,8 +37,8 @@ function buildCategoryChoices(client) {
 }
 
 async function ensureManageGuild(interaction) {
-  if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-    await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du brauchst die Berechtigung **Server verwalten** um Befehle zu verwalten.' });
+  if (!interaction.MitgliedBerechtigungs?.has(BerechtigungFlagsBits.ManageGuild)) {
+    await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'Du brauchst die Berechtigung **Server verwalten** um Befehle zu verwalten.' });
     return false;
   }
 
@@ -47,10 +47,10 @@ async function ensureManageGuild(interaction) {
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('commands')
+    .setName('Befehle')
     .setDescription('Aktiviere oder deaktiviere Bot-Befehle und Kategorien für diesen Server')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .setDMPermission(false)
+    .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
+    .setDMBerechtigung(false)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('dashboard')
@@ -119,33 +119,33 @@ export default {
       return interaction.respond(choices);
     }
 
-    // For command scope, get all commands including subcommands
+    // For command scope, get all Befehle including subBefehle
     const registry = buildCommandRegistry(interaction.client);
-    const allCommands = [];
+    const allBefehle = [];
     
-    // Check if the query matches a category name - if so, show commands from that category
+    // Check if the query matches a category name - if so, show Befehle from that category
     const matchedCategory = resolveCategoryChoice(interaction.client, query);
     
     if (matchedCategory) {
-      // Show commands from the matched category
-      for (const command of matchedCategory.commands) {
+      // Show Befehle from the matched category
+      for (const command of matchedCategory.Befehle) {
         if (!isProtectedCommand(command.name)) {
-          allCommands.push(command.name);
+          allBefehle.push(command.name);
         }
       }
     } else {
-      // Show all commands
+      // Show all Befehle
       for (const category of registry.values()) {
-        for (const command of category.commands) {
-          // Include both base commands and subcommands
+        for (const command of category.Befehle) {
+          // Include both base Befehle and subBefehle
           if (!isProtectedCommand(command.name)) {
-            allCommands.push(command.name);
+            allBefehle.push(command.name);
           }
         }
       }
     }
 
-    const choices = allCommands
+    const choices = allBefehle
       .filter((name) => name.includes(query))
       .slice(0, 25)
       .map((name) => ({ name: `/${name}`, value: name }));
@@ -161,13 +161,13 @@ export default {
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === 'dashboard') {
-      const deferred = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+      const deferred = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
       if (!deferred) {
         return;
       }
 
       const view = await buildDashboardView(client, interaction.guildId, interaction.guild, 'overview');
-      await InteractionHelper.safeBearbeitenReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [view.embed],
         components: view.components,
       });
@@ -188,15 +188,15 @@ export default {
             return;
           }
           await handleDashboardComponent(componentInteraction, client);
-        } catch (error) {
-          logger.error('Command access dashboard interaction failed', {
-            error: error.message,
+        } catch (Fehler) {
+          logger.Fehler('Command access dashboard interaction Fehlgeschlagen', {
+            Fehler: Fehler.message,
             customId: componentInteraction.customId,
             guildId: interaction.guildId,
           });
-          await replyUserError(componentInteraction, {
-            type: ErrorTypes.UNKNOWN,
-            message: error.message || 'Failed to Aktualisieren command access.',
+          await replyUserFehler(componentInteraction, {
+            type: FehlerTypes.UNKNOWN,
+            message: Fehler.message || 'Fehlgeschlagen to Aktualisieren command access.',
           }).catch(() => {});
         }
       });
@@ -219,7 +219,7 @@ export default {
     const target = interaction.options.getString('target');
     const isDisable = subcommand === 'disable';
 
-    const deferred = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+    const deferred = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
     if (!deferred) {
       return;
     }
@@ -227,14 +227,14 @@ export default {
     if (scope === 'category') {
       const category = resolveCategoryChoice(client, target);
       if (!category) {
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Keine Kategorie passt zu \`${target}\`. Verwende \`/commands dashboard\` um Kategorien zu durchsuchen.` });
+      return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Keine Kategorie passt zu \`${target}\`. Verwende \`/Befehle dashboard\` um Kategorien zu durchsuchen.` });
       }
 
       if (isDisable) {
         await disableCategory(client, interaction.guildId, category.key);
-        return InteractionHelper.safeBearbeitenReply(interaction, {
+        return InteractionHilfeer.safeBearbeitenReply(interaction, {
           embeds: [
-            successEmbed(
+            ErfolgEmbed(
             'Kategorie deaktiviert',
             `Alle **${category.displayName}** Befehle sind nun deaktiviert.\nGeschützte Befehle bleiben verfügbar.`,
             ),
@@ -243,23 +243,24 @@ export default {
       }
 
       await enableCategory(client, interaction.guildId, category.key);
-      return InteractionHelper.safeBearbeitenReply(interaction, {
-      embeds: [successEmbed('Kategorie aktiviert', `**${category.displayName}** Befehle sind nun aktiviert (außer einzeln deaktivierten Befehlen).`)],
+      return InteractionHilfeer.safeBearbeitenReply(interaction, {
+      embeds: [ErfolgEmbed('Kategorie aktiviert', `**${category.displayName}** Befehle sind nun aktiviert (außer einzeln deaktivierten Befehlen).`)],
       });
     }
 
     const commandName = target.toLowerCase();
     if (isDisable) {
       await disableCommand(client, interaction.guildId, commandName);
-      return InteractionHelper.safeBearbeitenReply(interaction, {
-      embeds: [successEmbed('Befehl deaktiviert', `\`/${commandName}\` ist jetzt in diesem Server deaktiviert.`)],
+      return InteractionHilfeer.safeBearbeitenReply(interaction, {
+      embeds: [ErfolgEmbed('Befehl deaktiviert', `\`/${commandName}\` ist jetzt in diesem Server deaktiviert.`)],
       });
     }
 
     await enableCommand(client, interaction.guildId, commandName);
-    return InteractionHelper.safeBearbeitenReply(interaction, {
-    embeds: [successEmbed('Befehl aktiviert', `\`/${commandName}\` ist jetzt in diesem Server aktiviert.`)],
+    return InteractionHilfeer.safeBearbeitenReply(interaction, {
+    embeds: [ErfolgEmbed('Befehl aktiviert', `\`/${commandName}\` ist jetzt in diesem Server aktiviert.`)],
     });
   },
 };
+
 

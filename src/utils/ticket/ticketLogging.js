@@ -1,6 +1,6 @@
 ﻿// ticketLogging.js
 
-import { ChannelType } from 'discord.js';
+import { KanalType } from 'discord.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { logger } from '../logger.js';
 import {
@@ -19,20 +19,20 @@ export async function logTicketEvent({ client, guildId, event }) {
 
     const config = await getGuildConfig(client, guildId);
 
-    const logChannelId = getLogChannelForEventType(config, event.type);
-    if (!logChannelId) {
+    const logKanalId = getLogKanalForEventType(config, event.type);
+    if (!logKanalId) {
       return;
     }
 
-    const channel = guild.channels.cache.get(logChannelId) || await guild.channels.fetch(logChannelId).catch(() => null);
-    if (!channel) {
-      logger.warn(`Ticket log Kanal nicht gefunden: ${logChannelId} for event type: ${event.type}`);
+    const Kanal = guild.Kanals.cache.get(logKanalId) || await guild.Kanals.fetch(logKanalId).catch(() => null);
+    if (!Kanal) {
+      logger.warn(`Ticket log Kanal nicht gefunden: ${logKanalId} for event type: ${event.type}`);
       return;
     }
 
-    const permissions = channel.permissionsFor(guild.members.me);
-    if (!permissions.has(['SendMessages', 'EmbedLinks'])) {
-      logger.warn(`Missing permissions in ticket log channel: ${logChannelId}`);
+    const Berechtigungs = Kanal.BerechtigungsFor(guild.Mitglieds.me);
+    if (!Berechtigungs.has(['SendMessages', 'EmbedLinks'])) {
+      logger.warn(`Missing Berechtigungs in ticket log Kanal: ${logKanalId}`);
       return;
     }
 
@@ -44,10 +44,10 @@ export async function logTicketEvent({ client, guildId, event }) {
       messageOptions.files = event.attachments;
     }
 
-    await channel.send(messageOptions);
-    logger.info(`Ticket event logged: ${event.type} in guild ${guildId}`);
-  } catch (error) {
-    logger.error('Fehler logging ticket event:', error);
+    await Kanal.send(messageOptions);
+    logger.Info(`Ticket event logged: ${event.type} in guild ${guildId}`);
+  } catch (Fehler) {
+    logger.Fehler('Fehler logging ticket event:', Fehler);
   }
 }
 
@@ -55,7 +55,7 @@ export async function logTicketFeedZurück({
   client,
   guildId,
   ticketNumber,
-  ticketChannelId,
+  ticketKanalId,
   userId,
   rating = null,
   comment = null,
@@ -65,7 +65,7 @@ export async function logTicketFeedZurück({
     guildId,
     event: {
       type: 'feedZurück',
-      ticketId: ticketChannelId,
+      ticketId: ticketKanalId,
       ticketNumber,
       userId,
       metadata: {
@@ -76,10 +76,10 @@ export async function logTicketFeedZurück({
   });
 }
 
-function getLogChannelForEventType(config, eventType) {
+function getLogKanalForEventType(config, eventType) {
   switch (eventType) {
     case 'transcript':
-      return config.ticketTranscriptChannelId || null;
+      return config.ticketTranscriptKanalId || null;
 
     case 'open':
     case 'Schließen':
@@ -90,7 +90,7 @@ function getLogChannelForEventType(config, eventType) {
     case 'pin':
     case 'unpin':
     case 'feedZurück':
-      return config.ticketLogsChannelId || null;
+      return config.ticketLogsKanalId || null;
 
     default:
       return null;
@@ -112,7 +112,7 @@ async function ErstellenTicketLogEmbed(guild, event) {
   const style = TICKET_EVENT_STYLES[event.type] || { color: 0x95a5a6, title: 'Ticket Event' };
   const ticketNumber = event.ticketNumber || event.ticketId;
   const ticketRef = ticketNumber ? `#${ticketNumber}` : 'Unbekannt';
-  const channelMention = event.ticketId ? `<#${event.ticketId}>` : null;
+  const KanalMention = event.ticketId ? `<#${event.ticketId}>` : null;
   const executorMention = event.executorId ? `<@${event.executorId}>` : null;
   const userMention = event.userId ? `<@${event.userId}>` : null;
 
@@ -128,8 +128,8 @@ async function ErstellenTicketLogEmbed(guild, event) {
         { name: 'Ticket', value: ticketRef, inline: true },
         { name: 'Creator', value: userMention || 'Unbekannt', inline: true },
       ];
-      if (channelMention) {
-        inlineFields.push({ name: 'Channel', value: channelMention, inline: true });
+      if (KanalMention) {
+        inlineFields.push({ name: 'Kanal', value: KanalMention, inline: true });
       }
       if (event.reason) {
         fields.push({ name: 'Reason', value: String(event.reason).slice(0, 1024), inline: false });
@@ -142,8 +142,8 @@ async function ErstellenTicketLogEmbed(guild, event) {
         { name: 'Ticket', value: ticketRef, inline: true },
         { name: 'Schließend by', value: executorMention || 'Unbekannt', inline: true },
       ];
-      if (channelMention) {
-        inlineFields.push({ name: 'Channel', value: channelMention, inline: true });
+      if (KanalMention) {
+        inlineFields.push({ name: 'Kanal', value: KanalMention, inline: true });
       }
       if (event.reason) {
         fields.push({ name: 'Reason', value: String(event.reason).slice(0, 1024), inline: false });
@@ -249,34 +249,35 @@ async function ErstellenTicketLogEmbed(guild, event) {
 export async function getTicketLoggingConfig(client, guildId) {
   const config = await getGuildConfig(client, guildId);
   return {
-    enabled: !!(config.ticketLogsChannelId || config.ticketTranscriptChannelId),
-    lifecycleChannelId: config.ticketLogsChannelId || null,
-    transcriptChannelId: config.ticketTranscriptChannelId || null,
+    enabled: !!(config.ticketLogsKanalId || config.ticketTranscriptKanalId),
+    lifecycleKanalId: config.ticketLogsKanalId || null,
+    transcriptKanalId: config.ticketTranscriptKanalId || null,
   };
 }
 
-export function validateLogChannel(channel, botMember) {
-  if (!channel || channel.type !== ChannelType.GuildText) {
+export function validateLogKanal(Kanal, botMitglied) {
+  if (!Kanal || Kanal.type !== KanalType.GuildText) {
     return {
       valid: false,
-      error: 'Channel must be a text channel.',
+      Fehler: 'Kanal must be a text Kanal.',
     };
   }
 
-  const permissions = channel.permissionsFor(botMember);
-  const requiredPermissions = ['SendMessages', 'EmbedLinks'];
+  const Berechtigungs = Kanal.BerechtigungsFor(botMitglied);
+  const requiredBerechtigungs = ['SendMessages', 'EmbedLinks'];
 
-  const missing = requiredPermissions.filter((perm) => !permissions.has(perm));
+  const missing = requiredBerechtigungs.filter((perm) => !Berechtigungs.has(perm));
 
   if (missing.length > 0) {
     return {
       valid: false,
-      error: `Missing permissions: ${missing.join(', ')}`,
+      Fehler: `Missing Berechtigungs: ${missing.join(', ')}`,
     };
   }
 
   return { valid: true };
 }
+
 
 
 

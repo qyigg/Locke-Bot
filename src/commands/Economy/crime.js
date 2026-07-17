@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const CRIME_COOLDOWN = 60 * 60 * 1000;
 const JAIL_TIME = 2 * 60 * 60 * 1000;
@@ -34,8 +34,8 @@ export default {
                 )
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        await InteractionHilfeer.safeDefer(interaction);
             
             const userId = interaction.user.id;
             const guildId = interaction.guildId;
@@ -47,9 +47,9 @@ export default {
 
             if (isJailed) {
                 const timeLeft = Math.ceil((userData.jailedUntil - now) / (1000 * 60));
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "User is in jail",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Du bist im Gefängnis noch ${timeLeft} Minuten lang!`,
                     { jailTimeRemaining: userData.jailedUntil - now }
                 );
@@ -57,9 +57,9 @@ export default {
 
             if (now < lastCrime + CRIME_COOLDOWN) {
                 const timeLeft = Math.ceil((lastCrime + CRIME_COOLDOWN - now) / (1000 * 60));
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Crime cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Du musst noch ${timeLeft} Minuten warten, bevor du ein weiteres Verbrechen begehst.`,
                     { remaining: lastCrime + CRIME_COOLDOWN - now, cooldownType: 'crime' }
                 );
@@ -71,33 +71,33 @@ export default {
             );
 
             if (!crime) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Invalid crime type",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Please select a valid crime type.",
                     { crimeType }
                 );
             }
 
-            const isSuccess = Math.random() > crime.risk;
-            const amountEarned = isSuccess
+            const isErfolg = Math.random() > crime.risk;
+            const amountEarned = isErfolg
                 ? Math.floor(Math.random() * (crime.max - crime.min + 1)) + crime.min
                 : 0;
 
             userData.cooldowns = userData.cooldowns || {};
             userData.cooldowns.crime = now;
 
-            if (isSuccess) {
+            if (isErfolg) {
                 userData.wallet = (userData.wallet || 0) + amountEarned;
                 
                 await setEconomyData(client, guildId, userId, userData);
                 
-                const embed = successEmbed(
+                const embed = ErfolgEmbed(
                     "🕵️ Verbrechen erfolgreich!",
                     `Du hast erfolgreich ${crime.name} begangen und verdienst **${amountEarned}** Münzen!`
                 );
                 
-                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+                await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
             } else {
                 // Fine is based on the potential haul of the attempted crime
                 const potentialHaul = Math.floor((crime.min + crime.max) / 2);
@@ -107,13 +107,14 @@ export default {
                 
                 await setEconomyData(client, guildId, userId, userData);
                 
-                const embed = warningEmbed(
+                const embed = WarnungEmbed(
                     "🚔 Verbrechen gescheitert!",
                     `Du wurdest beim Versuch, ${crime.name} zu begehen, erwischt und bist ins Gefängnis gegangen! ` +
                     `Du wurdest mit ${fine.toLocaleString()} Münzen Geldstrafe belegt und wirst 2 Stunden im Gefängnis sein.`
                 );
                 
-                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+                await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
             }
     }, { command: 'crime' })
 };
+

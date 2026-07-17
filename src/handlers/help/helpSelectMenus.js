@@ -5,15 +5,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Collection, ActionRowBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError } from '../../utils/errorHandler.js';
+import { handleInteractionFehler } from '../../utils/FehlerHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const Zurück_BUTTON_ID = "help-Zurück-to-main";
-const ALL_COMMANDS_ID = "help-all-commands";
-const PAGINATION_PREFIX = "help-page";
-const CATEGORY_SELECT_ID = "help-category-select";
+const Zurück_BUTTON_ID = "Hilfe-Zurück-to-main";
+const ALL_Befehle_ID = "Hilfe-all-Befehle";
+const PAGINATION_PREFIX = "Hilfe-page";
+const CATEGORY_SELECT_ID = "Hilfe-category-select";
 const FOOTER_TEXT = "Made with ❤️";
 const SUBCOMMAND_TYPE = 1;
 const SUBCOMMAND_GROUP_TYPE = 2;
@@ -32,7 +32,7 @@ const CATEGORY_ICONS = {
     Counter: "🔢",
     Tools: "🛠️",
     Search: "🔍",
-    "Reaction Roles": "🎭",
+    "Reaction Rollen": "🎭",
     Community: "👥",
     Birthday: "🎂",
     "Join To Erstellen": "🔌",
@@ -47,7 +47,7 @@ function formatCategoryName(rawCategory) {
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function buildHelpEntries(command, category) {
+function buildHilfeEntries(command, category) {
     const commandData = normalizeCommandData(command);
     if (!commandData?.name) {
         return [];
@@ -120,14 +120,14 @@ function normalizeCommandData(command) {
     };
 }
 
-async function ErstellenCategoryCommandsMenu(category, client) {
+async function ErstellenCategoryBefehleMenu(category, client) {
     const categoryName = formatCategoryName(category);
     const icon = CATEGORY_ICONS[categoryName] || "🔍";
 
-    const categoryCommands = [];
+    const categoryBefehle = [];
 
     try {
-        const categoryPath = path.join(__dirname, "../../commands", category);
+        const categoryPath = path.join(__dirname, "../../Befehle", category);
         const commandFiles = (await fs.readdir(categoryPath))
             .filter((file) => file.endsWith(".js"))
             .sort();
@@ -140,46 +140,46 @@ async function ErstellenCategoryCommandsMenu(category, client) {
 
             if (commandData) {
                 if (
-                    commandData.name === "help" ||
+                    commandData.name === "Hilfe" ||
                     commandData.name === "commandlist"
                 )
                     continue;
 
-                categoryCommands.push(...buildHelpEntries(command, categoryName));
+                categoryBefehle.push(...buildHilfeEntries(command, categoryName));
             }
         }
-    } catch (error) {
-        logger.error(
-            `Error reading commands from category ${category}:`,
-            error,
+    } catch (Fehler) {
+        logger.Fehler(
+            `Fehler reading Befehle from category ${category}:`,
+            Fehler,
         );
     }
 
-    categoryCommands.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    categoryBefehle.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    let registeredCommands = new Collection();
+    let registeredBefehle = new Collection();
     try {
-        if (client?.application?.commands?.fetch) {
-            const commands = await client.application.commands.fetch();
-            for (const cmd of commands.values()) {
-                registeredCommands.set(cmd.name, cmd);
+        if (client?.application?.Befehle?.fetch) {
+            const Befehle = await client.application.Befehle.fetch();
+            for (const cmd of Befehle.values()) {
+                registeredBefehle.set(cmd.name, cmd);
             }
         }
-    } catch (error) {
-        logger.error('Error fetching registered commands:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler fetching registered Befehle:', Fehler);
     }
 
     const embed = ErstellenEmbed({
-        title: `${icon} ${categoryName} Commands`,
-        description: categoryCommands.length > 0
+        title: `${icon} ${categoryName} Befehle`,
+        description: categoryBefehle.length > 0
             ? `Click any command mention below to use it.`
-            : `No commands found in the **${categoryName}** category.`
+            : `No Befehle found in the **${categoryName}** category.`
     });
 
-    if (categoryCommands.length > 0) {
-        const commandMentions = categoryCommands
+    if (categoryBefehle.length > 0) {
+        const commandMentions = categoryBefehle
             .map((cmd) => {
-                const registeredCmd = registeredCommands.get(cmd.baseName);
+                const registeredCmd = registeredBefehle.get(cmd.baseName);
                 if (registeredCmd && registeredCmd.id) {
                     return `</${cmd.displayName}:${registeredCmd.id}> · ${cmd.description}`;
                 }
@@ -190,7 +190,7 @@ async function ErstellenCategoryCommandsMenu(category, client) {
         const maxLength = 1000;
         if (commandMentions.length <= maxLength) {
             embed.addFields({
-                name: "Commands",
+                name: "Befehle",
                 value: commandMentions,
                 inline: false,
             });
@@ -211,7 +211,7 @@ async function ErstellenCategoryCommandsMenu(category, client) {
 
             chunks.forEach((chunk, index) => {
                 embed.addFields({
-                    name: `Commands (Part ${index + 1})`,
+                    name: `Befehle (Part ${index + 1})`,
                     value: chunk,
                     inline: false,
                 });
@@ -238,13 +238,13 @@ async function ErstellenCategoryCommandsMenu(category, client) {
     };
 }
 
-export async function ErstellenAllCommandsMenu(page = 1, client) {
-    const commandsPerPage = 45;
-    const allCommands = [];
+export async function ErstellenAllBefehleMenu(page = 1, client) {
+    const BefehlePerPage = 45;
+    const allBefehle = [];
 
-    const commandsPath = path.join(__dirname, "../../commands");
+    const BefehlePath = path.join(__dirname, "../../Befehle");
     const categoryDirs = (
-        await fs.readdir(commandsPath, { withFileTypes: true })
+        await fs.readdir(BefehlePath, { withFileTypes: true })
     )
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name)
@@ -254,7 +254,7 @@ export async function ErstellenAllCommandsMenu(page = 1, client) {
         try {
             const categoryPath = path.join(
                 __dirname,
-                "../../commands",
+                "../../Befehle",
                 category,
             );
             const commandFiles = (await fs.readdir(categoryPath))
@@ -269,61 +269,61 @@ export async function ErstellenAllCommandsMenu(page = 1, client) {
 
                 if (commandData) {
                     if (
-                        commandData.name === "help" ||
+                        commandData.name === "Hilfe" ||
                         commandData.name === "commandlist"
                     )
                         continue;
 
                     const categoryName = formatCategoryName(category);
 
-                    allCommands.push(...buildHelpEntries(command, categoryName));
+                    allBefehle.push(...buildHilfeEntries(command, categoryName));
                 }
             }
-        } catch (error) {
-            logger.error(
-                `Error reading commands from category ${category}:`,
-                error,
+        } catch (Fehler) {
+            logger.Fehler(
+                `Fehler reading Befehle from category ${category}:`,
+                Fehler,
             );
         }
     }
 
-    allCommands.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    allBefehle.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    let registeredCommands = new Collection();
+    let registeredBefehle = new Collection();
     try {
-        if (client?.application?.commands?.fetch) {
-            const commands = await client.application.commands.fetch();
-            for (const cmd of commands.values()) {
-                registeredCommands.set(cmd.name, cmd);
+        if (client?.application?.Befehle?.fetch) {
+            const Befehle = await client.application.Befehle.fetch();
+            for (const cmd of Befehle.values()) {
+                registeredBefehle.set(cmd.name, cmd);
             }
         }
-    } catch (error) {
-        logger.error('Error fetching registered commands:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler fetching registered Befehle:', Fehler);
     }
 
-    const totalPages = Math.ceil(allCommands.length / commandsPerPage);
-    const startIndex = (page - 1) * commandsPerPage;
-    const endIndex = startIndex + commandsPerPage;
-    const pageCommands = allCommands.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(allBefehle.length / BefehlePerPage);
+    const startIndex = (page - 1) * BefehlePerPage;
+    const endIndex = startIndex + BefehlePerPage;
+    const pageBefehle = allBefehle.slice(startIndex, endIndex);
 
     const embed = ErstellenEmbed({
-        title: "📋 All Commands",
+        title: "📋 All Befehle",
         description: `Browse every available command in one list. Use the page buttons below to move through the full set.`
     });
 
     embed.setFooter({ text: FOOTER_TEXT });
     embed.setTimestamp();
 
-    if (pageCommands.length > 0) {
-        const commandMentions = pageCommands.map((cmd) => {
-            const registeredCmd = registeredCommands.get(cmd.baseName);
+    if (pageBefehle.length > 0) {
+        const commandMentions = pageBefehle.map((cmd) => {
+            const registeredCmd = registeredBefehle.get(cmd.baseName);
             if (registeredCmd && registeredCmd.id) {
                 return `</${cmd.displayName}:${registeredCmd.id}> · ${cmd.category}`;
             }
             return `\`/${cmd.displayName}\` · ${cmd.category}`;
         });
 
-        const columnCount = pageCommands.length > 20 ? 3 : (pageCommands.length > 10 ? 2 : 1);
+        const columnCount = pageBefehle.length > 20 ? 3 : (pageBefehle.length > 10 ? 2 : 1);
         const chunkSize = Math.ceil(commandMentions.length / columnCount);
 
         for (let i = 0; i < columnCount; i++) {
@@ -334,7 +334,7 @@ export async function ErstellenAllCommandsMenu(page = 1, client) {
             if (!chunk) continue;
 
             embed.addFields({
-                name: i === 0 ? `Commands (Page ${page})` : "Commands (cont.)",
+                name: i === 0 ? `Befehle (Page ${page})` : "Befehle (cont.)",
                 value: chunk,
                 inline: columnCount > 1,
             });
@@ -371,7 +371,7 @@ export async function ErstellenAllCommandsMenu(page = 1, client) {
     };
 }
 
-export const helpCategorySelectMenu = {
+export const HilfeCategorySelectMenu = {
     name: CATEGORY_SELECT_ID,
     async execute(interaction, client) {
         try {
@@ -381,35 +381,36 @@ export const helpCategorySelectMenu = {
 
             const selectedCategory = interaction.values[0];
 
-            if (selectedCategory === ALL_COMMANDS_ID) {
-                const { embeds, components } = await ErstellenAllCommandsMenu(1, client);
+            if (selectedCategory === ALL_Befehle_ID) {
+                const { embeds, components } = await ErstellenAllBefehleMenu(1, client);
                 await interaction.BearbeitenReply({
                     embeds,
                     components,
                 });
             } else {
-                const { embeds, components } = await ErstellenCategoryCommandsMenu(selectedCategory, client);
+                const { embeds, components } = await ErstellenCategoryBefehleMenu(selectedCategory, client);
                 await interaction.BearbeitenReply({
                     embeds,
                     components,
                 });
             }
-        } catch (error) {
-            if (error?.code === 40060 || error?.code === 10062) {
-                logger.warn('Help category select interaction already acknowledged or expired.', {
-                    event: 'interaction.help.select.unavailable',
-                    errorCode: String(error.code),
+        } catch (Fehler) {
+            if (Fehler?.code === 40060 || Fehler?.code === 10062) {
+                logger.warn('Hilfe category select interaction already acknowledged or expired.', {
+                    event: 'interaction.Hilfe.select.unavailable',
+                    FehlerCode: String(Fehler.code),
                     customId: interaction.customId,
                     interactionId: interaction.id,
                 });
                 return;
             }
 
-            await handleInteractionError(interaction, error, {
+            await handleInteractionFehler(interaction, Fehler, {
                 type: 'select_menu',
                 customId: interaction.customId,
-                handler: 'help_category',
+                handler: 'Hilfe_category',
             });
         }
     },
 };
+

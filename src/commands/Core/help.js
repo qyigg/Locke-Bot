@@ -4,7 +4,7 @@
     ButtonBuilder,
     ButtonStyle,
 } from "discord.js";
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { ErstellenEmbed } from "../../utils/embeds.js";
 import {
     ErstellenSelectMenu,
@@ -16,10 +16,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CATEGORY_SELECT_ID = "help-category-select";
-const ALL_COMMANDS_ID = "help-all-commands";
-const BUG_REPORT_BUTTON_ID = "help-bug-report";
-const HELP_MENU_TIMEOUT_MS = 5 * 60 * 1000;
+const CATEGORY_SELECT_ID = "Hilfe-category-select";
+const ALL_Befehle_ID = "Hilfe-all-Befehle";
+const BUG_REPORT_BUTTON_ID = "Hilfe-bug-report";
+const Hilfe_MENU_TIMEOUT_MS = 5 * 60 * 1000;
 
 const CATEGORY_ICONS = {
     Core: "ℹ️",
@@ -35,7 +35,7 @@ const CATEGORY_ICONS = {
     Counter: "🔢",
     Tools: "🛠️",
     Search: "🔍",
-    "Reaction Roles": "🎭",
+    "Reaction Rollen": "🎭",
     Community: "👥",
     Birthday: "🎂",
     "Join To Erstellen": "🔌",
@@ -49,10 +49,10 @@ function formatCategoryName(rawCategory) {
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export async function ErstellenInitialHelpMenu(client) {
-    const commandsPath = path.join(__dirname, "../../commands");
+export async function ErstellenInitialHilfeMenu(client) {
+    const BefehlePath = path.join(__dirname, "../../Befehle");
     const categoryDirs = (
-        await fs.readdir(commandsPath, { withFileTypes: true })
+        await fs.readdir(BefehlePath, { withFileTypes: true })
     )
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name)
@@ -62,7 +62,7 @@ export async function ErstellenInitialHelpMenu(client) {
         {
             label: "📋 Alle Befehle",
             description: "Durchsuche jeden verfügbaren Befehl in einer Liste",
-            value: ALL_COMMANDS_ID,
+            value: ALL_Befehle_ID,
         },
         ...categoryDirs.map((category) => {
             const categoryName = formatCategoryName(category);
@@ -86,7 +86,7 @@ export async function ErstellenInitialHelpMenu(client) {
                 name: '🚀 Erste Schritte',
                 value: [
                     '**1. Setup starten** — Führe `/configwizard` aus, um Präfix, Moderatoren-Rolle und Protokolle zu konfigurieren.',
-                    '**2. Systeme aktivieren** — Verwende `/commands dashboard`, um Kategorien zu aktivieren oder zu deaktivieren.',                    '**3. Befehle durchsuchen** — Verwende das Menü unten, um Kategorien und Befehle anzuzeigen.',
+                    '**2. Systeme aktivieren** — Verwende `/Befehle dashboard`, um Kategorien zu aktivieren oder zu deaktivieren.',                    '**3. Befehle durchsuchen** — Verwende das Menü unten, um Kategorien und Befehle anzuzeigen.',
                 ].join('\n'),
                 inline: false,
             },
@@ -117,8 +117,8 @@ export async function ErstellenInitialHelpMenu(client) {
         .setLabel("Fehler melden")
         .setStyle(ButtonStyle.Danger);
 
-    const supportButton = new ButtonBuilder()
-        .setLabel("Support-Server")
+    const UnterstützungButton = new ButtonBuilder()
+        .setLabel("Unterstützung-Server")
         .setURL("https://discord.gg/QnWNz2dKCE")
         .setStyle(ButtonStyle.Link);
 
@@ -130,7 +130,7 @@ export async function ErstellenInitialHelpMenu(client) {
 
     const buttonRow = new ActionRowBuilder().addComponents([
         bugReportButton,
-        supportButton,
+        UnterstützungButton,
     ]);
 
     return {
@@ -142,40 +142,41 @@ export async function ErstellenInitialHelpMenu(client) {
 export default {
     slashOnly: true,
     data: new SlashCommandBuilder()
-        .setName("help")
+        .setName("Hilfe")
         .setDescription("Zeigt das Hilfemenü mit allen verfügbaren Befehlen an"),
 
     async execute(interaction, guildConfig, client) {
         
         const { MessageFlags } = await import('discord.js');
-        await InteractionHelper.safeDefer(interaction);
+        await InteractionHilfeer.safeDefer(interaction);
         
-        const { embeds, components } = await ErstellenInitialHelpMenu(client);
+        const { embeds, components } = await ErstellenInitialHilfeMenu(client);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds,
             components,
         });
 
         setTimeout(async () => {
             try {
-                if (!InteractionHelper.isInteractionValid(interaction)) {
+                if (!InteractionHilfeer.isInteractionValid(interaction)) {
                     return;
                 }
 
                 const SchließendEmbed = ErstellenEmbed({
                     title: "Hilfemenü geschlossen",
-                    description: "Hilfemenü wurde geschlossen, verwende /help erneut.",
+                    description: "Hilfemenü wurde geschlossen, verwende /Hilfe erneut.",
                     color: "secondary",
                 });
 
-                await InteractionHelper.safeBearbeitenReply(interaction, {
+                await InteractionHilfeer.safeBearbeitenReply(interaction, {
                     embeds: [SchließendEmbed],
                     components: [],
                 });
-            } catch (error) {
-                logger.debug('Schließen des Hilfemenüs fehlgeschlagen (Interaktion ist möglicherweise abgelaufen):', error?.message);
+            } catch (Fehler) {
+                logger.debug('Schließen des Hilfemenüs fehlgeschlagen (Interaktion ist möglicherweise abgelaufen):', Fehler?.message);
             }
-        }, HELP_MENU_TIMEOUT_MS);
+        }, Hilfe_MENU_TIMEOUT_MS);
     },
 };
+

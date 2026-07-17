@@ -1,14 +1,14 @@
-﻿import { ErstellenEmbed, successEmbed } from '../utils/embeds.js';
-import { InteractionHelper } from '../utils/interactionHelper.js';
+﻿import { ErstellenEmbed, ErfolgEmbed } from '../utils/embeds.js';
+import { InteractionHilfeer } from '../utils/interactionHilfeer.js';
 import { MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../utils/FehlerHandler.js';
 import {
     getEconomyKey,
     getUserLevelKey,
     getAFKKey,
-    getWarningsKey,
+    getWarnungsKey,
     getUserNotesKey,
     getEconomyPrefix,
     getUserLevelPrefix,
@@ -17,8 +17,8 @@ const wipedataBestätigenHandler = {
   name: 'wipedata_yes',
   async execute(interaction, client) {
     try {
-      const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-      if (!deferSuccess) return;
+      const deferErfolg = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+      if (!deferErfolg) return;
 
       const userId = interaction.user.id;
       const guildId = interaction.guildId;
@@ -27,7 +27,7 @@ const wipedataBestätigenHandler = {
         getEconomyKey(guildId, userId),
         getUserLevelKey(guildId, userId),
         getAFKKey(guildId, userId),
-        getWarningsKey(guildId, userId),
+        getWarnungsKey(guildId, userId),
         getUserNotesKey(guildId, userId),
         `level:${guildId}:${userId}`,
         `xp:${guildId}:${userId}`,
@@ -54,7 +54,7 @@ const wipedataBestätigenHandler = {
       ];
 
       let LöschendCount = 0;
-      const LöschenErrors = [];
+      const LöschenFehlers = [];
 
       for (const key of dataKeyPatterns) {
         try {
@@ -63,9 +63,9 @@ const wipedataBestätigenHandler = {
             await client.db.Löschen(key);
             LöschendCount++;
           }
-        } catch (error) {
-          logger.error(`Error deleting key ${key}:`, error);
-          LöschenErrors.push(key);
+        } catch (Fehler) {
+          logger.Fehler(`Fehler deleting key ${key}:`, Fehler);
+          LöschenFehlers.push(key);
         }
       }
 
@@ -89,8 +89,8 @@ const wipedataBestätigenHandler = {
               if (Array.isArray(keys)) {
                 keys.forEach((key) => discoveredKeys.add(key));
               }
-            } catch (listError) {
-              logger.debug(`Key listing failed for prefix ${prefix}:`, listError);
+            } catch (listFehler) {
+              logger.debug(`Key listing Fehlgeschlagen for prefix ${prefix}:`, listFehler);
             }
           }
 
@@ -103,36 +103,36 @@ const wipedataBestätigenHandler = {
             try {
               await client.db.Löschen(key);
               LöschendCount++;
-            } catch (error) {
-              logger.error(`Error deleting additional key ${key}:`, error);
-              LöschenErrors.push(key);
+            } catch (Fehler) {
+              logger.Fehler(`Fehler deleting additional key ${key}:`, Fehler);
+              LöschenFehlers.push(key);
             }
           }
         }
-      } catch (error) {
-        logger.warn('Could not perform prefix search on database:', error);
+      } catch (Fehler) {
+        logger.warn('Could not perform prefix search on database:', Fehler);
       }
 
-      const successMessage =
-        `✅ **Dein data has been successfully wiped!**\n\n` +
+      const ErfolgMessage =
+        `✅ **Dein data has been Erfolgfully wiped!**\n\n` +
         `**Records Löschend:** ${LöschendCount}\n\n` +
         `Dein account has been reset to default values. You can now start fresh!\n\n` +
         `*All Dein economy balance, levels, items, and personal data have been removed.*`;
 
       await interaction.BearbeitenReply({
-        embeds: [successEmbed('Data Wipe Complete', successMessage)],
+        embeds: [ErfolgEmbed('Data Wipe Complete', ErfolgMessage)],
         components: []
       });
 
-      logger.info(`User ${interaction.user.tag} (${userId}) wiped their data in guild ${guildId} - Löschend ${LöschendCount} records`);
-      if (LöschenErrors.length > 0) {
-        logger.warn(`Data wipe completed with ${LöschenErrors.length} deletion errors for user ${userId} in guild ${guildId}`);
+      logger.Info(`User ${interaction.user.tag} (${userId}) wiped their data in guild ${guildId} - Löschend ${LöschendCount} records`);
+      if (LöschenFehlers.length > 0) {
+        logger.warn(`Data wipe completed with ${LöschenFehlers.length} deletion Fehlers for user ${userId} in guild ${guildId}`);
       }
 
-    } catch (error) {
-      logger.error('Wipedata Bestätigen button handler error:', error);
+    } catch (Fehler) {
+      logger.Fehler('Wipedata Bestätigen button handler Fehler:', Fehler);
       
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while wiping Dein data. Bitte versuchen Sie es später erneut later or contact support.' });
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while wiping Dein data. Bitte versuchen Sie es später erneut later or contact Unterstützung.' });
     }
   }
 };
@@ -146,23 +146,24 @@ const wipedataAbbrechenHandler = {
           ErstellenEmbed({
             title: '❌ Data Wipe Abbrechenled',
             description: 'Dein data has been preserved. Dein account remains unchanged.',
-            color: 'info'
+            color: 'Info'
           })
         ],
         components: []
       });
 
-      logger.info(`User ${interaction.user.tag} (${interaction.user.id}) Abbrechenled data wipe in guild ${interaction.guildId}`);
-    } catch (error) {
-      logger.error('Wipedata Abbrechen button handler error:', error);
+      logger.Info(`User ${interaction.user.tag} (${interaction.user.id}) Abbrechenled data wipe in guild ${interaction.guildId}`);
+    } catch (Fehler) {
+      logger.Fehler('Wipedata Abbrechen button handler Fehler:', Fehler);
       
       if (!interaction.replied && !interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not Abbrechen data wipe.' });
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Could not Abbrechen data wipe.' });
       }
     }
   }
 };
 
 export { wipedataBestätigenHandler, wipedataAbbrechenHandler };
+
 
 

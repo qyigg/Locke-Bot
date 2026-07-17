@@ -1,8 +1,8 @@
 ﻿import { MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed } from '../utils/embeds.js';
-import { performDeletionByCounterId } from '../commands/ServerStats/modules/serverstats_Löschen.js';
+import { ErstellenEmbed, ErfolgEmbed } from '../utils/embeds.js';
+import { performDeletionByCounterId } from '../Befehle/ServerStats/modules/serverstats_Löschen.js';
 import { logger } from '../utils/logger.js';
-import { ErrorTypes, replyUserError, handleInteractionError } from '../utils/errorHandler.js';
+import { FehlerTypes, replyUserFehler, handleInteractionFehler } from '../utils/FehlerHandler.js';
 
 export const counterLöschenActionHandler = {
   name: 'counter-Löschen',
@@ -11,25 +11,25 @@ export const counterLöschenActionHandler = {
       
       try {
         await interaction.deferAktualisieren();
-      } catch (error) {
-        logger.error("Failed to defer button interaction:", error);
+      } catch (Fehler) {
+        logger.Fehler("Fehlgeschlagen to defer button interaction:", Fehler);
         return;
       }
 
       const [action, counterId, ownerId] = args;
 
       if (!interaction.inGuild()) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This action can only be used in a server.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'This action can only be used in a server.' }).catch(logger.Fehler);
         return;
       }
 
       if (!action || !counterId) {
-        await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Counter Löschen action data is missing.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Counter Löschen action data is missing.' }).catch(logger.Fehler);
         return;
       }
 
       if (ownerId && interaction.user.id !== ownerId) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only Der Benutzer who initiated this deletion can use these buttons.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Only Der Benutzer who initiated this deletion can use these buttons.' }).catch(logger.Fehler);
         return;
       }
 
@@ -38,26 +38,26 @@ export const counterLöschenActionHandler = {
           embeds: [ErstellenEmbed({
             title: '❌ Abbrechenled',
             description: 'Counter deletion Abbrechenled.',
-            color: 'error'
+            color: 'Fehler'
           })],
           components: []
-        }).catch(logger.error);
+        }).catch(logger.Fehler);
         return;
       }
 
       if (action !== 'Bestätigen') {
-        await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Unknown counter Löschen action.' }).catch(logger.error);
+        await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Unknown counter Löschen action.' }).catch(logger.Fehler);
         return;
       }
 
       const { message } = await performDeletionByCounterId(client, interaction.guild, counterId);
 
       await interaction.BearbeitenReply({
-        embeds: [successEmbed(message)],
+        embeds: [ErfolgEmbed(message)],
         components: []
-      }).catch(logger.error);
-    } catch (error) {
-      await handleInteractionError(interaction, error, {
+      }).catch(logger.Fehler);
+    } catch (Fehler) {
+      await handleInteractionFehler(interaction, Fehler, {
         type: 'button',
         handler: 'counter_Löschen',
         customId: interaction.customId,
@@ -67,4 +67,5 @@ export const counterLöschenActionHandler = {
 };
 
 export default counterLöschenActionHandler;
+
 

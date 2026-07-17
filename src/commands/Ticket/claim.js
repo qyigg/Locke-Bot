@@ -1,50 +1,51 @@
 ﻿import { getColor } from '../../config/bot.js';
-import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { SlashCommandBuilder, BerechtigungFlagsBits, MessageFlags } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { getTicketPermissionContext } from '../../utils/ticket/ticketPermissions.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { getTicketBerechtigungContext } from '../../utils/ticket/ticketBerechtigungs.js';
 import { claimTicket } from '../../services/ticket.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("claim")
         .setDescription("Claims an open ticket, assigning it to you.")
-        .setDMPermission(false),
+        .setDMBerechtigung(false),
 
     async execute(interaction, guildConfig, client) {
-        const deferred = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        const deferred = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
         if (!deferred) {
             return;
         }
 
-        const permissionContext = await getTicketPermissionContext({ client, interaction });
-        if (!permissionContext.ticketData) {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'This command can only be used in a valid ticket channel.' });
+        const BerechtigungContext = await getTicketBerechtigungContext({ client, interaction });
+        if (!BerechtigungContext.ticketData) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'This command can only be used in a valid ticket Kanal.' });
         }
 
-        if (!permissionContext.canManageTicket) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the `Manage Channels` permission or the configured `Ticket Staff Role` to claim tickets.' });
+        if (!BerechtigungContext.canManageTicket) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need the `Manage Kanals` Berechtigung or the configured `Ticket Staff Rolle` to claim tickets.' });
         }
 
-        await claimTicket(interaction.channel, interaction.user);
+        await claimTicket(interaction.Kanal, interaction.user);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     "Ticket beansprucht!",
-                    "You have successfully claimed this ticket.",
+                    "You have Erfolgfully claimed this ticket.",
                 ),
             ],
         });
 
-        logger.info('Ticket beansprucht successfully', {
+        logger.Info('Ticket beansprucht Erfolgfully', {
             userId: interaction.user.id,
             userTag: interaction.user.tag,
-            channelId: interaction.channel.id,
-            channelName: interaction.channel.name,
+            KanalId: interaction.Kanal.id,
+            KanalName: interaction.Kanal.name,
             guildId: interaction.guildId,
             commandName: 'claim'
         });
     },
 };
+

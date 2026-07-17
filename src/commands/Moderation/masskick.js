@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, MessageFlags } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("masskick")
@@ -21,14 +21,14 @@ export default {
                 .setDescription("Reason for the mass kick")
                 .setRequired(false)
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.KickMitglieds),
     category: "moderation",
     abuseProtection: { maxAttempts: 3, windowMs: 60_000 },
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Masskick interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Masskick interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'masskick'
@@ -47,65 +47,65 @@ export default {
 .slice(0, 20);
 
             if (userIds.length === 0) {
-                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide valid user IDs or mentions. Maximum 20 users at once.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please provide valid user IDs or mentions. Maximum 20 users at once.' });
             }
 
             if (userIds.includes(interaction.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht include Deinself in a mass kick.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Du kannst nicht include Deinself in a mass kick.' });
             }
 
             if (userIds.includes(client.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Du kannst nicht include the bot in a mass kick.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Du kannst nicht include the bot in a mass kick.' });
             }
 
             const results = {
-                successful: [],
-                failed: [],
+                Erfolgful: [],
+                Fehlgeschlagen: [],
                 skipped: []
             };
 
             for (const userId of userIds) {
                 try {
-                    const member = await interaction.guild.members.fetch(userId).catch(() => null);
+                    const Mitglied = await interaction.guild.Mitglieds.fetch(userId).catch(() => null);
                     
-                    if (!member) {
-                        results.failed.push({ userId, reason: "User not in server" });
+                    if (!Mitglied) {
+                        results.Fehlgeschlagen.push({ userId, reason: "User not in server" });
                         continue;
                     }
 
-                    const modCheck = ModerationService.validateHierarchy(interaction.member, member, 'kick');
+                    const modCheck = ModerationService.validateHierarchy(interaction.Mitglied, Mitglied, 'kick');
                     if (!modCheck.valid) {
                         results.skipped.push({
-                            user: member.user.tag,
+                            user: Mitglied.user.tag,
                             userId,
-                            reason: ModerationService.buildHierarchySkipReason(interaction.member, member, 'kick'),
+                            reason: ModerationService.buildHierarchySkipReason(interaction.Mitglied, Mitglied, 'kick'),
                         });
                         continue;
                     }
 
-                    const botCheck = ModerationService.validateBotHierarchy(member, 'kick');
+                    const botCheck = ModerationService.validateBotHierarchy(Mitglied, 'kick');
                     if (!botCheck.valid) {
                         results.skipped.push({
-                            user: member.user.tag,
+                            user: Mitglied.user.tag,
                             userId,
-                            reason: ModerationService.buildHierarchySkipReason(interaction.member, member, 'kick', 'bot'),
+                            reason: ModerationService.buildHierarchySkipReason(interaction.Mitglied, Mitglied, 'kick', 'bot'),
                         });
                         continue;
                     }
 
-                    if (!member.kickable) {
+                    if (!Mitglied.kickable) {
                         results.skipped.push({
-                            user: member.user.tag,
+                            user: Mitglied.user.tag,
                             userId,
-                            reason: 'Target has Admin or a managed role, or bot lacks Kick Members',
+                            reason: 'Target has Admin or a managed Rolle, or bot lacks Kick Mitglieds',
                         });
                         continue;
                     }
 
-                    await member.kick(reason);
+                    await Mitglied.kick(reason);
 
-                    results.successful.push({
-                        user: member.user.tag,
+                    results.Erfolgful.push({
+                        user: Mitglied.user.tag,
                         userId
                     });
 
@@ -113,24 +113,24 @@ export default {
                         client,
                         guild: interaction.guild,
                         event: {
-                            action: "Member Kicked",
-                            target: `${member.user.tag} (${member.user.id})`,
+                            action: "Mitglied Kicked",
+                            target: `${Mitglied.user.tag} (${Mitglied.user.id})`,
                             executor: `${interaction.user.tag} (${interaction.user.id})`,
                             reason: `${reason} (Mass Kick)`,
                             metadata: {
-                                userId: member.user.id,
+                                userId: Mitglied.user.id,
                                 moderatorId: interaction.user.id,
                                 massKick: true
                             }
                         }
                     });
 
-                } catch (error) {
-                    logger.error(`Failed to kick user ${userId}:`, error);
-                    const reason = error instanceof TitanBotError
-                        ? (error.userMessage || error.message)
-                        : (error.message || "Unknown error");
-                    results.failed.push({ 
+                } catch (Fehler) {
+                    logger.Fehler(`Fehlgeschlagen to kick user ${userId}:`, Fehler);
+                    const reason = Fehler instanceof TitanBotFehler
+                        ? (Fehler.userMessage || Fehler.message)
+                        : (Fehler.message || "Unknown Fehler");
+                    results.Fehlgeschlagen.push({ 
                         userId, 
                         reason,
                     });
@@ -139,9 +139,9 @@ export default {
 
             let description = `**Mass Kick Results:**\n\n`;
             
-            if (results.successful.length > 0) {
-                description += `✅ **Successfully Kicked (${results.successful.length}):**\n`;
-                results.successful.forEach(result => {
+            if (results.Erfolgful.length > 0) {
+                description += `✅ **Erfolgfully Kicked (${results.Erfolgful.length}):**\n`;
+                results.Erfolgful.forEach(result => {
                     description += `• ${result.user} (${result.userId})\n`;
                 });
                 description += '\n';
@@ -155,16 +155,16 @@ export default {
                 description += '\n';
             }
 
-            if (results.failed.length > 0) {
-                description += `❌ **Failed (${results.failed.length}):**\n`;
-                results.failed.forEach(result => {
+            if (results.Fehlgeschlagen.length > 0) {
+                description += `❌ **Fehlgeschlagen (${results.Fehlgeschlagen.length}):**\n`;
+                results.Fehlgeschlagen.forEach(result => {
                     description += `• ${result.userId} - ${result.reason}\n`;
                 });
             }
 
-            const embed = results.successful.length > 0 ? successEmbed : warningEmbed;
+            const embed = results.Erfolgful.length > 0 ? ErfolgEmbed : WarnungEmbed;
             
-            return await InteractionHelper.safeBearbeitenReply(interaction, {
+            return await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
                     embed(
                         `👢 Mass Kick Completed`,
@@ -173,11 +173,12 @@ export default {
                 ]
             });
 
-        } catch (error) {
-            logger.error("Error in masskick command:", error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while processing the mass kick. Bitte versuchen Sie es später erneut later.' });
+        } catch (Fehler) {
+            logger.Fehler("Fehler in masskick command:", Fehler);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while Wird verarbeitet the mass kick. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
+
 
 

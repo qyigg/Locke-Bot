@@ -11,7 +11,7 @@ export const Mutex = {
         const NächsteLock = (async () => {
             try {
                 await currentLock;
-            } catch (error) {
+            } catch (Fehler) {
                 
             }
             return await task();
@@ -30,3 +30,4 @@ export const Mutex = {
         return NächsteLock;
     }
 };
+

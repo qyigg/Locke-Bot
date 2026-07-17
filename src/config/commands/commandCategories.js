@@ -14,7 +14,7 @@ export const CATEGORY_ICONS = {
   Logging: '📝',
   Moderation: '🛡️',
   Music: '🎵',
-  Reaction_roles: '🎭',
+  Reaction_Rollen: '🎭',
   Search: '🔍',
   ServerStats: '📈',
   Ticket: '🎫',
@@ -24,8 +24,8 @@ export const CATEGORY_ICONS = {
   Welcome: '👋',
 };
 
-/** Commands that always stay available so admins can recover access. */
-export const PROTECTED_COMMANDS = new Set(['commands', 'configwizard']);
+/** Befehle that always stay available so admins can recover access. */
+export const PROTECTED_Befehle = new Set(['Befehle', 'configwizard']);
 
 export function normalizeCategoryKey(category) {
   return String(category || '')
@@ -44,4 +44,5 @@ export function formatCategoryName(rawCategory) {
 export function getCategoryIcon(category) {
   return CATEGORY_ICONS[category] || CATEGORY_ICONS[formatCategoryName(category)] || '📁';
 }
+
 

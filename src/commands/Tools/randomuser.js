@@ -1,25 +1,25 @@
 ﻿import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getColor } from '../../config/bot.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('randomuser')
         .setDescription('Select a random user from the server')
-        .addRoleOption(option =>
-            option.setName('role')
-                .setDescription('Limit selection to users with this role')
+        .addRolleOption(option =>
+            option.setName('Rolle')
+                .setDescription('Limit selection to users with this Rolle')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('bots')
                 .setDescription('Include bots in the selection (default: false)')
                 .setRequired(false))
         .addBooleanOption(option =>
-            option.setName('online')
-                .setDescription('Only select from online users (default: false)')
+            option.setName('Online')
+                .setDescription('Only select from Online users (default: false)')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('mention')
@@ -27,9 +27,9 @@ export default {
                 .setRequired(false)),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`RandomUser interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`RandomUser interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'randomuser'
@@ -38,65 +38,65 @@ export default {
         }
 
         if (!interaction.guild) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'This command can only be used in a server/guild.',
             });
         }
 
-        const role = interaction.options.getRole('role');
+        const Rolle = interaction.options.getRolle('Rolle');
         const includeBots = interaction.options.getBoolean('bots') || false;
-        const onlineOnly = interaction.options.getBoolean('online') || false;
+        const OnlineOnly = interaction.options.getBoolean('Online') || false;
         const shouldMention = interaction.options.getBoolean('mention') || false;
 
-        let members = interaction.guild.members.cache.filter(member => {
-            if (member.user.bot && !includeBots) return false;
+        let Mitglieds = interaction.guild.Mitglieds.cache.filter(Mitglied => {
+            if (Mitglied.user.bot && !includeBots) return false;
 
-            if (onlineOnly && member.presence?.status === 'offline') return false;
+            if (OnlineOnly && Mitglied.presence?.Status === 'Offline') return false;
 
-            if (role && !member.roles.cache.has(role.id)) return false;
+            if (Rolle && !Mitglied.Rollen.cache.has(Rolle.id)) return false;
 
             return true;
         });
 
-        let memberArray = Array.from(members.values());
+        let MitgliedArray = Array.from(Mitglieds.values());
 
         if (!includeBots) {
-            memberArray = memberArray.filter(member => !member.user.bot);
+            MitgliedArray = MitgliedArray.filter(Mitglied => !Mitglied.user.bot);
         }
 
-        if (memberArray.length === 0) {
-            let errorMessage = 'Could not find any users matching Dein filters:';
-            if (role) errorMessage = `No users have the **${role.name}** role.`;
-            if (onlineOnly) errorMessage = 'No users are currently online.';
-            if (role && onlineOnly) errorMessage = `No **${role.name}** members are online.`;
+        if (MitgliedArray.length === 0) {
+            let FehlerMessage = 'Could not find any users matching Dein filters:';
+            if (Rolle) FehlerMessage = `No users have the **${Rolle.name}** Rolle.`;
+            if (OnlineOnly) FehlerMessage = 'No users are currently Online.';
+            if (Rolle && OnlineOnly) FehlerMessage = `No **${Rolle.name}** Mitglieds are Online.`;
 
-            return replyUserError(interaction, {
-                type: ErrorTypes.USER_INPUT,
-                message: errorMessage + '\n\nTry adjusting Dein filters.',
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.USER_INPUT,
+                message: FehlerMessage + '\n\nTry adjusting Dein filters.',
             });
         }
 
-        const randomIndex = Math.floor(Math.random() * memberArray.length);
-        const selectedMember = memberArray[randomIndex];
+        const randomIndex = Math.floor(Math.random() * MitgliedArray.length);
+        const selectedMitglied = MitgliedArray[randomIndex];
 
-        const user = selectedMember.user;
-        const joinDate = selectedMember.joinedAt;
-        const roles = selectedMember.roles.cache
-            .filter(role => role.id !== interaction.guild.id)
+        const user = selectedMitglied.user;
+        const joinDate = selectedMitglied.joinedAt;
+        const Rollen = selectedMitglied.Rollen.cache
+            .filter(Rolle => Rolle.id !== interaction.guild.id)
             .sort((a, b) => b.position - a.position)
-            .map(role => role.toString())
+            .map(Rolle => Rolle.toString())
             .slice(0, 10);
 
-        const embed = successEmbed(
+        const embed = ErfolgEmbed(
             '🎲 Random User Selected',
-            shouldMention ? `${selectedMember}` : `**${user.username}**`
+            shouldMention ? `${selectedMitglied}` : `**${user.username}**`
         )
         .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }))
         .addFields(
             { name: 'Username', value: user.username, inline: true },
             { name: 'Bot', value: user.bot ? 'Yes' : 'No', inline: true },
-            { name: `Roles (${roles.length})`, value: roles.length > 0 ? roles.slice(0, 5).join('') + (roles.length > 5 ? `+${roles.length - 5} more` : '') : 'No roles', inline: false }
+            { name: `Rollen (${Rollen.length})`, value: Rollen.length > 0 ? Rollen.slice(0, 5).join('') + (Rollen.length > 5 ? `+${Rollen.length - 5} more` : '') : 'No Rollen', inline: false }
         )
         .setColor('primary');
 
@@ -109,7 +109,7 @@ export default {
             );
 
         const response = await interaction.BearbeitenReply({
-            content: shouldMention ? `${selectedMember}, you've been chosen!` : null,
+            content: shouldMention ? `${selectedMitglied}, you've been chosen!` : null,
             embeds: [embed],
             components: [row],
             allowedMentions: { users: shouldMention ? [user.id] : [] }
@@ -120,61 +120,61 @@ export default {
 
         collector.on('collect', async (i) => {
             try {
-                let newMembers = interaction.guild.members.cache.filter(member => {
-                    if (member.user.bot && !includeBots) return false;
+                let newMitglieds = interaction.guild.Mitglieds.cache.filter(Mitglied => {
+                    if (Mitglied.user.bot && !includeBots) return false;
 
-                    if (onlineOnly && member.presence?.status === 'offline') return false;
+                    if (OnlineOnly && Mitglied.presence?.Status === 'Offline') return false;
 
-                    if (role && !member.roles.cache.has(role.id)) return false;
+                    if (Rolle && !Mitglied.Rollen.cache.has(Rolle.id)) return false;
 
                     return true;
                 });
 
-                let newMemberArray = Array.from(newMembers.values());
+                let newMitgliedArray = Array.from(newMitglieds.values());
 
                 if (!includeBots) {
-                    newMemberArray = newMemberArray.filter(member => !member.user.bot);
+                    newMitgliedArray = newMitgliedArray.filter(Mitglied => !Mitglied.user.bot);
                 }
 
-                if (newMemberArray.length === 0) {
-                    await replyUserError(i, {
-                        type: ErrorTypes.USER_INPUT,
+                if (newMitgliedArray.length === 0) {
+                    await replyUserFehler(i, {
+                        type: FehlerTypes.USER_INPUT,
                         message: 'No users found matching the criteria.',
                     });
                     return;
                 }
 
-                const newRandomIndex = Math.floor(Math.random() * newMemberArray.length);
-                const newSelectedMember = newMemberArray[newRandomIndex];
-                const newUser = newSelectedMember.user;
+                const newRandomIndex = Math.floor(Math.random() * newMitgliedArray.length);
+                const newSelectedMitglied = newMitgliedArray[newRandomIndex];
+                const newUser = newSelectedMitglied.user;
 
-                const newRoles = newSelectedMember.roles.cache
+                const newRollen = newSelectedMitglied.Rollen.cache
                     .filter(r => r.id !== interaction.guild.id)
                     .sort((a, b) => b.position - a.position)
                     .map(r => r.toString())
                     .slice(0, 10);
 
-                const newEmbed = successEmbed(
+                const newEmbed = ErfolgEmbed(
                     '🎲 Random User Selected',
-                    shouldMention ? `${newSelectedMember}` : `**${newUser.username}**`
+                    shouldMention ? `${newSelectedMitglied}` : `**${newUser.username}**`
                 )
                 .setThumbnail(newUser.displayAvatarURL({ dynamic: true, size: 256 }))
                 .addFields(
                     { name: 'Username', value: newUser.username, inline: true },
                     { name: 'Bot', value: newUser.bot ? 'Yes' : 'No', inline: true },
-                    { name: `Roles (${newRoles.length})`, value: newRoles.length > 0 ? newRoles.slice(0, 5).join('') + (newRoles.length > 5 ? `+${newRoles.length - 5} more` : '') : 'No roles', inline: false }
+                    { name: `Rollen (${newRollen.length})`, value: newRollen.length > 0 ? newRollen.slice(0, 5).join('') + (newRollen.length > 5 ? `+${newRollen.length - 5} more` : '') : 'No Rollen', inline: false }
                 )
-                .setColor(newSelectedMember.displayHexColor || '#3498db');
+                .setColor(newSelectedMitglied.displayHexColor || '#3498db');
 
                 await i.Aktualisieren({
-                    content: shouldMention ? `${newSelectedMember}, you've been chosen!` : null,
+                    content: shouldMention ? `${newSelectedMitglied}, you've been chosen!` : null,
                     embeds: [newEmbed],
                     components: [row],
                     allowedMentions: { users: shouldMention ? [newUser.id] : [] }
                 });
 
-            } catch (error) {
-                logger.error('Button interaction error:', error);
+            } catch (Fehler) {
+                logger.Fehler('Button interaction Fehler:', Fehler);
                 await i.reply({
                     content: 'Ein Fehler ist aufgetreten while selecting another user.',
                     flags: ['Ephemeral']
@@ -187,9 +187,10 @@ export default {
                 ButtonBuilder.from(row.components[0]).setDisabled(true)
             );
 
-            interaction.BearbeitenReply({ components: [disabledRow] }).catch(console.error);
+            interaction.BearbeitenReply({ components: [disabledRow] }).catch(console.Fehler);
         });
     },
 };
+
 
 

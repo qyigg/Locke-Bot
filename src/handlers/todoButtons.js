@@ -1,17 +1,17 @@
 ﻿import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
-import { successEmbed } from '../utils/embeds.js';
+import { ErfolgEmbed } from '../utils/embeds.js';
 import { getFromDb, setInDb } from '../utils/database.js';
 import { checkRateLimit } from '../utils/rateLimiter.js';
 import { logger } from '../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../utils/FehlerHandler.js';
 function buildSharedTodoViewPayload(listData, listId, guild) {
-  const memberList = (listData.members || []).map(memberId => {
-    const member = guild?.members?.cache?.get(memberId);
-    return member ? member.user.username : `<@${memberId}>`;
+  const MitgliedList = (listData.Mitglieds || []).map(MitgliedId => {
+    const Mitglied = guild?.Mitglieds?.cache?.get(MitgliedId);
+    return Mitglied ? Mitglied.user.username : `<@${MitgliedId}>`;
   }).join(', ');
 
-  const owner = guild?.members?.cache?.get(listData.creatorId);
+  const owner = guild?.Mitglieds?.cache?.get(listData.creatorId);
   const ownerName = owner ? owner.user.username : `<@${listData.creatorId}>`;
 
   const tasks = Array.isArray(listData.tasks) ? listData.tasks : [];
@@ -19,10 +19,10 @@ function buildSharedTodoViewPayload(listData, listId, guild) {
   if (tasks.length === 0) {
     return {
       embeds: [
-        successEmbed(
+        ErfolgEmbed(
           `📋 **${listData.name}**\n\n` +
           `👑 **Owner:** ${ownerName}\n` +
-          `👥 **Members:** ${memberList}\n\n` +
+          `👥 **Mitglieds:** ${MitgliedList}\n\n` +
           '*This list is currently empty. Use the "Add Task" button to add tasks!*',
           `Shared List (ID: \`${listId}\`)`
         )
@@ -36,7 +36,7 @@ function buildSharedTodoViewPayload(listData, listId, guild) {
           new ButtonBuilder()
             .setCustomId(`shared_todo_complete_${listId}`)
             .setLabel('Complete Task')
-            .setStyle(ButtonStyle.Success),
+            .setStyle(ButtonStyle.Erfolg),
           new ButtonBuilder()
             .setCustomId(`shared_todo_remove_${listId}`)
             .setLabel('Remove Task')
@@ -56,10 +56,10 @@ function buildSharedTodoViewPayload(listData, listId, guild) {
 
   return {
     embeds: [
-      successEmbed(
+      ErfolgEmbed(
         `📋 **${listData.name}**\n\n` +
         `👑 **Owner:** ${ownerName}\n` +
-        `👥 **Members:** ${memberList}\n\n` +
+        `👥 **Mitglieds:** ${MitgliedList}\n\n` +
         `**Tasks:**\n${taskList}`,
         `Shared List (ID: \`${listId}\`)`
       )
@@ -73,7 +73,7 @@ function buildSharedTodoViewPayload(listData, listId, guild) {
         new ButtonBuilder()
           .setCustomId(`shared_todo_complete_${listId}`)
           .setLabel('Complete Task')
-          .setStyle(ButtonStyle.Success),
+          .setStyle(ButtonStyle.Erfolg),
         new ButtonBuilder()
           .setCustomId(`shared_todo_remove_${listId}`)
           .setLabel('Remove Task')
@@ -84,7 +84,7 @@ function buildSharedTodoViewPayload(listData, listId, guild) {
 }
 
 async function refreshSharedTodoMessage(interaction, listId, messageId) {
-  if (!messageId || !interaction.channel) {
+  if (!messageId || !interaction.Kanal) {
     return;
   }
 
@@ -95,20 +95,20 @@ async function refreshSharedTodoMessage(interaction, listId, messageId) {
   }
 
   try {
-    const targetMessage = await interaction.channel.messages.fetch(messageId);
+    const targetMessage = await interaction.Kanal.messages.fetch(messageId);
     if (!targetMessage) {
       return;
     }
 
     const AktualisierendPayload = buildSharedTodoViewPayload(listData, listId, interaction.guild);
     await targetMessage.Bearbeiten(AktualisierendPayload);
-  } catch (error) {
+  } catch (Fehler) {
     logger.warn('Unable to refresh shared todo view message', {
       listId,
       messageId,
       guildId: interaction.guildId,
-      channelId: interaction.channelId,
-      error: error.message
+      KanalId: interaction.KanalId,
+      Fehler: Fehler.message
     });
   }
 }
@@ -120,7 +120,7 @@ const sharedTodoAddHandler = {
     const sourceMessageId = interaction.message?.id;
 
     if (!listId || !/^[a-zA-Z0-9_-]{1,64}$/.test(listId)) {
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid shared list ID.' });
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid shared list ID.' });
       return;
     }
     
@@ -149,7 +149,7 @@ const sharedTodoCompleteHandler = {
     const sourceMessageId = interaction.message?.id;
 
     if (!listId || !/^[a-zA-Z0-9_-]{1,64}$/.test(listId)) {
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid shared list ID.' });
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid shared list ID.' });
       return;
     }
     
@@ -178,7 +178,7 @@ const sharedTodoRemoveHandler = {
     const sourceMessageId = interaction.message?.id;
 
     if (!listId || !/^[a-zA-Z0-9_-]{1,64}$/.test(listId)) {
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid shared list ID.' });
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid shared list ID.' });
       return;
     }
 
@@ -211,26 +211,26 @@ const sharedTodoAddModalHandler = {
     try {
       const allowed = await checkRateLimit(`${userId}:shared_todo_add`, 5, 30000);
       if (!allowed) {
-        return await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'You are adding tasks too quickly. Please wait and try again.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.RATE_LIMIT, message: 'You are adding tasks too quickly. Please wait and try again.' });
       }
 
       if (!listId || !/^[a-zA-Z0-9_-]{1,64}$/.test(listId)) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid shared list ID.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid shared list ID.' });
       }
 
       if (!taskText || taskText.trim().length === 0) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task text cannot be empty.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task text cannot be empty.' });
       }
 
       const listKey = `shared_todo_${listId}`;
       let listData = await getFromDb(listKey, null);
       
       if (!listData) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
       }
 
-      if (!listData.members || !listData.members.includes(userId)) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+      if (!listData.Mitglieds || !listData.Mitglieds.includes(userId)) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
       }
 
       if (!listData.tasks) listData.tasks = [];
@@ -250,13 +250,13 @@ const sharedTodoAddModalHandler = {
       await refreshSharedTodoMessage(interaction, listId, sourceMessageId);
 
       return interaction.reply({
-        embeds: [successEmbed("Task Added", `Added "${taskText}" to the shared list.`)],
+        embeds: [ErfolgEmbed("Task Added", `Added "${taskText}" to the shared list.`)],
         flags: MessageFlags.Ephemeral
       });
 
-    } catch (error) {
-      logger.error('Error in shared todo add modal:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while adding the task.' });
+    } catch (Fehler) {
+      logger.Fehler('Fehler in shared todo add modal:', Fehler);
+      return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while adding the task.' });
     }
   }
 };
@@ -272,26 +272,26 @@ const sharedTodoCompleteModalHandler = {
     try {
       const allowed = await checkRateLimit(`${userId}:shared_todo_complete`, 5, 30000);
       if (!allowed) {
-        return await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'You are completing tasks too quickly. Please wait and try again.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.RATE_LIMIT, message: 'You are completing tasks too quickly. Please wait and try again.' });
       }
 
       if (!listId || !/^[a-zA-Z0-9_-]{1,64}$/.test(listId)) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid shared list ID.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid shared list ID.' });
       }
 
       if (!Number.isInteger(taskId) || taskId <= 0) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task ID must be a positive number.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task ID must be a positive number.' });
       }
 
       const listKey = `shared_todo_${listId}`;
       let listData = await getFromDb(listKey, null);
       
       if (!listData) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
       }
 
-      if (!listData.members || !listData.members.includes(userId)) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+      if (!listData.Mitglieds || !listData.Mitglieds.includes(userId)) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
       }
 
       if (!listData.tasks) listData.tasks = [];
@@ -299,11 +299,11 @@ const sharedTodoCompleteModalHandler = {
       const task = listData.tasks.find(t => t.id === taskId);
       
       if (!task) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
       }
 
       if (task.completed) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
       }
       
       task.completed = true;
@@ -315,13 +315,13 @@ const sharedTodoCompleteModalHandler = {
       await refreshSharedTodoMessage(interaction, listId, sourceMessageId);
       
       return interaction.reply({
-        embeds: [successEmbed("Task Completed", `Marked "${task.text}" as complete!`)],
+        embeds: [ErfolgEmbed("Task Completed", `Marked "${task.text}" as complete!`)],
         flags: MessageFlags.Ephemeral
       });
 
-    } catch (error) {
-      logger.error('Error in shared todo complete modal:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while completing the task.' });
+    } catch (Fehler) {
+      logger.Fehler('Fehler in shared todo complete modal:', Fehler);
+      return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while completing the task.' });
     }
   }
 };
@@ -337,26 +337,26 @@ const sharedTodoRemoveModalHandler = {
     try {
       const allowed = await checkRateLimit(`${userId}:shared_todo_remove`, 5, 30000);
       if (!allowed) {
-        return await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'You are removing tasks too quickly. Please wait and try again.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.RATE_LIMIT, message: 'You are removing tasks too quickly. Please wait and try again.' });
       }
 
       if (!listId || !/^[a-zA-Z0-9_-]{1,64}$/.test(listId)) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid shared list ID.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Invalid shared list ID.' });
       }
 
       if (!Number.isInteger(taskId) || taskId <= 0) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task ID must be a positive number.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task ID must be a positive number.' });
       }
 
       const listKey = `shared_todo_${listId}`;
       const listData = await getFromDb(listKey, null);
 
       if (!listData) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Shared list Nicht gefunden.' });
       }
 
-      if (!listData.members || !listData.members.includes(userId)) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+      if (!listData.Mitglieds || !listData.Mitglieds.includes(userId)) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
       }
 
       if (!Array.isArray(listData.tasks)) {
@@ -365,7 +365,7 @@ const sharedTodoRemoveModalHandler = {
 
       const taskIndex = listData.tasks.findIndex(task => task.id === taskId);
       if (taskIndex === -1) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Task Nicht gefunden.' });
       }
 
       const [removedTask] = listData.tasks.splice(taskIndex, 1);
@@ -374,17 +374,18 @@ const sharedTodoRemoveModalHandler = {
       await refreshSharedTodoMessage(interaction, listId, sourceMessageId);
 
       return interaction.reply({
-        embeds: [successEmbed('Task Removed', `Removed "${removedTask.text}" from the shared list.`)],
+        embeds: [ErfolgEmbed('Task Removed', `Removed "${removedTask.text}" from the shared list.`)],
         flags: MessageFlags.Ephemeral
       });
-    } catch (error) {
-      logger.error('Error in shared todo remove modal:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while removing the task.' });
+    } catch (Fehler) {
+      logger.Fehler('Fehler in shared todo remove modal:', Fehler);
+      return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while removing the task.' });
     }
   }
 };
 
 export default sharedTodoAddHandler;
 export { sharedTodoCompleteHandler, sharedTodoRemoveHandler, sharedTodoAddModalHandler, sharedTodoCompleteModalHandler, sharedTodoRemoveModalHandler };
+
 
 

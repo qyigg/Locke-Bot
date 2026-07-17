@@ -1,18 +1,18 @@
-﻿// permissionGuard.js
+﻿// BerechtigungGuard.js
 
-import { PermissionFlagsBits } from 'discord.js';
+import { BerechtigungFlagsBits } from 'discord.js';
 import { logger } from './logger.js';
-import { replyUserError, ErrorTypes } from './errorHandler.js';
+import { replyUserFehler, FehlerTypes } from './FehlerHandler.js';
 import { isBotOwner, getBotMessage } from '../config/bot.js';
 
 /**
- * Read default_member_permissions from a SlashCommandBuilder (or its JSON).
+ * Read default_Mitglied_Berechtigungs from a SlashCommandBuilder (or its JSON).
  * @param {import('discord.js').SlashCommandBuilder | object} commandData
  * @returns {bigint | null}
  */
-export function getCommandDefaultPermissions(commandData) {
+export function getCommandDefaultBerechtigungs(commandData) {
   const json = commandData?.toJSON?.() ?? commandData;
-  const value = json?.default_member_permissions;
+  const value = json?.default_Mitglied_Berechtigungs;
 
   if (value == null || value === '0') {
     return null;
@@ -21,17 +21,17 @@ export function getCommandDefaultPermissions(commandData) {
   return BigInt(value);
 }
 
-function normalizeRoleId(role) {
-  if (!role) {
+function normalizeRolleId(Rolle) {
+  if (!Rolle) {
     return null;
   }
 
-  if (typeof role === 'string') {
-    return role;
+  if (typeof Rolle === 'string') {
+    return Rolle;
   }
 
-  if (typeof role === 'object' && role.id) {
-    return role.id;
+  if (typeof Rolle === 'object' && Rolle.id) {
+    return Rolle.id;
   }
 
   return null;
@@ -42,99 +42,99 @@ function isModerationCategory(category) {
 }
 
 /**
- * Whether a member holds the guild-configured moderator role (config wizard modRole).
- * @param {import('discord.js').GuildMember | null | undefined} member
+ * Whether a Mitglied holds the guild-configured moderator Rolle (config wizard modRolle).
+ * @param {import('discord.js').GuildMitglied | null | undefined} Mitglied
  * @param {object | null | undefined} guildConfig
  * @returns {boolean}
  */
-export function memberHasConfiguredModeratorRole(member, guildConfig) {
-  if (!member || !guildConfig) {
+export function MitgliedHasConfiguredModeratorRolle(Mitglied, guildConfig) {
+  if (!Mitglied || !guildConfig) {
     return false;
   }
 
-  const modRoleId = normalizeRoleId(guildConfig.modRole);
+  const modRolleId = normalizeRolleId(guildConfig.modRolle);
 
-  return Boolean(modRoleId && member.roles.cache.has(modRoleId));
+  return Boolean(modRolleId && Mitglied.Rollen.cache.has(modRolleId));
 }
 
 /**
- * Whether a member may run a moderation command (native Discord perm or configured modRole).
- * @param {import('discord.js').GuildMember | null | undefined} member
+ * Whether a Mitglied may run a moderation command (native Discord perm or configured modRolle).
+ * @param {import('discord.js').GuildMitglied | null | undefined} Mitglied
  * @param {object | null | undefined} guildConfig
- * @param {bigint | bigint[] | null} [requiredPermissions]
+ * @param {bigint | bigint[] | null} [requiredBerechtigungs]
  * @returns {boolean}
  */
-export function memberHasModerationCommandAccess(member, guildConfig, requiredPermissions = null) {
-  if (!member) {
+export function MitgliedHasModerationCommandAccess(Mitglied, guildConfig, requiredBerechtigungs = null) {
+  if (!Mitglied) {
     return false;
   }
 
-  if (member.guild?.ownerId === member.id) {
+  if (Mitglied.guild?.ownerId === Mitglied.id) {
     return true;
   }
 
-  if (member.permissions.has(PermissionFlagsBits.Administrator)) {
+  if (Mitglied.Berechtigungs.has(BerechtigungFlagsBits.Administrator)) {
     return true;
   }
 
-  if (requiredPermissions != null && member.permissions.has(requiredPermissions)) {
+  if (requiredBerechtigungs != null && Mitglied.Berechtigungs.has(requiredBerechtigungs)) {
     return true;
   }
 
-  return memberHasConfiguredModeratorRole(member, guildConfig);
+  return MitgliedHasConfiguredModeratorRolle(Mitglied, guildConfig);
 }
 
 /**
- * Whether a guild member satisfies a command's default_member_permissions bitfield.
- * Guild owners always pass. Moderation commands also accept the configured modRole.
- * @param {import('discord.js').GuildMember | null | undefined} member
- * @param {bigint | null} permissionBitfield
+ * Whether a guild Mitglied satisfies a command's default_Mitglied_Berechtigungs bitfield.
+ * Guild owners always pass. Moderation Befehle also accept the configured modRolle.
+ * @param {import('discord.js').GuildMitglied | null | undefined} Mitglied
+ * @param {bigint | null} BerechtigungBitfield
  * @param {{ guildConfig?: object | null, commandCategory?: string | null }} [options]
  * @returns {boolean}
  */
-export function memberMeetsCommandPermissions(member, permissionBitfield, options = {}) {
-  if (permissionBitfield == null) {
+export function MitgliedMeetsCommandBerechtigungs(Mitglied, BerechtigungBitfield, options = {}) {
+  if (BerechtigungBitfield == null) {
     return true;
   }
 
-  if (!member) {
+  if (!Mitglied) {
     return false;
   }
 
   const { guildConfig = null, commandCategory = null } = options;
 
   if (isModerationCategory(commandCategory)) {
-    return memberHasModerationCommandAccess(member, guildConfig, permissionBitfield);
+    return MitgliedHasModerationCommandAccess(Mitglied, guildConfig, BerechtigungBitfield);
   }
 
-  if (member.guild?.ownerId === member.id) {
+  if (Mitglied.guild?.ownerId === Mitglied.id) {
     return true;
   }
 
-  return member.permissions.has(permissionBitfield);
+  return Mitglied.Berechtigungs.has(BerechtigungBitfield);
 }
 
 /**
  * Check moderation command access and reply when denied.
  * @returns {Promise<boolean>}
  */
-export async function checkModerationPermissions(
+export async function checkModerationBerechtigungs(
   interaction,
   guildConfig,
-  requiredPermissions,
-  errorMessage = 'Du hast keine Berechtigung, diesen Befehl zu verwenden.'
+  requiredBerechtigungs,
+  FehlerMessage = 'Du hast keine Berechtigung, diesen Befehl zu verwenden.'
 ) {
-  if (memberHasModerationCommandAccess(interaction.member, guildConfig, requiredPermissions)) {
+  if (MitgliedHasModerationCommandAccess(interaction.Mitglied, guildConfig, requiredBerechtigungs)) {
     return true;
   }
 
-  await replyUserError(interaction, {
-    type: ErrorTypes.PERMISSION,
-    message: errorMessage,
-    context: { source: 'permissionGuard.checkModerationPermissions' },
+  await replyUserFehler(interaction, {
+    type: FehlerTypes.Berechtigung,
+    message: FehlerMessage,
+    context: { source: 'BerechtigungGuard.checkModerationBerechtigungs' },
   });
 
-  logger.warn('[PERMISSION_DENIED] Moderation command blocked', {
+  logger.warn('[Berechtigung_DENIED] Moderation command blocked', {
     userId: interaction.user?.id,
     guildId: interaction.guildId,
     command: interaction.commandName,
@@ -144,22 +144,22 @@ export async function checkModerationPermissions(
 }
 
 /**
- * Enforce a command's default_member_permissions for prefix (and other non-Discord-gated) invocations.
- * Slash commands are gated by Discord, but prefix commands must mirror the same requirement in code.
- * @returns {Promise<boolean>} true when the member may proceed
+ * Enforce a command's default_Mitglied_Berechtigungs for prefix (and other non-Discord-gated) invocations.
+ * Slash Befehle are gated by Discord, but prefix Befehle must mirror the same requirement in code.
+ * @returns {Promise<boolean>} true when the Mitglied may proceed
  */
-export async function enforceDefaultCommandPermissions(interaction, command, context = {}) {
+export async function enforceDefaultCommandBerechtigungs(interaction, command, context = {}) {
   if (isBotOwner(interaction.user?.id)) {
     return true;
   }
 
-  const requiredPermissions = getCommandDefaultPermissions(command?.data);
-  if (requiredPermissions == null) {
+  const requiredBerechtigungs = getCommandDefaultBerechtigungs(command?.data);
+  if (requiredBerechtigungs == null) {
     return true;
   }
 
-  const member = interaction.member;
-  if (memberMeetsCommandPermissions(member, requiredPermissions, {
+  const Mitglied = interaction.Mitglied;
+  if (MitgliedMeetsCommandBerechtigungs(Mitglied, requiredBerechtigungs, {
     guildConfig: context.guildConfig ?? null,
     commandCategory: command?.category ?? null,
   })) {
@@ -167,70 +167,70 @@ export async function enforceDefaultCommandPermissions(interaction, command, con
   }
 
   const commandName = command?.data?.name ?? interaction.commandName ?? 'command';
-  await replyUserError(interaction, {
-    type: ErrorTypes.PERMISSION,
-    message: getBotMessage('noPermission'),
+  await replyUserFehler(interaction, {
+    type: FehlerTypes.Berechtigung,
+    message: getBotMessage('noBerechtigung'),
     context: {
-      source: context.source ?? 'permissionGuard.enforceDefaultCommandPermissions',
+      source: context.source ?? 'BerechtigungGuard.enforceDefaultCommandBerechtigungs',
       commandName,
-      requiredPermissions: requiredPermissions.toString(),
+      requiredBerechtigungs: requiredBerechtigungs.toString(),
     },
   });
 
-  logger.warn('[PERMISSION_DENIED] Prefix command blocked by default_member_permissions', {
+  logger.warn('[Berechtigung_DENIED] Prefix command blocked by default_Mitglied_Berechtigungs', {
     userId: interaction.user?.id,
     guildId: interaction.guildId,
     command: commandName,
-    requiredPermissions: requiredPermissions.toString(),
+    requiredBerechtigungs: requiredBerechtigungs.toString(),
   });
 
   return false;
 }
 
-export function isAdmin(member) {
-  if (!member) return false;
-  return member.permissions.has(PermissionFlagsBits.Administrator);
+export function isAdmin(Mitglied) {
+  if (!Mitglied) return false;
+  return Mitglied.Berechtigungs.has(BerechtigungFlagsBits.Administrator);
 }
 
-export function isModerator(member, guildConfig = null) {
-  if (!member) return false;
-  if (memberHasConfiguredModeratorRole(member, guildConfig)) {
+export function isModerator(Mitglied, guildConfig = null) {
+  if (!Mitglied) return false;
+  if (MitgliedHasConfiguredModeratorRolle(Mitglied, guildConfig)) {
     return true;
   }
-  return member.permissions.has([
-    PermissionFlagsBits.Administrator,
-    PermissionFlagsBits.ManageGuild
+  return Mitglied.Berechtigungs.has([
+    BerechtigungFlagsBits.Administrator,
+    BerechtigungFlagsBits.ManageGuild
   ]);
 }
 
-export function hasPermission(member, permissions) {
-  if (!member) return false;
-  return member.permissions.has(permissions);
+export function hasBerechtigung(Mitglied, Berechtigungs) {
+  if (!Mitglied) return false;
+  return Mitglied.Berechtigungs.has(Berechtigungs);
 }
 
-export function botHasPermission(channel, permissions) {
-  if (!channel || !channel.guild) return false;
-  const botMember = channel.guild.members.me;
-  if (!botMember) return false;
-  return channel.permissionsFor(botMember).has(permissions);
+export function botHasBerechtigung(Kanal, Berechtigungs) {
+  if (!Kanal || !Kanal.guild) return false;
+  const botMitglied = Kanal.guild.Mitglieds.me;
+  if (!botMitglied) return false;
+  return Kanal.BerechtigungsFor(botMitglied).has(Berechtigungs);
 }
 
-export async function checkUserPermissions(
+export async function checkUserBerechtigungs(
   interaction,
-  requiredPermissions,
-  errorMessage = 'Du hast keine Berechtigung, diesen Befehl zu verwenden.'
+  requiredBerechtigungs,
+  FehlerMessage = 'Du hast keine Berechtigung, diesen Befehl zu verwenden.'
 ) {
-  const member = interaction.member;
+  const Mitglied = interaction.Mitglied;
 
-  if (!member.permissions.has(requiredPermissions)) {
-    await replyUserError(interaction, {
-      type: ErrorTypes.PERMISSION,
-      message: errorMessage,
-      context: { source: 'permissionGuard.checkUserPermissions' }
+  if (!Mitglied.Berechtigungs.has(requiredBerechtigungs)) {
+    await replyUserFehler(interaction, {
+      type: FehlerTypes.Berechtigung,
+      message: FehlerMessage,
+      context: { source: 'BerechtigungGuard.checkUserBerechtigungs' }
     });
 
     logger.warn(
-      `[PERMISSION_DENIED] User ${member.id} attempted command ${interaction.commandName} in guild ${interaction.guildId}`
+      `[Berechtigung_DENIED] User ${Mitglied.id} attempted command ${interaction.commandName} in guild ${interaction.guildId}`
     );
     return false;
   }
@@ -238,51 +238,51 @@ export async function checkUserPermissions(
   return true;
 }
 
-export async function checkBotPermissions(
+export async function checkBotBerechtigungs(
   interaction,
-  requiredPermissions,
-  channel = null
+  requiredBerechtigungs,
+  Kanal = null
 ) {
-  const targetChannel = channel || interaction.channel;
+  const targetKanal = Kanal || interaction.Kanal;
 
-  if (!targetChannel || !targetChannel.guild) {
-    await replyUserError(interaction, {
-      type: ErrorTypes.UNKNOWN,
+  if (!targetKanal || !targetKanal.guild) {
+    await replyUserFehler(interaction, {
+      type: FehlerTypes.UNKNOWN,
       message: 'Konnte den Kanal nicht bestimmen.',
-      context: { source: 'permissionGuard.checkBotPermissions' }
+      context: { source: 'BerechtigungGuard.checkBotBerechtigungs' }
     });
     return false;
   }
 
-  const botMember = targetChannel.guild.members.me;
-  if (!botMember) {
-    await replyUserError(interaction, {
-      type: ErrorTypes.UNKNOWN,
+  const botMitglied = targetKanal.guild.Mitglieds.me;
+  if (!botMitglied) {
+    await replyUserFehler(interaction, {
+      type: FehlerTypes.UNKNOWN,
       message: 'Konnte das Bot-Mitglied in dieser Gilde nicht finden.',
-      context: { source: 'permissionGuard.checkBotPermissions' }
+      context: { source: 'BerechtigungGuard.checkBotBerechtigungs' }
     });
     return false;
   }
 
-  const permissions = targetChannel.permissionsFor(botMember);
+  const Berechtigungs = targetKanal.BerechtigungsFor(botMitglied);
   const missingPerms = [];
 
-  const permArray = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
+  const permArray = Array.isArray(requiredBerechtigungs) ? requiredBerechtigungs : [requiredBerechtigungs];
   for (const perm of permArray) {
-    if (!permissions.has(perm)) {
+    if (!Berechtigungs.has(perm)) {
       missingPerms.push(perm);
     }
   }
 
   if (missingPerms.length > 0) {
-    await replyUserError(interaction, {
-      type: ErrorTypes.PERMISSION,
-      message: `Ich benötige die folgenden Berechtigungen in ${targetChannel}: ${missingPerms.join(', ')}`,
-      context: { source: 'permissionGuard.checkBotPermissions', subtype: 'bot_permission' }
+    await replyUserFehler(interaction, {
+      type: FehlerTypes.Berechtigung,
+      message: `Ich benötige die folgenden Berechtigungen in ${targetKanal}: ${missingPerms.join(', ')}`,
+      context: { source: 'BerechtigungGuard.checkBotBerechtigungs', subtype: 'bot_Berechtigung' }
     });
 
     logger.warn(
-      `[BOT_PERMISSION_DENIED] Bot missing permissions [${missingPerms.join(', ')}] in channel ${targetChannel.id}`
+      `[BOT_Berechtigung_DENIED] Bot missing Berechtigungs [${missingPerms.join(', ')}] in Kanal ${targetKanal.id}`
     );
     return false;
   }
@@ -301,32 +301,33 @@ function hashUserId(userId) {
   return Math.abs(hash).toString(16).substring(0, 8);
 }
 
-export function auditPermissionCheck(userId, action, allowed, reason = null) {
+export function auditBerechtigungCheck(userId, action, allowed, reason = null) {
 
   const userHash = hashUserId(userId);
 
   if (allowed) {
-    logger.debug('[PERMISSION_AUDIT] Permission granted', { action, userHash });
+    logger.debug('[Berechtigung_AUDIT] Berechtigung granted', { action, userHash });
   } else {
-    const denyReason = reason || 'insufficient_permissions';
-    logger.warn('[PERMISSION_AUDIT] Berechtigung verweigert', { action, userHash, reason: denyReason });
+    const denyReason = reason || 'insufficient_Berechtigungs';
+    logger.warn('[Berechtigung_AUDIT] Berechtigung verweigert', { action, userHash, reason: denyReason });
   }
 }
 
 export default {
   isAdmin,
   isModerator,
-  hasPermission,
-  botHasPermission,
-  getCommandDefaultPermissions,
-  memberHasConfiguredModeratorRole,
-  memberHasModerationCommandAccess,
-  memberMeetsCommandPermissions,
-  checkModerationPermissions,
-  enforceDefaultCommandPermissions,
-  checkUserPermissions,
-  checkBotPermissions,
-  auditPermissionCheck
+  hasBerechtigung,
+  botHasBerechtigung,
+  getCommandDefaultBerechtigungs,
+  MitgliedHasConfiguredModeratorRolle,
+  MitgliedHasModerationCommandAccess,
+  MitgliedMeetsCommandBerechtigungs,
+  checkModerationBerechtigungs,
+  enforceDefaultCommandBerechtigungs,
+  checkUserBerechtigungs,
+  checkBotBerechtigungs,
+  auditBerechtigungCheck
 };
+
 
 

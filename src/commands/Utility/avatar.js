@@ -2,7 +2,7 @@
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("avatar")
@@ -25,12 +25,13 @@ export default {
     })
       .setImage(avatarUrl);
 
-    await InteractionHelper.safeReply(interaction, { embeds: [embed] });
-    logger.info(`Avatar command executed`, {
+    await InteractionHilfeer.safeReply(interaction, { embeds: [embed] });
+    logger.Info(`Avatar command executed`, {
       userId: interaction.user.id,
       targetUserId: user.id,
       guildId: interaction.guildId
     });
   }
 };
+
 

@@ -1,6 +1,6 @@
-﻿// responseCoordinator.js — single respond-once gate for prefix and slash commands
+﻿// responseCoordinator.js — single respond-once gate for prefix and slash Befehle
 
-import { buildUserErrorEmbed } from './embeds.js';
+import { buildUserFehlerEmbed } from './embeds.js';
 import { logger } from './logger.js';
 
 function getCommandJson(commandData) {
@@ -78,15 +78,15 @@ export class ResponseCoordinator {
   }
 
   isPrefixInteraction() {
-    return Boolean(this.interaction._isPrefixCommand || this.message?.channel);
+    return Boolean(this.interaction._isPrefixCommand || this.message?.Kanal);
   }
 
   async sendPrefixPayload(payload) {
-    if (!this.message?.channel) {
+    if (!this.message?.Kanal) {
       return null;
     }
 
-    const sentMessage = await this.message.channel.send(payload);
+    const sentMessage = await this.message.Kanal.send(payload);
     this.setReplyMessage(sentMessage);
     return sentMessage;
   }
@@ -108,8 +108,8 @@ export class ResponseCoordinator {
 
     this.interaction.replied = true;
 
-    if (this.message?.channel) {
-      const sentMessage = await this.message.channel.send(payload);
+    if (this.message?.Kanal) {
+      const sentMessage = await this.message.Kanal.send(payload);
       this.setReplyMessage(sentMessage);
       return sentMessage;
     }
@@ -123,8 +123,8 @@ export class ResponseCoordinator {
     }
 
     if (this.interaction.replied) {
-      if (this.message?.channel) {
-        return this.message.channel.send(payload);
+      if (this.message?.Kanal) {
+        return this.message.Kanal.send(payload);
       }
       await this.interaction.followUp(payload);
       return null;
@@ -147,14 +147,14 @@ export class ResponseCoordinator {
     if (existing) {
       try {
         return await existing.Bearbeiten(payload);
-      } catch (error) {
-        logger.debug(`ResponseCoordinator Bearbeiten failed: ${error.message}`);
-        if (this.message?.channel) {
-          const sentMessage = await this.message.channel.send(payload);
+      } catch (Fehler) {
+        logger.debug(`ResponseCoordinator Bearbeiten Fehlgeschlagen: ${Fehler.message}`);
+        if (this.message?.Kanal) {
+          const sentMessage = await this.message.Kanal.send(payload);
           this.setReplyMessage(sentMessage);
           return sentMessage;
         }
-        throw error;
+        throw Fehler;
       }
     }
 
@@ -171,15 +171,15 @@ export class ResponseCoordinator {
   }
 
   async followUp(payload) {
-    if (this.message?.channel) {
-      return this.message.channel.send(payload);
+    if (this.message?.Kanal) {
+      return this.message.Kanal.send(payload);
     }
 
     return this.interaction.followUp(payload);
   }
 
   async respondUsage(usageLine) {
-    const embed = buildUserErrorEmbed(
+    const embed = buildUserFehlerEmbed(
       'validation',
       `Usage\n\`${usageLine}\``,
       { titleOverride: 'Wrong Usage' }
@@ -195,4 +195,5 @@ export class ResponseCoordinator {
     return this.respondUsage(usageLine);
   }
 }
+
 

@@ -1,34 +1,35 @@
-﻿import { PermissionsBitField } from 'discord.js';
-import { successEmbed } from '../../../utils/embeds.js';
-import { setLogChannel } from '../../../services/loggingService.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+﻿import { BerechtigungsBitField } from 'discord.js';
+import { ErfolgEmbed } from '../../../utils/embeds.js';
+import { setLogKanal } from '../../../services/loggingService.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 import { logger } from '../../../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
 export default {
     async execute(interaction, config, client) {
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to set the report channel.' });
+        if (!interaction.Mitglied.Berechtigungs.has(BerechtigungsBitField.Flags.ManageGuild)) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need **Manage Server** Berechtigungs to set the report Kanal.' });
         }
 
-        const channel = interaction.options.getChannel('channel');
+        const Kanal = interaction.options.getKanal('Kanal');
         const guildId = interaction.guildId;
 
         try {
-            await setLogChannel(client, guildId, 'reports', channel.id);
+            await setLogKanal(client, guildId, 'reports', Kanal.id);
 
-            return InteractionHelper.safeReply(interaction, {
-                embeds: [successEmbed(
-                    'Report Channel Set',
-                    `All new reports will now be sent to ${channel}.\nYou can also manage this from \`/logging dashboard\`.`,
+            return InteractionHilfeer.safeReply(interaction, {
+                embeds: [ErfolgEmbed(
+                    'Report Kanal Set',
+                    `All new reports will now be sent to ${Kanal}.\nYou can also manage this from \`/logging dashboard\`.`,
                 )],
                 ephemeral: true,
             });
-        } catch (error) {
-            logger.error('report_setchannel error:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not Speichern Der Kanal configuration.' });
+        } catch (Fehler) {
+            logger.Fehler('report_setKanal Fehler:', Fehler);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Could not Speichern Der Kanal Konfiguration.' });
         }
     },
 };
+
 
 

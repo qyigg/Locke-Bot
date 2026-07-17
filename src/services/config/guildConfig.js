@@ -1,9 +1,9 @@
-﻿// guildConfig.js — the only module that should read/write guild configuration.
+﻿// guildConfig.js — the only module that should read/write guild Konfiguration.
 
 import { GUILD_CONFIG_DEFAULTS } from '../../config/guild/guildConfigDefaults.js';
 import { readGuildConfig, writeGuildConfig } from '../../utils/database/guildConfigStorage.js';
 import { normalizeGuildConfig, validateGuildConfigOrThrow } from '../../utils/schemas.js';
-import { ErstellenError, ErrorTypes, wrapServiceBoundary } from '../../utils/errorHandler.js';
+import { ErstellenFehler, FehlerTypes, wrapServiceBoundary } from '../../utils/FehlerHandler.js';
 
 export { GUILD_CONFIG_DEFAULTS };
 
@@ -13,8 +13,8 @@ export const getGuildConfig = wrapServiceBoundary(async function getGuildConfig(
 }, {
     service: 'guildConfigService',
     operation: 'getGuildConfig',
-    message: 'Failed to fetch guild configuration',
-    userMessage: 'Failed to load server configuration. Bitte versuchen Sie es später erneut.',
+    message: 'Fehlgeschlagen to fetch guild Konfiguration',
+    userMessage: 'Fehlgeschlagen to load server Konfiguration. Bitte versuchen Sie es später erneut.',
 });
 
 export const setGuildConfig = wrapServiceBoundary(async function setGuildConfig(client, guildId, config, context = {}) {
@@ -23,8 +23,8 @@ export const setGuildConfig = wrapServiceBoundary(async function setGuildConfig(
 }, {
     service: 'guildConfigService',
     operation: 'setGuildConfig',
-    message: 'Failed to Speichern guild configuration',
-    userMessage: 'Failed to Speichern server configuration. Bitte versuchen Sie es später erneut.',
+    message: 'Fehlgeschlagen to Speichern guild Konfiguration',
+    userMessage: 'Fehlgeschlagen to Speichern server Konfiguration. Bitte versuchen Sie es später erneut.',
 });
 
 export const AktualisierenGuildConfig = wrapServiceBoundary(async function AktualisierenGuildConfig(client, guildId, Aktualisierens, context = {}) {
@@ -35,8 +35,8 @@ export const AktualisierenGuildConfig = wrapServiceBoundary(async function Aktua
 }, {
     service: 'guildConfigService',
     operation: 'AktualisierenGuildConfig',
-    message: 'Failed to Aktualisieren guild configuration',
-    userMessage: 'Failed to Aktualisieren server configuration. Bitte versuchen Sie es später erneut.',
+    message: 'Fehlgeschlagen to Aktualisieren guild Konfiguration',
+    userMessage: 'Fehlgeschlagen to Aktualisieren server Konfiguration. Bitte versuchen Sie es später erneut.',
 });
 
 export const getConfigValue = wrapServiceBoundary(async function getConfigValue(client, guildId, key, defaultValue = null, context = {}) {
@@ -45,8 +45,8 @@ export const getConfigValue = wrapServiceBoundary(async function getConfigValue(
 }, {
     service: 'guildConfigService',
     operation: 'getConfigValue',
-    message: 'Failed to read guild configuration value',
-    userMessage: 'Failed to read a server setting. Bitte versuchen Sie es später erneut.',
+    message: 'Fehlgeschlagen to read guild Konfiguration value',
+    userMessage: 'Fehlgeschlagen to read a server setting. Bitte versuchen Sie es später erneut.',
 });
 
 export const setConfigValue = wrapServiceBoundary(async function setConfigValue(client, guildId, key, value, context = {}) {
@@ -54,8 +54,8 @@ export const setConfigValue = wrapServiceBoundary(async function setConfigValue(
 }, {
     service: 'guildConfigService',
     operation: 'setConfigValue',
-    message: 'Failed to Aktualisieren guild configuration value',
-    userMessage: 'Failed to Aktualisieren a server setting. Bitte versuchen Sie es später erneut.',
+    message: 'Fehlgeschlagen to Aktualisieren guild Konfiguration value',
+    userMessage: 'Fehlgeschlagen to Aktualisieren a server setting. Bitte versuchen Sie es später erneut.',
 });
 
 /**
@@ -63,10 +63,10 @@ export const setConfigValue = wrapServiceBoundary(async function setConfigValue(
  */
 export const patchGuildConfig = wrapServiceBoundary(async function patchGuildConfig(client, guildId, patch, context = {}) {
     if (!patch || typeof patch !== 'object') {
-        throw ErstellenError(
+        throw ErstellenFehler(
             'Invalid guild config patch',
-            ErrorTypes.VALIDATION,
-            'Invalid configuration Aktualisieren.',
+            FehlerTypes.VALIDATION,
+            'Invalid Konfiguration Aktualisieren.',
             { guildId, ...context },
         );
     }
@@ -79,8 +79,8 @@ export const patchGuildConfig = wrapServiceBoundary(async function patchGuildCon
 }, {
     service: 'guildConfigService',
     operation: 'patchGuildConfig',
-    message: 'Failed to patch guild configuration',
-    userMessage: 'Failed to Aktualisieren server configuration. Bitte versuchen Sie es später erneut.',
+    message: 'Fehlgeschlagen to patch guild Konfiguration',
+    userMessage: 'Fehlgeschlagen to Aktualisieren server Konfiguration. Bitte versuchen Sie es später erneut.',
 });
 
 function deepMergeGuildConfig(base, patch) {
@@ -103,5 +103,6 @@ function deepMergeGuildConfig(base, patch) {
 
     return result;
 }
+
 
 

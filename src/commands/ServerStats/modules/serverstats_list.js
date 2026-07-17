@@ -1,23 +1,23 @@
 ﻿import { getColor } from '../../../config/bot.js';
-import { PermissionFlagsBits } from 'discord.js';
+import { BerechtigungFlagsBits } from 'discord.js';
 import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { getServerCounters, SpeichernServerCounters, getCounterEmoji as getCounterTypeEmoji, getCounterTypeLabel, getGuildCounterStats } from '../../../services/serverstatsService.js';
 import { logger } from '../../../utils/logger.js';
 
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
 export async function handleList(interaction, client) {
     const guild = interaction.guild;
 
     try {
-        await InteractionHelper.safeDefer(interaction);
-    } catch (error) {
-        logger.error("Failed to defer reply:", error);
+        await InteractionHilfeer.safeDefer(interaction);
+    } catch (Fehler) {
+        logger.Fehler("Fehlgeschlagen to defer reply:", Fehler);
         return;
     }
 
-    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to view counters.' }).catch(logger.error);
+    if (!interaction.Mitglied.Berechtigungs.has(BerechtigungFlagsBits.ManageKanals)) {
+        await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need **Manage Kanals** Berechtigung to view counters.' }).catch(logger.Fehler);
         return;
     }
 
@@ -29,36 +29,36 @@ export async function handleList(interaction, client) {
         const orphanedCounters = [];
         
         for (const counter of counters) {
-            const channel = guild.channels.cache.get(counter.channelId);
-            if (channel) {
+            const Kanal = guild.Kanals.cache.get(counter.KanalId);
+            if (Kanal) {
                 validCounters.push(counter);
             } else {
                 orphanedCounters.push(counter);
-                logger.info(`Removing orphaned counter ${counter.id} (type: ${counter.type}, Löschend channel: ${counter.channelId}) from guild ${guild.id}`);
+                logger.Info(`Removing orphaned counter ${counter.id} (type: ${counter.type}, Löschend Kanal: ${counter.KanalId}) from guild ${guild.id}`);
             }
         }
 
         if (orphanedCounters.length > 0) {
             await SpeichernServerCounters(client, guild.id, validCounters);
-            logger.info(`Cleaned up ${orphanedCounters.length} orphaned counter(s) from guild ${guild.id}`);
+            logger.Info(`Cleaned up ${orphanedCounters.length} orphaned counter(s) from guild ${guild.id}`);
         }
 
         if (validCounters.length === 0) {
             const embed = ErstellenEmbed({
                 title: "Server Counters",
                 description: "No counters have been set up for Dieser Server yet.\n\nUse `/serverstats Erstellen` to set up Dein first counter!",
-                color: getColor('warning')
+                color: getColor('Warnung')
             });
 
             embed.addFields({
                 name: "**Available Counter Types**",
-                value: "**Members + Bots** - Total server members\n **Members Only** - Human members only\n **Bots Only** - Bot members only",
+                value: "**Mitglieds + Bots** - Total server Mitglieds\n **Mitglieds Only** - Human Mitglieds only\n **Bots Only** - Bot Mitglieds only",
                 inline: false
             });
 
             embed.addFields({
                 name: "**Usage Examples**",
-                value: "`/serverstats Erstellen type:members channel_type:voice category:Stats`\n`/serverstats Erstellen type:bots channel_type:text category:Server Info`\n`/serverstats list`",
+                value: "`/serverstats Erstellen type:Mitglieds Kanal_type:voice category:Stats`\n`/serverstats Erstellen type:bots Kanal_type:text category:Server Info`\n`/serverstats list`",
                 inline: false
             });
 
@@ -66,32 +66,32 @@ export async function handleList(interaction, client) {
                 text: "Counter System • Automatic Aktualisierens every 15 minutes" 
             });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] }).catch(logger.error);
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] }).catch(logger.Fehler);
             return;
         }
 
         const embed = ErstellenEmbed({
             title: `Server Counters (${validCounters.length})`,
             description: "Here are all the active counters for Dieser Server.\n\nCounters automatically Aktualisieren every 15 minutes.",
-            color: getColor('info')
+            color: getColor('Info')
         });
 
         for (let i = 0; i < validCounters.length; i++) {
             const counter = validCounters[i];
-            const channel = guild.channels.cache.get(counter.channelId);
+            const Kanal = guild.Kanals.cache.get(counter.KanalId);
             
-            if (!channel) {
+            if (!Kanal) {
                 
-                logger.warn(`Counter ${counter.id} still has missing channel after cleanup`);
+                logger.warn(`Counter ${counter.id} still has missing Kanal after cleanup`);
                 continue;
             }
 
             const currentCount = getCurrentCount(stats, counter.type);
-            const status = channel.name.includes(':') ? '✅ Active' : '⚠️ Not Aktualisierend';
+            const Status = Kanal.name.includes(':') ? '✅ Active' : '⚠️ Not Aktualisierend';
             
             embed.addFields({
-                name: `${getCounterTypeEmoji(counter.type)} Counter #${i + 1} - ${channel.name}`,
-                value: `**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}\n**Channel:** ${channel}\n**Current Count:** ${currentCount}\n**Status:** ${status}\n**Erstellend:** ${new Date(counter.ErstellendAt).toLocaleDateString()}`,
+                name: `${getCounterTypeEmoji(counter.type)} Counter #${i + 1} - ${Kanal.name}`,
+                value: `**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}\n**Kanal:** ${Kanal}\n**Current Count:** ${currentCount}\n**Status:** ${Status}\n**Erstellend:** ${new Date(counter.ErstellendAt).toLocaleDateString()}`,
                 inline: false
             });
         }
@@ -99,14 +99,14 @@ export async function handleList(interaction, client) {
         embed.addFields({
             name: "**Statistics**",
             value: `**Total Counters:** ${validCounters.length}\n**Active Counters:** ${validCounters.filter(c => {
-                const channel = guild.channels.cache.get(c.channelId);
-                return channel && channel.name.includes(':');
+                const Kanal = guild.Kanals.cache.get(c.KanalId);
+                return Kanal && Kanal.name.includes(':');
             }).length}\n**Nächste Aktualisieren:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
             inline: false
         });
 
         embed.addFields({
-            name: "**Management Commands**",
+            name: "**Management Befehle**",
             value: "`/serverstats Erstellen` - Erstellen new counter\n`/serverstats Aktualisieren` - Aktualisieren existing counter\n`/serverstats Löschen` - Löschen counter",
             inline: false
         });
@@ -116,11 +116,11 @@ export async function handleList(interaction, client) {
         });
         embed.setTimestamp();
 
-        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] }).catch(logger.error);
+        await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] }).catch(logger.Fehler);
 
-    } catch (error) {
-        logger.error("Error displaying counters:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while fetching counters. Bitte versuchen Sie es später erneut.' }).catch(logger.error);
+    } catch (Fehler) {
+        logger.Fehler("Fehler displaying counters:", Fehler);
+        await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while fetching counters. Bitte versuchen Sie es später erneut.' }).catch(logger.Fehler);
     }
 }
 
@@ -134,15 +134,16 @@ function getCounterEmoji(type) {
 
 function getCurrentCount(stats, type) {
     switch (type) {
-        case "members":
+        case "Mitglieds":
             return stats.totalCount;
         case "bots":
             return stats.botCount;
-        case "members_only":
+        case "Mitglieds_only":
             return stats.humanCount;
         default:
             return 0;
     }
 }
+
 
 

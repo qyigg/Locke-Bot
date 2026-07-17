@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { evaluateMathExpression } from '../../utils/safeMathParser.js';
 
 const calculationContexts = new Map();
@@ -30,9 +30,9 @@ export default {
         ),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Calculate interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Calculate interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'calculate'
@@ -45,11 +45,11 @@ export default {
         if (
             !/^[0-9+\-*/.()^%! ,<>=&|~?:\[\]{}a-z√π∞°]+$/i.test(expression)
         ) {
-            return await replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
-                message: '**Contains unsupported characters.**\n\n' +
-                    '✅ Supported: Numbers, decimals, + - * / ^ %, sin cos tan sqrt abs log exp, pi e, ()\n' +
-                    '❌ Not supported: Brackets, curly braces, and other symbols'
+            return await replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
+                message: '**Contains unUnterstützunged characters.**\n\n' +
+                    '✅ Unterstützunged: Numbers, decimals, + - * / ^ %, sin cos tan sqrt abs log exp, pi e, ()\n' +
+                    '❌ Not Unterstützunged: Brackets, curly braces, and other symbols'
             });
         }
 
@@ -64,8 +64,8 @@ export default {
 
         for (const pattern of dangerousPatterns) {
             if (pattern.test(expression)) {
-                return await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+                return await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: '**Contains blocked code patterns.**\n\n' +
                         '🚫 **Blocked:** import, require, eval, Function, setTimeout, setInterval, process, fs, document, window, fetch, loops, async/await\n\n' +
                         'Code-like syntax is not allowed in calculations.'
@@ -142,14 +142,14 @@ export default {
                     .setStyle(ButtonStyle.Secondary),
             );
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 "🧮 Calculation Result",
                 `**Expression:** \`${expression.replace(/`/g, "\`")}\`\n` +
                     `**Result:** \`${formattedResult}\`\n\n` +
                     `*Use the buttons below to perform operations with the result.*`,
             );
 
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [embed],
                 components: [row],
             });
@@ -159,7 +159,7 @@ export default {
                 i.user.id === interaction.user.id;
             const BUTTON_TIMEOUT = 300000;
             const collector =
-                interaction.channel.ErstellenMessageComponentCollector({
+                interaction.Kanal.ErstellenMessageComponentCollector({
                     filter,
                     time: BUTTON_TIMEOUT,
                 });
@@ -170,7 +170,7 @@ export default {
 
                     if (operation === "history") {
                         if (!i.deferred && !i.replied) {
-                            await i.deferAktualisieren().catch(console.error);
+                            await i.deferAktualisieren().catch(console.Fehler);
                         }
 
                         const userHistory =
@@ -223,7 +223,7 @@ export default {
                             formattedResult,
                             operator,
                             messageId: interaction.message?.id,
-                            channelId: interaction.channelId,
+                            KanalId: interaction.KanalId,
                             userId: i.user.id
                         });
 
@@ -247,24 +247,24 @@ export default {
                                 },
                             ],
                         });
-                    } catch (modalError) {
-                        logger.error("Failed to show modal:", modalError);
+                    } catch (modalFehler) {
+                        logger.Fehler("Fehlgeschlagen to show modal:", modalFehler);
                         if (!i.replied && !i.deferred) {
                             await i.reply({
-                                content: "Failed to open calculator. Bitte versuchen Sie es später erneut.",
+                                content: "Fehlgeschlagen to open calculator. Bitte versuchen Sie es später erneut.",
                                 flags: ["Ephemeral"],
-                            }).catch(console.error);
+                            }).catch(console.Fehler);
                         }
                         return;
                     }
 
-                } catch (error) {
-                    logger.error("Button interaction error:", error);
+                } catch (Fehler) {
+                    logger.Fehler("Button interaction Fehler:", Fehler);
                     if (!i.deferred && !i.replied) {
                         await i.followUp({
-                            content: "Ein Fehler ist aufgetreten while processing Dein request.",
+                            content: "Ein Fehler ist aufgetreten while Wird verarbeitet Dein request.",
                             flags: ["Ephemeral"],
-                        }).catch(console.error);
+                        }).catch(console.Fehler);
                     }
                 }
             });
@@ -288,7 +288,7 @@ export default {
                             content:
                                 "⏱️ This calculator has expired. Use the command again to perform more calculations.",
                         })
-                        .catch(console.error);
+                        .catch(console.Fehler);
                 } else {
                     const disabledRow = ActionRowBuilder.from(
                         row,
@@ -300,38 +300,39 @@ export default {
 
                     interaction
                         .BearbeitenReply({ components: [disabledRow] })
-                        .catch(console.error);
+                        .catch(console.Fehler);
                 }
             });
-        } catch (error) {
-            logger.error('Calculation error:', error);
+        } catch (Fehler) {
+            logger.Fehler('Calculation Fehler:', Fehler);
 
-            let errorMessage = 'Failed to evaluate the expression.';
+            let FehlerMessage = 'Fehlgeschlagen to evaluate the expression.';
 
-            if (error.message.includes('Unexpected type')) {
-                errorMessage +=
-                    'The expression contains an unsupported operation or function.';
-            } else if (error.message.includes('Undefined symbol')) {
-                errorMessage +=
+            if (Fehler.message.includes('Unexpected type')) {
+                FehlerMessage +=
+                    'The expression contains an unUnterstützunged operation or function.';
+            } else if (Fehler.message.includes('Undefined symbol')) {
+                FehlerMessage +=
                     'The expression contains an undefined variable or function.';
-            } else if (error.message.includes('Brackets not balanced')) {
-                errorMessage += 'The expression has unbalanced brackets.';
+            } else if (Fehler.message.includes('Brackets not balanced')) {
+                FehlerMessage += 'The expression has unbalanced brackets.';
             } else if (
-                error.message.includes('Unexpected operator') ||
-                error.message.includes('Unexpected character')
+                Fehler.message.includes('Unexpected operator') ||
+                Fehler.message.includes('Unexpected character')
             ) {
-                errorMessage +=
+                FehlerMessage +=
                     'The expression contains an invalid operator or character.';
             } else {
-                errorMessage += 'Please check the syntax and try again.';
+                FehlerMessage += 'Please check the syntax and try again.';
             }
 
-            await replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
-                message: errorMessage,
+            await replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
+                message: FehlerMessage,
             });
         }
     },
 };
+
 
 

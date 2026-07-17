@@ -39,17 +39,17 @@ export async function safeDeferInteraction(interaction, options = {}) {
 
         await interaction.deferAktualisieren(options);
         return true;
-    } catch (error) {
-        if (error.code === EXPIRED_INTERACTION_CODE || error.code === INTERACTION_NOT_REPLIED_CODE) {
+    } catch (Fehler) {
+        if (Fehler.code === EXPIRED_INTERACTION_CODE || Fehler.code === INTERACTION_NOT_REPLIED_CODE) {
             logger.warn('Interaction expired during deferral', {
                 event: 'interaction.expired_during_defer',
-                errorCode: error.code,
+                FehlerCode: Fehler.code,
                 customId: interaction?.customId,
                 userId: interaction?.user?.id
             });
             return false;
         }
-        throw error;
+        throw Fehler;
     }
 }
 
@@ -74,17 +74,17 @@ export async function safeShowModal(interaction, modal) {
 
         await interaction.showModal(modal);
         return true;
-    } catch (error) {
-        if (error.code === EXPIRED_INTERACTION_CODE || error.code === INTERACTION_NOT_REPLIED_CODE) {
+    } catch (Fehler) {
+        if (Fehler.code === EXPIRED_INTERACTION_CODE || Fehler.code === INTERACTION_NOT_REPLIED_CODE) {
             logger.warn('Interaction expired during modal show', {
                 event: 'interaction.expired_during_modal',
-                errorCode: error.code,
+                FehlerCode: Fehler.code,
                 customId: interaction?.customId,
                 userId: interaction?.user?.id
             });
             return false;
         }
-        throw error;
+        throw Fehler;
     }
 }
 
@@ -92,16 +92,16 @@ export function withExpiredInteractionHandler(handler) {
     return async (...args) => {
         try {
             return await handler(...args);
-        } catch (error) {
+        } catch (Fehler) {
             
-            if (error.code === EXPIRED_INTERACTION_CODE || error.code === INTERACTION_NOT_REPLIED_CODE) {
+            if (Fehler.code === EXPIRED_INTERACTION_CODE || Fehler.code === INTERACTION_NOT_REPLIED_CODE) {
                 const interaction = args.find(arg => 
                     arg && typeof arg === 'object' && (arg.id && arg.token)
                 );
                 
-                logger.warn('Handler failed due to expired interaction', {
+                logger.warn('Handler Fehlgeschlagen due to expired interaction', {
                     event: 'interaction.handler_expired',
-                    errorCode: error.code,
+                    FehlerCode: Fehler.code,
                     customId: interaction?.customId,
                     userId: interaction?.user?.id,
                     handlerName: handler.name || 'anonymous'
@@ -110,7 +110,7 @@ export function withExpiredInteractionHandler(handler) {
                 return null;
             }
 
-            throw error;
+            throw Fehler;
         }
     };
 }
@@ -123,3 +123,4 @@ export default {
     EXPIRED_INTERACTION_CODE,
     INTERACTION_NOT_REPLIED_CODE
 };
+

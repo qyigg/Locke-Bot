@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("flip")
@@ -14,12 +14,13 @@ export default {
     const result = Math.random() < 0.5 ? "Kopf" : "Zahl";
     const emoji = result === "Kopf" ? "🪙" : "🔮";
 
-    const embed = successEmbed(
+    const embed = ErfolgEmbed(
       "Kopf oder Zahl?",
       `Die Münze landete auf... **${result}** ${emoji}!`,
     );
 
-    await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+    await InteractionHilfeer.safeReply(interaction, { embeds: [embed] });
     logger.debug(`Flip command executed by user ${interaction.user.id} in guild ${interaction.guildId}`);
   },
 };
+

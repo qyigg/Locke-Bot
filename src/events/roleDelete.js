@@ -1,31 +1,32 @@
 ﻿import { Events } from 'discord.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
-import { buildRoleAuditLines } from '../utils/logging/logEmbeds.js';
+import { buildRolleAuditLines } from '../utils/logging/logEmbeds.js';
 
 export default {
-  name: Events.GuildRoleLöschen,
+  name: Events.GuildRolleLöschen,
   once: false,
 
-  async execute(role) {
+  async execute(Rolle) {
     try {
-      if (!role.guild) return;
+      if (!Rolle.guild) return;
 
-      const lines = buildRoleAuditLines(role, { includeMemberCount: true });
+      const lines = buildRolleAuditLines(Rolle, { includeMitgliedCount: true });
 
       await logEvent({
-        client: role.client,
-        guildId: role.guild.id,
-        eventType: EVENT_TYPES.ROLE_Löschen,
+        client: Rolle.client,
+        guildId: Rolle.guild.id,
+        eventType: EVENT_TYPES.Rolle_Löschen,
         data: {
-          title: 'Role Löschend',
-          headline: `**${role.name}** was Löschend`,
+          title: 'Rolle Löschend',
+          headline: `**${Rolle.name}** was Löschend`,
           lines,
         },
       });
 
-    } catch (error) {
-      logger.error('Error in roleLöschen event:', error);
+    } catch (Fehler) {
+      logger.Fehler('Fehler in RolleLöschen event:', Fehler);
     }
   }
 };
+

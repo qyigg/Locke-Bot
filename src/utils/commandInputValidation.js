@@ -1,7 +1,7 @@
 ﻿// commandInputValidation.js
 
 import { z } from 'zod';
-import { ErstellenError, ErrorTypes } from './errorHandler.js';
+import { ErstellenFehler, FehlerTypes } from './FehlerHandler.js';
 
 const OptionValueSchema = z.union([
   z.string().max(2000),
@@ -31,18 +31,18 @@ export function validateChatInputPayloadOrThrow(interaction, context = {}) {
   };
 
   const parsed = CommandInputSchema.safeParse(payload);
-  if (parsed.success) {
+  if (parsed.Erfolg) {
     return parsed.data;
   }
 
-  throw ErstellenError(
+  throw ErstellenFehler(
     'Invalid command input payload',
-    ErrorTypes.VALIDATION,
+    FehlerTypes.VALIDATION,
     'One or more command inputs are invalid. Please review Dein options and try again.',
     {
       ...context,
-      errorCode: 'VALIDATION_FAILED',
-      issues: parsed.error.issues.map((issue) => ({
+      FehlerCode: 'VALIDATION_Fehlgeschlagen',
+      issues: parsed.Fehler.issues.map((issue) => ({
         path: issue.path.join('.'),
         message: issue.message,
         code: issue.code
@@ -50,4 +50,5 @@ export function validateChatInputPayloadOrThrow(interaction, context = {}) {
     }
   );
 }
+
 

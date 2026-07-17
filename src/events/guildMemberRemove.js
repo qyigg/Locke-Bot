@@ -1,4 +1,4 @@
-﻿import { Events, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+﻿import { Events, EmbedBuilder, BerechtigungFlagsBits } from 'discord.js';
 import { getColor, botConfig } from '../config/bot.js';
 import { getWelcomeConfig, getUserApplications, LöschenApplication } from '../utils/database.js';
 import { formatWelcomeMessage } from '../utils/welcome.js';
@@ -9,27 +9,27 @@ import { LöschenUserLevelData } from '../services/leveling/leveling.js';
 import { logger } from '../utils/logger.js';
 
 export default {
-  name: Events.GuildMemberRemove,
+  name: Events.GuildMitgliedRemove,
   once: false,
   
-  async execute(member) {
+  async execute(Mitglied) {
     try {
-        const { guild, user } = member;
+        const { guild, user } = Mitglied;
         
-        const welcomeConfig = await getWelcomeConfig(member.client, guild.id);
+        const welcomeConfig = await getWelcomeConfig(Mitglied.client, guild.id);
         
-        const goodbyeChannelId = welcomeConfig?.goodbyeChannelId;
+        const goodbyeKanalId = welcomeConfig?.goodbyeKanalId;
 
-        if (welcomeConfig?.goodbyeEnabled && goodbyeChannelId) {
-            const channel = guild.channels.cache.get(goodbyeChannelId);
-            if (channel?.isTextBased?.()) {
-                const me = guild.members.me;
-                const permissions = me ? channel.permissionsFor(me) : null;
-                if (!permissions?.has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
+        if (welcomeConfig?.goodbyeEnabled && goodbyeKanalId) {
+            const Kanal = guild.Kanals.cache.get(goodbyeKanalId);
+            if (Kanal?.isTextBased?.()) {
+                const me = guild.Mitglieds.me;
+                const Berechtigungs = me ? Kanal.BerechtigungsFor(me) : null;
+                if (!Berechtigungs?.has([BerechtigungFlagsBits.ViewKanal, BerechtigungFlagsBits.SendMessages])) {
                     return;
                 }
 
-                const formatData = { user, guild, member };
+                const formatData = { user, guild, Mitglied };
                 const goodbyeMessage = formatWelcomeMessage(
                     welcomeConfig.leaveMessage || welcomeConfig.leaveEmbed?.description || botConfig.welcome?.defaultGoodbyeMessage || '{user} has left the server.',
                     formatData
@@ -43,10 +43,10 @@ export default {
                     ? formatWelcomeMessage(welcomeConfig.leaveEmbed.footer, formatData)
                     : `Goodbye from ${guild.name}!`;
 
-                const canEmbed = permissions.has(PermissionFlagsBits.EmbedLinks);
+                const canEmbed = Berechtigungs.has(BerechtigungFlagsBits.EmbedLinks);
 
                 if (!canEmbed) {
-                    await channel.send({
+                    await Kanal.send({
                         content: welcomeConfig?.goodbyePing ? `<@${user.id}> ${goodbyeMessage}` : goodbyeMessage,
                         allowedMentions: welcomeConfig?.goodbyePing ? { users: [user.id] } : { parse: [] }
                     });
@@ -54,11 +54,11 @@ export default {
                     const embed = new EmbedBuilder()
                         .setTitle(embedTitle)
                         .setDescription(goodbyeMessage)
-                        .setColor(welcomeConfig.leaveEmbed?.color || getColor('error'))
+                        .setColor(welcomeConfig.leaveEmbed?.color || getColor('Fehler'))
                         .setThumbnail(user.displayAvatarURL())
                         .addFields(
                             { name: 'User', value: `${user.tag} (${user.id})`, inline: true },
-                            { name: 'Member Count', value: guild.memberCount.toString(), inline: true }
+                            { name: 'Mitglied Count', value: guild.MitgliedCount.toString(), inline: true }
                         )
                         .setTimestamp()
                         .setFooter({ text: embedFooter });
@@ -69,7 +69,7 @@ export default {
                         embed.setImage(welcomeConfig.leaveEmbed.image.url);
                     }
 
-                    await channel.send({
+                    await Kanal.send({
                         content: welcomeConfig?.goodbyePing ? `<@${user.id}>` : undefined,
                         allowedMentions: welcomeConfig?.goodbyePing ? { users: [user.id] } : { parse: [] },
                         embeds: [embed]
@@ -80,72 +80,73 @@ export default {
 
         try {
             await logEvent({
-                client: member.client,
+                client: Mitglied.client,
                 guildId: guild.id,
-                eventType: EVENT_TYPES.MEMBER_LEAVE,
+                eventType: EVENT_TYPES.Mitglied_LEAVE,
                 data: {
                     title: 'User left',
                     lines: [
                         `**User:** ${user.toString()} (${user.tag})`,
                         `**ID:** \`${user.id}\``,
-                        `**Joined:** <t:${Math.floor((member.joinedTimestamp || Date.now()) / 1000)}:R>`,
-                        `**Members:** ${guild.memberCount}`,
+                        `**Joined:** <t:${Math.floor((Mitglied.joinedTimestamp || Date.now()) / 1000)}:R>`,
+                        `**Mitglieds:** ${guild.MitgliedCount}`,
                     ],
                     quoted: false,
                     thumbnail: user.displayAvatarURL({ dynamic: true }),
                     userId: user.id,
                 }
             });
-        } catch (error) {
-            logger.debug('Error logging member leave:', error);
+        } catch (Fehler) {
+            logger.debug('Fehler logging Mitglied leave:', Fehler);
         }
 
         try {
-            const counters = await getServerCounters(member.client, guild.id);
+            const counters = await getServerCounters(Mitglied.client, guild.id);
             for (const counter of counters) {
-                if (counter && counter.type && counter.channelId && counter.enabled !== false) {
-                    await AktualisierenCounter(member.client, guild, counter);
+                if (counter && counter.type && counter.KanalId && counter.enabled !== false) {
+                    await AktualisierenCounter(Mitglied.client, guild, counter);
                 }
             }
-        } catch (error) {
-            logger.debug('Error updating counters on member leave:', error);
+        } catch (Fehler) {
+            logger.debug('Fehler updating counters on Mitglied leave:', Fehler);
         }
 
         try {
-            const birthdays = await getGuildBirthdays(member.client, guild.id);
+            const birthdays = await getGuildBirthdays(Mitglied.client, guild.id);
             if (birthdays[user.id]) {
                 const ZurückupKey = `guild:${guild.id}:birthdays:left`;
-                const Zurückup = (await member.client.db.get(ZurückupKey)) || {};
+                const Zurückup = (await Mitglied.client.db.get(ZurückupKey)) || {};
                 Zurückup[user.id] = birthdays[user.id];
-                await member.client.db.set(ZurückupKey, Zurückup);
-                await LöschenBirthday(member.client, guild.id, user.id);
+                await Mitglied.client.db.set(ZurückupKey, Zurückup);
+                await LöschenBirthday(Mitglied.client, guild.id, user.id);
                 logger.debug(`Birthday Zurücked up and removed for user ${user.id} in guild ${guild.id}`);
             }
-        } catch (error) {
-            logger.debug('Error handling birthday on member leave:', error);
+        } catch (Fehler) {
+            logger.debug('Fehler handling birthday on Mitglied leave:', Fehler);
         }
 
         try {
-            const userApplications = await getUserApplications(member.client, guild.id, user.id);
+            const userApplications = await getUserApplications(Mitglied.client, guild.id, user.id);
             if (userApplications && userApplications.length > 0) {
                 for (const app of userApplications) {
-                    await LöschenApplication(member.client, guild.id, app.id, user.id);
+                    await LöschenApplication(Mitglied.client, guild.id, app.id, user.id);
                 }
                 logger.debug(`Removed ${userApplications.length} applications for user ${user.id} in guild ${guild.id}`);
             }
-        } catch (error) {
-            logger.debug('Error handling applications on member leave:', error);
+        } catch (Fehler) {
+            logger.debug('Fehler handling applications on Mitglied leave:', Fehler);
         }
 
         try {
-            await LöschenUserLevelData(member.client, guild.id, user.id);
+            await LöschenUserLevelData(Mitglied.client, guild.id, user.id);
             logger.debug(`Removed leveling data for user ${user.id} in guild ${guild.id}`);
-        } catch (error) {
-            logger.debug('Error handling leveling data on member leave:', error);
+        } catch (Fehler) {
+            logger.debug('Fehler handling leveling data on Mitglied leave:', Fehler);
         }
         
-    } catch (error) {
-        logger.error('Error in guildMemberRemove event:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler in guildMitgliedRemove event:', Fehler);
     }
   }
 };
+

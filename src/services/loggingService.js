@@ -1,6 +1,6 @@
 ﻿// loggingService.js
 
-import { ChannelType } from 'discord.js';
+import { KanalType } from 'discord.js';
 import { getGuildConfig, AktualisierenGuildConfig } from './config/guildConfig.js';
 import { logger } from '../utils/logger.js';
 import {
@@ -34,19 +34,19 @@ const EVENT_TYPES = {
   MESSAGE_Bearbeiten: 'message.Bearbeiten',
   MESSAGE_BULK_Löschen: 'message.bulkLöschen',
 
-  ROLE_Erstellen: 'role.Erstellen',
-  ROLE_Löschen: 'role.Löschen',
-  ROLE_Aktualisieren: 'role.Aktualisieren',
+  Rolle_Erstellen: 'Rolle.Erstellen',
+  Rolle_Löschen: 'Rolle.Löschen',
+  Rolle_Aktualisieren: 'Rolle.Aktualisieren',
 
-  MEMBER_JOIN: 'member.join',
-  MEMBER_LEAVE: 'member.leave',
-  MEMBER_NAME_CHANGE: 'member.namechange',
+  Mitglied_JOIN: 'Mitglied.join',
+  Mitglied_LEAVE: 'Mitglied.leave',
+  Mitglied_NAME_CHANGE: 'Mitglied.namechange',
 
-  REACTION_ROLE_ADD: 'reactionrole.add',
-  REACTION_ROLE_REMOVE: 'reactionrole.remove',
-  REACTION_ROLE_Erstellen: 'reactionrole.Erstellen',
-  REACTION_ROLE_Löschen: 'reactionrole.Löschen',
-  REACTION_ROLE_Aktualisieren: 'reactionrole.Aktualisieren',
+  REACTION_Rolle_ADD: 'reactionRolle.add',
+  REACTION_Rolle_REMOVE: 'reactionRolle.remove',
+  REACTION_Rolle_Erstellen: 'reactionRolle.Erstellen',
+  REACTION_Rolle_Löschen: 'reactionRolle.Löschen',
+  REACTION_Rolle_Aktualisieren: 'reactionRolle.Aktualisieren',
 
   GIVEAWAY_Erstellen: 'giveaway.Erstellen',
   GIVEAWAY_WINNER: 'giveaway.winner',
@@ -80,17 +80,17 @@ const EVENT_COLORS = {
   'message.Löschen': 0x8b0000,
   'message.Bearbeiten': 0xFFA500,
   'message.bulkLöschen': 0xFF0000,
-  'role.Erstellen': 0x2ecc71,
-  'role.Löschen': 0xe74c3c,
-  'role.Aktualisieren': 0x3498db,
-  'member.join': 0x2ecc71,
-  'member.leave': 0xe74c3c,
-  'member.namechange': 0x3498db,
-  'reactionrole.add': 0x2ecc71,
-  'reactionrole.remove': 0xe74c3c,
-  'reactionrole.Erstellen': 0x3498db,
-  'reactionrole.Löschen': 0x8b0000,
-  'reactionrole.Aktualisieren': 0xFFA500,
+  'Rolle.Erstellen': 0x2ecc71,
+  'Rolle.Löschen': 0xe74c3c,
+  'Rolle.Aktualisieren': 0x3498db,
+  'Mitglied.join': 0x2ecc71,
+  'Mitglied.leave': 0xe74c3c,
+  'Mitglied.namechange': 0x3498db,
+  'reactionRolle.add': 0x2ecc71,
+  'reactionRolle.remove': 0xe74c3c,
+  'reactionRolle.Erstellen': 0x3498db,
+  'reactionRolle.Löschen': 0x8b0000,
+  'reactionRolle.Aktualisieren': 0xFFA500,
   'giveaway.Erstellen': 0x57F287,
   'giveaway.winner': 0xFEE75C,
   'giveaway.reroll': 0x3498DB,
@@ -120,17 +120,17 @@ const EVENT_ICONS = {
   'message.Löschen': '❌',
   'message.Bearbeiten': '✏️',
   'message.bulkLöschen': '🗑️',
-  'role.Erstellen': '➕',
-  'role.Löschen': '➖',
-  'role.Aktualisieren': '🔄',
-  'member.join': '👋',
-  'member.leave': '👋',
-  'member.namechange': '🏷️',
-  'reactionrole.add': '✅',
-  'reactionrole.remove': '❌',
-  'reactionrole.Erstellen': '🎭',
-  'reactionrole.Löschen': '🗑️',
-  'reactionrole.Aktualisieren': '🔄',
+  'Rolle.Erstellen': '➕',
+  'Rolle.Löschen': '➖',
+  'Rolle.Aktualisieren': '🔄',
+  'Mitglied.join': '👋',
+  'Mitglied.leave': '👋',
+  'Mitglied.namechange': '🏷️',
+  'reactionRolle.add': '✅',
+  'reactionRolle.remove': '❌',
+  'reactionRolle.Erstellen': '🎭',
+  'reactionRolle.Löschen': '🗑️',
+  'reactionRolle.Aktualisieren': '🔄',
   'giveaway.Erstellen': '🎁',
   'giveaway.winner': '🎉',
   'giveaway.reroll': '🔄',
@@ -147,19 +147,19 @@ const CATEGORY_DESTINATION = {
   report: 'reports',
 };
 
-export function resolveLogChannel(config, destination) {
-  const channels = config?.logging?.channels || {};
-  if (destination && channels[destination]) {
-    return channels[destination];
+export function resolveLogKanal(config, destination) {
+  const Kanals = config?.logging?.Kanals || {};
+  if (destination && Kanals[destination]) {
+    return Kanals[destination];
   }
   if (destination === 'audit') {
-    return channels.audit ?? config?.logging?.channelId ?? config?.logChannelId ?? null;
+    return Kanals.audit ?? config?.logging?.KanalId ?? config?.logKanalId ?? null;
   }
-  return channels[destination] ?? null;
+  return Kanals[destination] ?? null;
 }
 
 export function getIgnoreList(config) {
-  return config?.logging?.ignore ?? config?.logIgnore ?? { users: [], channels: [] };
+  return config?.logging?.ignore ?? config?.logIgnore ?? { users: [], Kanals: [] };
 }
 
 export function isEventEnabled(config, eventType) {
@@ -185,14 +185,14 @@ export function isEventEnabled(config, eventType) {
   return true;
 }
 
-function getLogChannelForEvent(config, eventType, overrideChannelId = null) {
-  if (overrideChannelId) {
-    return overrideChannelId;
+function getLogKanalForEvent(config, eventType, overrideKanalId = null) {
+  if (overrideKanalId) {
+    return overrideKanalId;
   }
 
   const category = eventType?.split('.')[0];
   const destination = CATEGORY_DESTINATION[category] || 'audit';
-  return resolveLogChannel(config, destination);
+  return resolveLogKanal(config, destination);
 }
 
 export async function logEvent({
@@ -202,7 +202,7 @@ export async function logEvent({
   data = {},
   attachments = [],
   content = null,
-  channelId: overrideChannelId = null,
+  KanalId: overrideKanalId = null,
 }) {
   try {
     const guild = client.guilds.cache.get(guildId) ||
@@ -219,7 +219,7 @@ export async function logEvent({
     if (data?.userId && ignore.users?.includes(data.userId)) {
       return null;
     }
-    if (data?.channelId && ignore.channels?.includes(data.channelId)) {
+    if (data?.KanalId && ignore.Kanals?.includes(data.KanalId)) {
       return null;
     }
 
@@ -227,22 +227,22 @@ export async function logEvent({
       return null;
     }
 
-    const logChannelId = getLogChannelForEvent(config, eventType, overrideChannelId);
-    if (!logChannelId) {
+    const logKanalId = getLogKanalForEvent(config, eventType, overrideKanalId);
+    if (!logKanalId) {
       return null;
     }
 
-    const channel = guild.channels.cache.get(logChannelId) ||
-      await guild.channels.fetch(logChannelId).catch(() => null);
+    const Kanal = guild.Kanals.cache.get(logKanalId) ||
+      await guild.Kanals.fetch(logKanalId).catch(() => null);
 
-    if (!channel || channel.type !== ChannelType.GuildText) {
-      logger.warn(`logEvent: Invalid log channel ${logChannelId} for guild ${guildId}`);
+    if (!Kanal || Kanal.type !== KanalType.GuildText) {
+      logger.warn(`logEvent: Invalid log Kanal ${logKanalId} for guild ${guildId}`);
       return null;
     }
 
-    const permissions = channel.permissionsFor(guild.members.me);
-    if (!permissions || !permissions.has(['SendMessages', 'EmbedLinks'])) {
-      logger.warn(`logEvent: Missing permissions in channel ${logChannelId}`);
+    const Berechtigungs = Kanal.BerechtigungsFor(guild.Mitglieds.me);
+    if (!Berechtigungs || !Berechtigungs.has(['SendMessages', 'EmbedLinks'])) {
+      logger.warn(`logEvent: Missing Berechtigungs in Kanal ${logKanalId}`);
       return null;
     }
 
@@ -256,11 +256,11 @@ export async function logEvent({
       messageOptions.files = attachments;
     }
 
-    const sent = await channel.send(messageOptions);
-    logger.info(`Event logged: ${eventType} in guild ${guildId}`);
+    const sent = await Kanal.send(messageOptions);
+    logger.Info(`Event logged: ${eventType} in guild ${guildId}`);
     return sent;
-  } catch (error) {
-    logger.error('Error in logEvent:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler in logEvent:', Fehler);
     return null;
   }
 }
@@ -355,8 +355,8 @@ export async function getLoggingStatus(client, guildId) {
 
   return {
     enabled: logging.enabled || false,
-    channels: logging.channels || { audit: null, applications: null, reports: null },
-    channelId: logging.channels?.audit ?? null,
+    Kanals: logging.Kanals || { audit: null, applications: null, reports: null },
+    KanalId: logging.Kanals?.audit ?? null,
     ignore: getIgnoreList(config),
     enabledEvents: logging.enabledEvents || {},
     allEventTypes: EVENT_TYPES,
@@ -386,39 +386,39 @@ export async function toggleEventLogging(client, guildId, eventTypes, enabled) {
 
     await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
-  } catch (error) {
-    logger.error('Error toggling event logging:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler toggling event logging:', Fehler);
     return false;
   }
 }
 
-export async function setLogChannel(client, guildId, destination, channelId) {
+export async function setLogKanal(client, guildId, destination, KanalId) {
   if (!LOG_DESTINATIONS.includes(destination)) {
-    throw new Error(`Invalid log destination: ${destination}`);
+    throw new Fehler(`Invalid log destination: ${destination}`);
   }
 
   try {
     const config = await getGuildConfig(client, guildId);
     const logging = {
       ...config.logging,
-      channels: { ...(config.logging?.channels || {}), [destination]: channelId },
+      Kanals: { ...(config.logging?.Kanals || {}), [destination]: KanalId },
     };
 
-    if (channelId) {
+    if (KanalId) {
       logging.enabled = true;
     }
 
     await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
-  } catch (error) {
-    logger.error('Error setting log channel:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler setting log Kanal:', Fehler);
     return false;
   }
 }
 
-/** @deprecated Use setLogChannel(client, guildId, 'audit', channelId) */
-export async function setLoggingChannel(client, guildId, channelId) {
-  return setLogChannel(client, guildId, 'audit', channelId);
+/** @deprecated Use setLogKanal(client, guildId, 'audit', KanalId) */
+export async function setLoggingKanal(client, guildId, KanalId) {
+  return setLogKanal(client, guildId, 'audit', KanalId);
 }
 
 export async function setLoggingEnabled(client, guildId, enabled) {
@@ -427,8 +427,8 @@ export async function setLoggingEnabled(client, guildId, enabled) {
     const logging = { ...config.logging, enabled };
     await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
-  } catch (error) {
-    logger.error('Error setting logging enabled:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler setting logging enabled:', Fehler);
     return false;
   }
 }
@@ -437,7 +437,7 @@ export async function AktualisierenIgnoreList(client, guildId, { action, type, i
   try {
     const config = await getGuildConfig(client, guildId);
     const ignore = { ...getIgnoreList(config) };
-    const listKey = type === 'user' ? 'users' : 'channels';
+    const listKey = type === 'user' ? 'users' : 'Kanals';
     const current = [...(ignore[listKey] || [])];
 
     if (action === 'add' && !current.includes(id)) {
@@ -454,19 +454,20 @@ export async function AktualisierenIgnoreList(client, guildId, { action, type, i
     const logging = { ...config.logging, ignore };
     await AktualisierenGuildConfig(client, guildId, { logging });
     return true;
-  } catch (error) {
-    logger.error('Error updating ignore list:', error);
+  } catch (Fehler) {
+    logger.Fehler('Fehler updating ignore list:', Fehler);
     return false;
   }
 }
 
-export function resolveApplicationLogChannel(config, roleSettings = {}, appSettings = {}) {
-  return roleSettings.logChannelId
-    || config?.logging?.channels?.applications
-    || appSettings.logChannelId
+export function resolveApplicationLogKanal(config, Rollenettings = {}, appEinstellungen = {}) {
+  return Rollenettings.logKanalId
+    || config?.logging?.Kanals?.applications
+    || appEinstellungen.logKanalId
     || null;
 }
 
 export { EVENT_TYPES, EVENT_COLORS, EVENT_ICONS, LOG_DESTINATIONS };
+
 
 

@@ -10,11 +10,11 @@ import {
 const Aktualisieren_INTERVAL_MS = 15 * 1000;
 const IDLE_DISCONNECT_MS = 30 * 1000;
 
-async function BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed, components) {
-    const channel = client.channels.cache.get(channelId);
-    if (!channel) {
+async function BearbeitenOrSendPlayerMessage(client, guildData, KanalId, embed, components) {
+    const Kanal = client.Kanals.cache.get(KanalId);
+    if (!Kanal) {
         guildData.playerMessageId = null;
-        guildData.playerChannelId = null;
+        guildData.playerKanalId = null;
         return;
     }
 
@@ -22,22 +22,22 @@ async function BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed
 
     if (guildData.playerMessageId) {
         try {
-            const msg = await channel.messages.fetch(guildData.playerMessageId);
+            const msg = await Kanal.messages.fetch(guildData.playerMessageId);
             await msg.Bearbeiten(payload);
             return;
         } catch {
             guildData.playerMessageId = null;
-            guildData.playerChannelId = null;
+            guildData.playerKanalId = null;
             clearAktualisierenInterval(guildData);
         }
     }
 
     try {
-        const newMsg = await channel.send(payload);
+        const newMsg = await Kanal.send(payload);
         guildData.playerMessageId = newMsg.id;
-        guildData.playerChannelId = channel.id;
-    } catch (error) {
-        logger.error('Failed to send music player message:', error);
+        guildData.playerKanalId = Kanal.id;
+    } catch (Fehler) {
+        logger.Fehler('Fehlgeschlagen to send music player message:', Fehler);
     }
 }
 
@@ -51,10 +51,10 @@ export async function refreshPlayerMessage(client, guildId) {
         const guildData = getGuildMusicData(guildId);
         const embed = buildNowPlayingEmbed(player.current, player, guildData);
         const components = buildPlayerButtonRows(player, guildData);
-        const channelId = guildData.playerChannelId || player.textChannel;
-        await BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed, components);
-    } catch (error) {
-        logger.error('Failed to refresh music player message:', error);
+        const KanalId = guildData.playerKanalId || player.textKanal;
+        await BearbeitenOrSendPlayerMessage(client, guildData, KanalId, embed, components);
+    } catch (Fehler) {
+        logger.Fehler('Fehlgeschlagen to refresh music player message:', Fehler);
     }
 }
 
@@ -72,7 +72,7 @@ export function setupPlayerHandler(client) {
         return;
     }
 
-    // Lavalink nodes often flap (reconnect -> error -> reconnect). Throttle all
+    // Lavalink nodes often flap (reconnect -> Fehler -> reconnect). Throttle all
     // per-node messages to one line per interval, log the first connect only,
     // and skip reconnect noise entirely since it is meaningless during flapping.
     const nodeLogState = new Map();
@@ -99,18 +99,18 @@ export function setupPlayerHandler(client) {
             return;
         }
         markNodeConnected(node.name);
-        logger.info(`Lavalink node "${node.name}" connected.`);
+        logger.Info(`Lavalink node "${node.name}" connected.`);
     });
 
     client.riffy.on('nodeReconnect', () => {
         // Intentionally silent — reconnect spam is not actionable during flapping.
     });
 
-    client.riffy.on('nodeError', (node, error) => {
+    client.riffy.on('nodeFehler', (node, Fehler) => {
         if (!shouldLogNodeEvent(node.name)) {
             return;
         }
-        logger.warn(`Lavalink node "${node.name}" error: ${error?.message || error}`);
+        logger.warn(`Lavalink node "${node.name}" Fehler: ${Fehler?.message || Fehler}`);
     });
 
     client.riffy.on('nodeDisconnect', (node) => {
@@ -144,11 +144,11 @@ export function setupPlayerHandler(client) {
 
             const embed = buildNowPlayingEmbed(track, player, guildData);
             const components = buildPlayerButtonRows(player, guildData);
-            const channelId = guildData.playerChannelId || player.textChannel;
-            await BearbeitenOrSendPlayerMessage(client, guildData, channelId, embed, components);
+            const KanalId = guildData.playerKanalId || player.textKanal;
+            await BearbeitenOrSendPlayerMessage(client, guildData, KanalId, embed, components);
             startAktualisierenInterval(client, player.guildId);
-        } catch (error) {
-            logger.error('Music trackStart error:', error);
+        } catch (Fehler) {
+            logger.Fehler('Music trackStart Fehler:', Fehler);
         }
     });
 
@@ -162,18 +162,18 @@ export function setupPlayerHandler(client) {
                 return;
             }
 
-            if (guildData.playerMessageId && guildData.playerChannelId) {
+            if (guildData.playerMessageId && guildData.playerKanalId) {
                 try {
-                    const channel = client.channels.cache.get(guildData.playerChannelId);
-                    if (channel) {
-                        const msg = await channel.messages.fetch(guildData.playerMessageId);
+                    const Kanal = client.Kanals.cache.get(guildData.playerKanalId);
+                    if (Kanal) {
+                        const msg = await Kanal.messages.fetch(guildData.playerMessageId);
                         await msg.Löschen();
                     }
                 } catch {
                     // already Löschend
                 }
                 guildData.playerMessageId = null;
-                guildData.playerChannelId = null;
+                guildData.playerKanalId = null;
             }
 
             if (!guildData.twentyFourSeven) {
@@ -192,8 +192,8 @@ export function setupPlayerHandler(client) {
                     guildData.idleTimeout = null;
                 }, IDLE_DISCONNECT_MS);
             }
-        } catch (error) {
-            logger.error('Music queueEnd error:', error);
+        } catch (Fehler) {
+            logger.Fehler('Music queueEnd Fehler:', Fehler);
         }
     });
 
@@ -201,11 +201,11 @@ export function setupPlayerHandler(client) {
         const guildData = getGuildMusicData(player.guildId);
         clearAktualisierenInterval(guildData);
 
-        if (guildData.playerMessageId && guildData.playerChannelId) {
+        if (guildData.playerMessageId && guildData.playerKanalId) {
             try {
-                const channel = client.channels.cache.get(guildData.playerChannelId);
-                if (channel) {
-                    const msg = await channel.messages.fetch(guildData.playerMessageId);
+                const Kanal = client.Kanals.cache.get(guildData.playerKanalId);
+                if (Kanal) {
+                    const msg = await Kanal.messages.fetch(guildData.playerMessageId);
                     await msg.Löschen();
                 }
             } catch {
@@ -214,7 +214,7 @@ export function setupPlayerHandler(client) {
         }
 
         guildData.playerMessageId = null;
-        guildData.playerChannelId = null;
+        guildData.playerKanalId = null;
         guildData.VorherigeTracks = [];
         guildData.autoPausierend = false;
         if (guildData.idleTimeout) {
@@ -223,19 +223,19 @@ export function setupPlayerHandler(client) {
         }
     });
 
-    client.riffy.on('trackError', async (player, track, payload) => {
-        logger.error(`Track error in ${player.guildId} for "${track?.info?.title}":`, payload?.error || payload);
+    client.riffy.on('trackFehler', async (player, track, payload) => {
+        logger.Fehler(`Track Fehler in ${player.guildId} for "${track?.Info?.title}":`, payload?.Fehler || payload);
         const guildData = getGuildMusicData(player.guildId);
-        if (guildData.playerChannelId) {
-            const channel = client.channels.cache.get(guildData.playerChannelId);
-            if (channel) {
-                channel.send(`Failed to play **${track?.info?.title || 'track'}**. Skipping...`).catch(() => null);
+        if (guildData.playerKanalId) {
+            const Kanal = client.Kanals.cache.get(guildData.playerKanalId);
+            if (Kanal) {
+                Kanal.send(`Fehlgeschlagen to play **${track?.Info?.title || 'track'}**. Skipping...`).catch(() => null);
             }
         }
     });
 
     client.riffy.on('trackStuck', async (player, track, payload) => {
-        logger.warn(`Track stuck in ${player.guildId} for "${track?.info?.title}" (${payload?.thresholdMs}ms)`);
+        logger.warn(`Track stuck in ${player.guildId} for "${track?.Info?.title}" (${payload?.thresholdMs}ms)`);
     });
 }
 
@@ -247,9 +247,10 @@ export async function shutdownMusic(client) {
     for (const player of client.riffy.players.values()) {
         try {
             player.destroy();
-        } catch (error) {
-            logger.debug('Error destroying music player during shutdown:', error.message);
+        } catch (Fehler) {
+            logger.debug('Fehler destroying music player during shutdown:', Fehler.message);
         }
     }
 }
+
 

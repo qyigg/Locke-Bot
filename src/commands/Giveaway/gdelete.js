@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { errorEmbed, successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, MessageFlags } from 'discord.js';
+import { FehlerEmbed, ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getGuildGiveaways, LöschenGiveaway } from '../../utils/giveaways.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("gLöschen")
@@ -18,35 +18,35 @@ export default {
                 .setDescription("Die Nachrichten-ID des zu löschenden Gewinnspiels.")
                 .setRequired(true),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild),
 
     async execute(interaction) {
         if (!interaction.inGuild()) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Giveaway command used outside guild',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Dieser Befehl kann nur auf einem Server verwendet werden.',
                 { userId: interaction.user.id }
             );
         }
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotError(
-                'User lacks ManageGuild permission',
-                ErrorTypes.PERMISSION,
+        if (!interaction.Mitglied.Berechtigungs.has(BerechtigungFlagsBits.ManageGuild)) {
+            throw new TitanBotFehler(
+                'User lacks ManageGuild Berechtigung',
+                FehlerTypes.Berechtigung,
                 "Du benötigst die Berechtigung 'Server verwalten', um ein Gewinnspiel zu löschen.",
                 { userId: interaction.user.id, guildId: interaction.guildId }
             );
         }
 
-        logger.info(`Giveaway deletion started by ${interaction.user.tag} in guild ${interaction.guildId}`);
+        logger.Info(`Giveaway deletion started by ${interaction.user.tag} in guild ${interaction.guildId}`);
 
         const messageId = interaction.options.getString("messageid");
 
         if (!messageId || !/^\d+$/.test(messageId)) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Invalid message ID format',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Bitte geben Sie eine gültige Nachrichten-ID an.',
                 { providedId: messageId }
             );
@@ -56,54 +56,54 @@ export default {
         const giveaway = giveaways.find(g => g.messageId === messageId);
 
         if (!giveaway) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway Nicht gefunden: ${messageId}`,
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Es wurde kein Gewinnspiel mit dieser Nachrichten-ID gefunden.",
                 { messageId, guildId: interaction.guildId }
             );
         }
 
         let LöschendMessage = false;
-        let channelName = "Unknown Channel";
+        let KanalName = "Unknown Kanal";
 
-        const tryLöschenFromChannel = async (channel) => {
-            if (!channel || !channel.isTextBased() || !channel.messages?.fetch) {
+        const tryLöschenFromKanal = async (Kanal) => {
+            if (!Kanal || !Kanal.isTextBased() || !Kanal.messages?.fetch) {
                 return false;
             }
 
-            const message = await channel.messages.fetch(messageId).catch(() => null);
+            const message = await Kanal.messages.fetch(messageId).catch(() => null);
             if (!message) {
                 return false;
             }
 
             await message.Löschen();
-            channelName = channel.name || 'unknown-channel';
+            KanalName = Kanal.name || 'unknown-Kanal';
             LöschendMessage = true;
             return true;
         };
 
         try {
-            const channel = await interaction.client.channels.fetch(giveaway.channelId).catch(() => null);
-            if (await tryLöschenFromChannel(channel)) {
-                logger.debug(`Löschend giveaway message ${messageId} from channel ${channelName}`);
+            const Kanal = await interaction.client.Kanals.fetch(giveaway.KanalId).catch(() => null);
+            if (await tryLöschenFromKanal(Kanal)) {
+                logger.debug(`Löschend giveaway message ${messageId} from Kanal ${KanalName}`);
             }
 
             if (!LöschendMessage && interaction.guild) {
-                const textChannels = interaction.guild.channels.cache.filter(
-                    ch => ch.id !== giveaway.channelId && ch.isTextBased() && ch.messages?.fetch
+                const textKanals = interaction.guild.Kanals.cache.filter(
+                    ch => ch.id !== giveaway.KanalId && ch.isTextBased() && ch.messages?.fetch
                 );
 
-                for (const [, guildChannel] of textChannels) {
-                    const foundAndLöschend = await tryLöschenFromChannel(guildChannel).catch(() => false);
+                for (const [, guildKanal] of textKanals) {
+                    const foundAndLöschend = await tryLöschenFromKanal(guildKanal).catch(() => false);
                     if (foundAndLöschend) {
-                        logger.debug(`Löschend giveaway message ${messageId} via fallZurück lookup in #${channelName}`);
+                        logger.debug(`Löschend giveaway message ${messageId} via fallZurück lookup in #${KanalName}`);
                         break;
                     }
                 }
             }
-        } catch (error) {
-            logger.warn(`Could not Löschen giveaway message: ${error.message}`);
+        } catch (Fehler) {
+            logger.warn(`Could not Löschen giveaway message: ${Fehler.message}`);
         }
 
         const removedFromDatabase = await LöschenGiveaway(
@@ -113,9 +113,9 @@ export default {
         );
 
         if (!removedFromDatabase) {
-            throw new TitanBotError(
-                `Failed to Löschen giveaway from database: ${messageId}`,
-                ErrorTypes.UNKNOWN,
+            throw new TitanBotFehler(
+                `Fehlgeschlagen to Löschen giveaway from database: ${messageId}`,
+                FehlerTypes.UNKNOWN,
                 'Das Gewinnspiel konnte nicht aus der Datenbank entfernt werden. Bitte versuchen Sie es erneut.',
                 { messageId, guildId: interaction.guildId }
             );
@@ -125,16 +125,16 @@ export default {
         const stillExistsInDatabase = giveawaysAfterLöschen.some(g => g.messageId === messageId);
 
         if (stillExistsInDatabase) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 `Giveaway still exists after deletion: ${messageId}`,
-                ErrorTypes.UNKNOWN,
+                FehlerTypes.UNKNOWN,
                 'Das Löschen blieb nicht in der Datenbank erhalten. Bitte versuchen Sie es erneut.',
                 { messageId, guildId: interaction.guildId }
             );
         }
 
-        const statusMsg = LöschendMessage
-            ? `und die Nachricht wurde aus #${channelName} gelöscht`
+        const StatusMsg = LöschendMessage
+            ? `und die Nachricht wurde aus #${KanalName} gelöscht`
             : `aber die Nachricht wurde bereits gelöscht oder der Kanal war nicht erreichbar.`;
 
         const winnerIds = Array.isArray(giveaway.winnerIds) ? giveaway.winnerIds : [];
@@ -147,7 +147,7 @@ export default {
                 ? 'Dieses Gewinnspiel endete ohne gültige Gewinner.'
                 : 'Kein Gewinner wurde vor dem Löschen ausgewählt.';
 
-        logger.info(`Giveaway Löschend: ${messageId} in ${channelName}`);
+        logger.Info(`Giveaway Löschend: ${messageId} in ${KanalName}`);
 
         try {
             await logEvent({
@@ -156,7 +156,7 @@ export default {
                 eventType: EVENT_TYPES.GIVEAWAY_Löschen,
                 data: {
                     description: `Giveaway Löschend: ${giveaway.prize}`,
-                    channelId: giveaway.channelId,
+                    KanalId: giveaway.KanalId,
                     userId: interaction.user.id,
                     fields: [
                         {
@@ -172,19 +172,20 @@ export default {
                     ]
                 }
             });
-        } catch (logError) {
-            logger.debug('Error logging giveaway deletion:', logError);
+        } catch (logFehler) {
+            logger.debug('Fehler logging giveaway deletion:', logFehler);
         }
 
-        return InteractionHelper.safeReply(interaction, {
+        return InteractionHilfeer.safeReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     "Gewinnspiel gelöscht",
-                    `Gewinnspiel für **${giveaway.prize}** erfolgreich gelöscht ${statusMsg}. ${winnerStatusMsg}`,
+                    `Gewinnspiel für **${giveaway.prize}** erfolgreich gelöscht ${StatusMsg}. ${winnerStatusMsg}`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
         });
     },
 };
+
 

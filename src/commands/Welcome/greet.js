@@ -1,25 +1,25 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, MessageFlags } from 'discord.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { logger } from '../../utils/logger.js';
-import { handleInteractionError, TitanBotError, ErrorTypes, replyUserError } from '../../utils/errorHandler.js';
+import { handleInteractionFehler, TitanBotFehler, FehlerTypes, replyUserFehler } from '../../utils/FehlerHandler.js';
 import greetDashboard from './modules/greet_dashboard.js';
 
 export default {
     slashOnly: true,
     data: new SlashCommandBuilder()
         .setName('greet')
-        .setDescription('Manage welcome & goodbye settings')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+        .setDescription('Manage welcome & goodbye Einstellungen')
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('dashboard')
-                .setDescription('Open the welcome & goodbye configuration dashboard'),
+                .setDescription('Open the welcome & goodbye Konfiguration dashboard'),
         ),
 
     async execute(interaction, config, client) {
         try {
-            if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-                return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the **Manage Server** permission to use `/greet`.' });
+            if (!interaction.MitgliedBerechtigungs?.has(BerechtigungFlagsBits.ManageGuild)) {
+                return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need the **Manage Server** Berechtigung to use `/greet`.' });
             }
 
             const subcommand = interaction.options.getSubcommand();
@@ -30,11 +30,12 @@ export default {
                 default:
                     logger.warn(`Unknown /greet subcommand: ${subcommand}`);
             }
-        } catch (error) {
-            if (error instanceof TitanBotError) {
-                return await replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: error.userMessage || 'Etwas ist schief gelaufen.' });
+        } catch (Fehler) {
+            if (Fehler instanceof TitanBotFehler) {
+                return await replyUserFehler(interaction, { type: FehlerTypes.Konfiguration, message: Fehler.userMessage || 'Etwas ist schief gelaufen.' });
             }
-            await handleInteractionError(interaction, error, { command: 'greet' });
+            await handleInteractionFehler(interaction, Fehler, { command: 'greet' });
         }
     },
 };
+

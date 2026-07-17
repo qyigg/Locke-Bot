@@ -1,31 +1,32 @@
-﻿import { PermissionsBitField } from 'discord.js';
-import { successEmbed } from '../../../utils/embeds.js';
+﻿import { BerechtigungsBitField } from 'discord.js';
+import { ErfolgEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 import { logger } from '../../../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
 export default {
     async execute(interaction, config, client) {
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to set the premium role.' });
+        if (!interaction.Mitglied.Berechtigungs.has(BerechtigungsBitField.Flags.ManageGuild)) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need **Manage Server** Berechtigungs to set the premium Rolle.' });
         }
 
-        const role = interaction.options.getRole('role');
+        const Rolle = interaction.options.getRolle('Rolle');
         const guildId = interaction.guildId;
 
         try {
             const currentConfig = await getGuildConfig(client, guildId);
-            currentConfig.premiumRoleId = role.id;
+            currentConfig.premiumRolleId = Rolle.id;
             await setGuildConfig(client, guildId, currentConfig);
 
-            return InteractionHelper.safeReply(interaction, {
-                embeds: [successEmbed('Premium Role Set', `The **Premium Shop Role** has been set to ${role.toString()}. Members who purchase the Premium Role item will be granted this role.`)],
+            return InteractionHilfeer.safeReply(interaction, {
+                embeds: [ErfolgEmbed('Premium Rolle Set', `The **Premium Shop Rolle** has been set to ${Rolle.toString()}. Mitglieds who purchase the Premium Rolle item will be granted this Rolle.`)],
                 ephemeral: true,
             });
-        } catch (error) {
-            logger.error('shop_config_setrole error:', error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not Speichern the guild configuration.' });
+        } catch (Fehler) {
+            logger.Fehler('shop_config_setRolle Fehler:', Fehler);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Could not Speichern the guild Konfiguration.' });
         }
     },
 };
+

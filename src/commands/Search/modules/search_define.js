@@ -1,13 +1,13 @@
 ﻿import axios from 'axios';
 import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';
-import { handleInteractionError, replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { handleInteractionFehler, replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 
 export default {
     async execute(interaction) {
         try {
-            const deferred = await InteractionHelper.safeDefer(interaction);
+            const deferred = await InteractionHilfeer.safeDefer(interaction);
             if (!deferred) {
                 return;
             }
@@ -20,7 +20,7 @@ export default {
                     word: word,
                     guildId: interaction.guildId
                 });
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Please enter a word with at least 2 characters.' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Please enter a word with at least 2 characters.' });
             }
 
             const response = await axios.get(
@@ -29,14 +29,14 @@ export default {
             );
 
             if (!response.data || response.data.length === 0) {
-                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${word}".` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `No definitions found for "${word}".` });
             }
 
             const data = response.data[0];
             const embed = ErstellenEmbed({
                 title: data.word,
                 description: data.phonetic ? `*${data.phonetic}*` : '',
-                color: 'success'
+                color: 'Erfolg'
             });
 
             data.meanings.slice(0, 5).forEach(meaning => {
@@ -62,29 +62,29 @@ export default {
 
             embed.setFooter({ text: 'Powered by Free Dictionary API' });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
 
-            logger.info('Dictionary definition retrieved', {
+            logger.Info('Dictionary definition retrieved', {
                 userId: interaction.user.id,
                 word: word,
                 guildId: interaction.guildId,
                 commandName: 'define'
             });
 
-        } catch (error) {
-            logger.error('Dictionary lookup error', {
-                error: error.message,
-                stack: error.stack,
+        } catch (Fehler) {
+            logger.Fehler('Dictionary lookup Fehler', {
+                Fehler: Fehler.message,
+                stack: Fehler.stack,
                 userId: interaction.user.id,
                 word: interaction.options.getString('word'),
                 guildId: interaction.guildId,
                 commandName: 'define'
             });
 
-            if (error.response?.status === 404) {
-                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('word')}".` });
+            if (Fehler.response?.Status === 404) {
+                await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('word')}".` });
             } else {
-                await handleInteractionError(interaction, error, {
+                await handleInteractionFehler(interaction, Fehler, {
                     commandName: 'define',
                     source: 'dictionary_api'
                 });
@@ -92,4 +92,5 @@ export default {
         }
     },
 };
+
 

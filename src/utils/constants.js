@@ -23,17 +23,17 @@ export const DEFAULT_ECONOMY_DATA = {
 };
 
 export const DEFAULT_GUILD_CONFIG = {
-    enabledCommands: {},
-    birthdayChannelId: null,
-    premiumRoleId: null,
-    modRole: null,
-    adminRole: null,
-    welcomeChannel: null,
-    autoRole: null,
+    enabledBefehle: {},
+    birthdayKanalId: null,
+    premiumRolleId: null,
+    modRolle: null,
+    adminRolle: null,
+    welcomeKanal: null,
+    autoRolle: null,
     logging: {
         enabled: false,
-        channels: { audit: null, applications: null, reports: null },
-        ignore: { users: [], channels: [] },
+        Kanals: { audit: null, applications: null, reports: null },
+        ignore: { users: [], Kanals: [] },
         enabledEvents: {},
     },
     verification: {
@@ -70,11 +70,11 @@ export const DEFAULTS = {
     NULL: null
 };
 
-export const ERROR_DEFAULTS = {
+export const Fehler_DEFAULTS = {
     INVALID_INPUT: 'Ungültige Eingabe provided',
-    DATABASE_ERROR: 'Database operation failed',
+    DATABASE_Fehler: 'Database operation Fehlgeschlagen',
     NOT_FOUND: 'Nicht gefunden',
-    INSUFFICIENT_PERMISSIONS: 'Unzureichende Berechtigungen',
+    INSUFFICIENT_BerechtigungS: 'Unzureichende Berechtigungen',
     INVALID_FORMAT: 'Invalid format'
 };
 
@@ -92,6 +92,7 @@ export default {
     INTERACTION_TIMEOUTS,
     STORAGE_LIMITS,
     DEFAULTS,
-    ERROR_DEFAULTS,
+    Fehler_DEFAULTS,
     TIME
 };
+

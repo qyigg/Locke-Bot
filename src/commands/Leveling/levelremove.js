@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { checkUserPermissions } from '../../utils/permissionGuard.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { checkUserBerechtigungs } from '../../utils/BerechtigungGuard.js';
 import { removeLevels, getUserLevelData, getLevelingConfig } from '../../services/leveling/leveling.js';
 import { ErstellenEmbed } from '../../utils/embeds.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('levelremove')
@@ -23,23 +23,23 @@ export default {
         .setRequired(true)
         .setMinValue(1)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .setDMPermission(false),
+    .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
+    .setDMBerechtigung(false),
   category: 'Leveling',
 
   async execute(interaction, config, client) {
-    await InteractionHelper.safeDefer(interaction);
+    await InteractionHilfeer.safeDefer(interaction);
 
-    const hasPermission = await checkUserPermissions(
+    const hasBerechtigung = await checkUserBerechtigungs(
       interaction,
-      PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      BerechtigungFlagsBits.ManageGuild,
+      'You need ManageGuild Berechtigung to use this command.'
     );
-    if (!hasPermission) return;
+    if (!hasBerechtigung) return;
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeBearbeitenReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
@@ -53,40 +53,41 @@ export default {
     const targetUser = interaction.options.getUser('user');
     const levelsToRemove = interaction.options.getInteger('levels');
 
-    const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
-    if (!member) {
-      throw new TitanBotError(
+    const Mitglied = await interaction.guild.Mitglieds.fetch(targetUser.id).catch(() => null);
+    if (!Mitglied) {
+      throw new TitanBotFehler(
         `User ${targetUser.id} Nicht gefunden in Diese Gilde`,
-        ErrorTypes.USER_INPUT,
+        FehlerTypes.USER_INPUT,
         'The specified user is not in Dieser Server.'
       );
     }
 
     const userData = await getUserLevelData(client, interaction.guildId, targetUser.id);
     if (userData.level === 0) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         `User ${targetUser.id} is already at minimum level`,
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         `${targetUser.tag} is already at level 0 and cannot have levels removed.`
       );
     }
 
     const AktualisierendData = await removeLevels(client, interaction.guildId, targetUser.id, levelsToRemove);
 
-    await InteractionHelper.safeBearbeitenReply(interaction, {
+    await InteractionHilfeer.safeBearbeitenReply(interaction, {
       embeds: [
         ErstellenEmbed({
           title: 'Levels Removed',
-          description: `Successfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${AktualisierendData.level}`,
-          color: 'success'
+          description: `Erfolgfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${AktualisierendData.level}`,
+          color: 'Erfolg'
         })
       ]
     });
 
-    logger.info(
+    logger.Info(
       `[ADMIN] User ${interaction.user.tag} removed ${levelsToRemove} levels from ${targetUser.tag} in guild ${interaction.guildId}`
     );
   }
 };
+
 
 

@@ -1,10 +1,10 @@
 ﻿import {
     SlashCommandBuilder,
-    PermissionFlagsBits,
+    BerechtigungFlagsBits,
     ActionRowBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
-    ChannelSelectMenuBuilder,
+    KanalSelectMenuBuilder,
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle,
@@ -12,15 +12,15 @@
     ButtonStyle,
     MessageFlags,
     ComponentType,
-    ChannelType,
+    KanalType,
     EmbedBuilder,
     LabelBuilder,
     RadioGroupBuilder,
 } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getColor } from '../../config/bot.js';
 
 const MAX_FIELDS = 25;
@@ -28,9 +28,9 @@ const IDLE_TIMEOUT = 900_000;
 
 const COLOR_PRESETS = [
     { label: 'Primary (Blue)',        value: '#336699', emoji: '' },
-    { label: 'Success (Green)',       value: '#57F287', emoji: '' },
-    { label: 'Error (Red)',           value: '#ED4245', emoji: '' },
-    { label: 'Warning (Yellow)',      value: '#FEE75C', emoji: '' },
+    { label: 'Erfolg (Green)',       value: '#57F287', emoji: '' },
+    { label: 'Fehler (Red)',           value: '#ED4245', emoji: '' },
+    { label: 'Warnung (Yellow)',      value: '#FEE75C', emoji: '' },
     { label: 'Info (Bright Blue)',    value: '#3498DB', emoji: '' },
     { label: 'Blurple (Discord)',     value: '#5865F2', emoji: '' },
     { label: 'Fuchsia',              value: '#EB459E', emoji: '' },
@@ -115,7 +115,7 @@ function buildDashboardEmbed(state) {
     return new EmbedBuilder()
         .setTitle('Embed Builder — Control Panel')
         .setDescription(lines.join('\n'))
-        .setColor(getColor('info'))
+        .setColor(getColor('Info'))
         .setFooter({ text: 'The preview above Aktualisierens live · Schließens after 5 min of inactivity' });
 }
 
@@ -189,7 +189,7 @@ function buildMainMenu(state) {
             .setEmoji('🕐'),
         new StringSelectMenuOptionBuilder()
             .setLabel('Post Embed')
-            .setDescription('Send the finished embed to a channel')
+            .setDescription('Send the finished embed to a Kanal')
             .setValue('post_embed')
             .setEmoji('📤'),
         new StringSelectMenuOptionBuilder()
@@ -208,7 +208,7 @@ function buildMainMenu(state) {
 }
 
 async function refreshDashboard(interaction, state) {
-    return await InteractionHelper.safeBearbeitenReply(interaction, {
+    return await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [buildPreviewEmbed(state), buildDashboardEmbed(state)],
         components: [new ActionRowBuilder().addComponents(buildMainMenu(state))],
     });
@@ -241,7 +241,7 @@ async function handleBearbeitenContent(selectInteraction, rootInteraction, state
             ),
         );
 
-    const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
+    const shown = await InteractionHilfeer.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
     const Absendented = await selectInteraction
@@ -284,13 +284,13 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
                 .setDescription(
                     'Select a preset color or choose **Custom Hex** to enter Dein own `#RRGGBB` value.',
                 )
-                .setColor(getColor('info')),
+                .setColor(getColor('Info')),
         ],
         components: [new ActionRowBuilder().addComponents(colorSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const colorCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
+    const colorCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_color_pick',
@@ -319,7 +319,7 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
                     ),
                 );
 
-            const shown = await InteractionHelper.safeShowModal(colorInter, hexModal);
+            const shown = await InteractionHilfeer.safeShowModal(colorInter, hexModal);
             if (!shown) return;
 
             const hexAbsenden = await colorInter
@@ -334,8 +334,8 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
 
             const hex = hexAbsenden.fields.getTextInputValue('hex_value').trim();
             if (!isValidHex(hex)) {
-                await replyUserError(hexAbsenden, {
-                    type: ErrorTypes.USER_INPUT,
+                await replyUserFehler(hexAbsenden, {
+                    type: FehlerTypes.USER_INPUT,
                     message: `\`${hex}\` is not a valid hex color. Use the format \`#RRGGBB\` (e.g. \`#5865F2\`).`,
                 });
                 return;
@@ -349,8 +349,8 @@ async function handleSetColor(selectInteraction, rootInteraction, state) {
         }
 
         await refreshDashboard(rootInteraction, state);
-        } catch (error) {
-            logger.warn('Embed builder color picker interaction failed:', error.message);
+        } catch (Fehler) {
+            logger.warn('Embed builder color picker interaction Fehlgeschlagen:', Fehler.message);
         }
     });
 }
@@ -390,7 +390,7 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
             ),
         );
 
-    const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
+    const shown = await InteractionHilfeer.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
     const Absendented = await selectInteraction
@@ -407,15 +407,15 @@ async function handleSetAuthor(selectInteraction, rootInteraction, state) {
     const url     = Absendented.fields.getTextInputValue('author_url').trim();
 
     if (iconUrl && !isValidUrl(iconUrl)) {
-        await replyUserError(Absendented, {
-            type: ErrorTypes.USER_INPUT,
+        await replyUserFehler(Absendented, {
+            type: FehlerTypes.USER_INPUT,
             message: 'Author icon URL must be a valid `https://` URL.',
         });
         return;
     }
     if (url && !isValidUrl(url)) {
-        await replyUserError(Absendented, {
-            type: ErrorTypes.USER_INPUT,
+        await replyUserFehler(Absendented, {
+            type: FehlerTypes.USER_INPUT,
             message: 'Author link URL must be a valid `https://` URL.',
         });
         return;
@@ -453,7 +453,7 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
             ),
         );
 
-    const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
+    const shown = await InteractionHilfeer.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
     const Absendented = await selectInteraction
@@ -469,8 +469,8 @@ async function handleSetFooter(selectInteraction, rootInteraction, state) {
     const iconUrl = Absendented.fields.getTextInputValue('footer_icon').trim();
 
     if (iconUrl && !isValidUrl(iconUrl)) {
-        await replyUserError(Absendented, {
-            type: ErrorTypes.USER_INPUT,
+        await replyUserFehler(Absendented, {
+            type: FehlerTypes.USER_INPUT,
             message: 'Footer icon URL must be a valid `https://` URL.',
         });
         return;
@@ -520,13 +520,13 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
                     { name: 'Thumbnail',    value: state.thumbnail ? `[View](${state.thumbnail})` : '`Not set`', inline: true },
                     { name: 'Large Image',  value: state.image     ? `[View](${state.image})`     : '`Not set`', inline: true },
                 )
-                .setColor(getColor('info')),
+                .setColor(getColor('Info')),
         ],
         components: [new ActionRowBuilder().addComponents(imageSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const imgMenuCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
+    const imgMenuCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_image_pick',
@@ -568,7 +568,7 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
                 ),
             );
 
-        const shown = await InteractionHelper.safeShowModal(imgInter, urlModal);
+        const shown = await InteractionHilfeer.safeShowModal(imgInter, urlModal);
         if (!shown) return;
 
         const Absendented = await imgInter
@@ -583,8 +583,8 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 
         const url = Absendented.fields.getTextInputValue('image_url').trim();
         if (!isValidUrl(url)) {
-            await replyUserError(Absendented, {
-                type: ErrorTypes.USER_INPUT,
+            await replyUserFehler(Absendented, {
+                type: FehlerTypes.USER_INPUT,
                 message: 'Image URL must be a valid `https://` link to a publicly accessible image.',
             });
             return;
@@ -595,8 +595,8 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 
         await Absendented.deferAktualisieren().catch(() => {});
         await refreshDashboard(rootInteraction, state);
-        } catch (error) {
-            logger.warn('Embed builder image picker interaction failed:', error.message);
+        } catch (Fehler) {
+            logger.warn('Embed builder image picker interaction Fehlgeschlagen:', Fehler.message);
         }
     });
 }
@@ -604,8 +604,8 @@ async function handleSetImages(selectInteraction, rootInteraction, state) {
 async function handleAddField(selectInteraction, rootInteraction, state) {
     if (state.fields.length >= MAX_FIELDS) {
         await selectInteraction.deferAktualisieren();
-        await replyUserError(selectInteraction, {
-            type: ErrorTypes.VALIDATION,
+        await replyUserFehler(selectInteraction, {
+            type: FehlerTypes.VALIDATION,
             message: `Embeds can have a maximum of ${MAX_FIELDS} fields.`,
         });
         return;
@@ -651,7 +651,7 @@ async function handleAddField(selectInteraction, rootInteraction, state) {
 
     modal.addLabelComponents(fieldNameLabel, fieldValueLabel, inlineLabel);
 
-    const shown = await InteractionHelper.safeShowModal(selectInteraction, modal);
+    const shown = await InteractionHilfeer.safeShowModal(selectInteraction, modal);
     if (!shown) return;
 
     const Absendented = await selectInteraction
@@ -696,13 +696,13 @@ async function handleBearbeitenField(selectInteraction, rootInteraction, state) 
             new EmbedBuilder()
                 .setTitle('Bearbeiten Field')
                 .setDescription('Select the field you want to modify.')
-                .setColor(getColor('info')),
+                .setColor(getColor('Info')),
         ],
         components: [new ActionRowBuilder().addComponents(pickSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const pickCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
+    const pickCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_Bearbeiten_field_pick',
@@ -763,7 +763,7 @@ async function handleBearbeitenField(selectInteraction, rootInteraction, state) 
 
         modal.addLabelComponents(BearbeitenNameLabel, BearbeitenValueLabel, BearbeitenInlineLabel);
 
-        const shown = await InteractionHelper.safeShowModal(pickInter, modal);
+        const shown = await InteractionHilfeer.safeShowModal(pickInter, modal);
         if (!shown) return;
 
         const Absendented = await pickInter
@@ -784,8 +784,8 @@ async function handleBearbeitenField(selectInteraction, rootInteraction, state) 
 
         await Absendented.deferAktualisieren().catch(() => {});
         await refreshDashboard(rootInteraction, state);
-        } catch (error) {
-            logger.warn('Embed builder field Bearbeiten interaction failed:', error.message);
+        } catch (Fehler) {
+            logger.warn('Embed builder field Bearbeiten interaction Fehlgeschlagen:', Fehler.message);
         }
     });
 }
@@ -813,13 +813,13 @@ async function handleRemoveField(selectInteraction, rootInteraction, state) {
             new EmbedBuilder()
                 .setTitle('Remove Field')
                 .setDescription('Select the field you want to Löschen.')
-                .setColor(getColor('warning')),
+                .setColor(getColor('Warnung')),
         ],
         components: [new ActionRowBuilder().addComponents(pickSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const removeCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
+    const removeCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_remove_field_pick',
@@ -858,13 +858,13 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
             new EmbedBuilder()
                 .setTitle('Reorder Fields')
                 .setDescription('Select a field, then use the arrows to move it up or down.')
-                .setColor(getColor('info')),
+                .setColor(getColor('Info')),
         ],
         components: [new ActionRowBuilder().addComponents(pickSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const pickCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
+    const pickCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'eb_reorder_pick',
@@ -902,13 +902,13 @@ async function handleReorderFields(selectInteraction, rootInteraction, state) {
                     .setDescription(
                         `Moving **${state.fields[sourceIdx].name}** — currently at position **${sourceIdx + 1}** of **${state.fields.length}**.`,
                     )
-                    .setColor(getColor('info')),
+                    .setColor(getColor('Info')),
             ],
             components: [new ActionRowBuilder().addComponents(upBtn, downBtn, AbbrechenBtn)],
             flags: MessageFlags.Ephemeral,
         });
 
-        const dirCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
+        const dirCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: i =>
                 i.user.id === selectInteraction.user.id &&
@@ -943,8 +943,8 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
         !state.author?.name
     ) {
         await selectInteraction.deferAktualisieren();
-        await replyUserError(selectInteraction, {
-            type: ErrorTypes.VALIDATION,
+        await replyUserFehler(selectInteraction, {
+            type: FehlerTypes.VALIDATION,
             message: 'Add at least a title, description, or field before posting.',
         });
         return;
@@ -952,47 +952,47 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
 
     await selectInteraction.deferAktualisieren();
 
-    const chanSelect = new ChannelSelectMenuBuilder()
-        .setCustomId('eb_post_channel')
-        .setPlaceholder('Select a channel...')
-        .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement);
+    const chanSelect = new KanalSelectMenuBuilder()
+        .setCustomId('eb_post_Kanal')
+        .setPlaceholder('Select a Kanal...')
+        .addKanalTypes(KanalType.GuildText, KanalType.GuildAnnouncement);
 
     await selectInteraction.followUp({
         embeds: [
             new EmbedBuilder()
                 .setTitle('Post Embed')
                 .setDescription('Select Der Kanal where this embed will be sent.')
-                .setColor(getColor('info')),
+                .setColor(getColor('Info')),
         ],
         components: [new ActionRowBuilder().addComponents(chanSelect)],
         flags: MessageFlags.Ephemeral,
     });
 
-    const chanCollector = rootInteraction.channel.ErstellenMessageComponentCollector({
-        componentType: ComponentType.ChannelSelect,
+    const chanCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
+        componentType: ComponentType.KanalSelect,
         filter: i =>
-            i.user.id === selectInteraction.user.id && i.customId === 'eb_post_channel',
+            i.user.id === selectInteraction.user.id && i.customId === 'eb_post_Kanal',
         time: 60_000,
         max: 1,
     });
 
     chanCollector.on('collect', async chanInter => {
         await chanInter.deferAktualisieren();
-        const channel = chanInter.channels.first();
+        const Kanal = chanInter.Kanals.first();
 
-        if (!channel) {
-            await replyUserError(chanInter, {
-                type: ErrorTypes.USER_INPUT,
-                message: 'Could not resolve the selected channel.',
+        if (!Kanal) {
+            await replyUserFehler(chanInter, {
+                type: FehlerTypes.USER_INPUT,
+                message: 'Could not resolve the selected Kanal.',
             });
             return;
         }
 
-        const perms = channel.permissionsFor(guild.members.me);
-        if (!perms?.has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks])) {
-            await replyUserError(chanInter, {
-                type: ErrorTypes.PERMISSION,
-                message: `I need **Send Messages** and **Embed Links** permissions in ${channel} to post there.`,
+        const perms = Kanal.BerechtigungsFor(guild.Mitglieds.me);
+        if (!perms?.has([BerechtigungFlagsBits.SendMessages, BerechtigungFlagsBits.EmbedLinks])) {
+            await replyUserFehler(chanInter, {
+                type: FehlerTypes.Berechtigung,
+                message: `I need **Send Messages** and **Embed Links** Berechtigungs in ${Kanal} to post there.`,
             });
             return;
         }
@@ -1003,10 +1003,10 @@ async function handlePostEmbed(selectInteraction, rootInteraction, state, guild)
             finalEmbed.setDescription(null);
         }
 
-        await channel.send({ embeds: [finalEmbed] });
+        await Kanal.send({ embeds: [finalEmbed] });
 
         await chanInter.followUp({
-            embeds: [successEmbed('Embed Sent', `Dein embed has been posted to ${channel}.`)],
+            embeds: [ErfolgEmbed('Embed Sent', `Dein embed has been posted to ${Kanal}.`)],
             flags: MessageFlags.Ephemeral,
         });
     });
@@ -1024,7 +1024,7 @@ async function handleJsonExport(selectInteraction, rootInteraction, state) {
                 new EmbedBuilder()
                     .setTitle('Embed JSON')
                     .setDescription(`\`\`\`json\n${json}\n\`\`\``)
-                    .setColor(getColor('info')),
+                    .setColor(getColor('Info')),
             ],
             flags: MessageFlags.Ephemeral,
         });
@@ -1034,7 +1034,7 @@ async function handleJsonExport(selectInteraction, rootInteraction, state) {
                 new EmbedBuilder()
                     .setTitle('Embed JSON')
                     .setDescription('The JSON is too long to display inline — see the attached file.')
-                    .setColor(getColor('info')),
+                    .setColor(getColor('Info')),
             ],
             files: [
                 {
@@ -1052,14 +1052,14 @@ export default {
     data: new SlashCommandBuilder()
         .setName('embedbuilder')
         .setDescription('Build and post a fully custom embed with live preview')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageMessages),
 
     async execute(interaction) {
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction, {
+            const deferErfolg = await InteractionHilfeer.safeDefer(interaction, {
                 flags: MessageFlags.Ephemeral,
             });
-            if (!deferSuccess) return;
+            if (!deferErfolg) return;
 
             const guild = interaction.guild;
 
@@ -1077,7 +1077,7 @@ export default {
 
             await refreshDashboard(interaction, state);
 
-            const collector = interaction.channel.ErstellenMessageComponentCollector({
+            const collector = interaction.Kanal.ErstellenMessageComponentCollector({
                 componentType: ComponentType.StringSelect,
                 filter: i =>
                     i.user.id === interaction.user.id && i.customId === 'eb_menu',
@@ -1141,15 +1141,15 @@ export default {
                         default:
                             await ci.deferAktualisieren();
                     }
-                } catch (error) {
-                    logger.error('Error in embedbuilder collector:', error);
+                } catch (Fehler) {
+                    logger.Fehler('Fehler in embedbuilder collector:', Fehler);
                     const msg =
-                        error instanceof TitanBotError
-                            ? error.userMessage || 'Ein Fehler ist aufgetreten.'
+                        Fehler instanceof TitanBotFehler
+                            ? Fehler.userMessage || 'Ein Fehler ist aufgetreten.'
                             : 'Ein unerwarteter Fehler ist aufgetreten.';
                     if (!ci.replied && !ci.deferred) await ci.deferAktualisieren().catch(() => {});
-                    await replyUserError(ci, {
-                        type: ErrorTypes.UNKNOWN,
+                    await replyUserFehler(ci, {
+                        type: FehlerTypes.UNKNOWN,
                         message: msg,
                     }).catch(() => {});
                 }
@@ -1157,19 +1157,20 @@ export default {
 
             collector.on('end', async (_, reason) => {
                 if (reason === 'time') {
-                    await InteractionHelper.safeBearbeitenReply(interaction, { components: [] }).catch(() => {});
+                    await InteractionHilfeer.safeBearbeitenReply(interaction, { components: [] }).catch(() => {});
                 }
             });
-        } catch (error) {
-            if (error instanceof TitanBotError) throw error;
-            logger.error('Unexpected error in embedbuilder:', error);
-            throw new TitanBotError(
-                `embedbuilder failed: ${error.message}`,
-                ErrorTypes.UNKNOWN,
-                'Failed to open the embed builder.',
+        } catch (Fehler) {
+            if (Fehler instanceof TitanBotFehler) throw Fehler;
+            logger.Fehler('Unexpected Fehler in embedbuilder:', Fehler);
+            throw new TitanBotFehler(
+                `embedbuilder Fehlgeschlagen: ${Fehler.message}`,
+                FehlerTypes.UNKNOWN,
+                'Fehlgeschlagen to open the embed builder.',
             );
         }
     },
 };
+
 
 

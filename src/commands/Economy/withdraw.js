@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData, getMaxBankCapacity } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('withdraw')
@@ -16,8 +16,8 @@ export default {
                 .setMinValue(1)
         ),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        await InteractionHilfeer.safeDefer(interaction);
             
             const userId = interaction.user.id;
             const guildId = interaction.guildId;
@@ -26,10 +26,10 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw ErstellenError(
-                    "Failed to load economy data",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load economy data",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -37,9 +37,9 @@ export default {
             let withdrawAmount = amountInput;
 
             if (withdrawAmount <= 0) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Invalid withdrawal amount",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "You must withdraw a positive amount.",
                     { amount: withdrawAmount, userId }
                 );
@@ -50,9 +50,9 @@ export default {
             }
 
             if (withdrawAmount === 0) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Empty bank account",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "Dein bank account is empty.",
                     { userId, bankBalance: userData.bank }
                 );
@@ -63,7 +63,7 @@ export default {
 
             await setEconomyData(client, guildId, userId, userData);
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 'Abhebung erfolgreich',
                 `Du hast erfolgreich **$${withdrawAmount.toLocaleString()}** von deiner Bank abgehoben.`
             )
@@ -80,8 +80,9 @@ export default {
                     },
                 );
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'withdraw' })
 };
+
 
 

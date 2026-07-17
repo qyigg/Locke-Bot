@@ -1,4 +1,4 @@
-// validation.js
+﻿// validation.js
 
 import { logger } from './logger.js';
 
@@ -93,7 +93,7 @@ export function validateUrl(value, fieldName = 'URL') {
   try {
     new URL(value);
     return value;
-  } catch (error) {
+  } catch (Fehler) {
     logger.warn(`[VALIDATION] ${fieldName} is not a valid URL`);
     return null;
   }

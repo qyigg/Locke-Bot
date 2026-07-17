@@ -1,18 +1,18 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
 import { ErstellenEmbed } from '../../utils/embeds.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { getEconomyPrefix } from '../../utils/database.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName("eleaderboard")
         .setDescription("Sieh dir die Top 10 reichsten Benutzer des Servers an.")
-        .setDMPermission(false),
+        .setDMBerechtigung(false),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
 
             const guildId = interaction.guildId;
@@ -28,9 +28,9 @@ export default {
             }
 
             if (allKeys.length === 0) {
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "No economy data found",
-                    ErrorTypes.VALIDATION,
+                    FehlerTypes.VALIDATION,
                     "No economy data found for Dieser Server."
                 );
             }
@@ -68,7 +68,7 @@ export default {
                 );
             }
 
-            logger.info(`[ECONOMY] Leaderboard generated`, { 
+            logger.Info(`[ECONOMY] Leaderboard generated`, { 
                 guildId, 
                 userCount: allUserData.length,
                 userRank 
@@ -84,7 +84,8 @@ export default {
                 footer: `Dein Rang: ${userRank > 0 ?`#${userRank}`: "Keine Ranglistendaten verfügbar"}`,
             });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'eleaderboard' })
 };
+
 

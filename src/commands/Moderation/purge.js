@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType, MessageFlags } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("purge")
@@ -16,16 +16,16 @@ export default {
         .setDescription("Number of messages (1-100)")
         .setRequired(true),
     )
-.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+.setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageMessages),
   category: "moderation",
   abuseProtection: { maxAttempts: 5, windowMs: 60_000 },
 
   async execute(interaction, config, client) {
-    const deferSuccess = await InteractionHelper.safeDefer(interaction, {
+    const deferErfolg = await InteractionHilfeer.safeDefer(interaction, {
       flags: MessageFlags.Ephemeral,
     });
-    if (!deferSuccess) {
-      logger.warn(`Purge interaction defer failed`, {
+    if (!deferErfolg) {
+      logger.warn(`Purge interaction defer Fehlgeschlagen`, {
         userId: interaction.user.id,
         guildId: interaction.guildId,
         commandName: 'purge'
@@ -34,14 +34,14 @@ export default {
     }
 
     const amount = interaction.options.getInteger("amount");
-    const channel = interaction.channel;
+    const Kanal = interaction.Kanal;
 
     if (amount < 1 || amount > 100)
-      return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please specify a number between 1 and 100.' });
+      return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please specify a number between 1 and 100.' });
 
     try {
-      const fetched = await channel.messages.fetch({ limit: amount });
-      const Löschend = await channel.bulkLöschen(fetched, true);
+      const fetched = await Kanal.messages.fetch({ limit: amount });
+      const Löschend = await Kanal.bulkLöschen(fetched, true);
       const LöschendCount = Löschend.size;
 
       await logEvent({
@@ -49,11 +49,11 @@ export default {
         guild: interaction.guild,
         event: {
           action: "Messages Purged",
-          target: `${channel} (${LöschendCount} messages)`,
+          target: `${Kanal} (${LöschendCount} messages)`,
           executor: `${interaction.user.tag} (${interaction.user.id})`,
           reason: `Löschend ${LöschendCount} messages`,
           metadata: {
-            channelId: channel.id,
+            KanalId: Kanal.id,
             messageCount: LöschendCount,
             requestedAmount: amount,
             moderatorId: interaction.user.id
@@ -61,11 +61,11 @@ export default {
         }
       });
 
-      await InteractionHelper.safeBearbeitenReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [
-          successEmbed(
+          ErfolgEmbed(
             "Messages Purged",
-            `Löschend ${LöschendCount} messages in ${channel}.`,
+            `Löschend ${LöschendCount} messages in ${Kanal}.`,
           ),
         ],
         flags: MessageFlags.Ephemeral,
@@ -73,12 +73,13 @@ export default {
 
       setTimeout(() => {
         interaction.LöschenReply().catch(err => 
-          logger.debug('Failed to auto-Löschen purge response:', err)
+          logger.debug('Fehlgeschlagen to auto-Löschen purge response:', err)
         );
       }, 3000);
-    } catch (error) {
-      logger.error('Purge command error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An unexpected error occurred during message deletion. Note: Messages older than 14 days cannot be bulk Löschend.' });
+    } catch (Fehler) {
+      logger.Fehler('Purge command Fehler:', Fehler);
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'An unexpected Fehler occurred during message deletion. Note: Messages older than 14 days cannot be bulk Löschend.' });
     }
   }
 };
+

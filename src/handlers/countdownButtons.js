@@ -1,8 +1,8 @@
-﻿import { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from 'discord.js';
-import { successEmbed } from '../utils/embeds.js';
+﻿import { ActionRowBuilder, ButtonBuilder, ButtonStyle, BerechtigungFlagsBits } from 'discord.js';
+import { ErfolgEmbed } from '../utils/embeds.js';
 import { logger } from '../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../utils/FehlerHandler.js';
 function ErstellenControlButtons(countdownId, isPausierend = false) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -36,7 +36,7 @@ function startCountdown(countdownId, countdownData, activeCountdowns) {
         countdownData.interval = null;
     }
 
-    logger.info(`Countdown started: ${countdownData.title} (${countdownData.remainingTime / 1000}s remaining)`);
+    logger.Info(`Countdown started: ${countdownData.title} (${countdownData.remainingTime / 1000}s remaining)`);
 
     countdownData.interval = setInterval(async () => {
         try {
@@ -49,7 +49,7 @@ function startCountdown(countdownId, countdownData, activeCountdowns) {
             if (now - countdownData.lastAktualisieren >= 1000) {
                 countdownData.lastAktualisieren = now;
 
-                const embed = successEmbed(
+                const embed = ErfolgEmbed(
                     `⏱️ ${countdownData.title}`,
                     `Time remaining: **${formatTime(Math.ceil(remaining / 1000))}**`,
                 );
@@ -64,15 +64,15 @@ function startCountdown(countdownId, countdownData, activeCountdowns) {
                             ),
                         ],
                     });
-                } catch (error) {
-                    logger.error("Error updating countdown message:", error);
+                } catch (Fehler) {
+                    logger.Fehler("Fehler updating countdown message:", Fehler);
                 }
             }
 
             if (remaining <= 0) {
                 clearInterval(countdownData.interval);
 
-                const finishedEmbed = successEmbed(
+                const finishedEmbed = ErfolgEmbed(
                     `⏱️ ${countdownData.title} (Beendet!)`,
                     "⏰ Zeit abgelaufen!",
                 );
@@ -84,8 +84,8 @@ function startCountdown(countdownId, countdownData, activeCountdowns) {
 
                 cleanupCountdown(countdownId, activeCountdowns);
             }
-        } catch (error) {
-            logger.error("Countdown Aktualisieren error:", error);
+        } catch (Fehler) {
+            logger.Fehler("Countdown Aktualisieren Fehler:", Fehler);
             cleanupCountdown(countdownId, activeCountdowns);
         }
     }, 100);
@@ -101,7 +101,7 @@ function cleanupCountdown(countdownId, activeCountdowns) {
 
 async function countdownButtonHandler(interaction, client, args) {
     try {
-        const { activeCountdowns } = await import('../commands/Tools/countdown.js');
+        const { activeCountdowns } = await import('../Befehle/Tools/countdown.js');
         const action = args[0];
         const countdownId = args[1];
 
@@ -113,7 +113,7 @@ async function countdownButtonHandler(interaction, client, args) {
             });
         }
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+        if (!interaction.Mitglied.Berechtigungs.has(BerechtigungFlagsBits.ManageMessages)) {
             return await interaction.reply({
                 content: 'Du brauchst die Berechtigung "Nachrichten verwalten" um Countdowns zu steuern.',
                 flags: ["Ephemeral"],
@@ -158,7 +158,7 @@ async function countdownButtonHandler(interaction, client, args) {
             case "Abbrechen":
                 clearInterval(countdownData.interval);
 
-                const embed = successEmbed(
+                const embed = ErfolgEmbed(
                     `⏱️ ${countdownData.title} (Abbrechenled)`,
                     "The countdown was Abbrechenled.",
                 );
@@ -176,18 +176,19 @@ async function countdownButtonHandler(interaction, client, args) {
                 });
                 break;
         }
-    } catch (error) {
-        logger.error('Countdown button handler error:', error);
+    } catch (Fehler) {
+        logger.Fehler('Countdown button handler Fehler:', Fehler);
         try {
             if (!interaction.replied && !interaction.deferred) {
-                await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten controlling the countdown.' });
+                await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten controlling the countdown.' });
             }
         } catch (err) {
-            logger.error('Failed to send error message:', err);
+            logger.Fehler('Fehlgeschlagen to send Fehler message:', err);
         }
     }
 }
 
 export { ErstellenControlButtons, formatTime, startCountdown, cleanupCountdown, countdownButtonHandler };
 export default countdownButtonHandler;
+
 

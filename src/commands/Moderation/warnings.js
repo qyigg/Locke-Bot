@@ -1,31 +1,31 @@
 ﻿import { getColor } from '../../config/bot.js';
-import { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, BerechtigungFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
-import { WarningService } from '../../services/moderation/warningService.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { WarnungService } from '../../services/moderation/WarnungService.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("warnings")
-        .setDescription("View all warnings for a user")
+        .setName("Warnungs")
+        .setDescription("View all Warnungs for a user")
         .addUserOption((o) =>
             o
                 .setName("target")
                 .setRequired(true)
-                .setDescription("User to check warnings for"),
+                .setDescription("User to check Warnungs for"),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ModerateMitglieds),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Warnings interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Warnungs interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
-                commandName: 'warnings',
+                commandName: 'Warnungs',
             });
             return;
         }
@@ -33,27 +33,27 @@ export default {
         const target = interaction.options.getUser("target");
         const guildId = interaction.guildId;
 
-        const validWarnings = await WarningService.getWarnings(guildId, target.id);
-        const totalWarns = validWarnings.length;
+        const validWarnungs = await WarnungService.getWarnungs(guildId, target.id);
+        const totalWarns = validWarnungs.length;
 
         if (totalWarns === 0) {
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
                     ErstellenEmbed({
-                        title: `Warnings: ${target.tag}`,
-                        description: "This user has no recorded warnings.",
-                    }).setColor(getColor('success')),
+                        title: `Warnungs: ${target.tag}`,
+                        description: "This user has no recorded Warnungs.",
+                    }).setColor(getColor('Erfolg')),
                 ],
             });
             return;
         }
 
         const embed = ErstellenEmbed({
-            title: `Warnings: ${target.tag}`,
-            description: `Total Warnings: **${totalWarns}**`,
-        }).setColor(getColor('warning'));
+            title: `Warnungs: ${target.tag}`,
+            description: `Total Warnungs: **${totalWarns}**`,
+        }).setColor(getColor('Warnung'));
 
-        const warningFields = validWarnings
+        const WarnungFields = validWarnungs
             .map((w, i) => {
                 const discordTimestamp = Math.floor(w.timestamp / 1000);
                 return {
@@ -64,16 +64,16 @@ export default {
             })
             .slice(0, 25);
 
-        embed.addFields(warningFields);
+        embed.addFields(WarnungFields);
 
         const actionRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId(`warning_Löschen_specific:${target.id}:${interaction.user.id}`)
-                .setLabel('Löschen Specific Warning')
+                .setCustomId(`Warnung_Löschen_specific:${target.id}:${interaction.user.id}`)
+                .setLabel('Löschen Specific Warnung')
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
-                .setCustomId(`warning_clear_all:${target.id}:${interaction.user.id}`)
-                .setLabel('Clear All Warnings')
+                .setCustomId(`Warnung_clear_all:${target.id}:${interaction.user.id}`)
+                .setLabel('Clear All Warnungs')
                 .setStyle(ButtonStyle.Danger),
         );
 
@@ -81,19 +81,20 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: "Warnings Viewed",
+                action: "Warnungs Viewed",
                 target: `${target.tag} (${target.id})`,
                 executor: `${interaction.user.tag} (${interaction.user.id})`,
-                reason: `Viewed ${totalWarns} warnings`,
+                reason: `Viewed ${totalWarns} Warnungs`,
                 metadata: {
                     userId: target.id,
                     moderatorId: interaction.user.id,
-                    totalWarnings: totalWarns,
+                    totalWarnungs: totalWarns,
                 },
             },
         });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed], components: [actionRow] });
+        await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed], components: [actionRow] });
     },
 };
+
 

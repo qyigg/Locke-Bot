@@ -1,9 +1,9 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("roll")
@@ -18,7 +18,7 @@ export default {
   category: 'Fun',
 
   async execute(interaction, config, client) {
-    await InteractionHelper.safeDefer(interaction);
+    await InteractionHilfeer.safeDefer(interaction);
 
     const notation = interaction.options
       .getString("notation")
@@ -28,9 +28,9 @@ export default {
     const match = notation.match(/^(\d*)d(\d+)([\+\-]\d+)?$/);
 
     if (!match) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         `Invalid dice notation: ${notation}`,
-        ErrorTypes.USER_INPUT,
+        FehlerTypes.USER_INPUT,
         'Ungültige Notation. Verwende das Format `1d20` oder `3d6+5`.'
       );
     }
@@ -40,17 +40,17 @@ export default {
     const modifier = parseInt(match[3] || "0", 10);
 
     if (numDice < 1 || numDice > 20) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         `Too many dice requested: ${numDice}`,
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         'Bitte halte die Anzahl der Würfel zwischen 1 und 20.'
       );
     }
 
     if (numSides < 1 || numSides > 1000) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         `Invalid number of sides: ${numSides}`,
-        ErrorTypes.VALIDATION,
+        FehlerTypes.VALIDATION,
         'Bitte halte die Anzahl der Seiten zwischen 1 und 1000.'
       );
     }
@@ -70,12 +70,13 @@ export default {
       numDice > 1 ? `**Würfel:** ${rolls.join(" + ")}\n` : "";
     const modifierText = modifier !== 0 ? `+ (${modifier})` : "";
 
-    const embed = successEmbed(
+    const embed = ErfolgEmbed(
       `🎲 Würfle ${numDice}d${numSides}${modifier !== 0 ? match[3] : ""}`,
       `${resultsDetail}**Gesamtwurf:** ${totalRoll}${modifierText} = **${finalTotal}**`,
     );
 
-    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Roll command executed by user ${interaction.user.id} with notation ${notation} in guild ${interaction.guildId}`);
   },
 };
+

@@ -1,8 +1,8 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
 
 const durationChoices = [
@@ -36,13 +36,13 @@ export default {
         .addStringOption((option) =>
             option.setName("reason").setDescription("Reason for the timeout"),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ModerateMitglieds),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Timeout interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Timeout interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'timeout',
@@ -51,37 +51,37 @@ export default {
         }
 
         const targetUser = interaction.options.getUser("target");
-        const member = interaction.options.getMember("target");
+        const Mitglied = interaction.options.getMitglied("target");
         const durationMinutes = interaction.options.getInteger("duration");
         const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!targetUser) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Zielbenutzer fehlt',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'Du musst angeben a user to timeout.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (targetUser.id === interaction.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot timeout self",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Du kannst nicht timeout Deinself.",
             );
         }
         if (targetUser.id === client.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot timeout bot",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Du kannst nicht timeout the bot.",
             );
         }
-        if (!member) {
-            throw new TitanBotError(
+        if (!Mitglied) {
+            throw new TitanBotFehler(
                 "Target Nicht gefunden",
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 "The target user is not currently in Dieser Server.",
             );
         }
@@ -89,8 +89,8 @@ export default {
         const durationMs = durationMinutes * 60 * 1000;
         const result = await ModerationService.timeoutUser({
             guild: interaction.guild,
-            member,
-            moderator: interaction.member,
+            Mitglied,
+            moderator: interaction.Mitglied,
             durationMs,
             reason,
         });
@@ -99,9 +99,9 @@ export default {
             durationChoices.find((c) => c.value === durationMinutes)
                 ?.name || `${durationMinutes} minutes`;
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     `⏳ **Timed out** ${targetUser.tag} for ${durationDisplay}.`,
                     `**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
                 ),
@@ -109,6 +109,7 @@ export default {
         });
     },
 };
+
 
 
 

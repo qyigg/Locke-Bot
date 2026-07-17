@@ -3,36 +3,37 @@ import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
 
 export default {
-  name: Events.GuildMemberAktualisieren,
+  name: Events.GuildMitgliedAktualisieren,
   once: false,
 
-  async execute(oldMember, newMember) {
+  async execute(oldMitglied, newMitglied) {
     try {
-      if (!newMember.guild) return;
+      if (!newMitglied.guild) return;
 
-      if (oldMember.nickname !== newMember.nickname) {
+      if (oldMitglied.nickname !== newMitglied.nickname) {
         await logEvent({
-          client: newMember.client,
-          guildId: newMember.guild.id,
-          eventType: EVENT_TYPES.MEMBER_NAME_CHANGE,
+          client: newMitglied.client,
+          guildId: newMitglied.guild.id,
+          eventType: EVENT_TYPES.Mitglied_NAME_CHANGE,
           data: {
             title: 'Nickname changed',
             lines: [
-              `**User:** ${newMember.user.toString()} (${newMember.user.tag})`,
-              `**ID:** \`${newMember.user.id}\``,
-              `**Before:** ${oldMember.nickname || '*(no nickname)*'}`,
-              `**After:** ${newMember.nickname || '*(no nickname)*'}`,
+              `**User:** ${newMitglied.user.toString()} (${newMitglied.user.tag})`,
+              `**ID:** \`${newMitglied.user.id}\``,
+              `**Before:** ${oldMitglied.nickname || '*(no nickname)*'}`,
+              `**After:** ${newMitglied.nickname || '*(no nickname)*'}`,
             ],
-            thumbnail: newMember.user.displayAvatarURL({ dynamic: true }),
-            userId: newMember.user.id,
+            thumbnail: newMitglied.user.displayAvatarURL({ dynamic: true }),
+            userId: newMitglied.user.id,
           }
         });
 
         return;
       }
 
-    } catch (error) {
-      logger.error('Error in guildMemberAktualisieren event:', error);
+    } catch (Fehler) {
+      logger.Fehler('Fehler in guildMitgliedAktualisieren event:', Fehler);
     }
   }
 };
+

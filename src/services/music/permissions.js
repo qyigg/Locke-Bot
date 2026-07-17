@@ -1,14 +1,15 @@
-export const VOICE_CHANNEL_DENIAL =
-    'You need to be in the same voice channel as the bot to use music controls.';
+﻿export const VOICE_Kanal_DENIAL =
+    'You need to be in the same voice Kanal as the bot to use music controls.';
 
-export function canControlMusic(member, player) {
-    const memberChannel = member?.voice?.channel;
-    if (!memberChannel || !player?.voiceChannel) {
+export function canControlMusic(Mitglied, player) {
+    const MitgliedKanal = Mitglied?.voice?.Kanal;
+    if (!MitgliedKanal || !player?.voiceKanal) {
         return false;
     }
-    return memberChannel.id === player.voiceChannel;
+    return MitgliedKanal.id === player.voiceKanal;
 }
 
-export function requireVoiceChannel(member) {
-    return Boolean(member?.voice?.channel);
+export function requireVoiceKanal(Mitglied) {
+    return Boolean(Mitglied?.voice?.Kanal);
 }
+

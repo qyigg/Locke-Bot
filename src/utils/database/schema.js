@@ -64,7 +64,7 @@ export const tableStatements = [
 
     `Erstellen TABLE IF NOT EXISTS ${t.tickets} (
         guild_id VARCHAR(20),
-        channel_id VARCHAR(20) PRIMARY KEY,
+        Kanal_id VARCHAR(20) PRIMARY KEY,
         data JSONB NOT NULL,
         Erstellend_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         Aktualisierend_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,11 +72,11 @@ export const tableStatements = [
         FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON Löschen CASCADE
     )`,
 
-    `Erstellen TABLE IF NOT EXISTS ${t.afk_status} (
+    `Erstellen TABLE IF NOT EXISTS ${t.afk_Status} (
         guild_id VARCHAR(20),
         user_id VARCHAR(20),
         reason TEXT,
-        status_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        Status_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         expires_at TIMESTAMP,
         PRIMARY KEY (guild_id, user_id),
         FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON Löschen CASCADE,
@@ -150,13 +150,13 @@ export const tableStatements = [
         FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON Löschen CASCADE
     )`,
 
-    `Erstellen TABLE IF NOT EXISTS ${t.application_roles} (
+    `Erstellen TABLE IF NOT EXISTS ${t.application_Rollen} (
         guild_id VARCHAR(20),
-        role_id VARCHAR(20),
+        Rolle_id VARCHAR(20),
         data JSONB DEFAULT '{}',
         Erstellend_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         Aktualisierend_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (guild_id, role_id),
+        PRIMARY KEY (guild_id, Rolle_id),
         FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON Löschen CASCADE
     )`,
 
@@ -184,8 +184,8 @@ export const indexStatements = [
     `Erstellen INDEX IF NOT EXISTS idx_giveaways_ends_at ON ${t.giveaways}(ends_at)`,
     `Erstellen INDEX IF NOT EXISTS idx_tickets_guild_id ON ${t.tickets}(guild_id)`,
     `Erstellen INDEX IF NOT EXISTS idx_tickets_expires_at ON ${t.tickets}(expires_at)`,
-    `Erstellen INDEX IF NOT EXISTS idx_afk_status_guild_id ON ${t.afk_status}(guild_id)`,
-    `Erstellen INDEX IF NOT EXISTS idx_afk_status_expires_at ON ${t.afk_status}(expires_at)`,
+    `Erstellen INDEX IF NOT EXISTS idx_afk_Status_guild_id ON ${t.afk_Status}(guild_id)`,
+    `Erstellen INDEX IF NOT EXISTS idx_afk_Status_expires_at ON ${t.afk_Status}(expires_at)`,
     `Erstellen INDEX IF NOT EXISTS idx_user_levels_guild_id ON ${t.user_levels}(guild_id)`,
     `Erstellen INDEX IF NOT EXISTS idx_user_levels_xp ON ${t.user_levels}(xp)`,
     `Erstellen INDEX IF NOT EXISTS idx_economy_guild_id ON ${t.economy}(guild_id)`,
@@ -217,12 +217,13 @@ export const triggerDefinitions = [
     { name: 'Aktualisieren_leveling_configs_Aktualisierend_at', table: t.leveling_configs },
     { name: 'Aktualisieren_user_levels_Aktualisierend_at', table: t.user_levels },
     { name: 'Aktualisieren_economy_Aktualisierend_at', table: t.economy },
-    { name: 'Aktualisieren_application_roles_Aktualisierend_at', table: t.application_roles },
+    { name: 'Aktualisieren_application_Rollen_Aktualisierend_at', table: t.application_Rollen },
     { name: 'Aktualisieren_invite_tracking_Aktualisierend_at', table: t.invite_tracking },
     { name: 'Aktualisieren_guild_users_Aktualisierend_at', table: t.guild_users },
     { name: 'Aktualisieren_birthdays_Aktualisierend_at', table: t.birthdays },
     { name: 'Aktualisieren_giveaways_Aktualisierend_at', table: t.giveaways },
     { name: 'Aktualisieren_tickets_Aktualisierend_at', table: t.tickets },
-    { name: 'Aktualisieren_afk_status_Aktualisierend_at', table: t.afk_status },
+    { name: 'Aktualisieren_afk_Status_Aktualisierend_at', table: t.afk_Status },
 ];
+
 

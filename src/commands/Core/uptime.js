@@ -2,15 +2,15 @@
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("uptime")
-    .setDescription("Überprüfe, wie lange der Bot online ist"),
+    .setDescription("Überprüfe, wie lange der Bot Online ist"),
 
   async execute(interaction) {
     try {
-      await InteractionHelper.safeDefer(interaction);
+      await InteractionHilfeer.safeDefer(interaction);
       
       let totalSeconds = interaction.client.uptime / 1000;
       let days = Math.floor(totalSeconds / 86400);
@@ -22,23 +22,24 @@ export default {
 
       const uptimeStr = `${days}t ${hours}h ${minutes}m ${seconds}s`;
 
-      await InteractionHelper.safeBearbeitenReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [ErstellenEmbed({ 
           title: "System-Betriebszeit", 
           description: `\`\`\`${uptimeStr}\`\`\`` 
         })],
       });
-    } catch (error) {
-      logger.error('Uptime-Befehlsfehler:', error);
+    } catch (Fehler) {
+      logger.Fehler('Uptime-Befehlsfehler:', Fehler);
       
       try {
-        return await InteractionHelper.safeBearbeitenReply(interaction, {
-          embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Betriebszeit nicht berechnen.', color: 'error' })],
+        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
+          embeds: [ErstellenEmbed({ title: 'Systemfehler', description: 'Konnte Betriebszeit nicht berechnen.', color: 'Fehler' })],
           flags: MessageFlags.Ephemeral,
         });
-      } catch (replyError) {
-        logger.error('Fehler beim Senden der Fehlerantwort:', replyError);
+      } catch (replyFehler) {
+        logger.Fehler('Fehler beim Senden der Fehlerantwort:', replyFehler);
       }
     }
   },
 };
+

@@ -1,16 +1,16 @@
 ﻿import { ErstellenEmbed } from '../../../utils/embeds.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
-import { logEvent, EVENT_TYPES, resolveLogChannel } from '../../../services/loggingService.js';
+import { logEvent, EVENT_TYPES, resolveLogKanal } from '../../../services/loggingService.js';
 import { formatLogLine, resolveUserAuthor } from '../../../utils/logging/logEmbeds.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
 import { logger } from '../../../utils/logger.js';
 
 export default {
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
-        if (!deferSuccess) {
-            logger.warn('Report interaction defer failed', { userId: interaction.user.id, guildId: interaction.guildId });
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction, { ephemeral: true });
+        if (!deferErfolg) {
+            logger.warn('Report interaction defer Fehlgeschlagen', { userId: interaction.user.id, guildId: interaction.guildId });
             return;
         }
 
@@ -19,10 +19,10 @@ export default {
         const guildId = interaction.guildId;
 
         const guildConfig = await getGuildConfig(client, guildId);
-        const reportChannelId = resolveLogChannel(guildConfig, 'reports');
+        const reportKanalId = resolveLogKanal(guildConfig, 'reports');
 
-        if (!reportChannelId) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'The report channel has not been set up. Ask a moderator to use `/logging dashboard` or `/logging channel`.' });
+        if (!reportKanalId) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'The report Kanal has not been set up. Ask a moderator to use `/logging dashboard` or `/logging Kanal`.' });
         }
 
         const ownerMention = interaction.guild.ownerId
@@ -39,7 +39,7 @@ export default {
                 lines: [
                     formatLogLine('Reported User', `${targetUser.tag} (\`${targetUser.id}\`)`),
                     formatLogLine('Reported By', `${interaction.user.tag} (\`${interaction.user.id}\`)`),
-                    formatLogLine('Channel', interaction.channel.toString()),
+                    formatLogLine('Kanal', interaction.Kanal.toString()),
                 ],
                 blockFields: [{ name: 'Reason', value: reason }],
                 author: await resolveUserAuthor(client, targetUser.id),
@@ -47,14 +47,14 @@ export default {
             },
         });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [ErstellenEmbed({
                 title: 'Report Absendented',
-                description: `Dein report against **${targetUser.tag}** has been successfully filed and sent to the moderation team. Thank you!`,
+                description: `Dein report against **${targetUser.tag}** has been Erfolgfully filed and sent to the moderation team. Thank you!`,
             })],
         });
 
-        logger.info('Report Absendented', {
+        logger.Info('Report Absendented', {
             userId: interaction.user.id,
             reportedUserId: targetUser.id,
             guildId,
@@ -62,5 +62,6 @@ export default {
         });
     },
 };
+
 
 

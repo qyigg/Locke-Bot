@@ -4,14 +4,14 @@ export const botConfig = {
   // =========================
   // BOT PRESENCE (what users see under the bot name)
   // =========================
-  // `status` options:
-  // - "online"    = green dot
+  // `Status` options:
+  // - "Online"    = green dot
   // - "idle"      = yellow moon
   // - "dnd"       = red do-not-disturb
-  // - "invisible" = appears offline
+  // - "invisible" = appears Offline
   presence: {
-    // Current online state shown on Discord.
-    status: "online",
+    // Current Online state shown on Discord.
+    Status: "Online",
 
     // Activity lines shown under the bot name.
     // `type` number mapping from Discord:
@@ -33,25 +33,25 @@ export const botConfig = {
   // =========================
   // COMMAND BEHAVIOR
   // =========================
-  commands: {
+  Befehle: {
     // Bot owner user IDs (comma-separated in OWNER_IDS env var).
-    // Owners can access owner/admin-level bot commands.
+    // Owners can access owner/admin-level bot Befehle.
     owners: process.env.OWNER_IDS?.split(",").map((id) => id.trim()).filter(Boolean) || [],
 
     // Default wait time between command uses (in seconds).
     defaultCooldown: 3,
 
-    // If true, old commands are removed before re-registering.
-    LöschenCommands: false,
+    // If true, old Befehle are removed before re-registering.
+    LöschenBefehle: false,
 
     // Optional server ID retained for tutorial compatibility; not used for command registration.
     testGuildId: process.env.TEST_GUILD_ID,
 
-    // When true (or MAINTENANCE_MODE=true), only bot owners can run commands.
+    // When true (or MAINTENANCE_MODE=true), only bot owners can run Befehle.
     maintenanceMode: process.env.MAINTENANCE_MODE === "true",
 
-    // Command prefix for text-based commands (e.g., "!" for "!ping").
-    // Supports both slash commands and prefix commands.
+    // Command prefix for text-based Befehle (e.g., "!" for "!ping").
+    // Unterstützungs both slash Befehle and prefix Befehle.
     prefix: process.env.PREFIX || "!",
   },
 
@@ -66,8 +66,8 @@ export const botConfig = {
       { question: "Why do you want to join?", required: true },
     ],
 
-    // Embed colors by application status.
-    statusColors: {
+    // Embed colors by application Status.
+    StatusColors: {
       pending: "#FFA500",
       approved: "#00FF00",
       denied: "#FF0000",
@@ -82,8 +82,8 @@ export const botConfig = {
     // Auto-Löschen approved applications after this many days.
     LöschenApprovedAfter: 30,
 
-    // Role IDs allowed to Verwalte Bewerbungen.
-    managerRoles: [], // Will be populated from environment or database
+    // Rolle IDs allowed to Verwalte Bewerbungen.
+    managerRollen: [], // Will be populated from environment or database
   },
 
   // =========================
@@ -96,11 +96,11 @@ export const botConfig = {
       primary: "#336699",
       secondary: "#2F3136",
 
-      // Standard status colors for success/error/warning/info messages.
-      success: "#57F287",
-      error: "#ED4245",
-      warning: "#FEE75C",
-      info: "#3498DB",
+      // Standard Status colors for Erfolg/Fehler/Warnung/Info messages.
+      Erfolg: "#57F287",
+      Fehler: "#ED4245",
+      Warnung: "#FEE75C",
+      Info: "#3498DB",
 
       // Neutral utility colors.
       light: "#FFFFFF",
@@ -156,7 +156,7 @@ export const botConfig = {
   },
 
   // =========================
-  // ECONOMY SETTINGS
+  // ECONOMY Einstellungen
   // =========================
   economy: {
     currency: {
@@ -194,15 +194,15 @@ export const botConfig = {
     },
 
     // Chance to succeed when robbing (0.4 = 40%).
-    robSuccessRate: 0.4,
+    robErfolgRate: 0.4,
 
-    // Jail time after failed rob (milliseconds).
+    // Jail time after Fehlgeschlagen rob (milliseconds).
     // 3600000 = 1 hour.
     robFailJailTime: 3600000,
   },
 
   // =========================
-  // SHOP SETTINGS
+  // SHOP Einstellungen
   // =========================
   // Add shop defaults here when needed.
   shop: {
@@ -216,8 +216,8 @@ export const botConfig = {
     // Category ID where new tickets are Erstellend (null = no forced category).
     defaultCategory: null,
 
-    // Role IDs allowed to manage/support tickets.
-    supportRoles: [],
+    // Rolle IDs allowed to manage/Unterstützung tickets.
+    UnterstützungRollen: [],
 
     // Priority options users/staff can assign.
     priorities: {
@@ -254,12 +254,12 @@ export const botConfig = {
     // Category ID where Schließend tickets are archived.
     archiveCategory: null,
 
-    // Channel ID where ticket logs are sent.
-    logChannel: null,
+    // Kanal ID where ticket logs are sent.
+    logKanal: null,
   },
 
   // =========================
-  // GIVEAWAY SETTINGS
+  // GIVEAWAY Einstellungen
   // =========================
   giveaways: {
     // Default giveaway duration in milliseconds.
@@ -276,29 +276,29 @@ export const botConfig = {
     // 2592000000 = 30 days.
     maximumDuration: 2592000000,
 
-    // Role IDs allowed to host giveaways.
-    allowedRoles: [],
+    // Rolle IDs allowed to host giveaways.
+    allowedRollen: [],
 
-    // Role IDs that bypass giveaway restrictions.
-    bypassRoles: [],
+    // Rolle IDs that bypass giveaway restrictions.
+    bypassRollen: [],
   },
 
   // =========================
-  // BIRTHDAY SETTINGS
+  // BIRTHDAY Einstellungen
   // =========================
   birthday: {
-    // Role ID given to users on their birthday.
-    defaultRole: null,
+    // Rolle ID given to users on their birthday.
+    defaultRolle: null,
 
-    // Channel ID where birthday announcements are posted.
-    announcementChannel: null,
+    // Kanal ID where birthday announcements are posted.
+    announcementKanal: null,
 
     // Timezone used to calculate birthday dates.
     timezone: "UTC",
   },
 
   // =========================
-  // VERIFICATION SETTINGS
+  // VERIFICATION Einstellungen
   // =========================
   verification: {
     // Message shown when posting the Verifizierungs-Panel.
@@ -318,8 +318,8 @@ export const botConfig = {
       // Days used when `defaultCriteria` is `account_age`.
       defaultAccountAgeDays: 7,
 
-      // Member count threshold used when `defaultCriteria` is `server_size`.
-      // Example: 1000 means auto-Verifizieren if server has fewer than 1000 members.
+      // Mitglied count threshold used when `defaultCriteria` is `server_size`.
+      // Example: 1000 means auto-Verifizieren if server has fewer than 1000 Mitglieds.
       serverSizeThreshold: 1000,
 
       // Allowed safety limits for account-age requirements.
@@ -333,7 +333,7 @@ export const botConfig = {
       // Human-readable descriptions for each criteria mode.
       criteria: {
         account_age: "Account must be older than specified days",
-        server_size: "All users if server has less than 1000 members",
+        server_size: "All users if server has less than 1000 Mitglieds",
         none: "All users immediately"
       }
     },
@@ -342,14 +342,14 @@ export const botConfig = {
     // 5000 = 5 seconds.
     verificationCooldown: 5000,
 
-    // Maximum failed attempts allowed inside the time window below.
+    // Maximum Fehlgeschlagen attempts allowed inside the time window below.
     maxVerificationAttempts: 3,
 
     // Time window for counting attempts (milliseconds).
     // 60000 = 1 minute.
     attemptWindow: 60000,
 
-    // In-memory safety limits (helps avoid unbounded memory growth).
+    // In-memory safety limits (Hilfes avoid unbounded memory growth).
     maxCooldownEntries: 10000,
     maxAttemptEntries: 10000,
     // Cleanup frequency for cooldown/attempt maps (milliseconds).
@@ -370,37 +370,37 @@ export const botConfig = {
   // =========================
   welcome: {
     // Welcome template posted when a user joins.
-    // Placeholders: {user}, {server}, {memberCount}
+    // Placeholders: {user}, {server}, {MitgliedCount}
     defaultWelcomeMessage:
-      "Willkommen {user} in {server}! We now have {memberCount} members!",
+      "Willkommen {user} in {server}! We now have {MitgliedCount} Mitglieds!",
     // Goodbye template posted when a user leaves.
-    // Placeholders: {user}, {memberCount}
+    // Placeholders: {user}, {MitgliedCount}
     defaultGoodbyeMessage:
-      "{user} has left the server. We now have {memberCount} members.",
-    // Channel ID for welcome messages.
-    defaultWelcomeChannel: null,
-    // Channel ID for goodbye messages.
-    defaultGoodbyeChannel: null,
+      "{user} has left the server. We now have {MitgliedCount} Mitglieds.",
+    // Kanal ID for welcome messages.
+    defaultWelcomeKanal: null,
+    // Kanal ID for goodbye messages.
+    defaultGoodbyeKanal: null,
   },
 
   // =========================
-  // COUNTER CHANNELS
+  // COUNTER KanalS
   // =========================
   counters: {
     defaults: {
       // Default naming/description templates for counter entries.
       name: "{name} Counter",
       description: "Server {name} counter",
-      // Channel type used for counters (typically "voice").
+      // Kanal type used for counters (typically "voice").
       type: "voice",
-      // Channel name format. `{count}` is replaced automatically.
-      channelName: "{name}-{count}",
+      // Kanal name format. `{count}` is replaced automatically.
+      KanalName: "{name}-{count}",
     },
-    permissions: {
-      // Default denied permissions for the counter channel.
-      deny: ["VIEW_CHANNEL"],
-      // Default allowed permissions for the counter channel.
-      allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK"],
+    Berechtigungs: {
+      // Default denied Berechtigungs for the counter Kanal.
+      deny: ["VIEW_Kanal"],
+      // Default allowed Berechtigungs for the counter Kanal.
+      allow: ["VIEW_Kanal", "CONNECT", "SPEAK"],
     },
     messages: {
       // Default response messages for counter actions.
@@ -410,22 +410,22 @@ export const botConfig = {
     },
     types: {
       // Built-in counter types and how each count is calculated.
-      members: {
-        name: "👥 Members",
-        description: "Total members in the server",
-        getCount: (guild) => guild.memberCount.toString(),
+      Mitglieds: {
+        name: "👥 Mitglieds",
+        description: "Total Mitglieds in the server",
+        getCount: (guild) => guild.MitgliedCount.toString(),
       },
       bots: {
         name: "🤖 Bots",
         description: "Total bot accounts in the server",
         getCount: (guild) =>
-          guild.members.cache.filter((m) => m.user.bot).size.toString(),
+          guild.Mitglieds.cache.filter((m) => m.user.bot).size.toString(),
       },
-      members_only: {
+      Mitglieds_only: {
         name: "👤 Humans",
-        description: "Total human members (non-bots)",
+        description: "Total human Mitglieds (non-bots)",
         getCount: (guild) =>
-          guild.members.cache.filter((m) => !m.user.bot).size.toString(),
+          guild.Mitglieds.cache.filter((m) => !m.user.bot).size.toString(),
       },
     },
   },
@@ -434,11 +434,11 @@ export const botConfig = {
   // GENERIC BOT MESSAGES
   // =========================
   messages: {
-    noPermission: "Du hast keine Berechtigung, diesen Befehl zu verwenden.",
+    noBerechtigung: "Du hast keine Berechtigung, diesen Befehl zu verwenden.",
     cooldownActive: "Please wait {time} before using this command again.",
-    errorOccurred: "Beim Ausführen dieses Befehls ist ein Fehler aufgetreten.",
-    missingPermissions:
-      "I am missing required permissions to perform this action.",
+    FehlerOccurred: "Beim Ausführen dieses Befehls ist ein Fehler aufgetreten.",
+    missingBerechtigungs:
+      "I am missing required Berechtigungs to perform this action.",
     commandDisabled: "This command has been disabled.",
     maintenanceMode: "The bot is currently in maintenance mode.",
   },
@@ -463,7 +463,7 @@ export const botConfig = {
 
     // Security and self-service systems.
     verification: true,
-    reactionRoles: true,
+    reactionRollen: true,
     joinToErstellen: true,
 
     // Utility/quality-of-life modules.
@@ -478,7 +478,7 @@ export const botConfig = {
 };
 
 export function validateConfig(config) {
-  const errors = [];
+  const Fehlers = [];
 
   if (process.env.NODE_ENV !== 'production') {
     logger.debug('Environment variables check:');
@@ -491,11 +491,11 @@ export function validateConfig(config) {
   }
 
   if (!process.env.DISCORD_TOKEN && !process.env.TOKEN) {
-    errors.push("Bot token is required (DISCORD_TOKEN or TOKEN environment variable)");
+    Fehlers.push("Bot token is required (DISCORD_TOKEN or TOKEN environment variable)");
   }
 
   if (!process.env.CLIENT_ID) {
-    errors.push("Client ID is required (CLIENT_ID environment variable)");
+    Fehlers.push("Client ID is required (CLIENT_ID environment variable)");
   }
 
   if (process.env.NODE_ENV === 'production') {
@@ -505,23 +505,23 @@ export function validateConfig(config) {
 
     if (!hasConnectionUrl) {
       if (!process.env.POSTGRES_HOST) {
-        errors.push("PostgreSQL connection is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_HOST)");
+        Fehlers.push("PostgreSQL connection is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_HOST)");
       }
       if (!process.env.POSTGRES_USER) {
-        errors.push("PostgreSQL user is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_USER)");
+        Fehlers.push("PostgreSQL user is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_USER)");
       }
       if (!process.env.POSTGRES_PASSWORD) {
-        errors.push("PostgreSQL password is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_PASSWORD)");
+        Fehlers.push("PostgreSQL password is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_PASSWORD)");
       }
     }
   }
 
-  return errors;
+  return Fehlers;
 }
 
-const configErrors = validateConfig(botConfig);
-if (configErrors.length > 0) {
-  logger.error("Bot configuration errors:", configErrors.join("\n"));
+const configFehlers = validateConfig(botConfig);
+if (configFehlers.length > 0) {
+  logger.Fehler("Bot Konfiguration Fehlers:", configFehlers.join("\n"));
   if (process.env.NODE_ENV === "production") {
     process.exit(1);
   }
@@ -540,7 +540,7 @@ const COMMAND_CATEGORY_FEATURE_MAP = {
   logging: "logging",
   moderation: "moderation",
   music: "music",
-  reaction_roles: "reactionRoles",
+  reaction_Rollen: "reactionRollen",
   search: "search",
   serverstats: "counter",
   ticket: "tickets",
@@ -555,11 +555,11 @@ function normalizeCategoryKey(category) {
 }
 
 export function getCommandPrefix() {
-  return botConfig.commands?.prefix ?? "!";
+  return botConfig.Befehle?.prefix ?? "!";
 }
 
 export function getBotOwners() {
-  return (botConfig.commands?.owners ?? [])
+  return (botConfig.Befehle?.owners ?? [])
     .map((id) => String(id).trim())
     .filter(Boolean);
 }
@@ -573,7 +573,7 @@ export function isBotOwner(userId) {
 }
 
 export function isMaintenanceMode() {
-  return botConfig.commands?.maintenanceMode === true;
+  return botConfig.Befehle?.maintenanceMode === true;
 }
 
 export function getBotMessage(key, replacements = {}) {
@@ -609,10 +609,10 @@ export function isCommandCategoryEnabled(category) {
   return isFeatureEnabled(featureKey);
 }
 
-export function getApplicationStatusColor(status) {
-  const colors = botConfig.applications?.statusColors || {};
-  const hex = colors[status];
-  return hex ? getColor(hex) : getColor(status === "approved" ? "success" : status === "denied" ? "error" : "warning");
+export function getApplicationStatusColor(Status) {
+  const colors = botConfig.applications?.StatusColors || {};
+  const hex = colors[Status];
+  return hex ? getColor(hex) : getColor(Status === "approved" ? "Erfolg" : Status === "denied" ? "Fehler" : "Warnung");
 }
 
 export function getDefaultApplicationQuestions() {
@@ -649,6 +649,7 @@ export function getRandomColor() {
 }
 
 export default botConfig;
+
 
 
 

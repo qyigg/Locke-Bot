@@ -1,10 +1,10 @@
-﻿import { PermissionsBitField, ChannelType } from 'discord.js';
-import { setLogChannel } from '../../../services/loggingService.js';
-import { successEmbed } from '../../../utils/embeds.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+﻿import { BerechtigungsBitField, KanalType } from 'discord.js';
+import { setLogKanal } from '../../../services/loggingService.js';
+import { ErfolgEmbed } from '../../../utils/embeds.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 import { logger } from '../../../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../../utils/FehlerHandler.js';
 const DESTINATION_LABELS = {
   audit: 'Audit Log',
   applications: 'Applications',
@@ -15,47 +15,48 @@ export default {
   prefixOnly: false,
   async execute(interaction, config, client) {
     try {
-      if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to configure logging channels.' });
+      if (!interaction.Mitglied.Berechtigungs.has(BerechtigungsBitField.Flags.ManageGuild)) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need **Manage Server** Berechtigungs to configure logging Kanals.' });
       }
 
-      await InteractionHelper.safeDefer(interaction, { ephemeral: true });
+      await InteractionHilfeer.safeDefer(interaction, { ephemeral: true });
 
       const destination = interaction.options.getString('destination');
-      const channel = interaction.options.getChannel('channel');
+      const Kanal = interaction.options.getKanal('Kanal');
       const disable = interaction.options.getBoolean('disable') ?? false;
 
       if (disable) {
-        await setLogChannel(client, interaction.guildId, destination, null);
-        return InteractionHelper.safeBearbeitenReply(interaction, {
-          embeds: [successEmbed(
-            'Channel Cleared',
-            `The **${DESTINATION_LABELS[destination]}** channel has been removed.`,
+        await setLogKanal(client, interaction.guildId, destination, null);
+        return InteractionHilfeer.safeBearbeitenReply(interaction, {
+          embeds: [ErfolgEmbed(
+            'Kanal Cleared',
+            `The **${DESTINATION_LABELS[destination]}** Kanal has been removed.`,
           )],
         });
       }
 
-      if (!channel || channel.type !== ChannelType.GuildText) {
-        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid text channel.' });
+      if (!Kanal || Kanal.type !== KanalType.GuildText) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please provide a valid text Kanal.' });
       }
 
-      const botPerms = channel.permissionsFor(interaction.guild.members.me);
-      if (!botPerms?.has(['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: `I need **View Channel**, **Send Messages**, and **Embed Links** in ${channel}.` });
+      const botPerms = Kanal.BerechtigungsFor(interaction.guild.Mitglieds.me);
+      if (!botPerms?.has(['ViewKanal', 'SendMessages', 'EmbedLinks'])) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: `I need **View Kanal**, **Send Messages**, and **Embed Links** in ${Kanal}.` });
       }
 
-      await setLogChannel(client, interaction.guildId, destination, channel.id);
+      await setLogKanal(client, interaction.guildId, destination, Kanal.id);
 
-      return InteractionHelper.safeBearbeitenReply(interaction, {
-        embeds: [successEmbed(
-          'Channel Aktualisierend',
-          `**${DESTINATION_LABELS[destination]}** logs will be sent to ${channel}.\nUse \`/logging dashboard\` to toggle event categories.`,
+      return InteractionHilfeer.safeBearbeitenReply(interaction, {
+        embeds: [ErfolgEmbed(
+          'Kanal Aktualisierend',
+          `**${DESTINATION_LABELS[destination]}** logs will be sent to ${Kanal}.\nUse \`/logging dashboard\` to toggle event categories.`,
         )],
       });
-    } catch (error) {
-      logger.error('logging_channel error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to Aktualisieren the log channel.' });
+    } catch (Fehler) {
+      logger.Fehler('logging_Kanal Fehler:', Fehler);
+      await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Fehlgeschlagen to Aktualisieren the log Kanal.' });
     }
   },
 };
+
 

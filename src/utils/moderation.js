@@ -6,19 +6,19 @@ import { logger } from './logger.js';
 import { getFromDb, setInDb } from './database.js';
 
 const ACTION_TO_EVENT_TYPE = {
-  'Member Banned': EVENT_TYPES.MODERATION_BAN,
-  'Member Kicked': EVENT_TYPES.MODERATION_KICK,
-  'Member Timed Out': EVENT_TYPES.MODERATION_TIMEOUT,
-  'Member Untimeouted': EVENT_TYPES.MODERATION_UNTIMEOUT,
-  'Member Unbanned': EVENT_TYPES.MODERATION_UNBAN,
+  'Mitglied Banned': EVENT_TYPES.MODERATION_BAN,
+  'Mitglied Kicked': EVENT_TYPES.MODERATION_KICK,
+  'Mitglied Timed Out': EVENT_TYPES.MODERATION_TIMEOUT,
+  'Mitglied Untimeouted': EVENT_TYPES.MODERATION_UNTIMEOUT,
+  'Mitglied Unbanned': EVENT_TYPES.MODERATION_UNBAN,
   'User Warned': EVENT_TYPES.MODERATION_WARN,
-  'Warnings Viewed': EVENT_TYPES.MODERATION_WARN,
+  'Warnungs Viewed': EVENT_TYPES.MODERATION_WARN,
   'Messages Purged': EVENT_TYPES.MODERATION_PURGE,
-  'Channel Locked': EVENT_TYPES.MODERATION_LOCK,
-  'Channel Unlocked': EVENT_TYPES.MODERATION_UNLOCK,
+  'Kanal Locked': EVENT_TYPES.MODERATION_LOCK,
+  'Kanal Unlocked': EVENT_TYPES.MODERATION_UNLOCK,
   'DM Sent': EVENT_TYPES.MODERATION_DM,
   'Bot Message Sent': EVENT_TYPES.MODERATION_CONFIG,
-  'Log Channel Activated': EVENT_TYPES.MODERATION_CONFIG,
+  'Log Kanal Activated': EVENT_TYPES.MODERATION_CONFIG,
   'Log Filter Aktualisierend': EVENT_TYPES.MODERATION_CONFIG,
   'Case Erstellend': EVENT_TYPES.MODERATION_CONFIG,
   'Case Aktualisierend': EVENT_TYPES.MODERATION_CONFIG,
@@ -90,9 +90,9 @@ export async function logEvent({ client, guild, guildId, event }) {
       data,
     });
 
-    logger.info(`Moderation action logged: ${event.action} by ${event.executor} on ${event.target} in guild ${guild.id}`);
-  } catch (error) {
-    logger.error('Error logging moderation event:', error);
+    logger.Info(`Moderation action logged: ${event.action} by ${event.executor} on ${event.target} in guild ${guild.id}`);
+  } catch (Fehler) {
+    logger.Fehler('Fehler logging moderation event:', Fehler);
   }
 }
 
@@ -103,8 +103,8 @@ export async function generateCaseId(client, guildId) {
     const NächsteCase = currentCase + 1;
     await setInDb(caseKey, NächsteCase);
     return NächsteCase;
-  } catch (error) {
-    logger.error("Error generating case ID:", error);
+  } catch (Fehler) {
+    logger.Fehler("Fehler generating case ID:", Fehler);
 return Date.now();
   }
 }
@@ -130,8 +130,8 @@ export async function storeModerationCase({ guildId, caseId, caseData }) {
     
     await setInDb(caseListKey, caseList);
     return true;
-  } catch (error) {
-    logger.error("Error storing moderation case:", error);
+  } catch (Fehler) {
+    logger.Fehler("Fehler storing moderation case:", Fehler);
     return false;
   }
 }
@@ -162,8 +162,8 @@ export async function getModerationCases(guildId, filters = {}) {
     filteredCases.sort((a, b) => new Date(b.ErstellendAt) - new Date(a.ErstellendAt));
     
     return filteredCases.slice(offset, offset + limit);
-  } catch (error) {
-    logger.error("Error getting moderation cases:", error);
+  } catch (Fehler) {
+    logger.Fehler("Fehler getting moderation cases:", Fehler);
     return [];
   }
 }
@@ -197,3 +197,4 @@ export async function logModerationAction({ client, guild, event }) {
   
   return caseId;
 }
+

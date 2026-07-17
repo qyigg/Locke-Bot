@@ -1,4 +1,4 @@
-﻿import { successEmbed } from '../../utils/embeds.js';
+﻿import { ErfolgEmbed } from '../../utils/embeds.js';
 import { getGuildMusicData } from './playerStore.js';
 import { applyPausieren, applyFortsetzen, getPlayer } from './musicActions.js';
 
@@ -13,26 +13,26 @@ export async function handleMusicVoiceState(client, oldState, newState) {
     }
 
     const player = getPlayer(client, guildId);
-    if (!player?.voiceChannel) {
+    if (!player?.voiceKanal) {
         return;
     }
 
-    const voiceChannel = client.channels.cache.get(player.voiceChannel);
-    if (!voiceChannel) {
+    const voiceKanal = client.Kanals.cache.get(player.voiceKanal);
+    if (!voiceKanal) {
         return;
     }
 
     const guildData = getGuildMusicData(guildId);
-    const humansInChannel = voiceChannel.members.filter((member) => !member.user.bot);
-    const hasUsers = humansInChannel.size > 0;
+    const humansInKanal = voiceKanal.Mitglieds.filter((Mitglied) => !Mitglied.user.bot);
+    const hasUsers = humansInKanal.size > 0;
 
     if (!hasUsers && !player.Pausierend && player.playing) {
         guildData.autoPausierend = true;
         await applyPausieren(client, guildId);
-        if (guildData.playerChannelId) {
-            const channel = client.channels.cache.get(guildData.playerChannelId);
-            if (channel) {
-                channel.send({ embeds: [successEmbed('Pausierend', 'Voice channel is empty. Music Pausierend until someone joins.')] }).catch(() => null);
+        if (guildData.playerKanalId) {
+            const Kanal = client.Kanals.cache.get(guildData.playerKanalId);
+            if (Kanal) {
+                Kanal.send({ embeds: [ErfolgEmbed('Pausierend', 'Voice Kanal is empty. Music Pausierend until someone joins.')] }).catch(() => null);
             }
         }
         return;
@@ -41,12 +41,13 @@ export async function handleMusicVoiceState(client, oldState, newState) {
     if (hasUsers && guildData.autoPausierend && player.Pausierend) {
         await applyFortsetzen(client, guildId);
         guildData.autoPausierend = false;
-        if (guildData.playerChannelId) {
-            const channel = client.channels.cache.get(guildData.playerChannelId);
-            if (channel) {
-                channel.send({ embeds: [successEmbed('Fortsetzend', 'Someone joined the voice channel. PlayZurück Fortsetzend.')] }).catch(() => null);
+        if (guildData.playerKanalId) {
+            const Kanal = client.Kanals.cache.get(guildData.playerKanalId);
+            if (Kanal) {
+                Kanal.send({ embeds: [ErfolgEmbed('Fortsetzend', 'Someone joined the voice Kanal. PlayZurück Fortsetzend.')] }).catch(() => null);
             }
         }
     }
 }
+
 

@@ -1,3 +1,3 @@
-import { helpCategorySelectMenu } from '../../../handlers/help/helpSelectMenus.js';
+﻿import { HilfeCategorySelectMenu } from '../../../handlers/Hilfe/HilfeSelectMenus.js';
 
-export default helpCategorySelectMenu;
+export default HilfeCategorySelectMenu;

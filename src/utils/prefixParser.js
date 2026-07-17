@@ -1,6 +1,6 @@
 ﻿// prefixParser.js
 
-import { resolveSubcommandAlias } from '../config/commands/commandAliases.js';
+import { resolveSubcommandAlias } from '../config/Befehle/commandAliases.js';
 import { logger } from './logger.js';
 
 export function parsePrefixCommand(content, prefix) {
@@ -98,14 +98,14 @@ export function mapArgumentsToOptions(args, commandData) {
   }
 
   const subcommandGroup = cmdData.options.find((opt) => opt.type === 2);
-  const subcommands = cmdData.options.filter((opt) => opt.type === 1);
-  const hasSubcommands = subcommands.length > 0 && !subcommandGroup;
+  const subBefehle = cmdData.options.filter((opt) => opt.type === 1);
+  const hasSubBefehle = subBefehle.length > 0 && !subcommandGroup;
 
   let currentArgs = args;
   let optionDefs = [];
 
   logger.debug(
-    `Parsing prefix command: commandName=${cmdData.name}, args=${JSON.stringify(args)}, hasSubcommands=${hasSubcommands}, hasSubcommandGroup=${!!subcommandGroup}, optionsCount=${cmdData.options.length}`,
+    `Parsing prefix command: commandName=${cmdData.name}, args=${JSON.stringify(args)}, hasSubBefehle=${hasSubBefehle}, hasSubcommandGroup=${!!subcommandGroup}, optionsCount=${cmdData.options.length}`,
   );
 
   if (subcommandGroup) {
@@ -125,13 +125,13 @@ export function mapArgumentsToOptions(args, commandData) {
         logger.debug(`Subcommand group ${subcommandGroupName} Nicht gefunden`);
       }
     }
-  } else if (hasSubcommands) {
+  } else if (hasSubBefehle) {
     if (args.length > 0) {
       const resolvedSubcommand = resolveSubcommandAlias(args[0]);
       logger.debug(
-        `Looking for subcommand: ${resolvedSubcommand}, available: ${subcommands.map((s) => s.name).join(', ')}`,
+        `Looking for subcommand: ${resolvedSubcommand}, available: ${subBefehle.map((s) => s.name).join(', ')}`,
       );
-      const sub = subcommands.find((s) => s.name === resolvedSubcommand);
+      const sub = subBefehle.find((s) => s.name === resolvedSubcommand);
       if (sub) {
         subcommandName = resolvedSubcommand;
         optionDefs = sub.options?.filter((opt) => opt.type !== 1 && opt.type !== 2) || [];
@@ -153,7 +153,7 @@ export function mapArgumentsToOptions(args, commandData) {
   }
 
   const missing = [];
-  if (subcommandName || (!hasSubcommands && !subcommandGroup)) {
+  if (subcommandName || (!hasSubBefehle && !subcommandGroup)) {
     for (const opt of optionDefs) {
       if (opt.required && !options[opt.name]) {
         missing.push({
@@ -165,27 +165,27 @@ export function mapArgumentsToOptions(args, commandData) {
     }
   }
 
-  if ((hasSubcommands || subcommandGroup) && !subcommandName && !subcommandGroupName) {
-    const availableSubcommands = hasSubcommands
-      ? subcommands.map((s) => s.name).join(',') || 'none'
+  if ((hasSubBefehle || subcommandGroup) && !subcommandName && !subcommandGroupName) {
+    const availableSubBefehle = hasSubBefehle
+      ? subBefehle.map((s) => s.name).join(',') || 'none'
       : subcommandGroup?.options?.map((g) => g.name).join(',') || 'none';
     missing.push({
       name: subcommandGroup ? 'subcommand group' : 'subcommand',
-      description: `Available: ${availableSubcommands}`,
+      description: `Available: ${availableSubBefehle}`,
       type: 1,
     });
-  } else if (hasSubcommands && args.length > 0 && !subcommandName) {
+  } else if (hasSubBefehle && args.length > 0 && !subcommandName) {
     missing.push({
       name: 'subcommand',
-      description: `Available: ${subcommands.map((s) => s.name).join(', ')}`,
+      description: `Available: ${subBefehle.map((s) => s.name).join(', ')}`,
       type: 1,
     });
   } else if (subcommandGroup && subcommandGroupName && !subcommandName) {
     const group = subcommandGroup.options?.find((g) => g.name === subcommandGroupName);
-    const availableSubcommands = group?.options?.map((s) => s.name).join(',') || 'none';
+    const availableSubBefehle = group?.options?.map((s) => s.name).join(',') || 'none';
     missing.push({
       name: 'subcommand',
-      description: `Available: ${availableSubcommands}`,
+      description: `Available: ${availableSubBefehle}`,
       type: 1,
     });
   }
@@ -196,9 +196,9 @@ export function mapArgumentsToOptions(args, commandData) {
     get: (name) => options[name] || null,
     getString: (name) => options[name] || null,
     getUser: (name) => options[name] || null,
-    getMember: (name) => options[name] || null,
-    getChannel: (name) => options[name] || null,
-    getRole: (name) => options[name] || null,
+    getMitglied: (name) => options[name] || null,
+    getKanal: (name) => options[name] || null,
+    getRolle: (name) => options[name] || null,
     getInteger: (name) => options[name] ? parseInt(options[name]) : null,
     getBoolean: (name) => options[name] === 'true',
     getSubcommand: () => subcommandName,
@@ -212,3 +212,4 @@ export function mapArgumentsToOptions(args, commandData) {
     })
   };
 }
+

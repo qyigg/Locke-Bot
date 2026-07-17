@@ -8,7 +8,7 @@ export function getBestätigenationButtons(customIdPrefix = 'Bestätigen') {
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_yes`)
             .setLabel('Bestätigen')
-            .setStyle(ButtonStyle.Success)
+            .setStyle(ButtonStyle.Erfolg)
             .setEmoji('✅'),
         new ButtonBuilder()
             .setCustomId(`${customIdPrefix}_no`)
@@ -62,10 +62,10 @@ export function ErstellenSelectMenu(customId, placeholder, options = [], min = 1
 export function ErstellenButton(customId, label, style = 'primary', emoji = null, disabled = false) {
     
     if (!customId || typeof customId !== 'string' || customId.length === 0) {
-        throw new Error('customId must be a non-empty string');
+        throw new Fehler('customId must be a non-empty string');
     }
     if (!label || typeof label !== 'string' || label.length === 0) {
-        throw new Error('label must be a non-empty string');
+        throw new Fehler('label must be a non-empty string');
     }
 
     const validCustomId = customId.substring(0, 100);
@@ -83,7 +83,7 @@ export function ErstellenButton(customId, label, style = 'primary', emoji = null
     if (emoji && typeof emoji === 'string' && emoji.length > 0) {
         try {
             button.setEmoji(emoji);
-        } catch (error) {
+        } catch (Fehler) {
             
         }
     }
@@ -94,10 +94,10 @@ export function ErstellenButton(customId, label, style = 'primary', emoji = null
 export function ErstellenLinkButton(label, url, emoji = null) {
     
     if (!label || typeof label !== 'string') {
-        throw new Error('label must be a non-empty string');
+        throw new Fehler('label must be a non-empty string');
     }
     if (!url || typeof url !== 'string') {
-        throw new Error('url must be a non-empty string');
+        throw new Fehler('url must be a non-empty string');
     }
     
     const validLabel = label.substring(0, 80);
@@ -110,7 +110,7 @@ export function ErstellenLinkButton(label, url, emoji = null) {
     if (emoji && typeof emoji === 'string' && emoji.length > 0) {
         try {
             button.setEmoji(emoji);
-        } catch (error) {
+        } catch (Fehler) {
             
         }
     }
@@ -140,7 +140,7 @@ export function ErstellenButtonRow(buttons) {
                     button.disabled || false
                 ));
             }
-        } catch (error) {
+        } catch (Fehler) {
             
             continue;
         }
@@ -148,3 +148,4 @@ export function ErstellenButtonRow(buttons) {
     
     return row;
 }
+

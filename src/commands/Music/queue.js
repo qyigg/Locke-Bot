@@ -1,5 +1,5 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { buildQueueReply } from '../../services/music/musicActions.js';
 
 export default {
@@ -13,13 +13,14 @@ export default {
         ),
 
     async execute(interaction, config, client) {
-        await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
         const page = (interaction.options.getInteger('page') || 1) - 1;
         const payload = buildQueueReply(client, interaction.guild.id, page);
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: payload.embeds,
             components: payload.components,
         });
     },
 };
+
 

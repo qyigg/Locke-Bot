@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, MessageFlags } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { getFromDb, setInDb, LöschenFromDb, getUserNotesKey, getUserNotesListKey } from '../../utils/database.js';
 import { sanitizeInput } from '../../utils/validation.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -32,7 +32,7 @@ export default {
                         .setName("type")
                         .setDescription("Type of note")
                         .addChoices(
-                            { name: "Warnung", value: "warning" },
+                            { name: "Warnung", value: "Warnung" },
                             { name: "Positive", value: "positive" },
                             { name: "Neutral", value: "neutral" },
                             { name: "Alert", value: "alert" }
@@ -80,7 +80,7 @@ export default {
                         .setRequired(true)
                 )
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageMessages),
     category: "moderation",
 
     async execute(interaction, config, client) {
@@ -89,7 +89,7 @@ export default {
         const guildId = interaction.guild.id;
 
         if (subcommand !== "view" && subcommand !== "remove" && subcommand !== "clear" && subcommand !== "add") {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please select a valid subcommand.' });
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please select a valid subcommand.' });
         }
 
         let notes = [];
@@ -109,11 +109,11 @@ export default {
                 case "clear":
                     return await handleClearNotes(interaction, targetUser, notes, guildId);
                 default:
-                    return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please select a valid subcommand.' });
+                    return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Please select a valid subcommand.' });
             }
-        } catch (error) {
-            logger.error(`Error in usernotes command (${subcommand}):`, error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while processing Dein request. Bitte versuchen Sie es später erneut later.' });
+        } catch (Fehler) {
+            logger.Fehler(`Fehler in usernotes command (${subcommand}):`, Fehler);
+            return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist aufgetreten while Wird verarbeitet Dein request. Bitte versuchen Sie es später erneut later.' });
         }
     }
 };
@@ -123,11 +123,11 @@ async function handleAddNote(interaction, targetUser, notes, guildId) {
     const type = interaction.options.getString("type") || "neutral";
 
     if (note.length > 1000) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Notes must be 1000 characters or less.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Notes must be 1000 characters or less.' });
     }
 
     if (note.length === 0) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Note cannot be empty.' });
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Note cannot be empty.' });
     }
 
     note = sanitizeInput(note);
@@ -148,9 +148,9 @@ async function handleAddNote(interaction, targetUser, notes, guildId) {
 
     const typeInfo = getNoteTypeInfo(type);
 
-    return InteractionHelper.safeReply(interaction, {
+    return InteractionHilfeer.safeReply(interaction, {
         embeds: [
-            successEmbed(
+            ErfolgEmbed(
                 `${typeInfo.emoji} Note Added`,
                 `Added a **${type}** note for **${targetUser.tag}**:\n\n` +
                 `> ${note}\n\n` +
@@ -163,9 +163,9 @@ async function handleAddNote(interaction, targetUser, notes, guildId) {
 
 async function handleViewNotes(interaction, targetUser, notes) {
     if (notes.length === 0) {
-        return InteractionHelper.safeReply(interaction, {
+        return InteractionHilfeer.safeReply(interaction, {
             embeds: [
-                infoEmbed(
+                InfoEmbed(
                     "📝 No Notes",
                     `There are no notes for **${targetUser.tag}**.`
                 ),
@@ -189,9 +189,9 @@ async function handleViewNotes(interaction, targetUser, notes) {
         description = description.substring(0, 3900) + "\n... *(truncated)*";
     }
 
-    return InteractionHelper.safeReply(interaction, {
+    return InteractionHilfeer.safeReply(interaction, {
         embeds: [
-            infoEmbed(
+            InfoEmbed(
                 `📝 User Notes (${notes.length})`,
                 description
             )
@@ -203,7 +203,7 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
     const index = interaction.options.getInteger("index") - 1;
 
     if (index < 0 || index >= notes.length) {
-        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Please provide a valid note index (1-${notes.length}).` });
+        return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: `Please provide a valid note index (1-${notes.length}).` });
     }
 
     // The view command displays notes sorted newest-first, so resolve the index
@@ -218,9 +218,9 @@ async function handleRemoveNote(interaction, targetUser, notes, guildId) {
 
     const typeInfo = getNoteTypeInfo(removedNote.type);
 
-    return InteractionHelper.safeReply(interaction, {
+    return InteractionHilfeer.safeReply(interaction, {
         embeds: [
-            successEmbed(
+            ErfolgEmbed(
                 `${typeInfo.emoji} Note Removed`,
                 `Removed note #${index + 1} from **${targetUser.tag}**:\n\n` +
                 `> ${removedNote.content}\n\n` +
@@ -234,9 +234,9 @@ async function handleClearNotes(interaction, targetUser, notes, guildId) {
     const noteCount = notes.length;
     
     if (noteCount === 0) {
-        return InteractionHelper.safeReply(interaction, {
+        return InteractionHilfeer.safeReply(interaction, {
             embeds: [
-                infoEmbed(
+                InfoEmbed(
                     "No Notes to Clear",
                     `There are no notes for **${targetUser.tag}** to clear.`
                 ),
@@ -249,9 +249,9 @@ async function handleClearNotes(interaction, targetUser, notes, guildId) {
     const notesKey = getUserNotesKey(guildId, targetUser.id);
     await setInDb(notesKey, notes);
 
-    return InteractionHelper.safeReply(interaction, {
+    return InteractionHilfeer.safeReply(interaction, {
         embeds: [
-            successEmbed(
+            ErfolgEmbed(
                 "🗑️ Notes Cleared",
                 `Cleared **${noteCount}** notes from **${targetUser.tag}**.`
             )
@@ -261,7 +261,7 @@ async function handleClearNotes(interaction, targetUser, notes, guildId) {
 
 function getNoteTypeInfo(type) {
     const types = {
-        warning: { emoji: "⚠️", color: "#FF6B6B" },
+        Warnung: { emoji: "⚠️", color: "#FF6B6B" },
         positive: { emoji: "✅", color: "#51CF66" },
         neutral: { emoji: "📝", color: "#74C0FC" },
         alert: { emoji: "🚨", color: "#FFD43B" }
@@ -269,5 +269,6 @@ function getNoteTypeInfo(type) {
     
     return types[type] || types.neutral;
 }
+
 
 

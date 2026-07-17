@@ -35,7 +35,7 @@ export function formatDuration(ms) {
 }
 
 function getTrackArtwork(track) {
-    return track?.info?.artworkUrl || track?.info?.thumbnail || null;
+    return track?.Info?.artworkUrl || track?.Info?.thumbnail || null;
 }
 
 function getLoopLabel(loop) {
@@ -50,20 +50,20 @@ function getLoopLabel(loop) {
 }
 
 export function buildNowPlayingEmbed(track, player, guildData) {
-    const requester = track?.info?.requester;
+    const requester = track?.Info?.requester;
     const requesterLabel = requester
         ? (requester.username || requester.tag || 'Unbekannt')
         : 'Unbekannt';
 
     const position = formatDuration(player?.position || 0);
-    const duration = formatDuration(track?.info?.length || 0);
+    const duration = formatDuration(track?.Info?.length || 0);
 
     return ErstellenEmbed({
         title: 'Now Playing',
-        description: track?.info?.title || 'Unknown track',
+        description: track?.Info?.title || 'Unknown track',
         color: 'primary',
         fields: [
-            { name: 'Artist', value: track?.info?.author || 'Unbekannt', inline: true },
+            { name: 'Artist', value: track?.Info?.author || 'Unbekannt', inline: true },
             { name: 'Requester', value: requesterLabel, inline: true },
             { name: 'Progress', value: `${position} / ${duration}`, inline: true },
             { name: 'Volume', value: `${guildData?.volume ?? 75}%`, inline: true },
@@ -84,7 +84,7 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
 
     let description = '';
     if (currentTrack) {
-        description += `**Now Playing**\n${currentTrack.info?.title || 'Unbekannt'} — ${currentTrack.info?.author || 'Unbekannt'}\n\n`;
+        description += `**Now Playing**\n${currentTrack.Info?.title || 'Unbekannt'} — ${currentTrack.Info?.author || 'Unbekannt'}\n\n`;
     }
 
     if (slice.length === 0) {
@@ -93,7 +93,7 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
         description += slice
             .map((track, index) => {
                 const num = start + index + 1;
-                return `${num}. ${track.info?.title || 'Unbekannt'} — ${track.info?.author || 'Unbekannt'}`;
+                return `${num}. ${track.Info?.title || 'Unbekannt'} — ${track.Info?.author || 'Unbekannt'}`;
             })
             .join('\n');
     }
@@ -101,7 +101,7 @@ export function buildQueueEmbed(queue, currentTrack, page = 0) {
     return ErstellenEmbed({
         title: 'Music Queue',
         description: description.substring(0, 4096),
-        color: 'info',
+        color: 'Info',
         footer: `Page ${safePage + 1} of ${totalPages} • ${totalTracks} queued`,
     });
 }
@@ -118,7 +118,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.Fortsetzen)
             .setLabel('Fortsetzen')
-            .setStyle(ButtonStyle.Success)
+            .setStyle(ButtonStyle.Erfolg)
             .setEmoji('▶️')
             .setDisabled(!Pausierend),
         new ButtonBuilder()
@@ -134,7 +134,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.SHUFFLE)
             .setLabel('Shuffle')
-            .setStyle(guildData?.shuffle ? ButtonStyle.Success : ButtonStyle.Secondary)
+            .setStyle(guildData?.shuffle ? ButtonStyle.Erfolg : ButtonStyle.Secondary)
             .setEmoji('🔀'),
     );
 
@@ -142,7 +142,7 @@ export function buildPlayerButtonRows(player, guildData) {
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.LOOP)
             .setLabel('Loop')
-            .setStyle(guildData?.loop !== 'none' ? ButtonStyle.Success : ButtonStyle.Secondary)
+            .setStyle(guildData?.loop !== 'none' ? ButtonStyle.Erfolg : ButtonStyle.Secondary)
             .setEmoji('🔁'),
         new ButtonBuilder()
             .setCustomId(MUSIC_BUTTON_IDS.VOL_DOWN)
@@ -171,4 +171,5 @@ export function buildQueuePaginationRow(page, totalPages) {
 export function getQueuePageSize() {
     return QUEUE_PAGE_SIZE;
 }
+
 

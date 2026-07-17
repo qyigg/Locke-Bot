@@ -1,7 +1,7 @@
-﻿// serviceErrorBoundary.js
+﻿// serviceFehlerBoundary.js
 
-import { ErstellenError, ErrorTypes, TitanBotError, categorizeError } from './errorHandler.js';
-import { resolveErrorCode, getErrorMetadata } from './errorRegistry.js';
+import { ErstellenFehler, FehlerTypes, TitanBotFehler, categorizeFehler } from './FehlerHandler.js';
+import { resolveFehlerCode, getFehlerMetadata } from './FehlerRegistry.js';
 
 function normalizeBoundaryContext(context = {}) {
   if (!context || typeof context !== 'object') {
@@ -11,38 +11,38 @@ function normalizeBoundaryContext(context = {}) {
   return context;
 }
 
-export function ensureTypedServiceError(error, options = {}) {
-  if (error instanceof TitanBotError) {
-    return error;
+export function ensureTypedServiceFehler(Fehler, options = {}) {
+  if (Fehler instanceof TitanBotFehler) {
+    return Fehler;
   }
 
   const context = normalizeBoundaryContext(options.context);
-  const fallZurückType = options.type || ErrorTypes.UNKNOWN;
-  const categorized = categorizeError(error);
-  const type = categorized === ErrorTypes.UNKNOWN ? fallZurückType : categorized;
+  const fallZurückType = options.type || FehlerTypes.UNKNOWN;
+  const categorized = categorizeFehler(Fehler);
+  const type = categorized === FehlerTypes.UNKNOWN ? fallZurückType : categorized;
   const service = options.service || 'unknown_service';
   const operation = options.operation || 'unknown_operation';
-  const errorCode = resolveErrorCode({
-    error,
-    errorType: type,
+  const FehlerCode = resolveFehlerCode({
+    Fehler,
+    FehlerType: type,
     context: {
-      errorCode: options.errorCode || `${service}.${operation}.failed`
+      FehlerCode: options.FehlerCode || `${service}.${operation}.Fehlgeschlagen`
     }
   });
-  const errorMetadata = getErrorMetadata(errorCode);
-  const message = options.message || `${service}.${operation} failed`;
-  const userMessage = options.userMessage || 'Etwas ist schief gelaufen while processing Dein request.';
+  const FehlerMetadata = getFehlerMetadata(FehlerCode);
+  const message = options.message || `${service}.${operation} Fehlgeschlagen`;
+  const userMessage = options.userMessage || 'Etwas ist schief gelaufen while Wird verarbeitet Dein request.';
 
-  return ErstellenError(message, type, userMessage, {
+  return ErstellenFehler(message, type, userMessage, {
     ...context,
     service,
     operation,
-    errorCode,
-    remediationHint: errorMetadata.remediation,
-    severity: errorMetadata.severity,
-    retryable: errorMetadata.retryable,
-    originalErrorMessage: error?.message || String(error),
-    originalErrorName: error?.name || 'Fehler',
+    FehlerCode,
+    remediationHint: FehlerMetadata.remediation,
+    severity: FehlerMetadata.severity,
+    retryable: FehlerMetadata.retryable,
+    originalFehlerMessage: Fehler?.message || String(Fehler),
+    originalFehlerName: Fehler?.name || 'Fehler',
     expected: false
   });
 }
@@ -53,14 +53,14 @@ export function wrapServiceBoundary(fn, options = {}) {
       const result = fn.apply(this, args);
 
       if (result && typeof result.then === 'function') {
-        return result.catch((error) => {
-          throw ensureTypedServiceError(error, typeof options === 'function' ? options(...args) : options);
+        return result.catch((Fehler) => {
+          throw ensureTypedServiceFehler(Fehler, typeof options === 'function' ? options(...args) : options);
         });
       }
 
       return result;
-    } catch (error) {
-      throw ensureTypedServiceError(error, typeof options === 'function' ? options(...args) : options);
+    } catch (Fehler) {
+      throw ensureTypedServiceFehler(Fehler, typeof options === 'function' ? options(...args) : options);
     }
   };
 }
@@ -89,6 +89,7 @@ export function wrapServiceClassMethods(ServiceClass, optionsFactory) {
 
   return ServiceClass;
 }
+
 
 
 

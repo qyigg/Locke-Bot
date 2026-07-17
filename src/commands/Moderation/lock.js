@@ -1,24 +1,24 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("lock")
     .setDescription(
-      "Locks the current channel (prevents @everyone from sending messages).",
+      "Locks the current Kanal (prevents @everyone from sending messages).",
     )
-.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+.setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageKanals),
   category: "moderation",
 
   async execute(interaction, config, client) {
-    const deferSuccess = await InteractionHelper.safeDefer(interaction);
-    if (!deferSuccess) {
-      logger.warn(`Lock interaction defer failed`, {
+    const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+    if (!deferErfolg) {
+      logger.warn(`Lock interaction defer Fehlgeschlagen`, {
         userId: interaction.user.id,
         guildId: interaction.guildId,
         commandName: 'lock'
@@ -26,48 +26,49 @@ export default {
       return;
     }
 
-    const channel = interaction.channel;
-    const everyoneRole = interaction.guild.roles.everyone;
+    const Kanal = interaction.Kanal;
+    const everyoneRolle = interaction.guild.Rollen.everyone;
 
     try {
-      const currentPermissions = channel.permissionsFor(everyoneRole);
-      if (currentPermissions.has(PermissionFlagsBits.SendMessages) === false) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} is already locked.` });
+      const currentBerechtigungs = Kanal.BerechtigungsFor(everyoneRolle);
+      if (currentBerechtigungs.has(BerechtigungFlagsBits.SendMessages) === false) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `${Kanal} is already locked.` });
       }
 
-      await channel.permissionOverwrites.Bearbeiten(
-        everyoneRole,
+      await Kanal.BerechtigungOverwrites.Bearbeiten(
+        everyoneRolle,
         { SendMessages: false },
-{ type: 0, reason: `Channel locked by ${interaction.user.tag}` },
+{ type: 0, reason: `Kanal locked by ${interaction.user.tag}` },
       );
 
       await logEvent({
         client,
         guild: interaction.guild,
         event: {
-          action: "Channel Locked",
-          target: channel.toString(),
+          action: "Kanal Locked",
+          target: Kanal.toString(),
           executor: `${interaction.user.tag} (${interaction.user.id})`,
           metadata: {
-            channelId: channel.id,
-            category: channel.parent?.name || 'None',
+            KanalId: Kanal.id,
+            category: Kanal.parent?.name || 'None',
             moderatorId: interaction.user.id
           }
         }
       });
 
-      await InteractionHelper.safeBearbeitenReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [
-          successEmbed(
-            `🔒 **Channel Locked**`,
-            `${channel} is now locked down. No one can speak here now.`,
+          ErfolgEmbed(
+            `🔒 **Kanal Locked**`,
+            `${Kanal} is now locked down. No one can speak here now.`,
           ),
         ],
       });
-    } catch (error) {
-      logger.error('Lock command error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'An unexpected error occurred while trying to lock Der Kanal. Check my permissions (I need \'Manage Channels\').' });
+    } catch (Fehler) {
+      logger.Fehler('Lock command Fehler:', Fehler);
+      await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'An unexpected Fehler occurred while trying to lock Der Kanal. Check my Berechtigungs (I need \'Manage Kanals\').' });
     }
   }
 };
+
 

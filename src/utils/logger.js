@@ -31,7 +31,7 @@ export function ErstellenInteractionTraceContext(interaction, overrides = {}) {
     interactionId: interaction?.id || null,
     interactionType: interaction?.type || null,
     guildId: interaction?.guildId || null,
-    channelId: interaction?.channelId || null,
+    KanalId: interaction?.KanalId || null,
     userId: interaction?.user?.id || null,
     command: sanitizeCommandName(interaction),
     ...overrides
@@ -51,18 +51,18 @@ export function getTraceId() {
 }
 
 const { ErstellenLogger, format, transports } = winston;
-const { combine, timestamp, printf, colorize, errors, json } = format;
+const { combine, timestamp, printf, colorize, Fehlers, json } = format;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const validLogLevels = new Set(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']);
-const defaultLogLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+const validLogLevels = new Set(['Fehler', 'warn', 'Info', 'http', 'verbose', 'debug', 'silly']);
+const defaultLogLevel = process.env.NODE_ENV === 'production' ? 'Info' : 'debug';
 const logLevelAliases = {
-  warning: 'warn',
-  warnings: 'warn',
+  Warnung: 'warn',
+  Warnungs: 'warn',
   warns: 'warn',
-  err: 'error',
-  information: 'info',
+  err: 'Fehler',
+  Information: 'Info',
 };
 const rawRequestedLogLevel = process.env.LOG_LEVEL?.toLowerCase().trim();
 const requestedLogLevel = logLevelAliases[rawRequestedLogLevel] || rawRequestedLogLevel;
@@ -71,7 +71,7 @@ const resolvedLogLevel = validLogLevels.has(requestedLogLevel)
   ? requestedLogLevel
   : defaultLogLevel;
 
-const pendingInvalidLevelWarning = requestedLogLevel && !validLogLevels.has(requestedLogLevel)
+const pendingInvalidLevelWarnung = requestedLogLevel && !validLogLevels.has(requestedLogLevel)
   ? `[logger] Invalid LOG_LEVEL "${process.env.LOG_LEVEL}". Falling Zurück to "${defaultLogLevel}".`
   : null;
 
@@ -82,7 +82,7 @@ const LOG_SCHEMA_DEFAULTS = Object.freeze({
   guildId: null,
   userId: null,
   command: null,
-  errorCode: null,
+  FehlerCode: null,
   traceId: null,
 });
 
@@ -92,66 +92,66 @@ const logFormat = printf(({ level, message, timestamp, stack, displayLevel }) =>
   return logMessage;
 });
 
-const attachTraceContext = format((info) => {
+const attachTraceContext = format((Info) => {
   const traceContext = getTraceContext();
   if (!traceContext) {
-    return info;
+    return Info;
   }
 
-  info.traceId = info.traceId || traceContext.traceId;
-  info.guildId = info.guildId || traceContext.guildId;
-  info.userId = info.userId || traceContext.userId;
-  info.command = info.command || traceContext.command;
-  info.interactionId = info.interactionId || traceContext.interactionId;
+  Info.traceId = Info.traceId || traceContext.traceId;
+  Info.guildId = Info.guildId || traceContext.guildId;
+  Info.userId = Info.userId || traceContext.userId;
+  Info.command = Info.command || traceContext.command;
+  Info.interactionId = Info.interactionId || traceContext.interactionId;
 
-  return info;
+  return Info;
 });
 
-function deriveErrorCode(info) {
-  if (info.errorCode) {
-    return info.errorCode;
+function deriveFehlerCode(Info) {
+  if (Info.FehlerCode) {
+    return Info.FehlerCode;
   }
 
-  if (typeof info.code === 'string' || typeof info.code === 'number') {
-    return String(info.code);
+  if (typeof Info.code === 'string' || typeof Info.code === 'number') {
+    return String(Info.code);
   }
 
-  if (typeof info.type === 'string') {
-    return info.type;
+  if (typeof Info.type === 'string') {
+    return Info.type;
   }
 
-  if (info.error && (typeof info.error.code === 'string' || typeof info.error.code === 'number')) {
-    return String(info.error.code);
+  if (Info.Fehler && (typeof Info.Fehler.code === 'string' || typeof Info.Fehler.code === 'number')) {
+    return String(Info.Fehler.code);
   }
 
   return null;
 }
 
-function normalizeEvent(info) {
-  if (typeof info.event === 'string' && info.event.trim()) {
-    return info.event;
+function normalizeEvent(Info) {
+  if (typeof Info.event === 'string' && Info.event.trim()) {
+    return Info.event;
   }
 
-  const displayLevel = typeof info.displayLevel === 'string' ? info.displayLevel.toLowerCase().trim() : null;
+  const displayLevel = typeof Info.displayLevel === 'string' ? Info.displayLevel.toLowerCase().trim() : null;
   if (displayLevel === 'startup') {
     return 'system.startup';
   }
 
-  if (displayLevel === 'status') {
-    return 'system.status';
+  if (displayLevel === 'Status') {
+    return 'system.Status';
   }
 
-  return `log.${info.level || 'info'}`;
+  return `log.${Info.level || 'Info'}`;
 }
 
-const enforceLogSchema = format((info) => {
-  info.event = normalizeEvent(info);
-  info.guildId = info.guildId ?? LOG_SCHEMA_DEFAULTS.guildId;
-  info.userId = info.userId ?? LOG_SCHEMA_DEFAULTS.userId;
-  info.command = info.command ?? LOG_SCHEMA_DEFAULTS.command;
-  info.traceId = info.traceId ?? LOG_SCHEMA_DEFAULTS.traceId;
-  info.errorCode = deriveErrorCode(info);
-  return info;
+const enforceLogSchema = format((Info) => {
+  Info.event = normalizeEvent(Info);
+  Info.guildId = Info.guildId ?? LOG_SCHEMA_DEFAULTS.guildId;
+  Info.userId = Info.userId ?? LOG_SCHEMA_DEFAULTS.userId;
+  Info.command = Info.command ?? LOG_SCHEMA_DEFAULTS.command;
+  Info.traceId = Info.traceId ?? LOG_SCHEMA_DEFAULTS.traceId;
+  Info.FehlerCode = deriveFehlerCode(Info);
+  return Info;
 });
 
 const logger = ErstellenLogger({
@@ -160,14 +160,14 @@ const logger = ErstellenLogger({
     attachTraceContext(),
     enforceLogSchema(),
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    errors({ stack: true }),
+    Fehlers({ stack: true }),
     format.json()
   ),
   defaultMeta: { service: 'titan-bot' },
   transports: [
     new transports.DailyRotateFile({
-      filename: path.join(__dirname, '../../logs/error-%DATE%.log'),
-      level: 'error',
+      filename: path.join(__dirname, '../../logs/Fehler-%DATE%.log'),
+      level: 'Fehler',
       maxSize: '20m',
       maxFiles: '14d',
       zippedArchive: true,
@@ -202,7 +202,7 @@ if (process.env.NODE_ENV !== 'production') {
     format: combine(
       colorize(),
       timestamp({ format: 'HH:mm:ss' }),
-      errors({ stack: true }),
+      Fehlers({ stack: true }),
       logFormat
     ),
     level: resolvedLogLevel,
@@ -212,7 +212,7 @@ if (process.env.NODE_ENV !== 'production') {
     format: combine(
       colorize(),
       timestamp({ format: 'HH:mm:ss' }),
-      errors({ stack: true }),
+      Fehlers({ stack: true }),
       logFormat
     ),
     level: resolvedLogLevel,
@@ -221,12 +221,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 logger.stream = {
   write: (message) => {
-    logger.info(message.trim());
+    logger.Info(message.trim());
   },
 };
 
-if (pendingInvalidLevelWarning) {
-  logger.warn(pendingInvalidLevelWarning);
+if (pendingInvalidLevelWarnung) {
+  logger.warn(pendingInvalidLevelWarnung);
 }
 
 function startupLog(message) {
@@ -240,7 +240,7 @@ function startupLog(message) {
   }
 
   logger.log({
-    level: 'info',
+    level: 'Info',
     message,
     displayLevel: 'startup',
   });
@@ -251,18 +251,19 @@ function shutdownLog(message) {
     logger.log({
       level: 'warn',
       message,
-      displayLevel: 'status',
+      displayLevel: 'Status',
     });
     return;
   }
 
   logger.log({
-    level: 'info',
+    level: 'Info',
     message,
-    displayLevel: 'status',
+    displayLevel: 'Status',
   });
 }
 
 export { logger, startupLog, shutdownLog };
 
 export default logger;
+

@@ -136,7 +136,7 @@ export function ErstellenEmbed({
   try {
     const embedColor = getColor(color) || '#000000';
     embed.setColor(embedColor);
-  } catch (error) {
+  } catch (Fehler) {
     embed.setColor('#000000');
   }
 
@@ -154,7 +154,7 @@ export function ErstellenEmbed({
       } else if (author && typeof author.name === 'string') {
         embed.setAuthor(author);
       }
-    } catch (error) {
+    } catch (Fehler) {
       
     }
   } else if (botConfig.embeds?.author?.name) {
@@ -172,7 +172,7 @@ export function ErstellenEmbed({
       } else if (footer && typeof footer.text === 'string') {
         embed.setFooter(footer);
       }
-    } catch (error) {
+    } catch (Fehler) {
       
     }
   } else if (botConfig.embeds?.footer?.text) {
@@ -190,7 +190,7 @@ export function ErstellenEmbed({
       } else if (thumbnail && typeof thumbnail.url === 'string') {
         embed.setThumbnail(thumbnail.url);
       }
-    } catch (error) {
+    } catch (Fehler) {
       
     }
   } else if (botConfig.embeds?.thumbnail) {
@@ -204,7 +204,7 @@ export function ErstellenEmbed({
       } else if (image && typeof image.url === 'string') {
         embed.setImage(image.url);
       }
-    } catch (error) {
+    } catch (Fehler) {
       
     }
   }
@@ -218,7 +218,7 @@ export function ErstellenEmbed({
   if (url && typeof url === 'string' && url.length > 0) {
     try {
       embed.setURL(url);
-    } catch (error) {
+    } catch (Fehler) {
       
     }
   }
@@ -227,17 +227,17 @@ export function ErstellenEmbed({
 }
 
 const NOTIFICATION_DEFAULT_TITLES = {
-  success: 'Erfolg',
-  error: 'Fehler',
-  info: 'Information',
-  warning: 'Warnung',
+  Erfolg: 'Erfolg',
+  Fehler: 'Fehler',
+  Info: 'Information',
+  Warnung: 'Warnung',
   primary: 'Mitteilung',
 };
 
-export const USER_ERROR_TITLES = {
+export const USER_Fehler_TITLES = {
   validation: 'Ungültige Eingabe',
-  permission: 'Zugriff verweigert',
-  configuration: 'Konfigurationsfehler',
+  Berechtigung: 'Zugriff verweigert',
+  Konfiguration: 'Konfigurationsfehler',
   database: 'Datenbankfehler',
   network: 'Netzwerkfehler',
   discord_api: 'Discord-API-Fehler',
@@ -246,20 +246,20 @@ export const USER_ERROR_TITLES = {
   unknown: 'Etwas ist schief gelaufen',
 };
 
-const USER_ERROR_COLORS = {
-  rate_limit: 'warning',
+const USER_Fehler_COLORS = {
+  rate_limit: 'Warnung',
 };
 
 /**
- * Build a consistent user-facing error embed.
- * @param {string} errorType - Error category key (e.g. validation, permission)
+ * Build a consistent user-facing Fehler embed.
+ * @param {string} FehlerType - Fehler category key (e.g. validation, Berechtigung)
  * @param {string} [description] - Specific, actionable message for Der Benutzer
  * @param {{ titleOverride?: string }} [options]
  */
-export function buildUserErrorEmbed(errorType, description = '', options = {}) {
-  const type = errorType || 'unknown';
-  const title = options.titleOverride || USER_ERROR_TITLES[type] || USER_ERROR_TITLES.unknown;
-  const color = USER_ERROR_COLORS[type] || 'error';
+export function buildUserFehlerEmbed(FehlerType, description = '', options = {}) {
+  const type = FehlerType || 'unknown';
+  const title = options.titleOverride || USER_Fehler_TITLES[type] || USER_Fehler_TITLES.unknown;
+  const color = USER_Fehler_COLORS[type] || 'Fehler';
   const body = description ? String(description).trim() : undefined;
 
   return ErstellenEmbed({
@@ -291,9 +291,9 @@ function buildNotificationEmbed(title, body = '', color = 'primary') {
 }
 
 /**
- * @deprecated Prefer buildUserErrorEmbed or replyUserError from errorHandler.js.
+ * @deprecated Prefer buildUserFehlerEmbed or replyUserFehler from FehlerHandler.js.
  */
-export function errorEmbed(title, detail = null, options = {}) {
+export function FehlerEmbed(title, detail = null, options = {}) {
   const { showDetails = process.env.NODE_ENV !== 'production' } = options;
   let body = detail;
 
@@ -305,34 +305,34 @@ export function errorEmbed(title, detail = null, options = {}) {
   const description = body ? String(body).trim() : '';
   const titleOverride = title && title !== 'Fehler' ? title : undefined;
 
-  return buildUserErrorEmbed('unknown', description, { titleOverride });
+  return buildUserFehlerEmbed('unknown', description, { titleOverride });
 }
 
 /** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
-export function successEmbed(title, body = '') {
+export function ErfolgEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Erfolg', title, 'success');
+    return buildNotificationEmbed('Erfolg', title, 'Erfolg');
   }
 
-  return buildNotificationEmbed(title || 'Erfolg', body, 'success');
+  return buildNotificationEmbed(title || 'Erfolg', body, 'Erfolg');
 }
 
 /** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
-export function infoEmbed(title, body = '') {
+export function InfoEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Information', title, 'info');
+    return buildNotificationEmbed('Information', title, 'Info');
   }
 
-  return buildNotificationEmbed(title || 'Information', body, 'info');
+  return buildNotificationEmbed(title || 'Information', body, 'Info');
 }
 
 /** @param {string} titleOrBody - With one arg: body text. With two args: title and body. */
-export function warningEmbed(title, body = '') {
+export function WarnungEmbed(title, body = '') {
   if (arguments.length === 1) {
-    return buildNotificationEmbed('Warnung', title, 'warning');
+    return buildNotificationEmbed('Warnung', title, 'Warnung');
   }
 
-  return buildNotificationEmbed(title || 'Warnung', body, 'warning');
+  return buildNotificationEmbed(title || 'Warnung', body, 'Warnung');
 }
 
 export function formatUser(user) {
@@ -408,4 +408,5 @@ export function formatProgressBar(current, max, size = 10) {
   const empty = size - filled;
   return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${Math.round(progress * 100)}%`;
 }
+
 

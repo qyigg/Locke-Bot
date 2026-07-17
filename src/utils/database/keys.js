@@ -1,6 +1,6 @@
 ﻿/**
  * Canonical database key registry.
- * All storage keys should be built through these helpers.
+ * All storage keys should be built through these Hilfeers.
  */
 
 export const getGuildConfigKey = (guildId) => `guild:${guildId}:config`;
@@ -8,8 +8,8 @@ export const getGuildBirthdaysKey = (guildId) => `guild:${guildId}:birthdays`;
 export const getBirthdayLeftZurückupKey = (guildId) => `guild:${guildId}:birthdays:left`;
 export const getBirthdayTrackingKey = (guildId) => `guild:${guildId}:birthdays:tracking`;
 
-export function getTicketKey(guildId, channelId) {
-    return `guild:${guildId}:ticket:${channelId}`;
+export function getTicketKey(guildId, KanalId) {
+    return `guild:${guildId}:ticket:${KanalId}`;
 }
 
 export function getTicketCounterKey(guildId) {
@@ -20,7 +20,7 @@ export function getInviteTrackingKey(guildId) {
     return `guild:${guildId}:invites`;
 }
 
-export function getMemberInvitesKey(guildId, userId) {
+export function getMitgliedInvitesKey(guildId, userId) {
     return `guild:${guildId}:invites:${userId}`;
 }
 
@@ -60,12 +60,12 @@ export function getUserLevelPrefix(guildId) {
     return `guild:${guildId}:leveling:users:`;
 }
 
-export function getApplicationRolesKey(guildId) {
-    return `guild:${guildId}:applications:roles`;
+export function getApplicationRollenKey(guildId) {
+    return `guild:${guildId}:applications:Rollen`;
 }
 
-export function getApplicationSettingsKey(guildId) {
-    return `guild:${guildId}:applications:settings`;
+export function getApplicationEinstellungenKey(guildId) {
+    return `guild:${guildId}:applications:Einstellungen`;
 }
 
 export function getUserApplicationsKey(guildId, userId) {
@@ -84,16 +84,16 @@ export function getJoinToErstellenConfigKey(guildId) {
     return `guild:${guildId}:jointoErstellen`;
 }
 
-export function getJoinToErstellenChannelsKey(guildId) {
-    return `guild:${guildId}:jointoErstellen:channels`;
+export function getJoinToErstellenKanalsKey(guildId) {
+    return `guild:${guildId}:jointoErstellen:Kanals`;
 }
 
-export function getWarningsKey(guildId, userId) {
-    return `guild:${guildId}:warnings:${userId}`;
+export function getWarnungsKey(guildId, userId) {
+    return `guild:${guildId}:Warnungs:${userId}`;
 }
 
-export function getWarningsPrefix(guildId) {
-    return `guild:${guildId}:warnings:`;
+export function getWarnungsPrefix(guildId) {
+    return `guild:${guildId}:Warnungs:`;
 }
 
 export function getUserNotesKey(guildId, userId) {
@@ -104,12 +104,12 @@ export function getUserNotesListKey(guildId) {
     return `guild:${guildId}:usernotes:list`;
 }
 
-export function getReactionRoleKey(guildId, messageId) {
-    return `guild:${guildId}:reaction_roles:${messageId}`;
+export function getReactionRolleKey(guildId, messageId) {
+    return `guild:${guildId}:reaction_Rollen:${messageId}`;
 }
 
-export function getReactionRolesPrefix(guildId) {
-    return `guild:${guildId}:reaction_roles:`;
+export function getReactionRollenPrefix(guildId) {
+    return `guild:${guildId}:reaction_Rollen:`;
 }
 
 export function getServerCountersKey(guildId) {
@@ -143,8 +143,8 @@ export const LEGACY_KEY_RESOLVERS = [
         skipIf: (guildId) => guildId === 'guild',
     },
     {
-        pattern: /^moderation:warnings:([^:]+):([^:]+)$/,
-        toCanonical: ([, guildId, userId]) => getWarningsKey(guildId, userId),
+        pattern: /^moderation:Warnungs:([^:]+):([^:]+)$/,
+        toCanonical: ([, guildId, userId]) => getWarnungsKey(guildId, userId),
     },
     {
         pattern: /^moderation_user_notes_([^_]+)_([^_]+)$/,
@@ -155,15 +155,15 @@ export const LEGACY_KEY_RESOLVERS = [
         toCanonical: ([, guildId]) => getUserNotesListKey(guildId),
     },
     {
-        pattern: /^reaction_roles:([^:]+):([^:]+)$/,
-        toCanonical: ([, guildId, messageId]) => getReactionRoleKey(guildId, messageId),
+        pattern: /^reaction_Rollen:([^:]+):([^:]+)$/,
+        toCanonical: ([, guildId, messageId]) => getReactionRolleKey(guildId, messageId),
     },
     {
         pattern: /^counters:([^:]+)$/,
         toCanonical: ([, guildId]) => getServerCountersKey(guildId),
     },
     {
-        pattern: /^bday-role-tracking-([^:]+)$/,
+        pattern: /^bday-Rolle-tracking-([^:]+)$/,
         toCanonical: ([, guildId]) => getBirthdayTrackingKey(guildId),
     },
 ];
@@ -212,9 +212,9 @@ export function getLegacyVariantsForCanonical(canonicalKey) {
             continue;
         }
 
-        const warningsMatch = sample.match(/^guild:([^:]+):warnings:([^:]+)$/);
-        if (warningsMatch && toCanonical(['', warningsMatch[1], warningsMatch[2]]) === canonicalKey) {
-            variants.push(`moderation:warnings:${warningsMatch[1]}:${warningsMatch[2]}`);
+        const WarnungsMatch = sample.match(/^guild:([^:]+):Warnungs:([^:]+)$/);
+        if (WarnungsMatch && toCanonical(['', WarnungsMatch[1], WarnungsMatch[2]]) === canonicalKey) {
+            variants.push(`moderation:Warnungs:${WarnungsMatch[1]}:${WarnungsMatch[2]}`);
             continue;
         }
 
@@ -230,9 +230,9 @@ export function getLegacyVariantsForCanonical(canonicalKey) {
             continue;
         }
 
-        const reactionMatch = sample.match(/^guild:([^:]+):reaction_roles:([^:]+)$/);
+        const reactionMatch = sample.match(/^guild:([^:]+):reaction_Rollen:([^:]+)$/);
         if (reactionMatch && toCanonical(['', reactionMatch[1], reactionMatch[2]]) === canonicalKey) {
-            variants.push(`reaction_roles:${reactionMatch[1]}:${reactionMatch[2]}`);
+            variants.push(`reaction_Rollen:${reactionMatch[1]}:${reactionMatch[2]}`);
             continue;
         }
 
@@ -244,10 +244,11 @@ export function getLegacyVariantsForCanonical(canonicalKey) {
 
         const trackingMatch = sample.match(/^guild:([^:]+):birthdays:tracking$/);
         if (trackingMatch && toCanonical(['', trackingMatch[1]]) === canonicalKey) {
-            variants.push(`bday-role-tracking-${trackingMatch[1]}`);
+            variants.push(`bday-Rolle-tracking-${trackingMatch[1]}`);
         }
     }
 
     return variants;
 }
+
 

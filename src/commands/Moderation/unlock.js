@@ -1,24 +1,24 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("unlock")
         .setDescription(
-            "Unlocks the current channel (allows @everyone to send messages again).",
+            "Unlocks the current Kanal (allows @everyone to send messages again).",
         )
-.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+.setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageKanals),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Unlock interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Unlock interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'unlock'
@@ -26,26 +26,26 @@ export default {
             return;
         }
 
-        const channel = interaction.channel;
-        const everyoneRole = interaction.guild.roles.everyone;
+        const Kanal = interaction.Kanal;
+        const everyoneRolle = interaction.guild.Rollen.everyone;
 
         try {
-            const currentPermissions = channel.permissionsFor(everyoneRole);
+            const currentBerechtigungs = Kanal.BerechtigungsFor(everyoneRolle);
             if (
-                currentPermissions.has(PermissionFlagsBits.SendMessages) ===
+                currentBerechtigungs.has(BerechtigungFlagsBits.SendMessages) ===
                     true ||
-                currentPermissions.has(PermissionFlagsBits.SendMessages) ===
+                currentBerechtigungs.has(BerechtigungFlagsBits.SendMessages) ===
                     null
             ) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} is not explicitly locked (everyone can already send messages).` });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `${Kanal} is not explicitly locked (everyone can already send messages).` });
             }
 
-            await channel.permissionOverwrites.Bearbeiten(
-                everyoneRole,
+            await Kanal.BerechtigungOverwrites.Bearbeiten(
+                everyoneRolle,
                 { SendMessages: true },
                 {
                     type: 0,
-                    reason: `Channel unlocked by ${interaction.user.tag}`,
+                    reason: `Kanal unlocked by ${interaction.user.tag}`,
 },
             );
 
@@ -53,28 +53,29 @@ export default {
                 client,
                 guild: interaction.guild,
                 event: {
-                    action: "Channel Unlocked",
-                    target: channel.toString(),
+                    action: "Kanal Unlocked",
+                    target: Kanal.toString(),
                     executor: `${interaction.user.tag} (${interaction.user.id})`,
                     metadata: {
-                        channelId: channel.id,
-                        category: channel.parent?.name || 'None'
+                        KanalId: Kanal.id,
+                        category: Kanal.parent?.name || 'None'
                     }
                 }
             });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [
-                    successEmbed(
-                        `🔓 **Channel Unlocked**`,
-                        `${channel} is now unlocked. You may speak now.`,
+                    ErfolgEmbed(
+                        `🔓 **Kanal Unlocked**`,
+                        `${Kanal} is now unlocked. You may speak now.`,
                     ),
                 ],
             });
-        } catch (error) {
-            logger.error('Unlock command error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'An unexpected error occurred while trying to unlock Der Kanal. Check my permissions (I need \'Manage Channels\').' });
+        } catch (Fehler) {
+            logger.Fehler('Unlock command Fehler:', Fehler);
+            await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'An unexpected Fehler occurred while trying to unlock Der Kanal. Check my Berechtigungs (I need \'Manage Kanals\').' });
         }
     }
 };
+
 

@@ -2,17 +2,17 @@
  * Prefix command restrictions — dashboard and advanced setup flows stay slash-only.
  */
 
-/** Top-level commands that cannot be invoked via prefix at all. */
-export const SLASH_ONLY_COMMANDS = new Set([
+/** Top-level Befehle that cannot be invoked via prefix at all. */
+export const SLASH_ONLY_Befehle = new Set([
   'configwizard',
-  'help',
+  'Hilfe',
   'embedbuilder',
   'wipedata',
   'apply',
 ]);
 
-/** Subcommands blocked for every command when invoked via prefix. */
-export const GLOBAL_BLOCKED_SUBCOMMANDS = new Set([
+/** SubBefehle blocked for every command when invoked via prefix. */
+export const GLOBAL_BLOCKED_SUBBefehle = new Set([
   'dashboard',
   'setup',
 ]);
@@ -22,8 +22,8 @@ export const GLOBAL_BLOCKED_SUBCOMMAND_GROUPS = new Set([
   'config',
 ]);
 
-/** Per-command subcommands that stay slash-only (beyond the global block list). */
-export const COMMAND_BLOCKED_SUBCOMMANDS = {
+/** Per-command subBefehle that stay slash-only (beyond the global block list). */
+export const COMMAND_BLOCKED_SUBBefehle = {
   music: new Set([
     'shuffle',
     'loop',
@@ -33,8 +33,8 @@ export const COMMAND_BLOCKED_SUBCOMMANDS = {
     'clear',
     '247',
   ]),
-  birthday: new Set(['setchannel']),
-  report: new Set(['setchannel']),
+  birthday: new Set(['setKanal']),
+  report: new Set(['setKanal']),
 };
 
 function collectSubcommandNames(commandJson) {
@@ -56,11 +56,11 @@ function isSubcommandBlocked(commandName, subcommandName) {
     return false;
   }
 
-  if (GLOBAL_BLOCKED_SUBCOMMANDS.has(subcommandName)) {
+  if (GLOBAL_BLOCKED_SUBBefehle.has(subcommandName)) {
     return true;
   }
 
-  const commandBlocked = COMMAND_BLOCKED_SUBCOMMANDS[commandName];
+  const commandBlocked = COMMAND_BLOCKED_SUBBefehle[commandName];
   return commandBlocked?.has(subcommandName) ?? false;
 }
 
@@ -83,7 +83,7 @@ export function getPrefixRestriction(command, args, resolveSubcommandAlias) {
     return { blocked: true, reason: 'This command is only available as a slash command.' };
   }
 
-  if (SLASH_ONLY_COMMANDS.has(commandName)) {
+  if (SLASH_ONLY_Befehle.has(commandName)) {
     return { blocked: true, reason: 'This command is only available as a slash command.' };
   }
 
@@ -94,18 +94,18 @@ export function getPrefixRestriction(command, args, resolveSubcommandAlias) {
   const subcommandGroup = commandJson.options?.find((opt) => opt.type === 2);
 
   const allSubcommandNames = collectSubcommandNames(commandJson);
-  const allSubcommandsBlocked =
+  const allSubBefehleBlocked =
     allSubcommandNames.length > 0 &&
     allSubcommandNames.every((name) => isSubcommandBlocked(commandName, name));
 
-  if (allSubcommandsBlocked) {
+  if (allSubBefehleBlocked) {
     return { blocked: true, reason: 'This command is only available as a slash command.' };
   }
 
   if (firstArg && GLOBAL_BLOCKED_SUBCOMMAND_GROUPS.has(firstArg)) {
     return {
       blocked: true,
-      reason: 'This configuration flow is only available as a slash command.',
+      reason: 'This Konfiguration flow is only available as a slash command.',
     };
   }
 
@@ -129,4 +129,5 @@ export function getPrefixRestriction(command, args, resolveSubcommandAlias) {
 export function isPrefixRestrictedCommand(command, args, resolveSubcommandAlias) {
   return getPrefixRestriction(command, args, resolveSubcommandAlias).blocked;
 }
+
 

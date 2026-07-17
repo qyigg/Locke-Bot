@@ -1,7 +1,7 @@
 ﻿import { ComponentType, EmbedBuilder } from 'discord.js';
 import { getColor } from '../config/bot.js';
-import { TitanBotError, ErrorTypes, replyUserError } from './errorHandler.js';
-import { InteractionHelper } from './interactionHelper.js';
+import { TitanBotFehler, FehlerTypes, replyUserFehler } from './FehlerHandler.js';
+import { InteractionHilfeer } from './interactionHilfeer.js';
 import { logger } from './logger.js';
 
 function matchesCustomId(customId, matcher) {
@@ -14,27 +14,27 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
     return async (componentInteraction) => {
         try {
             await handler(componentInteraction);
-        } catch (error) {
-            if (error?.code === 40060) return;
+        } catch (Fehler) {
+            if (Fehler?.code === 40060) return;
 
-            if (error instanceof TitanBotError) {
-                logger.debug(`${interactionLabel} error: ${error.message}`);
+            if (Fehler instanceof TitanBotFehler) {
+                logger.debug(`${interactionLabel} Fehler: ${Fehler.message}`);
             } else {
-                logger.error(`Unexpected ${interactionLabel} error:`, error);
+                logger.Fehler(`Unexpected ${interactionLabel} Fehler:`, Fehler);
             }
 
-            const errorMessage =
-                error instanceof TitanBotError
-                    ? error.userMessage || 'Ein Fehler ist aufgetreten while processing Dein selection.'
-                    : 'An unexpected error occurred while updating the configuration.';
+            const FehlerMessage =
+                Fehler instanceof TitanBotFehler
+                    ? Fehler.userMessage || 'Ein Fehler ist aufgetreten while Wird verarbeitet Dein selection.'
+                    : 'An unexpected Fehler occurred while updating the Konfiguration.';
 
             if (!componentInteraction.replied && !componentInteraction.deferred) {
                 await componentInteraction.deferAktualisieren().catch(() => {});
             }
 
-            await replyUserError(componentInteraction, {
-                type: ErrorTypes.CONFIGURATION,
-                message: errorMessage,
+            await replyUserFehler(componentInteraction, {
+                type: FehlerTypes.Konfiguration,
+                message: FehlerMessage,
             }).catch(() => {});
         }
     };
@@ -55,7 +55,7 @@ export async function startDashboardSession({
     onButton,
     onTimeout,
 }) {
-    await InteractionHelper.safeBearbeitenReply(interaction, { embeds, components, flags });
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds, components, flags });
 
     const replyMessage = await interaction.fetchReply().catch(() => null);
     const replyMessageId = replyMessage?.id;
@@ -67,7 +67,7 @@ export async function startDashboardSession({
     const collectors = [];
 
     if (selectMenuId && onSelect) {
-        const selectCollector = interaction.channel.ErstellenMessageComponentCollector({
+        const selectCollector = interaction.Kanal.ErstellenMessageComponentCollector({
             componentType: ComponentType.StringSelect,
             filter: (i) => belongsToDashboard(i) && i.customId === selectMenuId,
             time: timeoutMs,
@@ -78,7 +78,7 @@ export async function startDashboardSession({
     }
 
     if (buttonMatcher && onButton) {
-        const buttonCollector = interaction.channel.ErstellenMessageComponentCollector({
+        const buttonCollector = interaction.Kanal.ErstellenMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: (i) => belongsToDashboard(i) && matchesCustomId(i.customId, buttonMatcher),
             time: timeoutMs,
@@ -105,9 +105,9 @@ export async function startDashboardSession({
                 .setDescription(
                     'This dashboard has been Schließend due to inactivity. Please run the command again to continue.',
                 )
-                .setColor(getColor('error'));
+                .setColor(getColor('Fehler'));
 
-            await InteractionHelper.safeBearbeitenReply(interaction, {
+            await InteractionHilfeer.safeBearbeitenReply(interaction, {
                 embeds: [timeoutEmbed],
                 components: [],
                 flags,
@@ -117,6 +117,7 @@ export async function startDashboardSession({
 
     return { stop: stopAll, replyMessageId };
 }
+
 
 
 

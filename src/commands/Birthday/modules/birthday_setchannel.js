@@ -1,56 +1,56 @@
-import { PermissionsBitField, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { BerechtigungsBitField, EmbedBuilder, MessageFlags } from 'discord.js';
 import { getGuildConfig, setGuildConfig } from '../../../services/config/guildConfig.js';
-import { InteractionHelper } from '../../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 import { logger } from '../../../utils/logger.js';
 
 export default {
     async execute(interaction, config, client) {
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
+        if (!interaction.Mitglied.Berechtigungs.has(BerechtigungsBitField.Flags.ManageGuild)) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
                 .setTitle('Berechtigung verweigert')
                 .setDescription('Du benötigst die Berechtigung **Server verwalten** um den Geburtstagskanal zu konfigurieren.');
-            return InteractionHelper.safeReply(interaction, {
+            return InteractionHilfeer.safeReply(interaction, {
                 embeds: [embed],
                 flags: MessageFlags.Ephemeral,
             });
         }
 
         try {
-            const channel = interaction.options.getChannel('channel');
+            const Kanal = interaction.options.getKanal('Kanal');
             const guildId = interaction.guildId;
             const guildConfig = await getGuildConfig(client, guildId);
 
-            if (channel) {
-                guildConfig.birthdayChannelId = channel.id;
+            if (Kanal) {
+                guildConfig.birthdayKanalId = Kanal.id;
                 await setGuildConfig(client, guildId, guildConfig);
                 const embed = new EmbedBuilder()
                     .setColor(0x00FF00)
                     .setTitle('Geburtstagsankündigungen aktiviert')
-                    .setDescription(`Geburtstagsankündigungen werden jetzt in ${channel} gepostet.`);
-                return InteractionHelper.safeReply(interaction, {
+                    .setDescription(`Geburtstagsankündigungen werden jetzt in ${Kanal} gepostet.`);
+                return InteractionHilfeer.safeReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral,
                 });
             } else {
-                guildConfig.birthdayChannelId = null;
+                guildConfig.birthdayKanalId = null;
                 await setGuildConfig(client, guildId, guildConfig);
                 const embed = new EmbedBuilder()
                     .setColor(0xFFFF00)
                     .setTitle('Geburtstagsankündigungen deaktiviert')
                     .setDescription('Kein Kanal angegeben — Geburtstagsankündigungen wurden deaktiviert.');
-                return InteractionHelper.safeReply(interaction, {
+                return InteractionHilfeer.safeReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral,
                 });
             }
-        } catch (error) {
-            logger.error('birthday_setchannel error:', error);
+        } catch (Fehler) {
+            logger.Fehler('birthday_setKanal Fehler:', Fehler);
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
                 .setTitle('⚠️ Konfigurationsfehler')
                 .setDescription('Die Geburtstagskanal-Konfiguration konnte nicht gespeichert werden.');
-            return InteractionHelper.safeReply(interaction, {
+            return InteractionHilfeer.safeReply(interaction, {
                 embeds: [embed],
                 flags: MessageFlags.Ephemeral,
             });

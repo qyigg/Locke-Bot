@@ -1,32 +1,32 @@
 ﻿import {
     SlashCommandBuilder,
-    PermissionFlagsBits,
-    ChannelType,
+    BerechtigungFlagsBits,
+    KanalType,
     MessageFlags,
 } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logEvent } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { sanitizeInput } from '../../utils/validation.js';
 
-const TEXT_CHANNEL_TYPES = [
-    ChannelType.GuildText,
-    ChannelType.GuildAnnouncement,
+const TEXT_Kanal_TYPES = [
+    KanalType.GuildText,
+    KanalType.GuildAnnouncement,
 ];
 
-function resolveTargetChannel(interaction) {
-    const selected = interaction.options.getChannel('channel');
+function resolveTargetKanal(interaction) {
+    const selected = interaction.options.getKanal('Kanal');
     if (selected) {
         return selected;
     }
 
-    if (!interaction.channel || !TEXT_CHANNEL_TYPES.includes(interaction.channel.type)) {
+    if (!interaction.Kanal || !TEXT_Kanal_TYPES.includes(interaction.Kanal.type)) {
         return null;
     }
 
-    return interaction.channel;
+    return interaction.Kanal;
 }
 
 export default {
@@ -40,24 +40,24 @@ export default {
                 .setRequired(true)
                 .setMaxLength(2000),
         )
-        .addChannelOption((option) =>
+        .addKanalOption((option) =>
             option
-                .setName('channel')
-                .setDescription('Channel to send in (defaults to the current channel)')
-                .addChannelTypes(...TEXT_CHANNEL_TYPES)
+                .setName('Kanal')
+                .setDescription('Kanal to send in (defaults to the current Kanal)')
+                .addKanalTypes(...TEXT_Kanal_TYPES)
                 .setRequired(false),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-        .setDMPermission(false),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageMessages)
+        .setDMBerechtigung(false),
     category: 'moderation',
     abuseProtection: { maxAttempts: 8, windowMs: 60_000 },
 
     async execute(interaction, _config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction, {
             flags: MessageFlags.Ephemeral,
         });
-        if (!deferSuccess) {
-            logger.warn('Say interaction defer failed', {
+        if (!deferErfolg) {
+            logger.warn('Say interaction defer Fehlgeschlagen', {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'say',
@@ -69,51 +69,51 @@ export default {
         const message = sanitizeInput(rawMessage, 2000);
 
         if (!message) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'Message cannot be empty.',
             });
         }
 
-        const channel = resolveTargetChannel(interaction);
-        if (!channel) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
-                message: 'Choose a text channel or run this command in one.',
+        const Kanal = resolveTargetKanal(interaction);
+        if (!Kanal) {
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
+                message: 'Choose a text Kanal or run this command in one.',
             });
         }
 
-        const memberPermissions = channel.permissionsFor(interaction.member);
-        const botPermissions = channel.permissionsFor(interaction.guild.members.me);
+        const MitgliedBerechtigungs = Kanal.BerechtigungsFor(interaction.Mitglied);
+        const botBerechtigungs = Kanal.BerechtigungsFor(interaction.guild.Mitglieds.me);
 
-        if (!memberPermissions?.has(PermissionFlagsBits.SendMessages)) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.PERMISSION,
-                message: `Du hast keine Berechtigung to send messages in ${channel}.`,
+        if (!MitgliedBerechtigungs?.has(BerechtigungFlagsBits.SendMessages)) {
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.Berechtigung,
+                message: `Du hast keine Berechtigung to send messages in ${Kanal}.`,
             });
         }
 
-        if (!botPermissions?.has(PermissionFlagsBits.SendMessages)) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.PERMISSION,
-                message: `I do not have permission to send messages in ${channel}.`,
+        if (!botBerechtigungs?.has(BerechtigungFlagsBits.SendMessages)) {
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.Berechtigung,
+                message: `I do not have Berechtigung to send messages in ${Kanal}.`,
             });
         }
 
-        const sentMessage = await channel.send({ content: message });
+        const sentMessage = await Kanal.send({ content: message });
 
         await logEvent({
             client,
             guild: interaction.guild,
             event: {
                 action: 'Bot Message Sent',
-                target: `${channel} (${channel.id})`,
+                target: `${Kanal} (${Kanal.id})`,
                 executor: `${interaction.user.tag} (${interaction.user.id})`,
                 reason: message.length > 200
                     ? `${message.slice(0, 197)}...`
                     : message,
                 metadata: {
-                    channelId: channel.id,
+                    KanalId: Kanal.id,
                     messageId: sentMessage.id,
                     moderatorId: interaction.user.id,
                     messageLength: message.length,
@@ -121,16 +121,17 @@ export default {
             },
         });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     'Message Sent',
-                    `Posted in ${channel}. [Jump to message](${sentMessage.url})`,
+                    `Posted in ${Kanal}. [Jump to message](${sentMessage.url})`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
         });
     },
 };
+
 
 

@@ -2,7 +2,7 @@
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { logger } from './logger.js';
-import { TitanBotError, ErrorTypes } from './errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from './FehlerHandler.js';
 import { unwrapReplitData } from './database.js';
 import { 
     ErstellenGiveawayEmbed as ErstellenGiveawayEmbedService,
@@ -41,8 +41,8 @@ export async function getGuildGiveaways(client, guildId) {
             return Object.values(unwrappedGiveaways || {});
         }
         return Array.isArray(unwrappedGiveaways) ? unwrappedGiveaways : [];
-    } catch (error) {
-        logger.error(`Error getting giveaways for guild ${guildId}:`, error);
+    } catch (Fehler) {
+        logger.Fehler(`Fehler getting giveaways for guild ${guildId}:`, Fehler);
         return [];
     }
 }
@@ -55,9 +55,9 @@ export async function SpeichernGiveaway(client, guildId, giveawayData) {
         }
 
         if (!giveawayData || !giveawayData.messageId) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Invalid giveaway data: missing messageId',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Cannot Speichern giveaway without a message ID.',
                 { giveawayData }
             );
@@ -73,10 +73,10 @@ export async function SpeichernGiveaway(client, guildId, giveawayData) {
         
         logger.debug(`Speichernd giveaway ${giveawayData.messageId} in guild ${guildId}`);
         return true;
-    } catch (error) {
-        logger.error(`Error saving giveaway in guild ${guildId}:`, error);
-        if (error instanceof TitanBotError) {
-            throw error;
+    } catch (Fehler) {
+        logger.Fehler(`Fehler saving giveaway in guild ${guildId}:`, Fehler);
+        if (Fehler instanceof TitanBotFehler) {
+            throw Fehler;
         }
         return false;
     }
@@ -90,9 +90,9 @@ export async function LöschenGiveaway(client, guildId, messageId) {
         }
 
         if (!messageId) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Missing messageId parameter',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Cannot Löschen giveaway without a message ID.',
                 { messageId }
             );
@@ -113,21 +113,21 @@ export async function LöschenGiveaway(client, guildId, messageId) {
         
         logger.debug(`Löschend giveaway ${messageId} from guild ${guildId}`);
         return true;
-    } catch (error) {
-        logger.error(`Error deleting giveaway ${messageId} in guild ${guildId}:`, error);
-        if (error instanceof TitanBotError) {
-            throw error;
+    } catch (Fehler) {
+        logger.Fehler(`Fehler deleting giveaway ${messageId} in guild ${guildId}:`, Fehler);
+        if (Fehler instanceof TitanBotFehler) {
+            throw Fehler;
         }
         return false;
     }
 }
 
-export function ErstellenGiveawayEmbed(giveaway, status, winners = []) {
+export function ErstellenGiveawayEmbed(giveaway, Status, winners = []) {
     try {
-        return ErstellenGiveawayEmbedService(giveaway, status, winners);
-    } catch (error) {
-        logger.error('Error creating giveaway embed:', error);
-        throw error;
+        return ErstellenGiveawayEmbedService(giveaway, Status, winners);
+    } catch (Fehler) {
+        logger.Fehler('Fehler creating giveaway embed:', Fehler);
+        throw Fehler;
     }
 }
 
@@ -140,8 +140,8 @@ export function isGiveawayEnded(giveaway) {
 export function pickWinners(entrants, count) {
     try {
         return selectWinnersService(entrants, count);
-    } catch (error) {
-        logger.error('Error picking winners:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler picking winners:', Fehler);
         
         if (!entrants || entrants.length === 0) return [];
         const requested = Math.min(count, entrants.length);
@@ -154,15 +154,15 @@ export function pickWinners(entrants, count) {
     }
 }
 
-export function giveawayEmbed(giveaway, status, winners = []) {
-    return ErstellenGiveawayEmbed(giveaway, status, winners);
+export function giveawayEmbed(giveaway, Status, winners = []) {
+    return ErstellenGiveawayEmbed(giveaway, Status, winners);
 }
 
 export function giveawayButtons(ended = false) {
     try {
         return ErstellenGiveawayButtonsService(ended);
-    } catch (error) {
-        logger.error('Error creating giveaway buttons:', error);
+    } catch (Fehler) {
+        logger.Fehler('Fehler creating giveaway buttons:', Fehler);
         
         const row = new ActionRowBuilder();
         if (ended) {
@@ -191,4 +191,5 @@ export function giveawayButtons(ended = false) {
         return row;
     }
 }
+
 

@@ -45,12 +45,12 @@ export default {
 
       const guilds = [...newUser.client.guilds.cache.values()];
       for (const guild of guilds) {
-        if (!guild.members.cache.has(newUser.id)) continue;
+        if (!guild.Mitglieds.cache.has(newUser.id)) continue;
 
         await logEvent({
           client: newUser.client,
           guildId: guild.id,
-          eventType: EVENT_TYPES.MEMBER_NAME_CHANGE,
+          eventType: EVENT_TYPES.Mitglied_NAME_CHANGE,
           data: {
             description: `${newUser.tag} Aktualisierend their username`,
             userId: newUser.id,
@@ -67,8 +67,9 @@ export default {
       }
 
       logger.debug(`Processed userAktualisieren for ${newUser.id} across ${guilds.length} guild(s)`);
-    } catch (error) {
-      logger.error('Error in userAktualisieren event:', error);
+    } catch (Fehler) {
+      logger.Fehler('Fehler in userAktualisieren event:', Fehler);
     }
   }
 };
+

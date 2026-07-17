@@ -1,22 +1,22 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { successEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErfolgEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { botConfig } from '../../config/bot.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const COOLDOWN = 30 * 60 * 1000;
 const MIN_WIN = Number(botConfig?.economy?.begMin) || 50;
 const MAX_WIN = Number(botConfig?.economy?.begMax) || 200;
-const SUCCESS_CHANCE = 0.7;
+const Erfolg_CHANCE = 0.7;
 
 export default {
     data: new SlashCommandBuilder()
         .setName('beg')
         .setDescription('Betteln um einen kleinen Geldbetrag'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const userId = interaction.user.id;
@@ -25,10 +25,10 @@ export default {
             let userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw ErstellenError(
-                    "Failed to load economy data",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load economy data",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -43,36 +43,36 @@ export default {
                 let timeMessage =
                     minutes > 0 ? `${minutes} Minute(n)` : `${seconds} Sekunde(n)`;
 
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Beg cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Du bist müde vom Betteln! Versuche es in **${timeMessage}** erneut.`,
                     { remainingTime, minutes, seconds, cooldownType: 'beg' }
                 );
             }
 
-            const success = Math.random() < SUCCESS_CHANCE;
+            const Erfolg = Math.random() < Erfolg_CHANCE;
 
             let replyEmbed;
             let newCash = userData.wallet;
 
-            if (success) {
+            if (Erfolg) {
                 const amountWon =
                     Math.floor(Math.random() * (MAX_WIN - MIN_WIN + 1)) + MIN_WIN;
 
                 newCash += amountWon;
 
-                const successMessages = [
+                const ErfolgMessages = [
                     `Ein großzügiger Fremder wirft **$${amountWon.toLocaleString()}** in deine Schale.`,
                     `Du hast eine verwaiste Geldbörse gefunden! Du schnappst dir **$${amountWon.toLocaleString()}** und rennst weg.`,
                     `Jemand hatte Mitleid mit dir und gab dir **$${amountWon.toLocaleString()}**!`,
                     `Du hast **$${amountWon.toLocaleString()}** unter einer Parkbank gefunden.`,
                 ];
 
-                replyEmbed = successEmbed(
+                replyEmbed = ErfolgEmbed(
                     'Betteln erfolgreich',
-                    successMessages[
-                        Math.floor(Math.random() * successMessages.length)
+                    ErfolgMessages[
+                        Math.floor(Math.random() * ErfolgMessages.length)
                     ]
                 );
             } else {
@@ -83,7 +83,7 @@ export default {
                     "Du hast versucht zu betteln, aber warst zu verlegen und hast aufgegeben.",
                 ];
 
-                replyEmbed = warningEmbed(
+                replyEmbed = WarnungEmbed(
                     'Unzureichende Mittel',
                     failMessages[Math.floor(Math.random() * failMessages.length)]
                 );
@@ -94,8 +94,9 @@ userData.lastBeg = Date.now();
 
             await setEconomyData(client, guildId, userId, userData);
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [replyEmbed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [replyEmbed] });
     }, { command: 'beg' })
 };
+
 
 

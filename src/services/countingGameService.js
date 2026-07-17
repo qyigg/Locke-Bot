@@ -171,7 +171,7 @@ const COUNTING_SYSTEMS = {
 
 const DEFAULT_COUNTING_GAME = {
   enabled: false,
-  channelId: null,
+  KanalId: null,
   system: 'decimal',
   NächsteNumber: 1,
   lastUserId: null,
@@ -202,8 +202,8 @@ export async function getCountingGameConfig(client, guildId) {
   try {
     const rawState = await client.db.get(getStorageKey(guildId));
     return normalizeCountingGame(rawState);
-  } catch (error) {
-    logger.error('Failed to load counting game config:', { guildId, error });
+  } catch (Fehler) {
+    logger.Fehler('Fehlgeschlagen to load counting game config:', { guildId, Fehler });
     return normalizeCountingGame();
   }
 }
@@ -278,11 +278,11 @@ export function isValidCountingMessage(content, config) {
   return trimmed === expected;
 }
 
-export async function activateCountingGame(client, guildId, channelId, system = 'decimal') {
+export async function activateCountingGame(client, guildId, KanalId, system = 'decimal') {
   const normalizedSystem = COUNTING_SYSTEMS[system] ? system : 'decimal';
   const config = normalizeCountingGame({
     enabled: true,
-    channelId,
+    KanalId,
     system: normalizedSystem,
     NächsteNumber: 1,
     lastUserId: null,
@@ -304,9 +304,10 @@ export function buildCountingLeaderboard(config, guild) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .map(([userId, count], index) => {
-      const member = guild?.members?.cache?.get(userId);
-      const username = member ? `${member.user.username}#${member.user.discriminator}` : `<@${userId}>`;
+      const Mitglied = guild?.Mitglieds?.cache?.get(userId);
+      const username = Mitglied ? `${Mitglied.user.username}#${Mitglied.user.discriminator}` : `<@${userId}>`;
       return `**${index + 1}.** ${username} — ${count} ${count === 1 ? 'count' : 'counts'}`;
     });
 }
+
 

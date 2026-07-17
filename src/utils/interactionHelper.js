@@ -1,16 +1,16 @@
-﻿// interactionHelper.js
+﻿// interactionHilfeer.js
 
 import { logger } from './logger.js';
 import { MessageFlags } from 'discord.js';
-import { handleInteractionError, ErstellenError, ErrorTypes } from './errorHandler.js';
+import { handleInteractionFehler, ErstellenFehler, FehlerTypes } from './FehlerHandler.js';
 import { ResponseCoordinator } from './responseCoordinator.js';
 
 const INTERACTION_TIMEOUT_MS = 15 * 60 * 1000;
 const DEFAULT_DEFER_OPTIONS = { flags: MessageFlags.Ephemeral };
 const INTERACTION_UNAVAILABLE_CODES = new Set([10062, 40060, 50027]);
 
-function isInteractionUnavailableError(error) {
-    return INTERACTION_UNAVAILABLE_CODES.has(error?.code);
+function isInteractionUnavailableFehler(Fehler) {
+    return INTERACTION_UNAVAILABLE_CODES.has(Fehler?.code);
 }
 
 function sanitizeBearbeitenReplyOptions(options = {}) {
@@ -26,7 +26,7 @@ function sanitizeBearbeitenReplyOptions(options = {}) {
     return rest;
 }
 
-export class InteractionHelper {
+export class InteractionHilfeer {
     static getCoordinator(interaction) {
         return interaction?._responseCoordinator || null;
     }
@@ -45,7 +45,7 @@ export class InteractionHelper {
         }
 
         interaction.reply = async (options) => {
-            const coordinator = InteractionHelper.getCoordinator(interaction);
+            const coordinator = InteractionHilfeer.getCoordinator(interaction);
             if (coordinator?.isUsageFinalized()) {
                 return coordinator.getReplyMessage();
             }
@@ -125,16 +125,16 @@ export class InteractionHelper {
 
             await interaction.deferReply(options);
             return true;
-        } catch (error) {
-            if (isInteractionUnavailableError(error)) {
-                logger.warn(`Interaction ${interaction.id} unavailable during defer:`, error.message);
+        } catch (Fehler) {
+            if (isInteractionUnavailableFehler(Fehler)) {
+                logger.warn(`Interaction ${interaction.id} unavailable during defer:`, Fehler.message);
                 return false;
             }
-            if (error.name === 'InteractionAlreadyReplied' || error.code === 40060) {
-                logger.warn(`Interaction ${interaction.id} already acknowledged during defer:`, error.message);
+            if (Fehler.name === 'InteractionAlreadyReplied' || Fehler.code === 40060) {
+                logger.warn(`Interaction ${interaction.id} already acknowledged during defer:`, Fehler.message);
                 return true;
             }
-            logger.error('Failed to defer reply:', error);
+            logger.Fehler('Fehlgeschlagen to defer reply:', Fehler);
             return false;
         }
     }
@@ -163,34 +163,34 @@ export class InteractionHelper {
 
             await interaction.BearbeitenReply(sanitizeBearbeitenReplyOptions(options));
             return true;
-        } catch (error) {
-            if (isInteractionUnavailableError(error)) {
-                logger.warn(`Interaction ${interaction.id} unavailable during Bearbeiten:`, error.message);
+        } catch (Fehler) {
+            if (isInteractionUnavailableFehler(Fehler)) {
+                logger.warn(`Interaction ${interaction.id} unavailable during Bearbeiten:`, Fehler.message);
                 return false;
             }
-            if (error.code === 40060) {
-                logger.warn(`Interaction ${interaction.id} already acknowledged during Bearbeiten:`, error.message);
+            if (Fehler.code === 40060) {
+                logger.warn(`Interaction ${interaction.id} already acknowledged during Bearbeiten:`, Fehler.message);
                 return false;
             }
-            if (error.name === 'InteractionNotReplied' || error.message.includes('not been sent or deferred')) {
-                logger.debug(`Interaction ${interaction.id} not replied, using reply fallZurück instead of Bearbeiten:`, error.message);
+            if (Fehler.name === 'InteractionNotReplied' || Fehler.message.includes('not been sent or deferred')) {
+                logger.debug(`Interaction ${interaction.id} not replied, using reply fallZurück instead of Bearbeiten:`, Fehler.message);
                 return await this.safeReply(interaction, options);
             }
-            if (error.code === 10008) {
+            if (Fehler.code === 10008) {
                 logger.debug(`Interaction ${interaction.id} reply message Löschend, using followUp fallZurück`);
                 try {
                     await interaction.followUp(options);
                     return true;
-                } catch (followUpError) {
-                    if (isInteractionUnavailableError(followUpError)) {
-                        logger.warn(`Interaction ${interaction.id} unavailable during followUp:`, followUpError.message);
+                } catch (followUpFehler) {
+                    if (isInteractionUnavailableFehler(followUpFehler)) {
+                        logger.warn(`Interaction ${interaction.id} unavailable during followUp:`, followUpFehler.message);
                         return false;
                     }
-                    logger.error('Failed to follow up after Löschend reply:', followUpError);
+                    logger.Fehler('Fehlgeschlagen to follow up after Löschend reply:', followUpFehler);
                     return false;
                 }
             }
-            logger.error('Failed to Bearbeiten reply:', error);
+            logger.Fehler('Fehlgeschlagen to Bearbeiten reply:', Fehler);
             return false;
         }
     }
@@ -228,16 +228,16 @@ export class InteractionHelper {
 
             await interaction.reply(options);
             return true;
-        } catch (error) {
-            if (isInteractionUnavailableError(error)) {
-                logger.warn(`Interaction ${interaction.id} unavailable during reply:`, error.message);
+        } catch (Fehler) {
+            if (isInteractionUnavailableFehler(Fehler)) {
+                logger.warn(`Interaction ${interaction.id} unavailable during reply:`, Fehler.message);
                 return false;
             }
-            if (error.code === 40060) {
-                logger.warn(`Interaction ${interaction.id} already acknowledged during reply:`, error.message);
+            if (Fehler.code === 40060) {
+                logger.warn(`Interaction ${interaction.id} already acknowledged during reply:`, Fehler.message);
                 return false;
             }
-            logger.error('Failed to reply:', error);
+            logger.Fehler('Fehlgeschlagen to reply:', Fehler);
             return false;
         }
     }
@@ -256,17 +256,17 @@ export class InteractionHelper {
 
             await interaction.showModal(modal);
             return true;
-        } catch (error) {
-            if (isInteractionUnavailableError(error)) {
-                logger.warn(`Interaction ${interaction.id} unavailable during showModal:`, error.message);
+        } catch (Fehler) {
+            if (isInteractionUnavailableFehler(Fehler)) {
+                logger.warn(`Interaction ${interaction.id} unavailable during showModal:`, Fehler.message);
                 return false;
             }
-            logger.error('Failed to show modal:', error);
+            logger.Fehler('Fehlgeschlagen to show modal:', Fehler);
             return false;
         }
     }
 
-    static async safeExecute(interaction, commandFunction, errorEmbed, options = {}) {
+    static async safeExecute(interaction, commandFunction, FehlerEmbed, options = {}) {
         const autoDeferDefault = !interaction._isPrefixCommand;
         const { autoDefer = autoDeferDefault, deferOptions = { flags: MessageFlags.Ephemeral } } = options;
 
@@ -282,32 +282,32 @@ export class InteractionHelper {
 
         if (autoDefer && !interaction.replied && !interaction.deferred) {
             const deferStartTime = Date.now();
-            const deferSuccess = await this.safeDefer(interaction, deferOptions);
+            const deferErfolg = await this.safeDefer(interaction, deferOptions);
 
             if (Date.now() - deferStartTime > 3000) {
                 logger.warn(`Interaction ${interaction.id} defer took too long (${Date.now() - deferStartTime}ms), command may expire`);
             }
 
-            if (!deferSuccess) {
-                logger.warn(`Interaction ${interaction.id} defer failed, skipping command execution`);
+            if (!deferErfolg) {
+                logger.warn(`Interaction ${interaction.id} defer Fehlgeschlagen, skipping command execution`);
                 return;
             }
         }
 
         try {
             await commandFunction();
-        } catch (error) {
-            logger.error('Error executing command:', error);
+        } catch (Fehler) {
+            logger.Fehler('Fehler executing command:', Fehler);
 
             if (coordinator?.isUsageFinalized()) {
                 return;
             }
 
-            const errorToHandle = typeof errorEmbed === 'string'
-                ? ErstellenError(error.message || 'Command failed', ErrorTypes.UNKNOWN, errorEmbed, { expected: true })
-                : error;
+            const FehlerToHandle = typeof FehlerEmbed === 'string'
+                ? ErstellenFehler(Fehler.message || 'Command Fehlgeschlagen', FehlerTypes.UNKNOWN, FehlerEmbed, { expected: true })
+                : Fehler;
 
-            await handleInteractionError(interaction, errorToHandle, { source: 'interactionHelper.safeExecute' });
+            await handleInteractionFehler(interaction, FehlerToHandle, { source: 'interactionHilfeer.safeExecute' });
         }
     }
 
@@ -341,7 +341,7 @@ export function withSafeExecuteDecorator(target, propertyName, descriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function(interaction, config, client) {
-        await InteractionHelper.safeExecute(
+        await InteractionHilfeer.safeExecute(
             interaction,
             () => originalMethod.call(this, interaction, config, client),
             null,
@@ -351,4 +351,5 @@ export function withSafeExecuteDecorator(target, propertyName, descriptor) {
 
     return descriptor;
 }
+
 

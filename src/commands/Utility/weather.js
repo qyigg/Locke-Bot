@@ -1,15 +1,15 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("weather")
-        .setDescription("Get real-time weather information for a location")
+        .setDescription("Get real-time weather Information for a location")
         .addStringOption((option) =>
             option
                 .setName("city")
@@ -18,9 +18,9 @@ export default {
         ),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Weather interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Weather interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'weather'
@@ -36,12 +36,12 @@ export default {
         const geoData = await geoResponse.json();
 
         if (!geoData.results || geoData.results.length === 0) {
-            logger.info(`Weather command - city Nicht gefunden`, {
+            logger.Info(`Weather command - city Nicht gefunden`, {
                 userId: interaction.user.id,
                 city: city,
                 guildId: interaction.guildId
             });
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Could not find a location for **${city}**. Please check the spelling.` });
+            await replyUserFehler(interaction, { type: FehlerTypes.USER_INPUT, message: `Could not find a location for **${city}**. Please check the spelling.` });
             return;
         }
 
@@ -53,14 +53,14 @@ export default {
         );
         const weatherData = await weatherResponse.json();
 
-        if (weatherData.error) {
-            logger.error(`Weather API error`, {
-                error: weatherData.reason,
+        if (weatherData.Fehler) {
+            logger.Fehler(`Weather API Fehler`, {
+                Fehler: weatherData.reason,
                 city: city,
                 userId: interaction.user.id,
                 guildId: interaction.guildId
             });
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'A weather service error occurred.' });
+            await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'A weather service Fehler occurred.' });
             return;
         }
 
@@ -94,8 +94,8 @@ export default {
                 text: `Latitude: ${latitude.toFixed(2)} | Longitude: ${longitude.toFixed(2)}`,
             });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
-        logger.info(`Weather command executed`, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
+        logger.Info(`Weather command executed`, {
             userId: interaction.user.id,
             city: cityDisplay,
             country: country,
@@ -121,4 +121,5 @@ function getWeatherDescription(code) {
     }
     return { description: "Unknown conditions.", emoji: "" };
 }
+
 

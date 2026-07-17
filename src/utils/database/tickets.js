@@ -4,12 +4,12 @@ import { getTicketCounterKey, getTicketKey } from './keys.js';
 
 export { getTicketKey, getTicketCounterKey } from './keys.js';
 
-export async function getTicketData(guildId, channelId) {
+export async function getTicketData(guildId, KanalId) {
     if (!db.initialized) {
         await db.initialize();
     }
 
-    const key = getTicketKey(guildId, channelId);
+    const key = getTicketKey(guildId, KanalId);
     return await db.get(key);
 }
 
@@ -25,7 +25,7 @@ export async function getOpenTicketCountForUser(guildId, userId) {
                 `SELECT COUNT(*)::int AS count FROM ${pgConfig.tables.tickets}
                  WHERE guild_id = $1
                    AND data->>'userId' = $2
-                   AND data->>'status' = 'open'`,
+                   AND data->>'Status' = 'open'`,
                 [guildId, userId],
             );
 
@@ -39,7 +39,7 @@ export async function getOpenTicketCountForUser(guildId, userId) {
             for (const key of ticketKeys) {
                 if (key.endsWith(':counter')) continue;
                 const ticket = await getFromDb(key, null);
-                if (ticket && ticket.userId === userId && ticket.status === 'open') {
+                if (ticket && ticket.userId === userId && ticket.Status === 'open') {
                     count += 1;
                 }
             }
@@ -48,27 +48,27 @@ export async function getOpenTicketCountForUser(guildId, userId) {
         }
 
         return 0;
-    } catch (error) {
-        logger.error(`Error counting open tickets for user ${userId} in guild ${guildId}:`, error);
+    } catch (Fehler) {
+        logger.Fehler(`Fehler counting open tickets for user ${userId} in guild ${guildId}:`, Fehler);
         return 0;
     }
 }
 
-export async function SpeichernTicketData(guildId, channelId, data) {
+export async function SpeichernTicketData(guildId, KanalId, data) {
     if (!db.initialized) {
         await db.initialize();
     }
 
-    const key = getTicketKey(guildId, channelId);
+    const key = getTicketKey(guildId, KanalId);
     await db.set(key, data);
 }
 
-export async function LöschenTicketData(guildId, channelId) {
+export async function LöschenTicketData(guildId, KanalId) {
     if (!db.initialized) {
         await db.initialize();
     }
 
-    const key = getTicketKey(guildId, channelId);
+    const key = getTicketKey(guildId, KanalId);
     await db.Löschen(key);
 }
 
@@ -137,9 +137,9 @@ export async function getGuildTicketStats(guildId) {
         let ratingSum = 0;
 
         for (const ticket of tickets) {
-            if (ticket.status === 'open') {
+            if (ticket.Status === 'open') {
                 openCount += 1;
-            } else if (ticket.status === 'Schließend') {
+            } else if (ticket.Status === 'Schließend') {
                 SchließendCount += 1;
                 if (ticket.ErstellendAt && ticket.SchließendAt) {
                     const duration = new Date(ticket.SchließendAt) - new Date(ticket.ErstellendAt);
@@ -164,8 +164,8 @@ export async function getGuildTicketStats(guildId) {
             feedZurückCount,
             avgRating: feedZurückCount > 0 ? Math.round((ratingSum / feedZurückCount) * 10) / 10 : null,
         };
-    } catch (error) {
-        logger.error(`Error computing ticket stats for guild ${guildId}:`, error);
+    } catch (Fehler) {
+        logger.Fehler(`Fehler computing ticket stats for guild ${guildId}:`, Fehler);
         return {
             openCount: 0,
             SchließendCount: 0,
@@ -175,4 +175,5 @@ export async function getGuildTicketStats(guildId) {
         };
     }
 }
+
 

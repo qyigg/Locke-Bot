@@ -1,4 +1,4 @@
-// logEmbeds.js — shared helpers for clean, scannable log embeds
+﻿// logEmbeds.js — shared Hilfeers for clean, scannable log embeds
 
 import { EmbedBuilder } from 'discord.js';
 
@@ -173,34 +173,34 @@ export function buildStandardLogEmbed({
   return embed;
 }
 
-const MAX_DISPLAYED_ROLE_PERMISSIONS = 5;
+const MAX_DISPLAYED_Rolle_BerechtigungS = 5;
 
-export function buildRoleAuditFields(role, { includeMemberCount = false } = {}) {
+export function buildRolleAuditFields(Rolle, { includeMitgliedCount = false } = {}) {
   const fields = [
     {
-      name: 'Role Name',
-      value: role.name,
+      name: 'Rolle Name',
+      value: Rolle.name,
       inline: true
     },
     {
       name: 'Color',
-      value: role.hexColor || '#000000',
+      value: Rolle.hexColor || '#000000',
       inline: true
     },
     {
-      name: 'Role ID',
-      value: role.id,
+      name: 'Rolle ID',
+      value: Rolle.id,
       inline: true
     }
   ];
 
-  const permissions = role.permissions.toArray();
-  if (permissions.length > 0) {
-    const displayPerms = permissions.slice(0, MAX_DISPLAYED_ROLE_PERMISSIONS).join(',');
+  const Berechtigungs = Rolle.Berechtigungs.toArray();
+  if (Berechtigungs.length > 0) {
+    const displayPerms = Berechtigungs.slice(0, MAX_DISPLAYED_Rolle_BerechtigungS).join(',');
     fields.push({
-      name: 'Permissions',
-      value: permissions.length > MAX_DISPLAYED_ROLE_PERMISSIONS
-        ? `${displayPerms}... (+${permissions.length - MAX_DISPLAYED_ROLE_PERMISSIONS} more)`
+      name: 'Berechtigungs',
+      value: Berechtigungs.length > MAX_DISPLAYED_Rolle_BerechtigungS
+        ? `${displayPerms}... (+${Berechtigungs.length - MAX_DISPLAYED_Rolle_BerechtigungS} more)`
         : displayPerms,
       inline: false
     });
@@ -209,25 +209,25 @@ export function buildRoleAuditFields(role, { includeMemberCount = false } = {}) 
   fields.push(
     {
       name: 'Hoisted',
-      value: role.hoist ? 'Yes' : 'No',
+      value: Rolle.hoist ? 'Yes' : 'No',
       inline: true
     },
     {
       name: 'Managed',
-      value: role.managed ? 'Yes (Bot role)' : 'No',
+      value: Rolle.managed ? 'Yes (Bot Rolle)' : 'No',
       inline: true
     },
     {
       name: 'Position',
-      value: role.position.toString(),
+      value: Rolle.position.toString(),
       inline: true
     }
   );
 
-  if (includeMemberCount) {
+  if (includeMitgliedCount) {
     fields.push({
-      name: 'Members with Role',
-      value: role.members.size.toString(),
+      name: 'Mitglieds with Rolle',
+      value: Rolle.Mitglieds.size.toString(),
       inline: true
     });
   }
@@ -235,8 +235,9 @@ export function buildRoleAuditFields(role, { includeMemberCount = false } = {}) 
   return fields;
 }
 
-export function buildRoleAuditLines(role, options = {}) {
-  return buildRoleAuditFields(role, options).map((field) =>
+export function buildRolleAuditLines(Rolle, options = {}) {
+  return buildRolleAuditFields(Rolle, options).map((field) =>
     formatLogLine(field.name, field.value),
   );
 }
+

@@ -28,16 +28,16 @@ export const shopConfig = {
         {
             id: 'tools',
             name: 'Tools',
-            description: 'Equipment that helps you gather resources more efficiently',
+            description: 'Equipment that Hilfes you gather resources more efficiently',
             icon: '⛏️',
             itemTypes: ['tool']
         },
         {
-            id: 'roles',
-            name: 'Roles',
-            description: 'Special roles with unique perks',
+            id: 'Rollen',
+            name: 'Rollen',
+            description: 'Special Rollen with unique perks',
             icon: '🎭',
-            itemTypes: ['role']
+            itemTypes: ['Rolle']
         }
     ],
     
@@ -61,10 +61,10 @@ fee: 0.1
         
         colors: {
 primary: '#5865F2',
-success: '#43B581',
-error: '#F04747',
-warning: '#FAA61A',
-info: '#00B0F4',
+Erfolg: '#43B581',
+Fehler: '#F04747',
+Warnung: '#FAA61A',
+Info: '#00B0F4',
             
             rarity: {
 common: '#99AAB5',
@@ -87,7 +87,7 @@ mythic: '#E74C3C'
                 consumable: '🍯',
                 upgrade: '⚡',
                 tool: '⛏️',
-                role: '🎭'
+                Rolle: '🎭'
             }
         }
     },
@@ -96,7 +96,7 @@ mythic: '#E74C3C'
         restock: {
             enabled: true,
 interval: 86400000,
-announcementChannel: null,
+announcementKanal: null,
             message: '🛒 **Shop Restocked!** New items are now available!'
         },
         
@@ -136,7 +136,7 @@ export function getCurrentPrice(itemId, { quantity = 1, userData = null } = {}) 
     }
     
     if (userData) {
-        if (userData.roles?.includes('premium')) {
+        if (userData.Rollen?.includes('premium')) {
             discount += 0.1;
         }
         
@@ -169,4 +169,5 @@ export function getItemsInCategory(categoryId) {
         category.itemTypes.includes(item.type)
     );
 }
+
 

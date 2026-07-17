@@ -1,9 +1,10 @@
 ﻿import {
-  warningLöschenSpecificHandler,
-  warningClearAllHandler
-} from '../../../handlers/warningHandlers.js';
+  WarnungLöschenSpecificHandler,
+  WarnungClearAllHandler
+} from '../../../handlers/WarnungHandlers.js';
 
 export default [
-  warningLöschenSpecificHandler,
-  warningClearAllHandler
+  WarnungLöschenSpecificHandler,
+  WarnungClearAllHandler
 ];
+

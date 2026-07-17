@@ -1,16 +1,16 @@
 ﻿import { getColor } from '../../config/bot.js';
-import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+import { SlashCommandBuilder, BerechtigungFlagsBits, KanalType, MessageFlags } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { getTicketPermissionContext } from '../../utils/ticket/ticketPermissions.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { getTicketBerechtigungContext } from '../../utils/ticket/ticketBerechtigungs.js';
 import { SchließenTicket } from '../../services/ticket.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("Schließen")
         .setDescription("Schließens the current ticket.")
-        .setDMPermission(false)
+        .setDMBerechtigung(false)
         .addStringOption((option) =>
             option
                 .setName("reason")
@@ -19,44 +19,45 @@ export default {
         ),
 
     async execute(interaction, guildConfig, client) {
-        const deferred = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        const deferred = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
         if (!deferred) {
             return;
         }
 
-        const permissionContext = await getTicketPermissionContext({ client, interaction });
-        if (!permissionContext.ticketData) {
-            return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'This command can only be used in a valid ticket channel.' });
+        const BerechtigungContext = await getTicketBerechtigungContext({ client, interaction });
+        if (!BerechtigungContext.ticketData) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'This command can only be used in a valid ticket Kanal.' });
         }
 
-        if (!permissionContext.canSchließenTicket) {
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the `Manage Channels` permission, the configured `Ticket Staff Role`, or be the ticket creator to Schließen this ticket.' });
+        if (!BerechtigungContext.canSchließenTicket) {
+            return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'You need the `Manage Kanals` Berechtigung, the configured `Ticket Staff Rolle`, or be the ticket creator to Schließen this ticket.' });
         }
 
         const reason =
             interaction.options?.getString("reason") ||
             "Schließend via command without a specific reason.";
 
-        await SchließenTicket(interaction.channel, interaction.user, reason);
+        await SchließenTicket(interaction.Kanal, interaction.user, reason);
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     "Ticket geschlossen!",
-                    "This ticket has been Schließend successfully.",
+                    "This ticket has been Schließend Erfolgfully.",
                 ),
             ],
         });
 
-        logger.info('Ticket geschlossen successfully', {
+        logger.Info('Ticket geschlossen Erfolgfully', {
             userId: interaction.user.id,
             userTag: interaction.user.tag,
-            channelId: interaction.channel.id,
-            channelName: interaction.channel.name,
+            KanalId: interaction.Kanal.id,
+            KanalName: interaction.Kanal.name,
             guildId: interaction.guildId,
             reason: reason,
             commandName: 'Schließen'
         });
     },
 };
+
 

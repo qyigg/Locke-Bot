@@ -1,151 +1,152 @@
-﻿// errorRegistry.js
+﻿// FehlerRegistry.js
 
-const ErrorCodes = Object.freeze({
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-  PERMISSION_DENIED: 'PERMISSION_DENIED',
-  CONFIGURATION_ERROR: 'CONFIGURATION_ERROR',
-  DATABASE_ERROR: 'DATABASE_ERROR',
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  DISCORD_API_ERROR: 'DISCORD_API_ERROR',
-  USER_INPUT_ERROR: 'USER_INPUT_ERROR',
+const FehlerCodes = Object.freeze({
+  VALIDATION_Fehlgeschlagen: 'VALIDATION_Fehlgeschlagen',
+  Berechtigung_DENIED: 'Berechtigung_DENIED',
+  Konfiguration_Fehler: 'Konfiguration_Fehler',
+  DATABASE_Fehler: 'DATABASE_Fehler',
+  NETWORK_Fehler: 'NETWORK_Fehler',
+  DISCORD_API_Fehler: 'DISCORD_API_Fehler',
+  USER_INPUT_Fehler: 'USER_INPUT_Fehler',
   RATE_LIMITED: 'RATE_LIMITED',
   INTERACTION_INVALID: 'INTERACTION_INVALID',
   INTERACTION_EXPIRED: 'INTERACTION_EXPIRED',
-  INTERACTION_RESPONSE_FAILED: 'INTERACTION_RESPONSE_FAILED',
+  INTERACTION_RESPONSE_Fehlgeschlagen: 'INTERACTION_RESPONSE_Fehlgeschlagen',
   INTERACTION_UNHANDLED: 'INTERACTION_UNHANDLED',
-  TASK_ERROR: 'TASK_ERROR',
+  TASK_Fehler: 'TASK_Fehler',
   UNHANDLED_REJECTION: 'UNHANDLED_REJECTION',
-  UNKNOWN_ERROR: 'UNKNOWN_ERROR'
+  UNKNOWN_Fehler: 'UNKNOWN_Fehler'
 });
 
-const ErrorCodeRegistry = Object.freeze({
-  [ErrorCodes.VALIDATION_FAILED]: {
+const FehlerCodeRegistry = Object.freeze({
+  [FehlerCodes.VALIDATION_Fehlgeschlagen]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Validate command inputs before processing and return field-specific guidance.'
+    remediation: 'Validate command inputs before Wird verarbeitet and return field-specific guidance.'
   },
-  [ErrorCodes.PERMISSION_DENIED]: {
+  [FehlerCodes.Berechtigung_DENIED]: {
     severity: 'low',
     retryable: false,
-    remediation: 'Review bot/user role permissions and required Discord permissions for this command.'
+    remediation: 'Review bot/user Rolle Berechtigungs and required Discord Berechtigungs for this command.'
   },
-  [ErrorCodes.CONFIGURATION_ERROR]: {
+  [FehlerCodes.Konfiguration_Fehler]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Check required environment variables and guild feature configuration.'
+    remediation: 'Check required environment variables and guild feature Konfiguration.'
   },
-  [ErrorCodes.DATABASE_ERROR]: {
+  [FehlerCodes.DATABASE_Fehler]: {
     severity: 'high',
     retryable: true,
     remediation: 'Check Postgres connectivity, pool saturation, statement timeouts, and recent migrations.'
   },
-  [ErrorCodes.NETWORK_ERROR]: {
+  [FehlerCodes.NETWORK_Fehler]: {
     severity: 'medium',
     retryable: true,
-    remediation: 'Check network reachability, upstream service status, and retry/Zurückoff behavior.'
+    remediation: 'Check network reachability, upstream service Status, and retry/Zurückoff behavior.'
   },
-  [ErrorCodes.DISCORD_API_ERROR]: {
+  [FehlerCodes.DISCORD_API_Fehler]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Check Discord API status, rate-limit response patterns, and bot token validity.'
+    remediation: 'Check Discord API Status, rate-limit response patterns, and bot token validity.'
   },
-  [ErrorCodes.USER_INPUT_ERROR]: {
+  [FehlerCodes.USER_INPUT_Fehler]: {
     severity: 'low',
     retryable: false,
     remediation: 'Validate user-provided IDs/mentions and return clearer input examples.'
   },
-  [ErrorCodes.RATE_LIMITED]: {
+  [FehlerCodes.RATE_LIMITED]: {
     severity: 'low',
     retryable: true,
     remediation: 'Apply cooldown-aware retries and reduce bursty command execution.'
   },
-  [ErrorCodes.INTERACTION_INVALID]: {
+  [FehlerCodes.INTERACTION_INVALID]: {
     severity: 'medium',
     retryable: false,
     remediation: 'Ensure interaction object is available and valid before replying.'
   },
-  [ErrorCodes.INTERACTION_EXPIRED]: {
+  [FehlerCodes.INTERACTION_EXPIRED]: {
     severity: 'medium',
     retryable: false,
     remediation: 'Defer or reply to interactions earlier to avoid 15-minute expiry windows.'
   },
-  [ErrorCodes.INTERACTION_RESPONSE_FAILED]: {
+  [FehlerCodes.INTERACTION_RESPONSE_Fehlgeschlagen]: {
     severity: 'medium',
     retryable: false,
-    remediation: 'Check interaction acknowledgement state and Discord response error codes.'
+    remediation: 'Check interaction acknowledgement state and Discord response Fehler codes.'
   },
-  [ErrorCodes.INTERACTION_UNHANDLED]: {
+  [FehlerCodes.INTERACTION_UNHANDLED]: {
     severity: 'high',
     retryable: false,
     remediation: 'Add a handler for this interaction type or register the missing button/modal/select handler.'
   },
-  [ErrorCodes.TASK_ERROR]: {
+  [FehlerCodes.TASK_Fehler]: {
     severity: 'high',
     retryable: true,
-    remediation: 'Inspect the named Zurückground task for thrown errors or unawaited promises.'
+    remediation: 'Inspect the named Zurückground task for thrown Fehlers or unawaited promises.'
   },
-  [ErrorCodes.UNHANDLED_REJECTION]: {
+  [FehlerCodes.UNHANDLED_REJECTION]: {
     severity: 'high',
     retryable: false,
     remediation: 'Find the promise that rejected without a catch handler and route it through runSafeTask or an explicit catch.'
   },
-  [ErrorCodes.UNKNOWN_ERROR]: {
+  [FehlerCodes.UNKNOWN_Fehler]: {
     severity: 'high',
     retryable: false,
-    remediation: 'Capture trace context and stack, then classify this failure under a specific error code.'
+    remediation: 'Capture trace context and stack, then classify this failure under a specific Fehler code.'
   }
 });
 
-const TypeToErrorCode = Object.freeze({
-  validation: ErrorCodes.VALIDATION_FAILED,
-  permission: ErrorCodes.PERMISSION_DENIED,
-  configuration: ErrorCodes.CONFIGURATION_ERROR,
-  database: ErrorCodes.DATABASE_ERROR,
-  network: ErrorCodes.NETWORK_ERROR,
-  discord_api: ErrorCodes.DISCORD_API_ERROR,
-  user_input: ErrorCodes.USER_INPUT_ERROR,
-  rate_limit: ErrorCodes.RATE_LIMITED,
-  unknown: ErrorCodes.UNKNOWN_ERROR
+const TypeToFehlerCode = Object.freeze({
+  validation: FehlerCodes.VALIDATION_Fehlgeschlagen,
+  Berechtigung: FehlerCodes.Berechtigung_DENIED,
+  Konfiguration: FehlerCodes.Konfiguration_Fehler,
+  database: FehlerCodes.DATABASE_Fehler,
+  network: FehlerCodes.NETWORK_Fehler,
+  discord_api: FehlerCodes.DISCORD_API_Fehler,
+  user_input: FehlerCodes.USER_INPUT_Fehler,
+  rate_limit: FehlerCodes.RATE_LIMITED,
+  unknown: FehlerCodes.UNKNOWN_Fehler
 });
 
-function normalizeErrorCode(errorCode) {
-  if (errorCode === null || errorCode === undefined) {
+function normalizeFehlerCode(FehlerCode) {
+  if (FehlerCode === null || FehlerCode === undefined) {
     return null;
   }
 
-  return String(errorCode).trim().toUpperCase();
+  return String(FehlerCode).trim().toUpperCase();
 }
 
-export function getErrorMetadata(errorCode) {
-  const normalized = normalizeErrorCode(errorCode);
+export function getFehlerMetadata(FehlerCode) {
+  const normalized = normalizeFehlerCode(FehlerCode);
   if (!normalized) {
-    return ErrorCodeRegistry[ErrorCodes.UNKNOWN_ERROR];
+    return FehlerCodeRegistry[FehlerCodes.UNKNOWN_Fehler];
   }
 
-  return ErrorCodeRegistry[normalized] || ErrorCodeRegistry[ErrorCodes.UNKNOWN_ERROR];
+  return FehlerCodeRegistry[normalized] || FehlerCodeRegistry[FehlerCodes.UNKNOWN_Fehler];
 }
 
-export function getDefaultErrorCodeByType(errorType = 'unknown') {
-  return TypeToErrorCode[errorType] || ErrorCodes.UNKNOWN_ERROR;
+export function getDefaultFehlerCodeByType(FehlerType = 'unknown') {
+  return TypeToFehlerCode[FehlerType] || FehlerCodes.UNKNOWN_Fehler;
 }
 
-export function resolveErrorCode({ error, errorType = 'unknown', context = {} } = {}) {
-  const contextCode = normalizeErrorCode(context?.errorCode);
+export function resolveFehlerCode({ Fehler, FehlerType = 'unknown', context = {} } = {}) {
+  const contextCode = normalizeFehlerCode(context?.FehlerCode);
   if (contextCode) {
     return contextCode;
   }
 
-  const nestedContextCode = normalizeErrorCode(error?.context?.errorCode);
+  const nestedContextCode = normalizeFehlerCode(Fehler?.context?.FehlerCode);
   if (nestedContextCode) {
     return nestedContextCode;
   }
 
-  const code = normalizeErrorCode(error?.code);
+  const code = normalizeFehlerCode(Fehler?.code);
   if (code) {
     return code;
   }
 
-  return getDefaultErrorCodeByType(errorType);
+  return getDefaultFehlerCodeByType(FehlerType);
 }
 
-export { ErrorCodes, ErrorCodeRegistry, TypeToErrorCode };
+export { FehlerCodes, FehlerCodeRegistry, TypeToFehlerCode };
+

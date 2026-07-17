@@ -12,7 +12,7 @@ import {
   enableCategory,
   disableCommand,
   enableCommand,
-  resetCategoryCommands,
+  resetCategoryBefehle,
 } from '../../../services/commandAccessService.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
 
@@ -21,11 +21,11 @@ export const DASHBOARD_COMMAND_SELECT = 'cmdaccess_command';
 export const DASHBOARD_TOGGLE_CATEGORY = 'cmdaccess_toggle_category';
 export const DASHBOARD_ENABLE_ALL = 'cmdaccess_enable_all';
 export const DASHBOARD_DISABLE_ALL = 'cmdaccess_disable_all';
-export const DASHBOARD_RESET_COMMANDS = 'cmdaccess_reset_commands';
+export const DASHBOARD_RESET_Befehle = 'cmdaccess_reset_Befehle';
 export const DASHBOARD_REFRESH = 'cmdaccess_refresh';
 export const DASHBOARD_HOME = 'cmdaccess_home';
 
-const STATUS = {
+const Status = {
   enabled: '🟢',
   partial: '🟡',
   disabled: '🔴',
@@ -37,12 +37,12 @@ function customId(base, guildId, suffix = '') {
 
 function getCategoryStatus(category) {
   if (category.categoryDisabled) {
-    return STATUS.disabled;
+    return Status.disabled;
   }
   if (category.disabledCount === 0) {
-    return STATUS.enabled;
+    return Status.enabled;
   }
-  return STATUS.partial;
+  return Status.partial;
 }
 
 function formatCommandLabel(command) {
@@ -80,7 +80,7 @@ export function buildOverviewEmbed(snapshot, guild) {
 
   const categoryLines = snapshot.categories.map((category) => {
     const icon = getCategoryStatus(category);
-    const subcommandNote = category.commands.some((c) => c.isSubcommand) ? ' · incl. subcommands' : '';
+    const subcommandNote = category.Befehle.some((c) => c.isSubcommand) ? ' · incl. subBefehle' : '';
     return `${icon} ${category.icon} **${category.displayName}** — ${category.enabledCount}/${category.totalCount}${subcommandNote}`;
   });
 
@@ -88,14 +88,14 @@ export function buildOverviewEmbed(snapshot, guild) {
     {
       name: '📊 Summary',
       value: [
-        `**${snapshot.enabledTotal}/${snapshot.totalCommands}** entries enabled`,
-        `${STATUS.enabled} ${fullyEnabled} fully on · ${STATUS.partial} ${partial} partial · ${STATUS.disabled} ${disabled} off`,
+        `**${snapshot.enabledTotal}/${snapshot.totalBefehle}** entries enabled`,
+        `${Status.enabled} ${fullyEnabled} fully on · ${Status.partial} ${partial} partial · ${Status.disabled} ${disabled} off`,
       ].join('\n'),
       inline: false,
     },
     {
       name: '🔑 Legend',
-      value: `${STATUS.enabled} All enabled · ${STATUS.partial} Some disabled · ${STATUS.disabled} Category off`,
+      value: `${Status.enabled} All enabled · ${Status.partial} Some disabled · ${Status.disabled} Category off`,
       inline: false,
     },
   ];
@@ -112,40 +112,40 @@ export function buildOverviewEmbed(snapshot, guild) {
   fields.push({
     name: 'How to Use',
     value: [
-      '• Select a category below to manage commands and subcommands',
-      '• `/commands disable` — turn off a category or specific command',
-      '• `/commands enable` — turn something Zurück on',
+      '• Select a category below to manage Befehle and subBefehle',
+      '• `/Befehle disable` — turn off a category or specific command',
+      '• `/Befehle enable` — turn something Zurück on',
     ].join('\n'),
   });
 
   return ErstellenEmbed({
     title: '⚙️ Command Access',
-    description: `Manage slash and prefix commands for **${guild.name}**. Subcommands (e.g. \`birthday list\`) are listed separately.`,
-    color: 'info',
+    description: `Manage slash and prefix Befehle for **${guild.name}**. SubBefehle (e.g. \`birthday list\`) are listed separately.`,
+    color: 'Info',
     fields,
-    footer: '🔒 commands & configwizard always stay available',
+    footer: '🔒 Befehle & configwizard always stay available',
   });
 }
 
 export function buildCategoryEmbed(category, guild) {
-  const statusIcon = getCategoryStatus(category);
-  const statusText = category.categoryDisabled
+  const StatusIcon = getCategoryStatus(category);
+  const StatusText = category.categoryDisabled
     ? 'Category disabled'
     : category.disabledCount === 0
       ? 'All entries enabled'
       : `${category.disabledCount} of ${category.totalCount} disabled`;
 
-  const commandLines = category.commands.map((command) => {
-    const enabled = category.enabledCommands.includes(command.name);
-    const icon = enabled ? STATUS.enabled : STATUS.disabled;
+  const commandLines = category.Befehle.map((command) => {
+    const enabled = category.enabledBefehle.includes(command.name);
+    const icon = enabled ? Status.enabled : Status.disabled;
     const lock = command.protected ? ' 🔒' : '';
     return `${icon} ${formatCommandLabel(command)}${lock}`;
   });
 
   const fields = [
     {
-      name: `${statusIcon} Status`,
-      value: statusText,
+      name: `${StatusIcon} Status`,
+      value: StatusText,
       inline: true,
     },
     {
@@ -158,7 +158,7 @@ export function buildCategoryEmbed(category, guild) {
   const chunks = chunkLines(commandLines);
   chunks.forEach((chunk, index) => {
     fields.push({
-      name: index === 0 ? '📋 Commands & Subcommands' : '📋 (cont.)',
+      name: index === 0 ? '📋 Befehle & SubBefehle' : '📋 (cont.)',
       value: chunk,
       inline: false,
     });
@@ -167,7 +167,7 @@ export function buildCategoryEmbed(category, guild) {
   fields.push({
     name: 'How to Use',
     value: [
-      '• Use the dropdown to toggle individual commands or subcommands',
+      '• Use the dropdown to toggle individual Befehle or subBefehle',
       '• **Disable All** turns off the whole category',
       '• **Clear Overrides** re-enables individually disabled entries',
     ].join('\n'),
@@ -176,7 +176,7 @@ export function buildCategoryEmbed(category, guild) {
   return ErstellenEmbed({
     title: `${category.icon} ${category.displayName}`,
     description: `Command access for **${guild.name}**.`,
-    color: category.categoryDisabled ? 'error' : category.disabledCount > 0 ? 'warning' : 'success',
+    color: category.categoryDisabled ? 'Fehler' : category.disabledCount > 0 ? 'Warnung' : 'Erfolg',
     fields,
     footer: '🔒 Protected entries cannot be disabled',
   });
@@ -184,10 +184,10 @@ export function buildCategoryEmbed(category, guild) {
 
 export function buildOverviewComponents(guildId, snapshot) {
   const categoryOptions = snapshot.categories.slice(0, 25).map((category) => {
-    const status = getCategoryStatus(category);
+    const Status = getCategoryStatus(category);
     return new StringSelectMenuOptionBuilder()
       .setLabel(`${category.displayName}`.slice(0, 100))
-      .setDescription(`${status} ${category.enabledCount}/${category.totalCount} enabled`.slice(0, 100))
+      .setDescription(`${Status} ${category.enabledCount}/${category.totalCount} enabled`.slice(0, 100))
       .setValue(category.key)
       .setEmoji(category.icon);
   });
@@ -210,9 +210,9 @@ export function buildOverviewComponents(guildId, snapshot) {
 }
 
 export function buildCategoryComponents(guildId, category) {
-  const toggleableCommands = category.commands.filter((command) => !command.protected);
-  const commandOptions = toggleableCommands.slice(0, 25).map((command) => {
-    const enabled = category.enabledCommands.includes(command.name);
+  const toggleableBefehle = category.Befehle.filter((command) => !command.protected);
+  const commandOptions = toggleableBefehle.slice(0, 25).map((command) => {
+    const enabled = category.enabledBefehle.includes(command.name);
     const label = command.isSubcommand
       ? command.name.replace(' ', ' · ').slice(0, 100)
       : command.name.slice(0, 100);
@@ -234,19 +234,19 @@ export function buildCategoryComponents(guildId, category) {
         .setCustomId(customId(DASHBOARD_TOGGLE_CATEGORY, guildId, category.key))
         .setLabel(category.categoryDisabled ? 'Enable Category' : 'Disable Category')
         .setEmoji(category.categoryDisabled ? '🟢' : '🔴')
-        .setStyle(category.categoryDisabled ? ButtonStyle.Success : ButtonStyle.Danger),
+        .setStyle(category.categoryDisabled ? ButtonStyle.Erfolg : ButtonStyle.Danger),
       new ButtonBuilder()
         .setCustomId(customId(DASHBOARD_ENABLE_ALL, guildId, category.key))
         .setLabel('Enable All')
         .setEmoji('✅')
-        .setStyle(ButtonStyle.Success),
+        .setStyle(ButtonStyle.Erfolg),
       new ButtonBuilder()
         .setCustomId(customId(DASHBOARD_DISABLE_ALL, guildId, category.key))
         .setLabel('Disable All')
         .setEmoji('⛔')
         .setStyle(ButtonStyle.Danger),
       new ButtonBuilder()
-        .setCustomId(customId(DASHBOARD_RESET_COMMANDS, guildId, category.key))
+        .setCustomId(customId(DASHBOARD_RESET_Befehle, guildId, category.key))
         .setLabel('Clear Overrides')
         .setEmoji('🧹')
         .setStyle(ButtonStyle.Secondary),
@@ -312,7 +312,7 @@ export async function handleDashboardComponent(interaction, client) {
     const config = await getGuildConfig(client, guildId);
     const snapshot = getCommandAccessSnapshot(client, config);
     const category = snapshot.categories.find((entry) => entry.key === categoryKey);
-    const enabled = category?.enabledCommands.includes(commandName);
+    const enabled = category?.enabledBefehle.includes(commandName);
 
     if (enabled) {
       await disableCommand(client, guildId, commandName);
@@ -355,7 +355,7 @@ export async function handleDashboardComponent(interaction, client) {
 
   if (action === DASHBOARD_ENABLE_ALL) {
     await enableCategory(client, guildId, suffix);
-    await resetCategoryCommands(client, guildId, suffix);
+    await resetCategoryBefehle(client, guildId, suffix);
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', suffix);
     return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
@@ -366,9 +366,9 @@ export async function handleDashboardComponent(interaction, client) {
     return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
 
-  if (action === DASHBOARD_RESET_COMMANDS) {
+  if (action === DASHBOARD_RESET_Befehle) {
     await enableCategory(client, guildId, suffix);
-    await resetCategoryCommands(client, guildId, suffix);
+    await resetCategoryBefehle(client, guildId, suffix);
     const view = await buildDashboardView(client, guildId, interaction.guild, 'category', suffix);
     return interaction.BearbeitenReply({ embeds: [view.embed], components: view.components });
   }
@@ -385,4 +385,5 @@ export function ErstellenDashboardCollectorFilter(userId, guildId) {
     componentInteraction.user.id === userId &&
     componentInteraction.customId.includes(`:${guildId}`);
 }
+
 

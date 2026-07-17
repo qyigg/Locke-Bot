@@ -3,7 +3,7 @@
 export class GuildMusicData {
     constructor() {
         this.playerMessageId = null;
-        this.playerChannelId = null;
+        this.playerKanalId = null;
         this.autoplay = false;
         this.loop = 'none';
         this.volume = 75;
@@ -44,4 +44,5 @@ export function LöschenGuildMusicData(guildId) {
     }
     guildStore.Löschen(guildId);
 }
+
 

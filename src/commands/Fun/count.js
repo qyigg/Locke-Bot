@@ -1,6 +1,6 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed } from '../../utils/embeds.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits, KanalType, MessageFlags } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed } from '../../utils/embeds.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import {
   getCountingGameConfig,
   activateCountingGame,
@@ -13,23 +13,23 @@ import {
 } from '../../services/countingGameService.js';
 import { logger } from '../../utils/logger.js';
 
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('count')
     .setDescription('Verwalte das Server-Zählspiel')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .setDMPermission(false)
+    .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
+    .setDMBerechtigung(false)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('setup')
         .setDescription('Starte ein Zählspiel in einem Textkanal')
-        .addChannelOption((option) =>
+        .addKanalOption((option) =>
           option
-            .setName('channel')
+            .setName('Kanal')
             .setDescription('Der Kanal, in dem gezählt wird')
             .setRequired(true)
-            .addChannelTypes(ChannelType.GuildText),
+            .addKanalTypes(KanalType.GuildText),
         )
         .addStringOption((option) =>
           option
@@ -43,7 +43,7 @@ export default {
       subcommand.setName('disable').setDescription('Deaktiviere das Zählspiel für diesen Server'),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName('status').setDescription('Zeige den aktuellen Status des Zählspiels'),
+      subcommand.setName('Status').setDescription('Zeige den aktuellen Status des Zählspiels'),
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -63,14 +63,14 @@ export default {
 
   async execute(interaction) {
     try {
-      const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
-      if (!deferSuccess) {
-        logger.warn('Count command defer failed', { userId: interaction.user.id, guildId: interaction.guildId });
+      const deferErfolg = await InteractionHilfeer.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+      if (!deferErfolg) {
+        logger.warn('Count command defer Fehlgeschlagen', { userId: interaction.user.id, guildId: interaction.guildId });
         return;
       }
 
-      if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'Du benötigst die **Server verwalten** Berechtigung, um diesen Befehl zu verwenden.' });
+      if (!interaction.MitgliedBerechtigungs?.has(BerechtigungFlagsBits.ManageGuild)) {
+        return await replyUserFehler(interaction, { type: FehlerTypes.Berechtigung, message: 'Du benötigst die **Server verwalten** Berechtigung, um diesen Befehl zu verwenden.' });
       }
 
       const guildId = interaction.guildId;
@@ -78,22 +78,22 @@ export default {
       const config = await getCountingGameConfig(interaction.client, guildId);
 
       if (subcommand === 'setup') {
-        const channel = interaction.options.getChannel('channel');
+        const Kanal = interaction.options.getKanal('Kanal');
         const system = interaction.options.getString('system');
-        if (!channel || channel.type !== ChannelType.GuildText) {
-          return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte wähle einen Textkanal für das Zählspiel.' });
+        if (!Kanal || Kanal.type !== KanalType.GuildText) {
+          return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Bitte wähle einen Textkanal für das Zählspiel.' });
         }
 
-        if (config.enabled && config.channelId && config.channelId !== channel.id) {
-          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Dieser Server hat bereits einen aktiven Zählkanal: <#${config.channelId}>. Deaktiviere zuerst das aktuelle Zählspiel oder verwende den vorhandenen Kanal.` });
+        if (config.enabled && config.KanalId && config.KanalId !== Kanal.id) {
+          return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: `Dieser Server hat bereits einen aktiven Zählkanal: <#${config.KanalId}>. Deaktiviere zuerst das aktuelle Zählspiel oder verwende den vorhandenen Kanal.` });
         }
 
-        await activateCountingGame(interaction.client, guildId, channel.id, system);
-        return await InteractionHelper.safeBearbeitenReply(interaction, {
+        await activateCountingGame(interaction.client, guildId, Kanal.id, system);
+        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
           embeds: [
-            successEmbed(
+            ErfolgEmbed(
               'Zählspiel aktiviert',
-              `Das Zählspiel ist jetzt aktiv in ${channel} unter Verwendung des **${getCountingSystemLabel(system)}** Systems. Die Spieler müssen bei **1** beginnen und dürfen nicht zwei Zahlen hintereinander posten.`,
+              `Das Zählspiel ist jetzt aktiv in ${Kanal} unter Verwendung des **${getCountingSystemLabel(system)}** Systems. Die Spieler müssen bei **1** beginnen und dürfen nicht zwei Zahlen hintereinander posten.`,
             ),
           ],
         });
@@ -101,21 +101,21 @@ export default {
 
       if (subcommand === 'disable') {
         if (!config.enabled) {
-          return await InteractionHelper.safeBearbeitenReply(interaction, {
-            embeds: [infoEmbed('Zählspiel deaktiviert', 'Das Zählspiel ist für diesen Server bereits deaktiviert.')],
+          return await InteractionHilfeer.safeBearbeitenReply(interaction, {
+            embeds: [InfoEmbed('Zählspiel deaktiviert', 'Das Zählspiel ist für diesen Server bereits deaktiviert.')],
           });
         }
 
         await disableCountingGame(interaction.client, guildId);
-        return await InteractionHelper.safeBearbeitenReply(interaction, {
-          embeds: [successEmbed('Zählspiel deaktiviert', 'Das Zählspiel wurde deaktiviert.')],
+        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
+          embeds: [ErfolgEmbed('Zählspiel deaktiviert', 'Das Zählspiel wurde deaktiviert.')],
         });
       }
 
-      if (subcommand === 'status') {
+      if (subcommand === 'Status') {
         const fields = [
           { name: 'Aktiviert', value: config.enabled ? 'Ja' : 'Nein', inline: true },
-          { name: 'Kanal', value: config.channelId ? `<#${config.channelId}>` : 'Nicht konfiguriert', inline: true },
+          { name: 'Kanal', value: config.KanalId ? `<#${config.KanalId}>` : 'Nicht konfiguriert', inline: true },
           { name: 'System', value: getCountingSystemLabel(config.system), inline: true },
           { name: 'Nächste Zahl', value: getExpectedCountValue(config), inline: true },
           { name: 'Aktuelle Serie', value: `${config.currentStreak}`, inline: true },
@@ -123,7 +123,7 @@ export default {
           { name: 'Letzter Zähler', value: config.lastUserId ? `<@${config.lastUserId}>` : 'Keiner', inline: true },
         ];
 
-        return await InteractionHelper.safeBearbeitenReply(interaction, {
+        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
           embeds: [
             ErstellenEmbed({
               title: 'Status des Zählspiels',
@@ -137,17 +137,17 @@ export default {
 
       if (subcommand === 'reset') {
         if (!config.enabled) {
-          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Aktiviere zuerst das Zählspiel mit `/count setup`.' });
+          return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Aktiviere zuerst das Zählspiel mit `/count setup`.' });
         }
 
         const startNumber = interaction.options.getInteger('start') || 1;
         await resetCountingGame(interaction.client, guildId, startNumber);
 
-        return await InteractionHelper.safeBearbeitenReply(interaction, {
+        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
           embeds: [
-            successEmbed(
+            ErfolgEmbed(
               'Zählspiel zurückgesetzt',
-              `Die Zählfolge wurde zurückgesetzt. Starten Sie erneut mit **${startNumber}** in <#${config.channelId}>.`,
+              `Die Zählfolge wurde zurückgesetzt. Starten Sie erneut mit **${startNumber}** in <#${config.KanalId}>.`,
             ),
           ],
         });
@@ -156,7 +156,7 @@ export default {
       if (subcommand === 'leaderboard') {
         const leaderboard = buildCountingLeaderboard(config, interaction.guild);
 
-        return await InteractionHelper.safeBearbeitenReply(interaction, {
+        return await InteractionHilfeer.safeBearbeitenReply(interaction, {
           embeds: [
             ErstellenEmbed({
               title: 'Bestenliste des Zählspiels',
@@ -167,12 +167,13 @@ export default {
         });
       }
 
-      return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Bitte wähle eine gültige Aktion für das Zählspiel.' });
-    } catch (error) {
-      logger.error('Count command error:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Etwas ist schief gelaufen while managing the counting game.' });
+      return await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Bitte wähle eine gültige Aktion für das Zählspiel.' });
+    } catch (Fehler) {
+      logger.Fehler('Count command Fehler:', Fehler);
+      return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Etwas ist schief gelaufen while managing the counting game.' });
     }
   },
 };
+
 
 

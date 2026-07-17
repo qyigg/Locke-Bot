@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { infoEmbed, successEmbed } from '../../utils/embeds.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InfoEmbed, ErfolgEmbed } from '../../utils/embeds.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { VerifizierenUser } from '../../services/verificationService.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -17,22 +17,23 @@ export default {
             moderatorId: null
         });
 
-        if (result.status === 'already_verified') {
-            return await InteractionHelper.safeReply(interaction, {
-                embeds: [infoEmbed('Bereits verifiziert', "You are Bereits verifiziert.")],
+        if (result.Status === 'already_verified') {
+            return await InteractionHilfeer.safeReply(interaction, {
+                embeds: [InfoEmbed('Bereits verifiziert', "You are Bereits verifiziert.")],
                 flags: MessageFlags.Ephemeral
             });
         }
 
-        await InteractionHelper.safeReply(interaction, {
-            embeds: [successEmbed(
+        await InteractionHilfeer.safeReply(interaction, {
+            embeds: [ErfolgEmbed(
                 "Verifizierung abgeschlossen",
-                `You have been verified and given the **${result.roleName}** role! Welcome to the server! 🎉`
+                `You have been verified and given the **${result.RolleName}** Rolle! Welcome to the server! 🎉`
             )],
             flags: MessageFlags.Ephemeral
         });
     }
 };
+
 
 
 

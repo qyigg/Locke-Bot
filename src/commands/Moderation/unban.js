@@ -1,9 +1,9 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -20,13 +20,13 @@ export default {
                 .setDescription("Reason for the unban")
                 .setRequired(false),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.BanMitglieds),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Unban interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Unban interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'unban',
@@ -38,16 +38,16 @@ export default {
         const targetId = rawTarget.replace(/[<@!>]/g, '').trim();
 
         if (!/^\d{17,20}$/.test(targetId)) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.USER_INPUT,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.USER_INPUT,
                 message: 'Please provide a valid user ID or mention.',
             });
         }
 
         const targetUser = await client.users.fetch(targetId).catch(() => null);
         if (!targetUser) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.USER_INPUT,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.USER_INPUT,
                 message: `Could not find a user with the ID \`${targetId}\`.`,
             });
         }
@@ -57,20 +57,21 @@ export default {
         const result = await ModerationService.unbanUser({
             guild: interaction.guild,
             user: targetUser,
-            moderator: interaction.member,
+            moderator: interaction.Mitglied,
             reason,
         });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     "✅ User Unbanned",
-                    `Successfully unbanned **${targetUser.tag}** from the server.\n\n**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                    `Erfolgfully unbanned **${targetUser.tag}** from the server.\n\n**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
                 ),
             ],
         });
     },
 };
+
 
 
 

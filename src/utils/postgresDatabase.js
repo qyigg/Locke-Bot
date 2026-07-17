@@ -53,8 +53,8 @@ class PostgreSQLDatabase {
 
                 this.pool = new pg.Pool(resolvePostgresPoolConfig());
 
-                this.pool.on('error', (error, client) => {
-                    logger.error('PostgreSQL pool error:', error);
+                this.pool.on('Fehler', (Fehler, client) => {
+                    logger.Fehler('PostgreSQL pool Fehler:', Fehler);
                 });
 
                 const client = await this.pool.connect();
@@ -65,7 +65,7 @@ class PostgreSQLDatabase {
                 this.lastFailureMessage = null;
 
                 this.isConnected = true;
-                logger.info('PostgreSQL Database initialized successfully');
+                logger.Info('PostgreSQL Database initialized Erfolgfully');
 
                 if (pgConfig.features.autoErstellenTables) {
                     await this.ErstellenTables();
@@ -73,7 +73,7 @@ class PostgreSQLDatabase {
                     try {
                         const columnCheck = await this.pool.query(`
                             SELECT column_name 
-                            FROM information_schema.columns 
+                            FROM Information_schema.columns 
                             WHERE table_name = 'guilds' AND column_name = 'counters'
                         `);
 
@@ -82,10 +82,10 @@ class PostgreSQLDatabase {
                                 ALTER TABLE ${pgConfig.tables.guilds} 
                                 ADD COLUMN counters JSONB DEFAULT '[]'
                             `);
-                            logger.info('Added counters column to guilds table');
+                            logger.Info('Added counters column to guilds table');
                         }
-                    } catch (error) {
-                        logger.warn('Could not add counters column to guilds table:', error.message);
+                    } catch (Fehler) {
+                        logger.warn('Could not add counters column to guilds table:', Fehler.message);
                     }
                 }
 
@@ -108,44 +108,44 @@ class PostgreSQLDatabase {
                             return true;
                         }
 
-                        const error = new Error(
-                            `Schema version check failed: expected ${migrationCheck.expectedVersion} but found ${migrationCheck.currentVersion === null ? 'none' : migrationCheck.currentVersion}`
+                        const Fehler = new Fehler(
+                            `Schema version check Fehlgeschlagen: expected ${migrationCheck.expectedVersion} but found ${migrationCheck.currentVersion === null ? 'none' : migrationCheck.currentVersion}`
                         );
-                        error.code = 'SCHEMA_VERSION_MISMATCH';
-                        throw error;
+                        Fehler.code = 'SCHEMA_VERSION_MISMATCH';
+                        throw Fehler;
                     }
                 }
 
                 await this.runStartupKeyMigration();
                 return true;
-            } catch (error) {
-                this.lastFailureReason = error.code || 'POSTGRES_CONNECTION_FAILED';
-                this.lastFailureMessage = error.message || 'Unknown PostgreSQL error';
+            } catch (Fehler) {
+                this.lastFailureReason = Fehler.code || 'POSTGRES_CONNECTION_Fehlgeschlagen';
+                this.lastFailureMessage = Fehler.message || 'Unknown PostgreSQL Fehler';
 
                 if (this.pool) {
                     try {
                         await this.pool.end();
-                    } catch (SchließenError) {
-                        logger.warn('Failed to Schließen PostgreSQL pool after error:', SchließenError.message);
+                    } catch (SchließenFehler) {
+                        logger.warn('Fehlgeschlagen to Schließen PostgreSQL pool after Fehler:', SchließenFehler.message);
                     }
                     this.pool = null;
                 }
 
                 const isLastAttempt = attempt >= attempts;
-                const isSchemaMismatch = error.code === 'SCHEMA_VERSION_MISMATCH';
+                const isSchemaMismatch = Fehler.code === 'SCHEMA_VERSION_MISMATCH';
                 if (isLastAttempt) {
-                    logger.error('Failed to initialize PostgreSQL Database:', error);
+                    logger.Fehler('Fehlgeschlagen to initialize PostgreSQL Database:', Fehler);
                     this.isConnected = false;
                     return false;
                 }
 
                 if (isSchemaMismatch) {
-                    logger.error('Failed to initialize PostgreSQL Database:', error);
+                    logger.Fehler('Fehlgeschlagen to initialize PostgreSQL Database:', Fehler);
                     this.isConnected = false;
                     return false;
                 }
 
-                logger.warn(`PostgreSQL connection attempt ${attempt} failed: ${error.message}`);
+                logger.warn(`PostgreSQL connection attempt ${attempt} Fehlgeschlagen: ${Fehler.message}`);
                 const Zurückoff = Math.round(baseDelay * Math.pow(multiplier, attempt - 1));
                 await new Promise(resolve => setTimeout(resolve, Zurückoff));
             }
@@ -164,12 +164,12 @@ class PostgreSQLDatabase {
             const result = await runKeyMigration({ pool: this.pool, logger });
             if (result?.alreadyFertig) {
                 logger.debug('Key migration already applied, skipping.');
-            } else if (result && (result.migrated > 0 || result.errors > 0)) {
-                logger.info('Startup key migration finished', result);
+            } else if (result && (result.migrated > 0 || result.Fehlers > 0)) {
+                logger.Info('Startup key migration finished', result);
             }
-        } catch (error) {
+        } catch (Fehler) {
             // Never block startup on key migration; legacy reads still work via fallZurück.
-            logger.error('Startup key migration failed (continuing with legacy fallZurück):', error);
+            logger.Fehler('Startup key migration Fehlgeschlagen (continuing with legacy fallZurück):', Fehler);
         }
     }
 
@@ -257,12 +257,12 @@ class PostgreSQLDatabase {
         for (const table of tableStatements) {
             try {
                 await this.pool.query(table);
-            } catch (error) {
-                logger.error('Error creating table:', error);
+            } catch (Fehler) {
+                logger.Fehler('Fehler creating table:', Fehler);
             }
         }
         
-        logger.info('Database tables Erstellend/verified');
+        logger.Info('Database tables Erstellend/verified');
         
         await this.ErstellenIndexes();
         await this.ErstellenAuditTriggers();
@@ -272,12 +272,12 @@ class PostgreSQLDatabase {
         for (const index of indexStatements) {
             try {
                 await this.pool.query(index);
-            } catch (error) {
-                logger.warn('Error creating index:', error.message);
+            } catch (Fehler) {
+                logger.warn('Fehler creating index:', Fehler.message);
             }
         }
         
-        logger.info('Performance indexes Erstellend/verified');
+        logger.Info('Performance indexes Erstellend/verified');
     }
 
     async ErstellenAuditTriggers() {
@@ -309,14 +309,14 @@ class PostgreSQLDatabase {
                          BEFORE Aktualisieren ON ${quoteIdentifier(safeTableIdentifier)}
                          FOR EACH ROW EXECUTE FUNCTION Aktualisieren_Aktualisierend_at_column();`
                     );
-                } catch (error) {
-                    logger.warn(`Error creating trigger ${trigger.name} on ${trigger.table}: ${error.message}`);
+                } catch (Fehler) {
+                    logger.warn(`Fehler creating trigger ${trigger.name} on ${trigger.table}: ${Fehler.message}`);
                 }
             }
             
-            logger.info('Audit triggers Erstellend/verified');
-        } catch (error) {
-            logger.warn('Error creating audit triggers:', error.message);
+            logger.Info('Audit triggers Erstellend/verified');
+        } catch (Fehler) {
+            logger.warn('Fehler creating audit triggers:', Fehler.message);
         }
     }
 
@@ -384,8 +384,8 @@ class PostgreSQLDatabase {
             }
 
             return structuredValue;
-        } catch (error) {
-            logger.error(`Error getting value for key ${key}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler getting value for key ${key}:`, Fehler);
             return defaultValue;
         }
     }
@@ -423,8 +423,8 @@ class PostgreSQLDatabase {
             }
 
             return await this.setStructuredData(parsedKey, value, ttl);
-        } catch (error) {
-            logger.error(`Error setting value for key ${key}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler setting value for key ${key}:`, Fehler);
             return false;
         }
     }
@@ -459,8 +459,8 @@ class PostgreSQLDatabase {
             }
 
             return Löschend;
-        } catch (error) {
-            logger.error(`Error deleting key ${key}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler deleting key ${key}:`, Fehler);
             return false;
         }
     }
@@ -509,8 +509,8 @@ class PostgreSQLDatabase {
             }
 
             return [...keys];
-        } catch (error) {
-            logger.error(`Error listing keys with prefix ${prefix}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler listing keys with prefix ${prefix}:`, Fehler);
             return [];
         }
     }
@@ -540,8 +540,8 @@ class PostgreSQLDatabase {
             );
 
             return true;
-        } catch (error) {
-            logger.error('Error inserting verification audit:', error);
+        } catch (Fehler) {
+            logger.Fehler('Fehler inserting verification audit:', Fehler);
             return false;
         }
     }
@@ -554,8 +554,8 @@ class PostgreSQLDatabase {
 
             const value = await this.get(key);
             return value !== null;
-        } catch (error) {
-            logger.error(`Error checking if key exists ${key}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler checking if key exists ${key}:`, Fehler);
             return false;
         }
     }
@@ -570,8 +570,8 @@ class PostgreSQLDatabase {
             const newValue = (typeof currentValue === 'number' ? currentValue : 0) + amount;
             await this.set(key, newValue);
             return newValue;
-        } catch (error) {
-            logger.error(`Error incrementing key ${key}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler incrementing key ${key}:`, Fehler);
             return amount;
         }
     }
@@ -586,8 +586,8 @@ class PostgreSQLDatabase {
             const newValue = (typeof currentValue === 'number' ? currentValue : 0) - amount;
             await this.set(key, newValue);
             return newValue;
-        } catch (error) {
-            logger.error(`Error decrementing key ${key}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler decrementing key ${key}:`, Fehler);
             return -amount;
         }
     }
@@ -665,24 +665,24 @@ class PostgreSQLDatabase {
                     return { wallet: row.balance ?? 0, bank: row.bank ?? 0 };
                 }
                 
-                case 'afk_status': {
+                case 'afk_Status': {
                     const afkResult = await this.pool.query(
-                        `SELECT reason, status_at, expires_at FROM ${pgConfig.tables.afk_status} WHERE guild_id = $1 AND user_id = $2`,
+                        `SELECT reason, Status_at, expires_at FROM ${pgConfig.tables.afk_Status} WHERE guild_id = $1 AND user_id = $2`,
                         [parsedKey.guildId, parsedKey.userId],
                     );
                     if (afkResult.rows.length === 0) return defaultValue;
                     const row = afkResult.rows[0];
                     return {
                         reason: row.reason,
-                        setAt: row.status_at,
+                        setAt: row.Status_at,
                         expiresAt: row.expires_at,
                     };
                 }
                 
                 case 'ticket':
                     const ticketResult = await this.pool.query(
-                        `SELECT data FROM ${pgConfig.tables.tickets} WHERE guild_id = $1 AND channel_id = $2`,
-                        [parsedKey.guildId, parsedKey.channelId]
+                        `SELECT data FROM ${pgConfig.tables.tickets} WHERE guild_id = $1 AND Kanal_id = $2`,
+                        [parsedKey.guildId, parsedKey.KanalId]
                     );
                     return ticketResult.rows.length > 0 ? ticketResult.rows[0].data : defaultValue;
                 
@@ -696,8 +696,8 @@ class PostgreSQLDatabase {
                 default:
                     return defaultValue;
             }
-        } catch (error) {
-            logger.error(`Error getting structured data for ${parsedKey.fullKey}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler getting structured data for ${parsedKey.fullKey}:`, Fehler);
             return defaultValue;
         }
     }
@@ -846,7 +846,7 @@ class PostgreSQLDatabase {
                     );
                     return true;
                 
-                case 'afk_status':
+                case 'afk_Status':
                     await this.pool.query(
                         `INSERT INTO ${pgConfig.tables.guilds} (id, Erstellend_at) 
                          VALUES ($1, CURRENT_TIMESTAMP) 
@@ -862,10 +862,10 @@ class PostgreSQLDatabase {
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.afk_status} (guild_id, user_id, reason, expires_at) 
+                        `INSERT INTO ${pgConfig.tables.afk_Status} (guild_id, user_id, reason, expires_at) 
                          VALUES ($1, $2, $3, $4) 
                          ON CONFLICT (guild_id, user_id) DO Aktualisieren SET 
-                         reason = $3, expires_at = $4, status_at = CURRENT_TIMESTAMP`,
+                         reason = $3, expires_at = $4, Status_at = CURRENT_TIMESTAMP`,
                         [parsedKey.guildId, parsedKey.userId, value.reason, (value.expiresAt ?? value.expires_at) ? new Date(value.expiresAt ?? value.expires_at) : null]
                     );
                     return true;
@@ -879,11 +879,11 @@ class PostgreSQLDatabase {
                     );
                     
                     await this.pool.query(
-                        `INSERT INTO ${pgConfig.tables.tickets} (guild_id, channel_id, data, expires_at) 
+                        `INSERT INTO ${pgConfig.tables.tickets} (guild_id, Kanal_id, data, expires_at) 
                          VALUES ($1, $2, $3, $4) 
-                         ON CONFLICT (channel_id) DO Aktualisieren SET 
+                         ON CONFLICT (Kanal_id) DO Aktualisieren SET 
                          data = $3, expires_at = $4, Aktualisierend_at = CURRENT_TIMESTAMP`,
-                        [parsedKey.guildId, parsedKey.channelId, value, ttl ? new Date(Date.now() + ttl * 1000) : null]
+                        [parsedKey.guildId, parsedKey.KanalId, value, ttl ? new Date(Date.now() + ttl * 1000) : null]
                     );
                     return true;
                 
@@ -897,7 +897,7 @@ class PostgreSQLDatabase {
                     
                     const columnCheck = await this.pool.query(`
                         SELECT column_name 
-                        FROM information_schema.columns 
+                        FROM Information_schema.columns 
                         WHERE table_name = '${pgConfig.tables.guilds}' AND column_name = 'counters'
                     `);
                     
@@ -908,10 +908,10 @@ class PostgreSQLDatabase {
                                 ALTER TABLE ${pgConfig.tables.guilds} 
                                 ADD COLUMN counters JSONB DEFAULT '[]'
                             `);
-                            logger.info('Added counters column to guilds table');
-                        } catch (alterError) {
-                            logger.error('Failed to add counters column:', alterError);
-                            throw new Error(`Counters column missing and could not be Erstellend: ${alterError.message}`);
+                            logger.Info('Added counters column to guilds table');
+                        } catch (alterFehler) {
+                            logger.Fehler('Fehlgeschlagen to add counters column:', alterFehler);
+                            throw new Fehler(`Counters column missing and could not be Erstellend: ${alterFehler.message}`);
                         }
                     }
                     
@@ -927,17 +927,17 @@ class PostgreSQLDatabase {
                              ON CONFLICT (id) DO Aktualisieren SET counters = $2::jsonb, Aktualisierend_at = CURRENT_TIMESTAMP`,
                             [parsedKey.guildId, jsonString]
                         );
-                    } catch (queryError) {
-                        logger.error('PostgreSQL query error', { message: queryError.message, detail: queryError.detail, hint: queryError.hint });
-                        throw queryError;
+                    } catch (queryFehler) {
+                        logger.Fehler('PostgreSQL query Fehler', { message: queryFehler.message, detail: queryFehler.detail, hint: queryFehler.hint });
+                        throw queryFehler;
                     }
                     return true;
                 
                 default:
                     return false;
             }
-        } catch (error) {
-            logger.error(`Error setting structured data for ${parsedKey.fullKey}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler setting structured data for ${parsedKey.fullKey}:`, Fehler);
             return false;
         }
     }
@@ -973,12 +973,12 @@ class PostgreSQLDatabase {
                     await this.pool.query(`Löschen FROM ${pgConfig.tables.economy} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
                     return true;
                 
-                case 'afk_status':
-                    await this.pool.query(`Löschen FROM ${pgConfig.tables.afk_status} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
+                case 'afk_Status':
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.afk_Status} WHERE guild_id = $1 AND user_id = $2`, [parsedKey.guildId, parsedKey.userId]);
                     return true;
                 
                 case 'ticket':
-                    await this.pool.query(`Löschen FROM ${pgConfig.tables.tickets} WHERE guild_id = $1 AND channel_id = $2`, [parsedKey.guildId, parsedKey.channelId]);
+                    await this.pool.query(`Löschen FROM ${pgConfig.tables.tickets} WHERE guild_id = $1 AND Kanal_id = $2`, [parsedKey.guildId, parsedKey.KanalId]);
                     return true;
 
                 case 'counters':
@@ -991,8 +991,8 @@ class PostgreSQLDatabase {
                 default:
                     return false;
             }
-        } catch (error) {
-            logger.error(`Error deleting structured data for ${parsedKey.fullKey}:`, error);
+        } catch (Fehler) {
+            logger.Fehler(`Fehler deleting structured data for ${parsedKey.fullKey}:`, Fehler);
             return false;
         }
     }
@@ -1001,10 +1001,10 @@ class PostgreSQLDatabase {
         try {
             if (this.pool) {
                 await this.pool.end();
-                logger.info('PostgreSQL connection Schließend');
+                logger.Info('PostgreSQL connection Schließend');
             }
-        } catch (error) {
-            logger.error('Error closing PostgreSQL connection:', error);
+        } catch (Fehler) {
+            logger.Fehler('Fehler closing PostgreSQL connection:', Fehler);
         }
     }
 
@@ -1022,8 +1022,8 @@ class PostgreSQLDatabase {
                 idleCount: this.pool.idleCount,
                 waitingCount: this.pool.waitingCount
             };
-        } catch (error) {
-            logger.error('Error getting PostgreSQL info:', error);
+        } catch (Fehler) {
+            logger.Fehler('Fehler getting PostgreSQL Info:', Fehler);
             return null;
         }
     }
@@ -1032,3 +1032,4 @@ class PostgreSQLDatabase {
 const pgDb = new PostgreSQLDatabase();
 
 export { PostgreSQLDatabase, pgDb };
+

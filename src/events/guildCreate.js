@@ -6,18 +6,19 @@ export default {
   name: Events.GuildErstellen,
   async execute(guild, client) {
     try {
-      logger.info('Bot joined guild', {
+      logger.Info('Bot joined guild', {
         event: 'guild.Erstellen',
         guildId: guild.id,
         guildName: guild.name,
-        memberCount: guild.memberCount,
+        MitgliedCount: guild.MitgliedCount,
       });
 
       const config = await getGuildConfig(client, guild.id);
       await setGuildConfig(client, guild.id, config);
-    } catch (error) {
-      logger.error(`Error initializing guild ${guild?.id} on join:`, error);
+    } catch (Fehler) {
+      logger.Fehler(`Fehler initializing guild ${guild?.id} on join:`, Fehler);
     }
   },
 };
+
 

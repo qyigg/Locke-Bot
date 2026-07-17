@@ -1,18 +1,18 @@
-﻿import { successEmbed } from '../../../utils/embeds.js';
+﻿import { ErfolgEmbed } from '../../../utils/embeds.js';
 
 import ConfigService from '../../../services/config/configService.js';
 import { MessageFlags } from 'discord.js';
 import { logger } from '../../../utils/logger.js';
-import { ErrorTypes, replyUserError } from '../../../utils/errorHandler.js';
+import { FehlerTypes, replyUserFehler } from '../../../utils/FehlerHandler.js';
 
 function extractId(value) {
     if (!value || typeof value !== 'string') return null;
 
-    const channelMention = value.match(/^<#(\d+)>$/);
-    if (channelMention) return channelMention[1];
+    const KanalMention = value.match(/^<#(\d+)>$/);
+    if (KanalMention) return KanalMention[1];
 
-    const roleMention = value.match(/^<@&(\d+)>$/);
-    if (roleMention) return roleMention[1];
+    const RolleMention = value.match(/^<@&(\d+)>$/);
+    if (RolleMention) return RolleMention[1];
 
     const digits = value.match(/^(\d{17,19})$/);
     if (digits) return digits[1];
@@ -23,13 +23,13 @@ function extractId(value) {
 function parseValue(key, rawValue) {
     const value = rawValue.trim();
 
-    if (['modRole', 'adminRole', 'autoRole', 'logChannelId'].includes(key)) {
+    if (['modRolle', 'adminRolle', 'autoRolle', 'logKanalId'].includes(key)) {
         if (value.toLowerCase() === 'none') {
             return null;
         }
         const id = extractId(value);
         if (!id) {
-            throw new Error('Please provide a valid mention or ID.');
+            throw new Fehler('Please provide a valid mention or ID.');
         }
         return id;
     }
@@ -41,12 +41,12 @@ function parseValue(key, rawValue) {
         if (['no', 'false', 'disabled', 'disable'].includes(value.toLowerCase())) {
             return false;
         }
-        throw new Error('Please enter either yes or no.');
+        throw new Fehler('Please enter either yes or no.');
     }
 
     if (key === 'prefix') {
         if (value.length < 1 || value.length > 10 || /\s/.test(value)) {
-            throw new Error('Prefix must be 1-10 characters with no spaces.');
+            throw new Fehler('Prefix must be 1-10 characters with no spaces.');
         }
         return value;
     }
@@ -55,35 +55,35 @@ function parseValue(key, rawValue) {
 }
 
 function resolveModalValue(key, interaction) {
-    if (key === 'logChannelId') {
-        const channelId = interaction.fields.getField('log_channel')?.values?.[0];
-        if (!channelId) {
-            throw new Error('Please select a log channel.');
+    if (key === 'logKanalId') {
+        const KanalId = interaction.fields.getField('log_Kanal')?.values?.[0];
+        if (!KanalId) {
+            throw new Fehler('Please select a log Kanal.');
         }
-        return channelId;
+        return KanalId;
     }
 
-    if (key === 'modRole') {
-        const roleId = interaction.fields.getField('mod_role')?.values?.[0];
-        if (!roleId) {
-            throw new Error('Please select a moderator role.');
+    if (key === 'modRolle') {
+        const RolleId = interaction.fields.getField('mod_Rolle')?.values?.[0];
+        if (!RolleId) {
+            throw new Fehler('Please select a moderator Rolle.');
         }
-        return roleId;
+        return RolleId;
     }
 
     const rawValue = interaction.fields.getTextInputValue('value');
     return parseValue(key, rawValue);
 }
 
-function buildSuccessMessage(key, value, guild) {
-    if (key === 'logChannelId') {
-        const channel = guild?.channels?.cache?.get(value);
-        return `Log channel set to ${channel ?? `<#${value}>`}.`;
+function buildErfolgMessage(key, value, guild) {
+    if (key === 'logKanalId') {
+        const Kanal = guild?.Kanals?.cache?.get(value);
+        return `Log Kanal set to ${Kanal ?? `<#${value}>`}.`;
     }
 
-    if (key === 'modRole') {
-        const role = guild?.roles?.cache?.get(value);
-        return `Moderator role set to ${role ?? `<@&${value}>`}.`;
+    if (key === 'modRolle') {
+        const Rolle = guild?.Rollen?.cache?.get(value);
+        return `Moderator Rolle set to ${Rolle ?? `<@&${value}>`}.`;
     }
 
     return `The setting \`${key}\` has been Erfolgreich aktualisiert.`;
@@ -99,15 +99,16 @@ export default {
             await ConfigService.AktualisierenSetting(interaction.client, guildId, key, value, interaction.user.id);
 
             await interaction.reply({
-                embeds: [successEmbed('Configuration Aktualisierend', buildSuccessMessage(key, value, interaction.guild))],
+                embeds: [ErfolgEmbed('Konfiguration Aktualisierend', buildErfolgMessage(key, value, interaction.guild))],
                 flags: MessageFlags.Ephemeral,
             });
-        } catch (error) {
-            logger.error('Config modal handler error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.CONFIGURATION, message: error.message || 'Bitte versuchen Sie es später erneut.' });
+        } catch (Fehler) {
+            logger.Fehler('Config modal handler Fehler:', Fehler);
+            await replyUserFehler(interaction, { type: FehlerTypes.Konfiguration, message: Fehler.message || 'Bitte versuchen Sie es später erneut.' });
         }
     },
 };
+
 
 
 

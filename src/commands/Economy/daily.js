@@ -1,11 +1,11 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { getGuildConfig } from '../../services/config/guildConfig.js';
 import { formatDuration } from '../../utils/embeds.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { botConfig } from '../../config/bot.js';
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
@@ -17,8 +17,8 @@ export default {
         .setName('daily')
         .setDescription('Fordere deine tägliche Geldprämie an'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const userId = interaction.user.id;
@@ -30,10 +30,10 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
             
             if (!userData) {
-                throw ErstellenError(
-                    "Failed to load economy data for daily",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load economy data for daily",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -42,32 +42,32 @@ export default {
 
             if (now < lastDaily + DAILY_COOLDOWN) {
                 const timeRemaining = lastDaily + DAILY_COOLDOWN - now;
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Daily cooldown active",
-                    ErrorTypes.RATE_LIMIT,
-                    `Du musst warten, bevor du deine tägliche Auszahlung einfordest. Versuche es in **${formatDuration(timeRemaining)}** erneut.`,
+                    FehlerTypes.RATE_LIMIT,
+                    `Du musst warten, bevor du deine tägliche Auszahlung eInfordest. Versuche es in **${formatDuration(timeRemaining)}** erneut.`,
                     { timeRemaining, cooldownType: 'daily' }
                 );
             }
 
             const guildConfig = await getGuildConfig(client, guildId);
-            const PREMIUM_ROLE_ID = guildConfig.premiumRoleId;
+            const PREMIUM_Rolle_ID = guildConfig.premiumRolleId;
 
             let earned = DAILY_AMOUNT;
             let bonusMessage = "";
-            let hasPremiumRole = false;
+            let hasPremiumRolle = false;
 
             if (
-                PREMIUM_ROLE_ID &&
-                interaction.member &&
-                interaction.member.roles.cache.has(PREMIUM_ROLE_ID)
+                PREMIUM_Rolle_ID &&
+                interaction.Mitglied &&
+                interaction.Mitglied.Rollen.cache.has(PREMIUM_Rolle_ID)
             ) {
                 const bonusAmount = Math.floor(
                     DAILY_AMOUNT * PREMIUM_BONUS_PERCENTAGE,
                 );
                 earned += bonusAmount;
                 bonusMessage = `\n✨ **Premium Bonus:** +$${bonusAmount.toLocaleString()}`;
-                hasPremiumRole = true;
+                hasPremiumRolle = true;
             }
 
             userData.wallet = (userData.wallet || 0) + earned;
@@ -75,16 +75,16 @@ export default {
 
             await setEconomyData(client, guildId, userId, userData);
 
-            logger.info(`[ECONOMY_TRANSACTION] Daily claimed`, {
+            logger.Info(`[ECONOMY_TRANSACTION] Daily claimed`, {
                 userId,
                 guildId,
                 amount: earned,
                 newWallet: userData.wallet,
-                hasPremium: hasPremiumRole,
+                hasPremium: hasPremiumRolle,
                 timestamp: new Date().toISOString()
             });
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 "✅ Täglich eingefordert!",
                 `Du hast deine tägliche **$${earned.toLocaleString()}** eingefordert!${bonusMessage}`
             )
@@ -94,13 +94,14 @@ export default {
                     inline: true,
                 })
                 .setFooter({
-                    text: hasPremiumRole
+                    text: hasPremiumRolle
                         ? `Nächster Anspruch in 24 Stunden. (Premium aktiv)`
                         : `Nächster Anspruch in 24 Stunden.`,
                 });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'daily' })
 };
+
 
 

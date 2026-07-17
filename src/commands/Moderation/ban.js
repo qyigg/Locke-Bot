@@ -1,8 +1,8 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -17,7 +17,7 @@ export default {
         .addStringOption((option) =>
             option.setName("reason").setDescription("Grund für den Ban"),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.BanMitglieds),
     category: "moderation",
 
     async execute(interaction, config, client) {
@@ -25,25 +25,25 @@ export default {
         const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!user) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Zielbenutzer fehlt',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'Du musst einen Benutzer angeben zum Bannen.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (user.id === interaction.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Cannot ban self',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Du kannst dich nicht selbst verbannen.',
             );
         }
         if (user.id === client.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Cannot ban bot',
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 'Du kannst nicht den Bot bannen.',
             );
         }
@@ -51,13 +51,13 @@ export default {
         const result = await ModerationService.banUser({
             guild: interaction.guild,
             user,
-            moderator: interaction.member,
+            moderator: interaction.Mitglied,
             reason,
         });
 
-        await InteractionHelper.universalReply(interaction, {
+        await InteractionHilfeer.universalReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     `🚫 **Banned** ${user.tag}`,
                     `**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
                 ),
@@ -65,6 +65,7 @@ export default {
         });
     },
 };
+
 
 
 

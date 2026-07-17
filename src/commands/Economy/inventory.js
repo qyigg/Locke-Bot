@@ -1,10 +1,10 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { shopItems } from '../../config/shop/items.js';
 import { getEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const SHOP_ITEMS = shopItems;
 
@@ -13,8 +13,8 @@ export default {
         .setName('inventory')
         .setDescription('Sieh dir dein Wirtschafts-Inventar an'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
 
             const userId = interaction.user.id;
@@ -25,10 +25,10 @@ export default {
             const userData = await getEconomyData(client, guildId, userId);
 
             if (!userData) {
-                throw ErstellenError(
-                    "Failed to load economy data for inventory",
-                    ErrorTypes.DATABASE,
-                    "Failed to load Dein economy data. Bitte versuchen Sie es später erneut later.",
+                throw ErstellenFehler(
+                    "Fehlgeschlagen to load economy data for inventory",
+                    FehlerTypes.DATABASE,
+                    "Fehlgeschlagen to load Dein economy data. Bitte versuchen Sie es später erneut later.",
                     { userId, guildId }
                 );
             }
@@ -54,7 +54,7 @@ export default {
                     .join("\n");
             }
 
-            logger.info(`[ECONOMY] Inventory retrieved`, { 
+            logger.Info(`[ECONOMY] Inventory retrieved`, { 
                 userId, 
                 guildId,
                 itemCount: Object.keys(inventory).length
@@ -65,8 +65,9 @@ export default {
                 description: inventoryDescription, 
             }).setThumbnail(interaction.user.displayAvatarURL());
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'inventory' })
 };
+
 
 

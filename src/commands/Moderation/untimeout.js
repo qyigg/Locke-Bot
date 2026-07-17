@@ -1,9 +1,9 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -15,13 +15,13 @@ export default {
                 .setDescription("User to untimeout")
                 .setRequired(true),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ModerateMitglieds),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`Untimeout interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`Untimeout interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'untimeout',
@@ -30,40 +30,41 @@ export default {
         }
 
         const targetUser = interaction.options.getUser("target");
-        const member = interaction.options.getMember("target");
+        const Mitglied = interaction.options.getMitglied("target");
 
         if (!targetUser) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Zielbenutzer fehlt',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'Du musst angeben a user to untimeout.',
                 { subtype: 'invalid_user' },
             );
         }
 
-        if (!member) {
-            throw new TitanBotError(
+        if (!Mitglied) {
+            throw new TitanBotFehler(
                 "Target Nicht gefunden",
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 "The target user is not currently in Dieser Server.",
             );
         }
 
         await ModerationService.removeTimeoutUser({
             guild: interaction.guild,
-            member,
-            moderator: interaction.member,
+            Mitglied,
+            moderator: interaction.Mitglied,
         });
 
-        await InteractionHelper.safeBearbeitenReply(interaction, {
+        await InteractionHilfeer.safeBearbeitenReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     `🔓 **Removed timeout** from ${targetUser.tag}`,
                 ),
             ],
         });
     },
 };
+
 
 
 

@@ -1,20 +1,20 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
 import { ErstellenEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
-    .setName("serverinfo")
-    .setDescription("Get detailed information about the server"),
+    .setName("serverInfo")
+    .setDescription("Get detailed Information about the server"),
 
   async execute(interaction) {
-    const deferSuccess = await InteractionHelper.safeDefer(interaction);
-    if (!deferSuccess) {
-      logger.warn(`ServerInfo interaction defer failed`, {
+    const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+    if (!deferErfolg) {
+      logger.warn(`ServerInfo interaction defer Fehlgeschlagen`, {
         userId: interaction.user.id,
         guildId: interaction.guildId,
-        commandName: 'serverinfo'
+        commandName: 'serverInfo'
       });
       return;
     }
@@ -28,13 +28,13 @@ export default {
       .setThumbnail(guild.iconURL({ size: 256 }))
       .addFields(
         { name: "Owner", value: owner.user.tag, inline: true },
-        { name: "Members", value: `${guild.memberCount}`, inline: true },
+        { name: "Mitglieds", value: `${guild.MitgliedCount}`, inline: true },
         {
-          name: "Channels",
-          value: `${guild.channels.cache.size}`,
+          name: "Kanals",
+          value: `${guild.Kanals.cache.size}`,
           inline: true,
         },
-        { name: "Roles", value: `${guild.roles.cache.size}`, inline: true },
+        { name: "Rollen", value: `${guild.Rollen.cache.size}`, inline: true },
         {
           name: "Boosts",
           value: `Level ${guild.premiumTier} (${guild.premiumSubscriptionCount})`,
@@ -47,12 +47,13 @@ export default {
         },
       );
 
-    await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
-    logger.info(`ServerInfo command executed`, {
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
+    logger.Info(`ServerInfo command executed`, {
       userId: interaction.user.id,
       guildId: guild.id,
       guildName: guild.name,
-      memberCount: guild.memberCount
+      MitgliedCount: guild.MitgliedCount
     });
   },
 };
+

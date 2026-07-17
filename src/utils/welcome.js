@@ -50,9 +50,9 @@ export function formatWelcomeMessage(message, data) {
         '{server.name}': guild?.name || 'Server',
         '{guild.name}': guild?.name || 'Server',
         '{guild.id}': guild?.id || 'unknown',
-        '{guild.memberCount}': guild?.memberCount?.toString?.() || '0',
-        '{memberCount}': guild?.memberCount?.toString?.() || '0',
-        '{membercount}': guild?.memberCount?.toString?.() || '0'
+        '{guild.MitgliedCount}': guild?.MitgliedCount?.toString?.() || '0',
+        '{MitgliedCount}': guild?.MitgliedCount?.toString?.() || '0',
+        '{Mitgliedcount}': guild?.MitgliedCount?.toString?.() || '0'
     };
 
     let result = message;
@@ -71,3 +71,4 @@ export function getDefaultWelcomeMessage() {
 export function getDefaultGoodbyeMessage() {
     return DEFAULT_TEMPLATES.goodbye;
 }
+

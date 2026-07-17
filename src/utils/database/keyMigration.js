@@ -157,23 +157,23 @@ async function writeCompletedMarker(client, summary) {
  * @param {import('pg').Pool} options.pool - Connected pg pool.
  * @param {boolean} [options.dryRun=false] - Log actions without writing.
  * @param {boolean} [options.force=false] - Ignore the completion marker.
- * @param {object} [options.logger=console] - Logger with info/warn/error.
- * @returns {Promise<{migrated:number, skipped:number, errors:number, alreadyFertig?:boolean}>}
+ * @param {object} [options.logger=console] - Logger with Info/warn/Fehler.
+ * @returns {Promise<{migrated:number, skipped:number, Fehlers:number, alreadyFertig?:boolean}>}
  */
 export async function runKeyMigration({ pool, dryRun = false, force = false, logger = console } = {}) {
     if (!pool) {
-        throw new Error('runKeyMigration requires a connected pg pool');
+        throw new Fehler('runKeyMigration requires a connected pg pool');
     }
 
     const client = await pool.connect();
-    const summary = { migrated: 0, skipped: 0, errors: 0 };
+    const summary = { migrated: 0, skipped: 0, Fehlers: 0 };
 
     try {
         if (!force && !dryRun && (await hasCompletedMarker(client))) {
             return { ...summary, alreadyFertig: true };
         }
 
-        logger.info(`Starting key migration${dryRun ? ' (dry run)' : ''}...`);
+        logger.Info(`Starting key migration${dryRun ? ' (dry run)' : ''}...`);
 
         const rows = await client.query(
             `SELECT key, value FROM ${pgConfig.tables.temp_data} ORDER BY key`,
@@ -188,7 +188,7 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
 
             try {
                 if (await keyExists(client, canonicalKey)) {
-                    logger.info(`Skip ${legacyKey} -> ${canonicalKey} (canonical Existiert bereits)`);
+                    logger.Info(`Skip ${legacyKey} -> ${canonicalKey} (canonical Existiert bereits)`);
                     summary.skipped += 1;
                     if (!dryRun) {
                         await client.query(
@@ -200,7 +200,7 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
                 }
 
                 const parsed = parseKey(canonicalKey);
-                logger.info(`Migrate ${legacyKey} -> ${canonicalKey} [${parsed.type}]`);
+                logger.Info(`Migrate ${legacyKey} -> ${canonicalKey} [${parsed.type}]`);
 
                 if (!dryRun) {
                     if (parsed.type === 'economy') {
@@ -227,9 +227,9 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
                 }
 
                 summary.migrated += 1;
-            } catch (error) {
-                summary.errors += 1;
-                logger.error(`Failed to migrate ${legacyKey}:`, error);
+            } catch (Fehler) {
+                summary.Fehlers += 1;
+                logger.Fehler(`Fehlgeschlagen to migrate ${legacyKey}:`, Fehler);
             }
         }
 
@@ -237,11 +237,12 @@ export async function runKeyMigration({ pool, dryRun = false, force = false, log
             await writeCompletedMarker(client, summary);
         }
 
-        logger.info('Key migration complete', summary);
+        logger.Info('Key migration complete', summary);
         return summary;
     } finally {
         client.release();
     }
 }
+
 
 

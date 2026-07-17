@@ -1,8 +1,8 @@
-﻿import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { successEmbed } from '../../utils/embeds.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
+import { ErfolgEmbed } from '../../utils/embeds.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -17,43 +17,43 @@ export default {
         .addStringOption((option) =>
             option.setName("reason").setDescription("Reason for the kick"),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.KickMitglieds),
     category: "moderation",
 
     async execute(interaction, config, client) {
         const targetUser = interaction.options.getUser("target");
-        const member = interaction.options.getMember("target");
+        const Mitglied = interaction.options.getMitglied("target");
         const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!targetUser) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 'Zielbenutzer fehlt',
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 'Du musst angeben a user to kick.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (targetUser.id === interaction.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot kick self",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Du kannst dich nicht selbst entfernen.",
             );
         }
 
         if (targetUser.id === client.user.id) {
-            throw new TitanBotError(
+            throw new TitanBotFehler(
                 "Cannot kick bot",
-                ErrorTypes.VALIDATION,
+                FehlerTypes.VALIDATION,
                 "Du kannst nicht kick the bot.",
             );
         }
 
-        if (!member) {
-            throw new TitanBotError(
+        if (!Mitglied) {
+            throw new TitanBotFehler(
                 "Target Nicht gefunden",
-                ErrorTypes.USER_INPUT,
+                FehlerTypes.USER_INPUT,
                 "The target user is not currently in Dieser Server.",
                 { subtype: 'user_not_found' },
             );
@@ -61,14 +61,14 @@ export default {
 
         const result = await ModerationService.kickUser({
             guild: interaction.guild,
-            member,
-            moderator: interaction.member,
+            Mitglied,
+            moderator: interaction.Mitglied,
             reason,
         });
 
-        await InteractionHelper.universalReply(interaction, {
+        await InteractionHilfeer.universalReply(interaction, {
             embeds: [
-                successEmbed(
+                ErfolgEmbed(
                     `👢 **Kicked** ${targetUser.tag}`,
                     `**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
                 ),
@@ -76,6 +76,7 @@ export default {
         });
     },
 };
+
 
 
 

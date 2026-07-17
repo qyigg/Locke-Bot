@@ -1,6 +1,6 @@
 ﻿import { getColor } from '../../config/bot.js';
-import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, ChannelType } from 'discord.js';
-import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
+import { SlashCommandBuilder, BerechtigungFlagsBits, MessageFlags, KanalType } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
 import { handleErstellen } from './modules/serverstats_Erstellen.js';
@@ -8,44 +8,44 @@ import { handleList } from './modules/serverstats_list.js';
 import { handleAktualisieren } from './modules/serverstats_Aktualisieren.js';
 import { handleLöschen } from './modules/serverstats_Löschen.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("serverstats")
-        .setDescription("Manage server statistics that track member counts and channel data")
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+        .setDescription("Manage server statistics that track Mitglied counts and Kanal data")
+        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageKanals)
         .addSubcommand(subcommand =>
             subcommand
                 .setName("Erstellen")
-                .setDescription("Erstellen a new statistics tracker channel in a category")
+                .setDescription("Erstellen a new statistics tracker Kanal in a category")
                 .addStringOption(option =>
                     option
                         .setName("type")
                         .setDescription("The type of statistics to track")
                         .setRequired(true)
                         .addChoices(
-                            { name: "members + bots", value: "members" },
-                            { name: "members only", value: "members_only" },
+                            { name: "Mitglieds + bots", value: "Mitglieds" },
+                            { name: "Mitglieds only", value: "Mitglieds_only" },
                             { name: "bots only", value: "bots" }
                         )
                 )
                 .addStringOption(option =>
                     option
-                        .setName("channel_type")
+                        .setName("Kanal_type")
                         .setDescription("Der Kanal type to Erstellen for this tracker")
                         .setRequired(true)
                         .addChoices(
-                            { name: "voice channel (recommended)", value: "voice" },
-                            { name: "text channel", value: "text" }
+                            { name: "voice Kanal (recommended)", value: "voice" },
+                            { name: "text Kanal", value: "text" }
                         )
                 )
-                .addChannelOption(option =>
+                .addKanalOption(option =>
                     option
                         .setName("category")
-                        .setDescription("The category where the statistics tracker channel will be Erstellend")
+                        .setDescription("The category where the statistics tracker Kanal will be Erstellend")
                         .setRequired(true)
-                        .addChannelTypes(ChannelType.GuildCategory)
+                        .addKanalTypes(KanalType.GuildCategory)
                 )
         )
         .addSubcommand(subcommand =>
@@ -69,8 +69,8 @@ export default {
                         .setDescription("The new tracker type")
                         .setRequired(false)
                         .addChoices(
-                            { name: "members + bots", value: "members" },
-                            { name: "members only", value: "members_only" },
+                            { name: "Mitglieds + bots", value: "Mitglieds" },
+                            { name: "Mitglieds only", value: "Mitglieds_only" },
                             { name: "bots only", value: "bots" }
                         )
                 )
@@ -104,8 +104,9 @@ export default {
                 await handleLöschen(interaction, client);
                 break;
             default:
-                await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Unknown subcommand.' });
+                await replyUserFehler(interaction, { type: FehlerTypes.VALIDATION, message: 'Unknown subcommand.' });
         }
     }
 };
+
 

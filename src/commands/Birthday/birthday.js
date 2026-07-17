@@ -1,15 +1,15 @@
-﻿import { SlashCommandBuilder, MessageFlags, ChannelType } from 'discord.js';
-import { ErstellenEmbed, successEmbed } from '../../utils/embeds.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+﻿import { SlashCommandBuilder, MessageFlags, KanalType } from 'discord.js';
+import { ErstellenEmbed, ErfolgEmbed } from '../../utils/embeds.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 
 import birthdaySet from './modules/birthday_set.js';
-import birthdayInfo from './modules/birthday_info.js';
+import birthdayInfo from './modules/birthday_Info.js';
 import birthdayList from './modules/birthday_list.js';
 import birthdayRemove from './modules/birthday_remove.js';
 import NächsteBirthdays from './modules/Nächste_birthdays.js';
-import birthdaySetchannel from './modules/birthday_setchannel.js';
+import birthdaySetKanal from './modules/birthday_setKanal.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('geburtstag')
@@ -37,7 +37,7 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName('info')
+                .setName('Info')
                 .setDescription('Zeige Geburtstagsangaben an')
                 .addUserOption(option =>
                     option
@@ -63,13 +63,13 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName('setchannel')
+                .setName('setKanal')
                 .setDescription('Lege den Kanal für Geburtstagsankündigungen fest oder deaktiviere ihn. (Server verwalten erforderlich)')
-                .addChannelOption(option =>
+                .addKanalOption(option =>
                     option
-                        .setName('channel')
+                        .setName('Kanal')
                         .setDescription('Der Textkanal für Ankündigungen. Leerlassen zum Deaktivieren.')
-                        .addChannelTypes(ChannelType.GuildText)
+                        .addKanalTypes(KanalType.GuildText)
                         .setRequired(false)
                 )
         ),
@@ -80,7 +80,7 @@ export default {
         switch (subcommand) {
             case 'set':
                 return await birthdaySet.execute(interaction, config, client);
-            case 'info':
+            case 'Info':
                 return await birthdayInfo.execute(interaction, config, client);
             case 'list':
                 return await birthdayList.execute(interaction, config, client);
@@ -88,10 +88,11 @@ export default {
                 return await birthdayRemove.execute(interaction, config, client);
             case 'Nächste':
                 return await NächsteBirthdays.execute(interaction, config, client);
-            case 'setchannel':
-                return await birthdaySetchannel.execute(interaction, config, client);
+            case 'setKanal':
+                return await birthdaySetKanal.execute(interaction, config, client);
             default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unbekannter Unterkommando' });
+                return await replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: 'Unbekannter Unterkommando' });
         }
     }
 };
+

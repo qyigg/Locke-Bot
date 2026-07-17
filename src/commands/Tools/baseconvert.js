@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 import { getColor } from '../../config/bot.js';
 
 const BASE_ALPHABETS = {
@@ -35,7 +35,7 @@ function parseBigIntFromBase(value, baseKey) {
 
     const charset = BASE_CHARSETS[baseKey];
     if (!charset) {
-        throw new Error(`Unsupported base: ${baseKey}`);
+        throw new Fehler(`UnUnterstützunged base: ${baseKey}`);
     }
 
     const normalized = ['BIN', 'OCT', 'DEC', 'HEX', 'B36'].includes(baseKey)
@@ -48,7 +48,7 @@ function parseBigIntFromBase(value, baseKey) {
     for (const char of normalized) {
         const digit = charset.indexOf(char);
         if (digit < 0) {
-            throw new Error(`Invalid character '${char}' for base ${baseKey}`);
+            throw new Fehler(`Invalid character '${char}' for base ${baseKey}`);
         }
         result = (result * base) + BigInt(digit);
     }
@@ -74,7 +74,7 @@ function formatBigIntToBase(value, baseKey) {
 
     const charset = BASE_CHARSETS[baseKey];
     if (!charset) {
-        throw new Error(`Unsupported base: ${baseKey}`);
+        throw new Fehler(`UnUnterstützunged base: ${baseKey}`);
     }
 
     if (value === 0n) {
@@ -114,9 +114,9 @@ export default {
                 .addChoices(...BASE_NAMES)),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
-        if (!deferSuccess) {
-            logger.warn(`BaseConvert interaction defer failed`, {
+        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
+        if (!deferErfolg) {
+            logger.warn(`BaseConvert interaction defer Fehlgeschlagen`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'baseconvert'
@@ -135,8 +135,8 @@ export default {
             : numberStr;
 
         if (!cleanNumber) {
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'You must provide a number to convert.\n\n**Example:** `/baseconvert number:1010 from:BIN to:DEC`',
             });
         }
@@ -156,8 +156,8 @@ export default {
                 examples = '\n\n**Valid:** FF, A1B2, DEADBEEF | **Invalid:** G (only 0-9, A-F)';
             }
             logger.warn(`Invalid base conversion input: ${cleanNumber} for base ${fromBase}`);
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: `You provided: \`${cleanNumber}\`\n\nValid characters: \`${alphabet}\`${examples}`,
             });
         }
@@ -169,10 +169,10 @@ export default {
             } else {
                 decimalValue = parseBigIntFromBase(cleanNumber, fromBase);
             }
-        } catch (error) {
-            logger.error('Base conversion parse error:', error);
-            return replyUserError(interaction, {
-                type: ErrorTypes.VALIDATION,
+        } catch (Fehler) {
+            logger.Fehler('Base conversion parse Fehler:', Fehler);
+            return replyUserFehler(interaction, {
+                type: FehlerTypes.VALIDATION,
                 message: 'The number is too large to process.\n\nTry with a smaller number.',
             });
         }
@@ -184,20 +184,20 @@ export default {
             try {
                 result = formatBigIntToBase(decimalValue, toBase);
 
-                const embed = successEmbed(
+                const embed = ErfolgEmbed(
                     '🔄 Base Conversion Result',
                     `**From ${fromName} (${fromBase}):** \`${fromPrefix}${cleanNumber}\`\n` +
                     `**To ${toName} (${toBase}):** \`${toPrefix}${result}\`\n` +
                     `**Decimal:** \`${decimalValue.toLocaleString()}\``
                 );
-                embed.setColor(getColor('success'));
+                embed.setColor(getColor('Erfolg'));
 
-                await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+                await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
 
-            } catch (error) {
-                logger.error(`Base conversion error to ${toName}:`, error);
-                await replyUserError(interaction, {
-                    type: ErrorTypes.VALIDATION,
+            } catch (Fehler) {
+                logger.Fehler(`Base conversion Fehler to ${toName}:`, Fehler);
+                await replyUserFehler(interaction, {
+                    type: FehlerTypes.VALIDATION,
                     message: 'The result would be too large or incompatible.\n\nTry with a smaller number or different target base.',
                 });
             }
@@ -213,18 +213,19 @@ export default {
                     let value = formatBigIntToBase(decimalValue, baseKey);
 
                     description += `**${name} (${baseKey}):** \`${prefix}${value}\`\n`;
-                } catch (error) {
+                } catch (Fehler) {
                     description += `**${name} (${baseKey}):** *Too large to convert*\n`;
                 }
             }
 
-            const embed = successEmbed(
+            const embed = ErfolgEmbed(
                 '🔄 Base Conversion Results',
                 description
             );
             embed.setColor(getColor('primary'));
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
         }
     },
 };
+

@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from 'discord.js';
-import { ErstellenEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
+import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
-import { withErrorHandling, ErstellenError, ErrorTypes } from '../../utils/errorHandler.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { withFehlerHandling, ErstellenFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 const FISH_COOLDOWN = 45 * 60 * 1000; 
 const BASE_MIN_REWARD = 300;
@@ -34,8 +34,8 @@ export default {
         .setName('fish')
         .setDescription('Gehe fischen um Fische zu fangen und Geld zu verdienen'),
 
-    execute: withErrorHandling(async (interaction, config, client) => {
-        const deferred = await InteractionHelper.safeDefer(interaction);
+    execute: withFehlerHandling(async (interaction, config, client) => {
+        const deferred = await InteractionHilfeer.safeDefer(interaction);
         if (!deferred) return;
             
             const userId = interaction.user.id;
@@ -53,9 +53,9 @@ export default {
                     (remaining % (1000 * 60 * 60)) / (1000 * 60),
                 );
 
-                throw ErstellenError(
+                throw ErstellenFehler(
                     "Fishing cooldown active",
-                    ErrorTypes.RATE_LIMIT,
+                    FehlerTypes.RATE_LIMIT,
                     `Du bist zu müde zum Fischen. Ruhe dich **${hours}h ${minutes}m** aus, bevor du wieder fischst.`,
                     { remaining, cooldownType: 'fish' }
                 );
@@ -127,7 +127,8 @@ export default {
                 )
                 .setFooter({ text: `Nächste Angeltour verfügbar in 45 Minuten.` });
 
-            await InteractionHelper.safeBearbeitenReply(interaction, { embeds: [embed] });
+            await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     }, { command: 'fish' })
 };
+
 
