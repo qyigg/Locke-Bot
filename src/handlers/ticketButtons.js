@@ -352,7 +352,7 @@ const pinTicketHandler = {
 
         await interaction.editReply({
           embeds: [createEmbed({
-            title: '📌 Ticket Unpinned',
+            title: '📌 Ticket abgeheftet',
             description: 'Dieses Ticket wurde abgeheftet und zum normalen Standort verschoben.',
             color: 0x95A5A6
           })],
@@ -375,7 +375,7 @@ const pinTicketHandler = {
 
         await interaction.editReply({
           embeds: [createEmbed({
-            title: '📌 Ticket Pinned',
+            title: '📌 Ticket angeheftet',
             description: 'Dieses Ticket wurde an die Spitze der Kategorie gehängt.',
             color: 0x3498db
           })],
@@ -407,7 +407,7 @@ const pinTicketHandler = {
       });
 
     } catch (error) {
-      logger.error('Error pinning/unpinning ticket:', error);
+      logger.error('Fehler beim Anheften/Abheften des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
         await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket nicht anheften/abheften.' });
       } else if (interaction.deferred) {
@@ -430,13 +430,13 @@ const unclaimTicketHandler = {
       
       const { unclaimTicket } = await import('../services/ticket.js');
       await unclaimTicket(interaction.channel, interaction.member);
-      await interaction.editReply({ embeds: [successEmbed('Ticket Unclaimed', 'Dieses Ticket wurde unclaimed.') ] });
+      await interaction.editReply({ embeds: [successEmbed('Ticket freigegeben', 'Dieses Ticket wurde freigegeben.') ] });
     } catch (error) {
       logger.error('Fehler beim Unclaimen des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket nicht unclaimen.' });
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket nicht freigeben.' });
       } else if (interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket nicht unclaimen.' });
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket nicht freigeben.' });
       }
     }
   }

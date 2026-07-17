@@ -6,11 +6,11 @@ import { logTicketFeedback } from '../../../utils/ticket/ticketLogging.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 
 const STAR_LABELS = {
-    '1': '⭐ 1 — Poor',
-    '2': '⭐ 2 — Below Average',
-    '3': '⭐ 3 — Average',
-    '4': '⭐ 4 — Good',
-    '5': '⭐ 5 — Excellent',
+    '1': '⭐ 1 — Schlecht',
+    '2': '⭐ 2 — Unterdurchschnittlich',
+    '3': '⭐ 3 — Durchschnittlich',
+    '4': '⭐ 4 — Gut',
+    '5': '⭐ 5 — Exzellent',
 };
 
 const feedbackHandler = {
@@ -24,8 +24,8 @@ const feedbackHandler = {
             await InteractionHelper.safeReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('⚠️ Invalid Feedback Link')
-                        .setDescription('This feedback link appears to be malformed.')
+                        .setTitle('⚠️ Ungültiger Feedback-Link')
+                        .setDescription('Dieser Feedback-Link scheint fehlerhaft zu sein.')
                         .setColor(getColor('error')),
                 ],
                 components: [],
@@ -51,8 +51,8 @@ const feedbackHandler = {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('⚠️ Ticket Not Found')
-                        .setDescription('Could not find the ticket associated with this survey.')
+                        .setTitle('⚠️ Ticket nicht gefunden')
+                        .setDescription('Das zu dieser Umfrage gehörige Ticket konnte nicht gefunden werden.')
                         .setColor(getColor('error')),
                 ],
                 components: [],
@@ -64,8 +64,8 @@ const feedbackHandler = {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('❌ Not Allowed')
-                        .setDescription('Only the ticket creator can submit feedback for this ticket.')
+                        .setTitle('❌ Nicht erlaubt')
+                        .setDescription('Nur der Ticket-Ersteller kann Feedback für dieses Ticket abgeben.')
                         .setColor(getColor('error')),
                 ],
                 components: [],
@@ -77,8 +77,8 @@ const feedbackHandler = {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('✅ Already Submitted')
-                        .setDescription(`You already rated this ticket **${STAR_LABELS[String(ticketData.feedback.rating)]}**.\nThank you for your feedback!`)
+                        .setTitle('✅ Bereits abgegeben')
+                        .setDescription(`Du hast dieses Ticket bereits mit **${STAR_LABELS[String(ticketData.feedback.rating)]}** bewertet.\nDanke für dein Feedback!`)
                         .setColor(getColor('success')),
                 ],
                 components: [],
@@ -87,7 +87,7 @@ const feedbackHandler = {
         }
 
         const rating = parseInt(ratingStr, 10);
-        const ratingLabel = STAR_LABELS[String(rating)] ?? `${rating} stars`;
+        const ratingLabel = STAR_LABELS[String(rating)] ?? `${rating} Sterne`;
 
         try {
             ticketData.feedback = {
@@ -115,10 +115,10 @@ const feedbackHandler = {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 new EmbedBuilder()
-                    .setTitle('✅ Thanks for your feedback!')
-                    .setDescription(`You rated your support experience **${ratingLabel}**.\n\nYour feedback has been recorded and helps us improve!`)
+                    .setTitle('✅ Danke für dein Feedback!')
+                    .setDescription(`Du hast deine Support-Erfahrung mit **${ratingLabel}** bewertet.\n\nDein Feedback wurde gespeichert und hilft uns, besser zu werden!`)
                     .setColor(getColor('success'))
-                    .setFooter({ text: 'Thank you for using our support system.' })
+                    .setFooter({ text: 'Danke, dass du unser Support-System nutzt.' })
                     .setTimestamp(),
             ],
             components: [],
@@ -143,8 +143,8 @@ const commentHandler = {
             await interaction.update({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('⚠️ Invalid Feedback Link')
-                        .setDescription('This feedback action appears to be malformed.')
+                        .setTitle('⚠️ Ungültiger Feedback-Link')
+                        .setDescription('Diese Feedback-Aktion scheint fehlerhaft zu sein.')
                         .setColor(getColor('error')),
                 ],
                 components: [],
@@ -154,13 +154,13 @@ const commentHandler = {
 
         const modal = new ModalBuilder()
             .setCustomId(`ticket_feedback_comment_modal:${guildId}:${channelId}`)
-            .setTitle('Add Ticket Feedback');
+            .setTitle('Ticket-Feedback hinzufügen');
 
         const commentInput = new TextInputBuilder()
             .setCustomId('feedback_comment')
-            .setLabel('Your feedback')
+            .setLabel('Dein Feedback')
             .setStyle(TextInputStyle.Paragraph)
-            .setPlaceholder('Share what went well or how we can improve...')
+            .setPlaceholder('Teile mit, was gut lief oder was wir verbessern können ...')
             .setRequired(true)
             .setMaxLength(1000);
 
@@ -177,8 +177,8 @@ const declineHandler = {
         await interaction.update({
             embeds: [
                 new EmbedBuilder()
-                    .setTitle('👋 No problem!')
-                    .setDescription('You can always reach out again if you need further support.')
+                    .setTitle('👋 Kein Problem!')
+                    .setDescription('Du kannst dich jederzeit wieder melden, wenn du weitere Unterstützung brauchst.')
                     .setColor(getColor('default')),
             ],
             components: [],
