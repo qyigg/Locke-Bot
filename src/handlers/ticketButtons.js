@@ -231,22 +231,37 @@ const closeTicketModalHandler = {
     try {
       if (!(await ensureGuildContext(interaction))) return;
 
-      await assertTicketPermission(interaction, client, 'close this ticket', { allowTicketCreator: true }, 2000);
+      const context = await getTicketPermissionContext({ client, interaction });
+      if (!context.ticketData) {
+        await replyUserError(interaction, {
+          type: ErrorTypes.UNKNOWN,
+          message: 'Dieser Befehl kann nur in einem gültigen Ticket-Kanal verwendet werden.'
+        });
+        return;
+      }
 
       const deferSuccess = await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
       if (!deferSuccess) return;
 
       const providedReason = interaction.fields.getTextInputValue('reason')?.trim();
-      const reason = providedReason || 'Ohne Grund angegeben';
+      const reason = providedReason || 'Geschlossen ohne Angabe eines Grundes.';
 
       await closeTicket(interaction.channel, interaction.user, reason);
-      await interaction.editReply({ embeds: [successEmbed('Ticket Closed', 'This ticket has been closed.')] });
+      await interaction.editReply({
+        embeds: [successEmbed('Ticket Geschlossen', 'Dieses Ticket wurde geschlossen.')]
+      });
     } catch (error) {
       logger.error('Error submitting close ticket modal:', error);
       if (!interaction.replied && !interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket-Schließungsformular nicht öffnen.' });
+        await replyUserError(interaction, {
+          type: ErrorTypes.UNKNOWN,
+          message: 'Beim Schließen des Tickets ist ein Fehler aufgetreten.'
+        });
       } else if (interaction.deferred) {
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket-Schließungsformular nicht öffnen.' });
+        await replyUserError(interaction, {
+          type: ErrorTypes.UNKNOWN,
+          message: 'Beim Schließen des Tickets ist ein Fehler aufgetreten.'
+        });
       }
     }
   }
@@ -266,7 +281,7 @@ const claimTicketHandler = {
       await claimTicket(interaction.channel, interaction.user);
       await interaction.editReply({ embeds: [successEmbed('Ticket Beansprucht', 'Du hast dieses Ticket beansprucht.')] });
     } catch (error) {
-      logger.error('Error claiming ticket:', error);
+      logger.error('Fehler beim Beanspruchen des Tickets:', error);
       if (!interaction.replied && !interaction.deferred) {
         await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Konnte das Ticket nicht beanspruchen.' });
       } else if (interaction.deferred) {
