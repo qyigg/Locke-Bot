@@ -35,7 +35,15 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             });
         }
 
-        const member = interaction.member;
+        const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+        if (!member) {
+            throw createError(
+                'Guild member could not be fetched for reaction role update',
+                ErrorTypes.USER_INPUT,
+                'Dein Mitgliedsprofil konnte nicht geladen werden. Bitte versuche es erneut.',
+                { guildId: interaction.guildId, userId: interaction.user.id }
+            );
+        }
         const selectedRoleIds = interaction.values;
 
         const me = interaction.guild.members.me ?? await interaction.guild.members.fetchMe().catch(() => null);
@@ -67,13 +75,9 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
         const addedRoles = [];
         const removedRoles = [];
         const skippedRoles = [];
+        const selectedSet = new Set(selectedRoleIds);
 
-        for (const roleId of selectedRoleIds) {
-            if (!availableRoleIds.includes(roleId)) {
-                logger.warn(`Role ${roleId} not in available roles for message ${interaction.message.id}`);
-                continue;
-            }
-
+        for (const roleId of availableRoleIds) {
             const role = interaction.guild.roles.cache.get(roleId);
             if (!role) {
                 logger.warn(`Role ${roleId} not found in guild ${interaction.guildId}`);
@@ -99,12 +103,15 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
             }
 
             if (role.position >= botRolePosition) {
-                logger.warn(`Cannot assign role ${role.name} (${roleId}), hierarchy issue`);
+                logger.warn(`Cannot manage role ${role.name} (${roleId}), hierarchy issue`);
                 skippedRoles.push(role.name);
                 continue;
             }
 
-            if (!member.roles.cache.has(roleId)) {
+            const shouldHaveRole = selectedSet.has(roleId);
+            const hasRole = member.roles.cache.has(roleId);
+
+            if (shouldHaveRole && !hasRole) {
                 try {
                     await member.roles.add(role);
                     addedRoles.push(role.name);
@@ -113,24 +120,14 @@ export async function handleReactionRolesSelectMenu(interaction, client) {
                     logger.error(`Failed to add role ${role.name} to ${member.user.tag}:`, roleError);
                     skippedRoles.push(role.name);
                 }
-            }
-        }
-
-        for (const roleId of availableRoleIds) {
-            if (selectedRoleIds.includes(roleId)) continue;
-
-            const role = interaction.guild.roles.cache.get(roleId);
-            if (!role) continue;
-
-            if (role.position >= botRolePosition) continue;
-
-            if (member.roles.cache.has(roleId)) {
+            } else if (!shouldHaveRole && hasRole) {
                 try {
                     await member.roles.remove(role);
                     removedRoles.push(role.name);
                     logger.debug(`Removed role ${role.name} from ${member.user.tag}`);
                 } catch (roleError) {
                     logger.error(`Failed to remove role ${role.name} from ${member.user.tag}:`, roleError);
+                    skippedRoles.push(role.name);
                 }
             }
         }
