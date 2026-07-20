@@ -118,13 +118,13 @@ function buildButtonRow(cfg, guildId, disabled = false) {
         new ButtonBuilder()
             .setCustomId(`level_cfg_toggle_announce_${guildId}`)
             .setLabel('Ankündigungen')
-            .setStyle(announceOn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(announceOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('📣')
             .setDisabled(disabled),
         new ButtonBuilder()
             .setCustomId(`level_cfg_toggle_system_${guildId}`)
             .setLabel('Levelsystem')
-            .setStyle(systemOn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('⚡')
             .setDisabled(disabled),
     );
@@ -719,5 +719,6 @@ async function handleXpCooldown(selectInteraction, rootInteraction, cfg, guildId
 
     await refreshDashboard(rootInteraction, cfg, guildId);
 }
+
 
 

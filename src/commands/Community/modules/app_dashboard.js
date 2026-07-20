@@ -120,7 +120,7 @@ function buildButtonRow(Einstellungen, guildId, disabled = false) {
         new ButtonBuilder()
             .setCustomId(`app_cfg_toggle_${guildId}`)
             .setLabel('Bewerbungen')
-            .setStyle(systemOn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setDisabled(disabled),
     );
 }
@@ -330,7 +330,7 @@ async function showApplicationDashboard(rootInteraction, selectedRolle, Einstell
         new ButtonBuilder()
             .setCustomId(`app_toggle_${selectedRolle.RolleId}`)
             .setLabel(isEnabled ? 'Bewerbung deaktivieren' : 'Bewerbung aktivieren')
-            .setStyle(isEnabled ? ButtonStyle.Danger : ButtonStyle.Erfolg),
+            .setStyle(isEnabled ? ButtonStyle.Danger : ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(`app_Löschen_${selectedRolle.RolleId}`)
             .setLabel('Bewerbung löschen')
@@ -1152,6 +1152,7 @@ async function handleLöschenApplication(BestätigenAbsenden, selectedRolleId, g
         await replyUserFehler(BestätigenAbsenden, { type: FehlerTypes.UNKNOWN, message: 'Ein Fehler ist beim Löschen der Bewerbung aufgetreten. Bitte versuche es später erneut.' });
     }
 }
+
 
 
 

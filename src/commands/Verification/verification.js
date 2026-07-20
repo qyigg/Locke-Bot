@@ -191,7 +191,7 @@ async function handleSetup(interaction, guild, client) {
         new ButtonBuilder()
             .setCustomId("Verifizieren_user")
             .setLabel(buttonText)
-            .setStyle(ButtonStyle.Erfolg)
+            .setStyle(ButtonStyle.Success)
             .setEmoji("✅")
     );
 
@@ -248,6 +248,7 @@ async function handleRemove(interaction, guild, client) {
         embeds: [ErfolgEmbed('Verifizierung entfernt', `Verifizierung von ${targetUser.tag} entfernt.`)]
     });
 }
+
 
 
 

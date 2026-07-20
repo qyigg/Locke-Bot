@@ -95,7 +95,7 @@ function buildButtonRow(cfg, guildId, disabled = false) {
         new ButtonBuilder()
             .setCustomId(`autoVerifizieren_cfg_toggle_${guildId}`)
             .setLabel('Auto-Verifizierung')
-            .setStyle(autoVerifizierenOn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(autoVerifizierenOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('🤖')
             .setDisabled(disabled),
     );
@@ -502,6 +502,7 @@ async function handleAccountAge(selectInteraction, rootInteraction, guildConfig,
 
     await refreshDashboard(rootInteraction, guildConfig, guildId, client);
 }
+
 
 
 

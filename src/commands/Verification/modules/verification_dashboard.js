@@ -45,7 +45,7 @@ async function AktualisierenLivePanel(guild, cfg) {
             new ButtonBuilder()
                 .setCustomId('Verifizieren_user')
                 .setLabel(cfg.buttonText || botConfig.verification.defaultButtonText)
-                .setStyle(ButtonStyle.Erfolg)
+                .setStyle(ButtonStyle.Success)
                 .setEmoji('✅'),
         );
 
@@ -137,7 +137,7 @@ function buildButtonRow(cfg, guildId, disabled = false, panelStatus = null) {
         new ButtonBuilder()
             .setCustomId(`verif_cfg_toggle_${guildId}`)
             .setLabel('Verifizierung')
-            .setStyle(systemOn ? ButtonStyle.Erfolg : ButtonStyle.Danger)
+            .setStyle(systemOn ? ButtonStyle.Success : ButtonStyle.Danger)
             .setEmoji('🔒')
             .setDisabled(disabled),
     );
@@ -164,7 +164,7 @@ async function repostVerificationPanel(guild, cfg) {
         new ButtonBuilder()
             .setCustomId('Verifizieren_user')
             .setLabel(cfg.buttonText || botConfig.verification.defaultButtonText)
-            .setStyle(ButtonStyle.Erfolg)
+            .setStyle(ButtonStyle.Success)
             .setEmoji('✅'),
     );
 
@@ -460,7 +460,7 @@ async function handleKanal(selectInteraction, rootInteraction, cfg, guildId, cli
                     new ButtonBuilder()
                         .setCustomId('Verifizieren_user')
                         .setLabel(cfg.buttonText || botConfig.verification.defaultButtonText)
-                        .setStyle(ButtonStyle.Erfolg)
+                        .setStyle(ButtonStyle.Success)
                         .setEmoji('✅'),
                 );
 
@@ -667,6 +667,7 @@ async function handleButtonText(selectInteraction, rootInteraction, cfg, guildId
         
     }
 }
+
 
 
 

@@ -306,7 +306,7 @@ async function handleReview(interaction) {
         new ButtonBuilder()
             .setCustomId(`app_review_approve_${appId}`)
             .setLabel('Genehmigen')
-            .setStyle(ButtonStyle.Erfolg),
+            .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(`app_review_deny_${appId}`)
             .setLabel('Ablehnen')
@@ -580,6 +580,7 @@ async function handleList(interaction) {
         flags: ["Ephemeral"],
     });
 }
+
 
 
 
