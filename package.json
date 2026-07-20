@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "titanbot",
   "version": "2.1.0",
   "description": "Modular Ultimate Community Bot by Touchpoint Support",
@@ -36,3 +36,4 @@
     "undici": "^6.27.0"
   }
 }
+
