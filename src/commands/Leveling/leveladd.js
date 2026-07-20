@@ -1,49 +1,49 @@
-﻿import { SlashCommandBuilder, BerechtigungFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
-import { checkUserBerechtigungs } from '../../utils/BerechtigungGuard.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { addLevels, getLevelingConfig } from '../../services/leveling/leveling.js';
-import { ErstellenEmbed } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
 
-import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('leveladd')
-    .setDescription('Füge Levels zu einem Benutzer hinzu')
+    .setDescription('Add levels to a user')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('Der Benutzer, dem Levels hinzugefügt werden sollen')
+        .setDescription('The user to add levels to')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Anzahl der hinzuzufügenden Levels')
+        .setDescription('Number of levels to add')
         .setRequired(true)
         .setMinValue(1)
     )
-    .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
-    .setDMBerechtigung(false),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .setDMPermission(false),
   category: 'Leveling',
 
   async execute(interaction, config, client) {
-    await InteractionHilfeer.safeDefer(interaction);
+    await InteractionHelper.safeDefer(interaction);
 
-    const hasBerechtigung = await checkUserBerechtigungs(
+    const hasPermission = await checkUserPermissions(
       interaction,
-      BerechtigungFlagsBits.ManageGuild,
-      'Du benötigst die Berechtigung **Server verwalten**, um diesen Befehl zu verwenden.'
+      PermissionFlagsBits.ManageGuild,
+      'You need ManageGuild permission to use this command.'
     );
-    if (!hasBerechtigung) return;
+    if (!hasPermission) return;
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {
-      await InteractionHilfeer.safeBearbeitenReply(interaction, {
+      await InteractionHelper.safeEditReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('Das Levelsystem ist derzeit auf diesem Server deaktiviert.')
+            .setDescription('The leveling system is currently disabled on this server.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -53,32 +53,29 @@ export default {
     const targetUser = interaction.options.getUser('user');
     const levelsToAdd = interaction.options.getInteger('levels');
 
-    const Mitglied = await interaction.guild.Mitglieds.fetch(targetUser.id).catch(() => null);
-    if (!Mitglied) {
-      throw new TitanBotFehler(
-        `User ${targetUser.id} Nicht gefunden in Diese Gilde`,
-        FehlerTypes.USER_INPUT,
-        'Der angegebene Benutzer ist nicht auf diesem Server.'
+    const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
+    if (!member) {
+      throw new TitanBotError(
+        `User ${targetUser.id} not found in this guild`,
+        ErrorTypes.USER_INPUT,
+        'The specified user is not in this server.'
       );
     }
 
     const userData = await addLevels(client, interaction.guildId, targetUser.id, levelsToAdd);
 
-    await InteractionHilfeer.safeBearbeitenReply(interaction, {
+    await InteractionHelper.safeEditReply(interaction, {
       embeds: [
-        ErstellenEmbed({
-          title: 'Levels hinzugefügt',
-          description: `Erfolgreich ${levelsToAdd} Levels zu ${targetUser.tag} hinzugefügt.\n**Neues Level:** ${userData.level}`,
-          color: 'Erfolg'
+        createEmbed({
+          title: 'Levels Added',
+          description: `Successfully added ${levelsToAdd} levels to ${targetUser.tag}.\n**New Level:** ${userData.level}`,
+          color: 'success'
         })
       ]
     });
 
-    logger.Info(
+    logger.info(
       `[ADMIN] User ${interaction.user.tag} added ${levelsToAdd} levels to ${targetUser.tag} in guild ${interaction.guildId}`
     );
   }
 };
-
-
-
