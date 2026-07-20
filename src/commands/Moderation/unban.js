@@ -1,32 +1,32 @@
-﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
-import { ErfolgEmbed } from '../../utils/embeds.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
-import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName("unban")
-        .setDescription("UnVerbanne einen Benutzer vom Server")
+        .setDescription("Hebe den Bann eines Benutzers auf")
         .addStringOption(option =>
             option
                 .setName("target")
-                .setDescription("The ID (or mention) of Der Benutzer to unban")
+                .setDescription("Die ID (oder Erwähnung) des zu entbannenden Benutzers")
                 .setRequired(true),
         )
         .addStringOption(option =>
             option.setName("reason")
-                .setDescription("Reason for the unban")
+                .setDescription("Grund für die Entbannung")
                 .setRequired(false),
         )
-        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.BanMitglieds),
+        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
-        if (!deferErfolg) {
-            logger.warn(`Unban interaction defer Fehlgeschlagen`, {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
+            logger.warn(`Unban interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'unban',
@@ -38,17 +38,17 @@ export default {
         const targetId = rawTarget.replace(/[<@!>]/g, '').trim();
 
         if (!/^\d{17,20}$/.test(targetId)) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.USER_INPUT,
-                message: 'Please provide a valid user ID or mention.',
+            return replyUserError(interaction, {
+                type: ErrorTypes.USER_INPUT,
+                message: 'Bitte gib eine gültige Benutzer-ID oder Erwähnung an.',
             });
         }
 
         const targetUser = await client.users.fetch(targetId).catch(() => null);
         if (!targetUser) {
-            return replyUserFehler(interaction, {
-                type: FehlerTypes.USER_INPUT,
-                message: `Could not find a user with the ID \`${targetId}\`.`,
+            return replyUserError(interaction, {
+                type: ErrorTypes.USER_INPUT,
+                message: `Es konnte kein Benutzer mit der ID \`${targetId}\` gefunden werden.`,
             });
         }
 
@@ -57,22 +57,17 @@ export default {
         const result = await ModerationService.unbanUser({
             guild: interaction.guild,
             user: targetUser,
-            moderator: interaction.Mitglied,
+            moderator: interaction.member,
             reason,
         });
 
-        await InteractionHilfeer.safeBearbeitenReply(interaction, {
+        await InteractionHelper.safeEditReply(interaction, {
             embeds: [
-                ErfolgEmbed(
-                    "✅ User Unbanned",
-                    `Erfolgfully unbanned **${targetUser.tag}** from the server.\n\n**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                successEmbed(
+                    '✅ Benutzer entbannt',
+                    `**${targetUser.tag}** wurde erfolgreich entbannt.\n\n**Grund:** ${reason}\n**Fall-ID:** #${result.caseId}`,
                 ),
             ],
         });
     },
 };
-
-
-
-
-

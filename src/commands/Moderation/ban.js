@@ -1,8 +1,8 @@
-﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
-import { ErfolgEmbed } from '../../utils/embeds.js';
-import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { successEmbed } from '../../utils/embeds.js';
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -11,13 +11,13 @@ export default {
         .addUserOption((option) =>
             option
                 .setName("target")
-        .setDescription("Der zu banneende Benutzer")
+                .setDescription("Der zu bannende Benutzer")
                 .setRequired(true),
         )
         .addStringOption((option) =>
-            option.setName("reason").setDescription("Grund für den Ban"),
+            option.setName("reason").setDescription("Grund für den Bann"),
         )
-        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.BanMitglieds),
+        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
@@ -25,47 +25,43 @@ export default {
         const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!user) {
-            throw new TitanBotFehler(
-                'Zielbenutzer fehlt',
-                FehlerTypes.USER_INPUT,
-                'Du musst einen Benutzer angeben zum Bannen.',
+            throw new TitanBotError(
+                'Missing target user',
+                ErrorTypes.USER_INPUT,
+                'Du musst einen Benutzer zum Bannen angeben.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (user.id === interaction.user.id) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Cannot ban self',
-                FehlerTypes.VALIDATION,
-                'Du kannst dich nicht selbst verbannen.',
+                ErrorTypes.VALIDATION,
+                'Du kannst dich nicht selbst bannen.',
             );
         }
         if (user.id === client.user.id) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 'Cannot ban bot',
-                FehlerTypes.VALIDATION,
-                'Du kannst nicht den Bot bannen.',
+                ErrorTypes.VALIDATION,
+                'Du kannst den Bot nicht bannen.',
             );
         }
 
         const result = await ModerationService.banUser({
             guild: interaction.guild,
             user,
-            moderator: interaction.Mitglied,
+            moderator: interaction.member,
             reason,
         });
 
-        await InteractionHilfeer.universalReply(interaction, {
+        await InteractionHelper.universalReply(interaction, {
             embeds: [
-                ErfolgEmbed(
-                    `🚫 **Banned** ${user.tag}`,
-                    `**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                successEmbed(
+                    `🚫 **Gebannt** ${user.tag}`,
+                    `**Grund:** ${reason}\n**Fall-ID:** #${result.caseId}`,
                 ),
             ],
         });
     },
 };
-
-
-
-

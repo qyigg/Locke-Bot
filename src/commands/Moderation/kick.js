@@ -1,8 +1,8 @@
-﻿import { SlashCommandBuilder, BerechtigungFlagsBits } from 'discord.js';
-import { ErfolgEmbed } from '../../utils/embeds.js';
-import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { successEmbed } from '../../utils/embeds.js';
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -11,73 +11,68 @@ export default {
         .addUserOption((option) =>
             option
                 .setName("target")
-                .setDescription("Der Benutzer to kick")
+                .setDescription("Der zu entfernende Benutzer")
                 .setRequired(true),
         )
         .addStringOption((option) =>
-            option.setName("reason").setDescription("Reason for the kick"),
+            option.setName("reason").setDescription("Grund für den Kick"),
         )
-        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.KickMitglieds),
+        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
         const targetUser = interaction.options.getUser("target");
-        const Mitglied = interaction.options.getMitglied("target");
+        const member = interaction.options.getMember("target");
         const reason = interaction.options.getString("reason") || "Kein Grund angegeben";
 
         if (!targetUser) {
-            throw new TitanBotFehler(
-                'Zielbenutzer fehlt',
-                FehlerTypes.USER_INPUT,
-                'Du musst angeben a user to kick.',
+            throw new TitanBotError(
+                'Missing target user',
+                ErrorTypes.USER_INPUT,
+                'Du musst einen Benutzer zum Entfernen angeben.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (targetUser.id === interaction.user.id) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 "Cannot kick self",
-                FehlerTypes.VALIDATION,
-                "Du kannst dich nicht selbst entfernen.",
+                ErrorTypes.VALIDATION,
+                "Du kannst dich nicht selbst kicken.",
             );
         }
 
         if (targetUser.id === client.user.id) {
-            throw new TitanBotFehler(
+            throw new TitanBotError(
                 "Cannot kick bot",
-                FehlerTypes.VALIDATION,
-                "Du kannst nicht kick the bot.",
+                ErrorTypes.VALIDATION,
+                "Du kannst den Bot nicht kicken.",
             );
         }
 
-        if (!Mitglied) {
-            throw new TitanBotFehler(
-                "Target Nicht gefunden",
-                FehlerTypes.USER_INPUT,
-                "The target user is not currently in Dieser Server.",
+        if (!member) {
+            throw new TitanBotError(
+                "Target not found",
+                ErrorTypes.USER_INPUT,
+                "Der Zielbenutzer ist aktuell nicht auf diesem Server.",
                 { subtype: 'user_not_found' },
             );
         }
 
         const result = await ModerationService.kickUser({
             guild: interaction.guild,
-            Mitglied,
-            moderator: interaction.Mitglied,
+            member,
+            moderator: interaction.member,
             reason,
         });
 
-        await InteractionHilfeer.universalReply(interaction, {
+        await InteractionHelper.universalReply(interaction, {
             embeds: [
-                ErfolgEmbed(
-                    `👢 **Kicked** ${targetUser.tag}`,
-                    `**Reason:** ${reason}\n**Case ID:** #${result.caseId}`,
+                successEmbed(
+                    `👢 **Gekickt** ${targetUser.tag}`,
+                    `**Grund:** ${reason}\n**Fall-ID:** #${result.caseId}`,
                 ),
             ],
         });
     },
 };
-
-
-
-
-

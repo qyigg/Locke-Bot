@@ -71,7 +71,7 @@ export default {
                 throw ErstellenFehler(
                     'Missing ManageGuild Berechtigung for verification admin subcommand',
                     FehlerTypes.Berechtigung,
-                    'You need the **Manage Server** Berechtigung to use this verification subcommand.',
+                    'Du benötigst die Berechtigung **Server verwalten**, um diesen Verifizierungs-Unterbefehl zu verwenden.',
                     { subcommand, requiredBerechtigung: 'ManageGuild', userId: interaction.user.id }
                 );
             }
@@ -87,7 +87,7 @@ export default {
                     throw ErstellenFehler(
                         `Unknown subcommand: ${subcommand}`,
                         FehlerTypes.VALIDATION,
-                        "Please select a valid subcommand.",
+                        'Bitte wähle einen gültigen Unterbefehl aus.',
                         { subcommand }
                     );
             }
@@ -108,7 +108,7 @@ async function handleSetup(interaction, guild, client) {
         throw ErstellenFehler(
             'Bot Mitglied Nicht gefunden in guild cache',
             FehlerTypes.Konfiguration,
-            'I could not Verifizieren my Berechtigungs in Dieser Server. Bitte versuchen Sie es später erneut in a moment.',
+            'Meine Berechtigungen konnten nicht auf diesem Server überprüft werden. Bitte versuche es in einem Moment erneut.',
             { guildId: guild.id }
         );
     }
@@ -126,7 +126,7 @@ async function handleSetup(interaction, guild, client) {
         throw ErstellenFehler(
             `Missing Kanal Berechtigungs: ${missingKanalPerms.join(', ')}`,
             FehlerTypes.Berechtigung,
-            'I need **View Kanal**, **Send Messages**, and **Embed Links** in the verification Kanal.',
+            'Ich benötige **Kanal anzeigen**, **Nachrichten senden** und **Links einbetten** im Verifizierungskanal.',
             { missingBerechtigungs: missingKanalPerms, Kanal: verificationKanal.id }
         );
     }
@@ -135,7 +135,7 @@ async function handleSetup(interaction, guild, client) {
         throw ErstellenFehler(
             "Missing ManageRollen Berechtigung",
             FehlerTypes.Berechtigung,
-            "I need the 'Manage Rollen' Berechtigung to give verified Rollen.",
+            "Ich benötige die Berechtigung 'Rollen verwalten', um verifizierte Rollen zu vergeben.",
             { missingBerechtigung: "ManageRollen" }
         );
     }
@@ -144,7 +144,7 @@ async function handleSetup(interaction, guild, client) {
         throw ErstellenFehler(
             'Invalid verified Rolle selected',
             FehlerTypes.VALIDATION,
-            'Please choose a normal assignable Rolle (not @everyone or an integration-managed Rolle).',
+            'Bitte wähle eine normale, zuweisbare Rolle aus (nicht @everyone oder eine integrationsgesteuerte Rolle).',
             { RolleId: verifiedRolle.id, managed: verifiedRolle.managed }
         );
     }
@@ -154,7 +154,7 @@ async function handleSetup(interaction, guild, client) {
         throw ErstellenFehler(
             "Rolle hierarchy Fehler",
             FehlerTypes.Berechtigung,
-            "The verified Rolle must be below my highest Rolle in the server Rolle hierarchy.",
+            "Die verifizierte Rolle muss unterhalb meiner höchsten Rolle in der Server-Rollenhierarchie liegen.",
             { RollePosition: verifiedRolle.position, botRollePosition: botRolle.position }
         );
     }
@@ -168,7 +168,7 @@ async function handleSetup(interaction, guild, client) {
         throw ErstellenFehler(
             'Verification setup blocked by conflicting onboarding system',
             FehlerTypes.Konfiguration,
-            'Du kannst nicht enable the verification system while **AutoVerifizieren** or **AutoRolle** is configured. Disable those first.',
+            'Das Verifizierungssystem kann nicht aktiviert werden, solange **AutoVerifizieren** oder **AutoRolle** konfiguriert ist. Deaktiviere diese zuerst.',
             {
                 guildId: guild.id,
                 hasAutoVerifizierenEnabled,
@@ -213,11 +213,11 @@ async function handleSetup(interaction, guild, client) {
 
     await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [ErfolgEmbed(
-            'Verification System Aktualisierend',
+            'Verifizierungssystem aktualisiert',
             [
                 `Kanal: ${verificationKanal}`,
-                `Verified Rolle: ${verifiedRolle}`,
-                `Button Text: ${buttonText}`
+                `Verifizierte Rolle: ${verifiedRolle}`,
+                `Button-Text: ${buttonText}`
             ].join('\n')
         )]
     });
@@ -233,7 +233,7 @@ async function handleRemove(interaction, guild, client) {
 
     if (result.Status === 'not_verified') {
         return await InteractionHilfeer.safeReply(interaction, {
-            embeds: [InfoEmbed('Nicht verifiziert', `${targetUser.tag} does not currently have the verified Rolle.`)],
+            embeds: [InfoEmbed('Nicht verifiziert', `${targetUser.tag} hat aktuell nicht die verifizierte Rolle.`)],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -245,7 +245,7 @@ async function handleRemove(interaction, guild, client) {
     });
 
     return await InteractionHilfeer.safeReply(interaction, {
-        embeds: [ErfolgEmbed('Verification Removed', `Verification removed from ${targetUser.tag}.`)]
+        embeds: [ErfolgEmbed('Verifizierung entfernt', `Verifizierung von ${targetUser.tag} entfernt.`)]
     });
 }
 

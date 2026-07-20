@@ -1,11 +1,11 @@
-﻿import { SlashCommandBuilder, BerechtigungFlagsBits, BerechtigungsBitField, KanalType, MessageFlags } from 'discord.js';
-import { ErstellenEmbed, FehlerEmbed, ErfolgEmbed, InfoEmbed, WarnungEmbed } from '../../utils/embeds.js';
+import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, MessageFlags } from 'discord.js';
+import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logModerationAction } from '../../utils/moderation.js';
 import { logger } from '../../utils/logger.js';
-import { WarnungService } from '../../services/moderation/WarnungService.js';
+import { WarningService } from '../../services/moderation/warningService.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
-import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
-import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
+import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("warn")
@@ -14,21 +14,21 @@ export default {
             o
                 .setName("target")
                 .setRequired(true)
-                .setDescription("User to warn"),
+                .setDescription("Zu verwarnender Benutzer"),
         )
         .addStringOption((o) =>
             o
                 .setName("reason")
                 .setRequired(true)
-                .setDescription("Reason for the Warnung"),
+                .setDescription("Grund für die Verwarnung"),
         )
-        .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ModerateMitglieds),
+        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     category: "moderation",
 
     async execute(interaction, config, client) {
-        const deferErfolg = await InteractionHilfeer.safeDefer(interaction);
-        if (!deferErfolg) {
-            logger.warn(`Warn interaction defer Fehlgeschlagen`, {
+        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        if (!deferSuccess) {
+            logger.warn(`Warn interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
                 commandName: 'warn'
@@ -37,40 +37,40 @@ export default {
         }
 
         const target = interaction.options.getUser("target");
-        const Mitglied = interaction.options.getMitglied("target");
+        const member = interaction.options.getMember("target");
         const reason = interaction.options.getString("reason");
         const moderator = interaction.user;
         const guildId = interaction.guildId;
 
         if (!target) {
-            throw new TitanBotFehler(
-                'Zielbenutzer fehlt',
-                FehlerTypes.USER_INPUT,
-                'Du musst angeben a user to warn.',
+            throw new TitanBotError(
+                'Missing target user',
+                ErrorTypes.USER_INPUT,
+                'Du musst einen Benutzer zum Verwarnen angeben.',
                 { subtype: 'invalid_user' },
             );
         }
 
         if (!reason) {
-            throw new TitanBotFehler(
-                'Missing Warnung reason',
-                FehlerTypes.VALIDATION,
-                'You must provide a reason for the Warnung.',
+            throw new TitanBotError(
+                'Missing warning reason',
+                ErrorTypes.VALIDATION,
+                'Du musst einen Grund für die Verwarnung angeben.',
                 { subtype: 'missing_required' },
             );
         }
 
-        if (!Mitglied) {
-            throw new TitanBotFehler(
-                "Target Nicht gefunden",
-                FehlerTypes.USER_INPUT,
-                "The target user is not currently in Dieser Server."
+        if (!member) {
+            throw new TitanBotError(
+                "Target not found",
+                ErrorTypes.USER_INPUT,
+                "Der Zielbenutzer ist aktuell nicht auf diesem Server."
             );
         }
 
-        ModerationService.assertModerationHierarchy(interaction.Mitglied, Mitglied, 'warn');
+        ModerationService.assertModerationHierarchy(interaction.member, member, 'warn');
 
-        const { id, totalCount } = await WarnungService.addWarnung({
+        const { id, totalCount } = await WarningService.addWarning({
             guildId,
             userId: target.id,
             moderatorId: moderator.id,
@@ -82,7 +82,7 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: "User Warned",
+                action: "Benutzer verwarnt",
                 target: `${target.tag} (${target.id})`,
                 executor: `${moderator.tag} (${moderator.id})`,
                 reason,
@@ -90,24 +90,19 @@ export default {
                     userId: target.id,
                     moderatorId: moderator.id,
                     totalWarns: totalCount,
-                    WarnungNumber: totalCount,
-                    WarnungId: id
+                    warningNumber: totalCount,
+                    warningId: id
                 }
             }
         });
 
-        await InteractionHilfeer.safeBearbeitenReply(interaction, {
+        await InteractionHelper.safeEditReply(interaction, {
             embeds: [
-                ErfolgEmbed(
-                    `⚠️ **Warned** ${target.tag}`,
-                    `**Reason:** ${reason}\n**Total Warns:** ${totalCount}`,
+                successEmbed(
+                    `⚠️ **Verwarnt** ${target.tag}`,
+                    `**Grund:** ${reason}\n**Verwarnungen gesamt:** ${totalCount}`,
                 ),
             ],
         });
     }
 };
-
-
-
-
-
