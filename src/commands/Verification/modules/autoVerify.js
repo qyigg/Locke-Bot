@@ -7,7 +7,7 @@ import { validateAutoVerifizierenCriteria } from '../../../services/verification
 import { logger } from '../../../utils/logger.js';
 import { InteractionHilfeer } from '../../../utils/interactionHilfeer.js';
 import { getWelcomeConfig } from '../../../utils/database.js';
-import autoVerifizierenDashboard from './autoVerifizierenDashboard.js';
+import autoVerifizierenDashboard from './autoVerifyDashboard.js';
 
 const autoVerifizierenDefaults = botConfig.verification?.autoVerifizieren || {};
 const minAccountAgeDays = autoVerifizierenDefaults.minAccountAge ?? 1;
