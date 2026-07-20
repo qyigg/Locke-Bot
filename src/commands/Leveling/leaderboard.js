@@ -1,27 +1,27 @@
-import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getLeaderboard, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('leaderboard')
-    .setDescription("Shows the server's level leaderboard")
-    .setDMPermission(false),
+    .setDescription("Zeigt die Leveltabelle des Servers")
+    .setDMBerechtigung(false),
   category: 'Leveling',
 
   async execute(interaction, config, client) {
-    await InteractionHelper.safeDefer(interaction);
+    await InteractionHilfeer.safeDefer(interaction);
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
 
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeEditReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('Das Levelsystem ist derzeit auf diesem Server deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -31,25 +31,25 @@ export default {
     const leaderboard = await getLeaderboard(client, interaction.guildId, 10);
 
     if (leaderboard.length === 0) {
-      throw new TitanBotError(
+      throw new TitanBotFehler(
         'No leaderboard data found',
-        ErrorTypes.DATABASE,
-        'No level data found yet. Start chatting to gain XP!'
+        FehlerTypes.DATABASE,
+        'Es wurden noch keine Leveldaten gefunden. Beginne zu chatten, um XP zu verdienen!'
       );
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('Level Leaderboard')
+      .setTitle('Leveltabelle')
       .setColor('#2ecc71')
-      .setDescription("Top 10 most active members in this server:")
+      .setDescription("Die 10 aktivsten Mitglieder auf diesem Server:")
       .setTimestamp();
 
     const leaderboardText = await Promise.all(
       leaderboard.map(async (user, index) => {
         try {
-          const member = await interaction.guild.members.fetch(user.userId).catch(() => null);
-          const userMention = member?.user.toString() || `<@${user.userId}>`;
-          const xpForNextLevel = getXpForLevel(user.level + 1);
+          const Mitglied = await interaction.guild.Mitglieds.fetch(user.userId).catch(() => null);
+          const userMention = Mitglied?.user.toString() || `<@${user.userId}>`;
+          const xpForNächsteLevel = getXpForLevel(user.level + 1);
 
           let rankPrefix = `${index + 1}.`;
           if (index === 0) rankPrefix = '🥇';
@@ -57,19 +57,21 @@ export default {
           else if (index === 2) rankPrefix = '🥉';
           else rankPrefix = `**${index + 1}.**`;
 
-          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNextLevel} XP)`;
+          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNächsteLevel} XP)`;
         } catch {
-          return `**${index + 1}.** Error loading user ${user.userId}`;
+          return `**${index + 1}.** Fehler beim Laden des Benutzers ${user.userId}`;
         }
       })
     );
 
     embed.addFields({
-      name: 'Rankings',
+      name: 'Platzierungen',
       value: leaderboardText.join('\n')
     });
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Leaderboard displayed for guild ${interaction.guildId}`);
   }
 };
+
+

@@ -1,32 +1,32 @@
-import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
+import { TitanBotFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
 import { getUserLevelData, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
-    .setDescription("Check your or another user's rank and level")
+    .setDescription("Überprüfe deinen oder den Rang eines anderen Benutzers")
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to check the rank of')
+        .setDescription('Der Benutzer, dessen Rang überprüft werden soll')
         .setRequired(false)
     )
-    .setDMPermission(false),
+    .setDMBerechtigung(false),
   category: 'Leveling',
 
   async execute(interaction, config, client) {
-    await InteractionHelper.safeDefer(interaction);
+    await InteractionHilfeer.safeDefer(interaction);
 
     const levelingConfig = await getLevelingConfig(client, interaction.guildId);
     if (!levelingConfig?.enabled) {
-      await InteractionHelper.safeEditReply(interaction, {
+      await InteractionHilfeer.safeBearbeitenReply(interaction, {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('Das Levelsystem ist derzeit auf diesem Server deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -34,15 +34,15 @@ export default {
     }
 
     const targetUser = interaction.options.getUser('user') || interaction.user;
-    const member = await interaction.guild.members
+    const Mitglied = await interaction.guild.Mitglieds
       .fetch(targetUser.id)
       .catch(() => null);
 
-    if (!member) {
-      throw new TitanBotError(
-        `User ${targetUser.id} not found in guild`,
-        ErrorTypes.USER_INPUT,
-        'Could not find the specified user in this server.'
+    if (!Mitglied) {
+      throw new TitanBotFehler(
+        `User ${targetUser.id} Nicht gefunden in guild`,
+        FehlerTypes.USER_INPUT,
+        'Der angegebene Benutzer konnte auf diesem Server nicht gefunden werden.'
       );
     }
 
@@ -56,11 +56,11 @@ export default {
 
     const xpNeeded = getXpForLevel(safeUserData.level + 1);
     const progress = xpNeeded > 0 ? Math.floor((safeUserData.xp / xpNeeded) * 100) : 0;
-    const progressBar = createProgressBar(progress, 20);
+    const progressBar = ErstellenProgressBar(progress, 20);
 
     const embed = new EmbedBuilder()
-      .setTitle(`${member.displayName}'s Rank`)
-      .setThumbnail(member.displayAvatarURL({ dynamic: true }))
+      .setTitle(`${Mitglied.displayName}'s Rang`)
+      .setThumbnail(Mitglied.displayAvatarURL({ dynamic: true }))
       .addFields(
         {
           name: 'Level',
@@ -68,32 +68,35 @@ export default {
           inline: true
         },
         {
-          name: 'XP',
+          name: 'Erfahrungspunkte',
           value: `${safeUserData.xp}/${xpNeeded}`,
           inline: true
         },
         {
-          name: 'Total XP',
+          name: 'Gesamt-XP',
           value: safeUserData.totalXp.toString(),
           inline: true
         },
         {
-          name: `Progress to Level ${safeUserData.level + 1}`,
+          name: `Fortschritt zum Level ${safeUserData.level + 1}`,
           value: `${progressBar} ${progress}%`
         }
       )
       .setColor('#2ecc71')
       .setTimestamp();
 
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    await InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed] });
     logger.debug(`Rank checked for user ${targetUser.id} in guild ${interaction.guildId}`);
   }
 };
 
-function createProgressBar(percentage, length = 10) {
+function ErstellenProgressBar(percentage, length = 10) {
   if (percentage < 0 || percentage > 100) {
     percentage = Math.max(0, Math.min(100, percentage));
   }
   const filled = Math.round((percentage / 100) * length);
   return '█'.repeat(filled) + '░'.repeat(length - filled);
 }
+
+
+

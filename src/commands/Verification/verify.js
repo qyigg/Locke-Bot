@@ -1,35 +1,39 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { infoEmbed, successEmbed } from '../../utils/embeds.js';
-import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
-import { verifyUser } from '../../services/verificationService.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+﻿import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { InfoEmbed, ErfolgEmbed } from '../../utils/embeds.js';
+import { replyUserFehler, FehlerTypes } from '../../utils/FehlerHandler.js';
+import { VerifizierenUser } from '../../services/verificationService.js';
+import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('verify')
-        .setDescription('Verifiziere dich und erhalte Zugriff auf den Server'),
+        .setName('Verifizieren')
+        .setDescription('Verifiziere dich selbst und erhalte Zugriff auf den Server'),
 
     async execute(interaction, config, client) {
         const guild = interaction.guild;
 
-        const result = await verifyUser(client, guild.id, interaction.user.id, {
+        const result = await VerifizierenUser(client, guild.id, interaction.user.id, {
             source: 'command_self',
             moderatorId: null
         });
 
-        if (result.status === 'already_verified') {
-            return await InteractionHelper.safeReply(interaction, {
-                embeds: [infoEmbed('Bereits verifiziert', 'Du bist bereits verifiziert.')],
+        if (result.Status === 'already_verified') {
+            return await InteractionHilfeer.safeReply(interaction, {
+                embeds: [InfoEmbed('Bereits verifiziert', "Du bist bereits verifiziert.")],
                 flags: MessageFlags.Ephemeral
             });
         }
 
-        await InteractionHelper.safeReply(interaction, {
-            embeds: [successEmbed(
-                'Verifizierung erfolgreich',
-                `Du wurdest verifiziert und hast die Rolle **${result.roleName}** erhalten! Willkommen auf dem Server! 🎉`
+        await InteractionHilfeer.safeReply(interaction, {
+            embeds: [ErfolgEmbed(
+                "Verifizierung erfolgreich",
+                `Du wurdest verifiziert und erhältst die **${result.RolleName}** Rolle! Willkommen auf dem Server! 🎉`
             )],
             flags: MessageFlags.Ephemeral
         });
     }
 };
+
+
+
+
