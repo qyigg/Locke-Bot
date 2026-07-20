@@ -36,14 +36,14 @@ export default {
             });
 
             const embed = ErfolgEmbed(
-                '✅ Join to Erstellen Einrichtung abgeschlossen',
-                `Erstellend trigger Kanal: ${triggerKanal}\n\n` +
+                '✅ Einrichtung abgeschlossen',
+                `Auslöser-Kanal erstellt: ${triggerKanal}\n\n` +
                 `**Einstellungen:**\n` +
-                `• Temporary Kanal Name Template: \`${nameTemplate}\`\n` +
-                `• User Limit: ${userLimit === 0 ? 'No limit' : userLimit + ' users'}\n` +
+                `• Kanalname-Vorlage: \`${nameTemplate}\`\n` +
+                `• Benutzerlimit: ${userLimit === 0 ? 'Unbegrenzt' : userLimit + ' Benutzer'}\n` +
                 `• Bitrate: ${bitrate} kbps\n` +
-                `${category ?`• Category: ${category.name}`: '• Category: None (root level)'}\n\n` +
-                `When users join this Kanal, a temporary voice Kanal will be Erstellend for them.`
+                `${category ?`• Kategorie: ${category.name}`: '• Kategorie: Stammebene'}\n\n` +
+                `Wenn Benutzer diesem Kanal beitreten, wird automatisch ein temporärer Sprachkanal für sie erstellt.`
             );
 
             try {
@@ -71,7 +71,7 @@ export default {
             throw new TitanBotFehler(
                 `Setup Fehlgeschlagen: ${Fehler.message}`,
                 FehlerTypes.DISCORD_API,
-                'Fehlgeschlagen to set up Join to Erstellen system.'
+                'Das Einrichten des Bei-Beitritt-erstellen-Systems ist fehlgeschlagen.'
             );
         }
     }

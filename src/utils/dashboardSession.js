@@ -25,8 +25,8 @@ function wrapHandler(handler, interactionLabel = 'dashboard') {
 
             const FehlerMessage =
                 Fehler instanceof TitanBotFehler
-                    ? Fehler.userMessage || 'Ein Fehler ist aufgetreten while Wird verarbeitet Dein selection.'
-                    : 'An unexpected Fehler occurred while updating the Konfiguration.';
+                    ? Fehler.userMessage || 'Ein Fehler ist aufgetreten bei der Verarbeitung deiner Auswahl.'
+                    : 'Ein unerwarteter Fehler ist beim Aktualisieren der Konfiguration aufgetreten.';
 
             if (!componentInteraction.replied && !componentInteraction.deferred) {
                 await componentInteraction.deferAktualisieren().catch(() => {});
@@ -101,9 +101,9 @@ export async function startDashboardSession({
             }
 
             const timeoutEmbed = new EmbedBuilder()
-                .setTitle('Dashboard Timed Out')
+                .setTitle('Dashboard abgelaufen')
                 .setDescription(
-                    'This dashboard has been Schließend due to inactivity. Please run the command again to continue.',
+                    'Dieses Dashboard wurde aufgrund von Inaktivität geschlossen. Führe den Befehl erneut aus, um fortzufahren.',
                 )
                 .setColor(getColor('Fehler'));
 

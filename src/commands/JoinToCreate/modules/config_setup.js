@@ -33,57 +33,57 @@ export default {
             throw new TitanBotFehler(
                 `Kanal ${triggerKanal.id} is not a Join to Erstellen trigger`,
                 FehlerTypes.VALIDATION,
-                `${triggerKanal} is not configured as a Join to Erstellen trigger Kanal.`
+                `${triggerKanal} ist kein konfigurierter Bei-Beitritt-erstellen-Auslöser-Kanal.`
             );
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('Join to Erstellen Konfiguration')
-            .setDescription(`Configure Einstellungen for ${triggerKanal}`)
+            .setTitle('Bei Beitritt erstellen — Konfiguration')
+            .setDescription(`Einstellungen für ${triggerKanal}`)
             .setColor(getColor('Info'))
             .addFields(
                 {
-                    name: 'Current Kanal Name Template',
+                    name: 'Aktuelle Kanalname-Vorlage',
                     value: `\`${currentConfig.KanalOptions?.[triggerKanal.id]?.nameTemplate || currentConfig.KanalNameTemplate}\``,
                     inline: false
                 },
                 {
-                    name: 'Current User Limit',
-                    value: `${currentConfig.KanalOptions?.[triggerKanal.id]?.userLimit || currentConfig.userLimit === 0 ? 'No limit' : currentConfig.userLimit + ' users'}`,
+                    name: 'Aktuelles Benutzerlimit',
+                    value: `${currentConfig.KanalOptions?.[triggerKanal.id]?.userLimit || currentConfig.userLimit === 0 ? 'Kein Limit' : currentConfig.userLimit + ' Benutzer'}`,
                     inline: true
                 },
                 {
-                    name: 'Current Bitrate',
+                    name: 'Aktuelle Bitrate',
                     value: `${(currentConfig.KanalOptions?.[triggerKanal.id]?.bitrate || currentConfig.bitrate) / 1000} kbps`,
                     inline: true
                 }
             )
-            .setFooter({ text: 'Select an option to configure below' })
+            .setFooter({ text: 'Wähle unten eine Option zum Konfigurieren' })
             .setTimestamp();
 
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId(`jointoErstellen_config_${triggerKanal.id}`)
-            .setPlaceholder('Select a Konfiguration option')
+            .setPlaceholder('Konfigurationsoption auswählen')
             .addOptions(
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Change Kanal Name Template')
-                    .setDescription('Modify the template for temporary Kanal names')
+                    .setLabel('Kanalname-Vorlage ändern')
+                    .setDescription('Vorlage für temporäre Kanalnamen anpassen')
                     .setValue('name_template'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Change User Limit')
-                    .setDescription('Set maximum users per temporary Kanal')
+                    .setLabel('Benutzerlimit ändern')
+                    .setDescription('Maximale Benutzer pro temporärem Kanal festlegen')
                     .setValue('user_limit'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Change Bitrate')
-                    .setDescription('Adjust audio quality for temporary Kanals')
+                    .setLabel('Bitrate ändern')
+                    .setDescription('Audioqualität für temporäre Kanäle anpassen')
                     .setValue('bitrate'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Remove This Trigger Kanal')
-                    .setDescription('Remove this Kanal from the Join to Erstellen system')
+                    .setLabel('Diesen Auslöser-Kanal entfernen')
+                    .setDescription('Diesen Kanal aus dem Bei-Beitritt-erstellen-System entfernen')
                     .setValue('remove_trigger'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('View Current Einstellungen')
-                    .setDescription('Show all current Konfiguration details')
+                    .setLabel('Aktuelle Einstellungen anzeigen')
+                    .setDescription('Alle aktuellen Konfigurationsdetails anzeigen')
                     .setValue('view_Einstellungen')
             );
 
@@ -170,22 +170,22 @@ time: 60000
 
 async function handleNameTemplateChange(interaction, triggerKanal, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('Kanal Name Template Konfiguration')
-        .setDescription('Please enter the new Kanal name template.')
+        .setTitle('Kanalname-Vorlage konfigurieren')
+        .setDescription('Bitte gib die neue Kanalname-Vorlage ein.')
         .addFields(
             {
-                name: 'Available Variables',
-                value: '• `{username}` - User\'s username\n• `{display_name}` - User\'s display name\n• `{user_tag}` - User\'s tag (User#1234)\n• `{guild_name}` - Server name',
+                name: 'Verfügbare Variablen',
+                value: '• `{username}` – Benutzername\n• `{display_name}` – Anzeigename\n• `{user_tag}` – Tag (User#1234)\n• `{guild_name}` – Servername',
                 inline: false
             },
             {
-                name: 'Current Template',
+                name: 'Aktuelle Vorlage',
                 value: `\`${currentConfig.KanalOptions?.[triggerKanal.id]?.nameTemplate || currentConfig.KanalNameTemplate}\``,
                 inline: false
             }
         )
         .setColor(getColor('Info'))
-        .setFooter({ text: 'Type Dein new template in the chat below' });
+        .setFooter({ text: 'Gib deine neue Vorlage im Chat ein' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
@@ -202,7 +202,7 @@ time: 600_000,
             if (!newTemplate || newTemplate.length > 100) {
                 await replyUserFehler(interaction, {
                     type: FehlerTypes.VALIDATION,
-                    message: 'Template must be between 1 and 100 characters.'
+                    message: 'Die Vorlage muss zwischen 1 und 100 Zeichen lang sein.'
                 });
                 return;
             }
@@ -218,7 +218,7 @@ time: 600_000,
             });
 
             await interaction.followUp({
-                embeds: [ErfolgEmbed('Template Aktualisierend', `Kanal name template changed to \`${newTemplate}\``)],
+                embeds: [ErfolgEmbed('Vorlage aktualisiert', `Kanalname-Vorlage geändert zu \`${newTemplate}\``)],
                 flags: MessageFlags.Ephemeral,
             });
 
@@ -231,8 +231,8 @@ time: 600_000,
             }
             
             const FehlerMessage = Fehler instanceof TitanBotFehler
-                ? Fehler.userMessage || 'Could not Aktualisieren Der Kanal name template.'
-                : 'Could not Aktualisieren Der Kanal name template.';
+                ? Fehler.userMessage || 'Die Kanalname-Vorlage konnte nicht aktualisiert werden.'
+                : 'Die Kanalname-Vorlage konnte nicht aktualisiert werden.';
                 
             await replyUserFehler(interaction, {
                 type: FehlerTypes.Konfiguration,
@@ -245,7 +245,7 @@ time: 600_000,
         if (reason === 'time') {
             replyUserFehler(interaction, {
                 type: FehlerTypes.RATE_LIMIT,
-                message: 'No response received. Template Aktualisieren Abbrechenled.'
+                message: 'Keine Antwort erhalten. Vorlage-Aktualisierung abgebrochen.'
             }).catch(() => {});
         }
     });
@@ -253,17 +253,17 @@ time: 600_000,
 
 async function handleUserLimitChange(interaction, triggerKanal, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('User Limit Konfiguration')
-        .setDescription('Please enter the new user limit (0-99, where 0 = no limit).')
+        .setTitle('Benutzerlimit konfigurieren')
+        .setDescription('Bitte gib das neue Benutzerlimit ein (0–99, wobei 0 = kein Limit).')
         .addFields(
             {
-                name: 'Current Limit',
-                value: `${currentConfig.KanalOptions?.[triggerKanal.id]?.userLimit || currentConfig.userLimit === 0 ? 'No limit' : currentConfig.userLimit + ' users'}`,
+                name: 'Aktuelles Limit',
+                value: `${currentConfig.KanalOptions?.[triggerKanal.id]?.userLimit || currentConfig.userLimit === 0 ? 'Kein Limit' : currentConfig.userLimit + ' Benutzer'}`,
                 inline: false
             }
         )
         .setColor(getColor('Info'))
-        .setFooter({ text: 'Type the new limit in the chat below' });
+        .setFooter({ text: 'Gib das neue Limit im Chat ein' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
@@ -280,7 +280,7 @@ async function handleUserLimitChange(interaction, triggerKanal, currentConfig, c
             if (newLimit < 0 || newLimit > 99) {
                 await replyUserFehler(interaction, {
                     type: FehlerTypes.VALIDATION,
-                    message: 'User limit must be between 0 and 99.'
+                    message: 'Das Benutzerlimit muss zwischen 0 und 99 liegen.'
                 });
                 return;
             }
@@ -296,7 +296,7 @@ async function handleUserLimitChange(interaction, triggerKanal, currentConfig, c
             });
 
             await interaction.followUp({
-                embeds: [ErfolgEmbed('Limit Aktualisierend', `User limit changed to ${newLimit === 0 ? 'No limit' : newLimit + ' users'}`)],
+                embeds: [ErfolgEmbed('Limit aktualisiert', `Benutzerlimit geändert zu ${newLimit === 0 ? 'Kein Limit' : newLimit + ' Benutzer'}`)],
                 flags: MessageFlags.Ephemeral,
             });
 
@@ -309,8 +309,8 @@ async function handleUserLimitChange(interaction, triggerKanal, currentConfig, c
             }
             
             const FehlerMessage = Fehler instanceof TitanBotFehler
-                ? Fehler.userMessage || 'Could not Aktualisieren Der Benutzer limit.'
-                : 'Could not Aktualisieren Der Benutzer limit.';
+                ? Fehler.userMessage || 'Das Benutzerlimit konnte nicht aktualisiert werden.'
+                : 'Das Benutzerlimit konnte nicht aktualisiert werden.';
                 
             await replyUserFehler(interaction, {
                 type: FehlerTypes.Konfiguration,
@@ -323,7 +323,7 @@ async function handleUserLimitChange(interaction, triggerKanal, currentConfig, c
         if (reason === 'time') {
             replyUserFehler(interaction, {
                 type: FehlerTypes.RATE_LIMIT,
-                message: 'No valid response received. Aktualisieren Abbrechenled.'
+                message: 'Keine gültige Antwort erhalten. Aktualisierung abgebrochen.'
             }).catch(() => {});
         }
     });
@@ -331,22 +331,22 @@ async function handleUserLimitChange(interaction, triggerKanal, currentConfig, c
 
 async function handleBitrateChange(interaction, triggerKanal, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('Bitrate Konfiguration')
-        .setDescription('Please enter the new bitrate in kbps (8-384).')
+        .setTitle('Bitrate konfigurieren')
+        .setDescription('Bitte gib die neue Bitrate in kbps ein (8–384).')
         .addFields(
             {
-                name: 'Current Bitrate',
+                name: 'Aktuelle Bitrate',
                 value: `${(currentConfig.KanalOptions?.[triggerKanal.id]?.bitrate || currentConfig.bitrate) / 1000} kbps`,
                 inline: false
             },
             {
-                name: 'Common Values',
-                value: '• 64 kbps - Normal quality\n• 96 kbps - Good quality\n• 128 kbps - High quality\n• 256 kbps - Very high quality',
+                name: 'Häufige Werte',
+                value: '• 64 kbps – Normale Qualität\n• 96 kbps – Gute Qualität\n• 128 kbps – Hohe Qualität\n• 256 kbps – Sehr hohe Qualität',
                 inline: false
             }
         )
         .setColor(getColor('Info'))
-        .setFooter({ text: 'Type the new bitrate in the chat below' });
+        .setFooter({ text: 'Gib die neue Bitrate im Chat ein' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
@@ -363,7 +363,7 @@ async function handleBitrateChange(interaction, triggerKanal, currentConfig, cli
             if (newBitrate < 8 || newBitrate > 384) {
                 await replyUserFehler(interaction, {
                     type: FehlerTypes.VALIDATION,
-                    message: 'Bitrate must be between 8 and 384 kbps.'
+                    message: 'Die Bitrate muss zwischen 8 und 384 kbps liegen.'
                 });
                 return;
             }
@@ -379,7 +379,7 @@ async function handleBitrateChange(interaction, triggerKanal, currentConfig, cli
             });
 
             await interaction.followUp({
-                embeds: [ErfolgEmbed('Bitrate Aktualisierend', `Bitrate changed to ${newBitrate} kbps`)],
+                embeds: [ErfolgEmbed('Bitrate aktualisiert', `Bitrate geändert zu ${newBitrate} kbps`)],
                 flags: MessageFlags.Ephemeral,
             });
 
@@ -392,8 +392,8 @@ async function handleBitrateChange(interaction, triggerKanal, currentConfig, cli
             }
             
             const FehlerMessage = Fehler instanceof TitanBotFehler
-                ? Fehler.userMessage || 'Could not Aktualisieren the bitrate.'
-                : 'Could not Aktualisieren the bitrate.';
+                ? Fehler.userMessage || 'Die Bitrate konnte nicht aktualisiert werden.'
+                : 'Die Bitrate konnte nicht aktualisiert werden.';
                 
             await replyUserFehler(interaction, {
                 type: FehlerTypes.Konfiguration,
@@ -406,7 +406,7 @@ async function handleBitrateChange(interaction, triggerKanal, currentConfig, cli
         if (reason === 'time') {
             replyUserFehler(interaction, {
                 type: FehlerTypes.RATE_LIMIT,
-                message: 'No valid response received. Aktualisieren Abbrechenled.'
+                message: 'Keine gültige Antwort erhalten. Aktualisierung abgebrochen.'
             }).catch(() => {});
         }
     });
@@ -414,15 +414,15 @@ async function handleBitrateChange(interaction, triggerKanal, currentConfig, cli
 
 async function handleRemoveTrigger(interaction, triggerKanal, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('Remove Trigger Kanal')
-        .setDescription(`Are you sure you want to remove ${triggerKanal} from the Join to Erstellen system?`)
+        .setTitle('Auslöser-Kanal entfernen')
+        .setDescription(`Bist du sicher, dass du ${triggerKanal} aus dem Bei-Beitritt-erstellen-System entfernen möchtest?`)
         .setColor('#ff6600')
-        .setFooter({ text: 'This action cannot be unFertig' });
+        .setFooter({ text: 'Diese Aktion kann nicht rückgängig gemacht werden' });
 
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`Bestätigen_remove_${triggerKanal.id}`)
-            .setLabel('Remove Kanal')
+            .setLabel('Kanal entfernen')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`Abbrechen_remove_${triggerKanal.id}`)
@@ -453,13 +453,13 @@ async function handleRemoveTrigger(interaction, triggerKanal, currentConfig, cli
                 
                 if (Erfolg) {
                     await buttonInteraction.followUp({
-                        embeds: [ErfolgEmbed('Kanal Removed', `${triggerKanal} has been removed from the Join to Erstellen system.`)],
+                        embeds: [ErfolgEmbed('Kanal entfernt', `${triggerKanal} wurde aus dem Bei-Beitritt-erstellen-System entfernt.`)],
                         flags: MessageFlags.Ephemeral,
                     });
                 } else {
                     await replyUserFehler(buttonInteraction, {
                         type: FehlerTypes.Konfiguration,
-                        message: 'Could not remove the trigger Kanal.'
+                        message: 'Der Auslöser-Kanal konnte nicht entfernt werden.'
                     });
                 }
             } catch (Fehler) {
@@ -470,8 +470,8 @@ async function handleRemoveTrigger(interaction, triggerKanal, currentConfig, cli
                 }
                 
                 const FehlerMessage = Fehler instanceof TitanBotFehler
-                    ? Fehler.userMessage || 'Ein Fehler ist aufgetreten while removing the trigger Kanal.'
-                    : 'Ein Fehler ist aufgetreten while removing the trigger Kanal.';
+                    ? Fehler.userMessage || 'Ein Fehler ist aufgetreten beim Entfernen des Auslöser-Kanals.'
+                    : 'Ein Fehler ist aufgetreten beim Entfernen des Auslöser-Kanals.';
                     
                 await replyUserFehler(buttonInteraction, {
                     type: FehlerTypes.Konfiguration,
@@ -480,7 +480,7 @@ async function handleRemoveTrigger(interaction, triggerKanal, currentConfig, cli
             }
         } else {
             await buttonInteraction.followUp({
-                embeds: [ErfolgEmbed('Abbrechenled', 'Kanal removal has been Abbrechenled.')],
+                embeds: [ErfolgEmbed('Abgebrochen', 'Kanal-Entfernung wurde abgebrochen.')],
                 flags: MessageFlags.Ephemeral,
             });
         }
@@ -490,7 +490,7 @@ async function handleRemoveTrigger(interaction, triggerKanal, currentConfig, cli
         if (reason === 'time') {
             replyUserFehler(interaction, {
                 type: FehlerTypes.RATE_LIMIT,
-                message: 'No response received. Removal Abbrechenled.'
+                message: 'Keine Antwort erhalten. Entfernung abgebrochen.'
             }).catch(() => {});
         }
     });
@@ -500,23 +500,23 @@ async function handleViewEinstellungen(interaction, triggerKanal, currentConfig,
     const KanalConfig = currentConfig.KanalOptions?.[triggerKanal.id] || {};
     
     const embed = new EmbedBuilder()
-        .setTitle('Current Einstellungen')
-        .setDescription(`Konfiguration for ${triggerKanal}`)
+        .setTitle('Aktuelle Einstellungen')
+        .setDescription(`Konfiguration für ${triggerKanal}`)
         .setColor(getColor('Info'))
         .addFields(
             {
-                name: 'Trigger Kanal',
+                name: 'Auslöser-Kanal',
                 value: `${triggerKanal} (${triggerKanal.id})`,
                 inline: false
             },
             {
-                name: 'Kanal Name Template',
+                name: 'Kanalname-Vorlage',
                 value: `\`${KanalConfig.nameTemplate || currentConfig.KanalNameTemplate}\``,
                 inline: false
             },
             {
-                name: 'User Limit',
-                value: `${KanalConfig.userLimit || currentConfig.userLimit === 0 ? 'No limit' : (KanalConfig.userLimit || currentConfig.userLimit) + ' users'}`,
+                name: 'Benutzerlimit',
+                value: `${KanalConfig.userLimit || currentConfig.userLimit === 0 ? 'Kein Limit' : (KanalConfig.userLimit || currentConfig.userLimit) + ' Benutzer'}`,
                 inline: true
             },
             {
@@ -525,17 +525,17 @@ async function handleViewEinstellungen(interaction, triggerKanal, currentConfig,
                 inline: true
             },
             {
-                name: 'Category',
-                value: currentConfig.categoryId ? `<#${currentConfig.categoryId}>` : 'Not set',
+                name: 'Kategorie',
+                value: currentConfig.categoryId ? `<#${currentConfig.categoryId}>` : 'Nicht festgelegt',
                 inline: true
             },
             {
-                name: 'SystemStatus',
-                value: currentConfig.enabled ? '✅ Enabled' : '❌ Disabled',
+                name: 'Systemstatus',
+                value: currentConfig.enabled ? '✅ Aktiv' : '❌ Deaktiviert',
                 inline: true
             },
             {
-                name: 'Active Temporary Kanals',
+                name: 'Aktive temporäre Kanäle',
                 value: Object.keys(currentConfig.temporaryKanals || {}).length.toString(),
                 inline: true
             }

@@ -98,7 +98,7 @@ export default {
             throw ErstellenFehler(
                 'Applications are disabled',
                 FehlerTypes.Konfiguration,
-                'Applications are currently disabled in Dieser Server.',
+                'Bewerbungen sind auf diesem Server derzeit deaktiviert.',
                 { guildId: guild.id }
             );
         }
@@ -184,7 +184,7 @@ export async function handleApplicationModal(interaction) {
                 eventType: EVENT_TYPES.APPLICATION_Absenden,
                 KanalId: logKanalId,
                 data: {
-                    title: 'Application Absendented',
+                    title: 'Bewerbung eingereicht',
                     lines: [
                         formatLogLine('Bewerber', `<@${interaction.user.id}> (${interaction.user.tag})`),
                         formatLogLine('Bewerbung', applicationRolle.name),
@@ -260,7 +260,7 @@ async function handleList(interaction) {
         throw ErstellenFehler(
             'Fehlgeschlagen to load applications',
             FehlerTypes.DATABASE,
-            'Fehlgeschlagen to load applications. Bitte versuchen Sie es später erneut later.',
+            'Bewerbungen konnten nicht geladen werden. Bitte versuche es später erneut.',
             { guildId: interaction.guild.id }
         );
     }
@@ -342,7 +342,7 @@ async function handleStatus(interaction) {
         const AbsendentedAt = application?.ErstellendAt ? new Date(application.ErstellendAt) : null;
         const AbsendentedAtDisplay = AbsendentedAt && !Number.isNaN(AbsendentedAt.getTime())
             ? AbsendentedAt.toLocaleString()
-            : 'Unknown date';
+            : 'Unbekanntes Datum';
         const StatusView = getApplicationStatusPresentation(application.Status);
         const embed = ErstellenEmbed({
             title: `Bewerbung #${application.id} - ${application.RolleName || 'Unbekannte Rolle'}`,
@@ -377,7 +377,7 @@ async function handleStatus(interaction) {
             const AbsendentedAt = application?.ErstellendAt ? new Date(application.ErstellendAt) : null;
             const AbsendentedAtDisplay = AbsendentedAt && !Number.isNaN(AbsendentedAt.getTime())
                 ? AbsendentedAt.toLocaleDateString()
-                : 'Unknown date';
+                : 'Unbekanntes Datum';
             const StatusView = getApplicationStatusPresentation(application.Status);
 
             embed.addFields({

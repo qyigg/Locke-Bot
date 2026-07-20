@@ -105,7 +105,7 @@ export default {
                     logger.debug(`TitanBotFehler [${Fehler.type}]: ${Fehler.message}`, Fehler.context || {});
                 } else {
                     logger.Fehler('Unexpected Fehler in jointoErstellen command:', Fehler);
-                    FehlerMessage = 'An unexpected Fehler occurred. Bitte versuchen Sie es später erneut or contact Unterstützung.';
+                    FehlerMessage = 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut oder kontaktiere den Support.';
                 }
 
                 return replyUserFehler(interaction, { type: FehlerTypes.UNKNOWN, message: FehlerMessage });
@@ -367,16 +367,16 @@ async function handleConfigSubcommand(interaction, client) {
 async function handleNameTemplateModal(interaction, triggerKanal, currentConfig, client) {
     try {
         const TEMPLATE_OPTIONS = [
-            { label: "{username}'s Room (Default)", value: "{username}'s Room" },
-            { label: "{username}'s Kanal",        value: "{username}'s Kanal" },
-            { label: "{username}'s Lounge",         value: "{username}'s Lounge" },
-            { label: "{username}'s Space",          value: "{username}'s Space" },
-            { label: "{displayName}'s Room",        value: "{displayName}'s Room" },
-            { label: "{username}'s VC",             value: "{username}'s VC" },
-            { label: "{username}'s Music Room",  value: "{username}'s Music Room" },
-            { label: "{username}'s Gaming Room", value: "{username}'s Gaming Room" },
-            { label: "{username}'s Chat Room",   value: "{username}'s Chat Room" },
-            { label: "{username}'s Private Room",   value: "{username}'s Private Room" },
+            { label: "{username}'s Raum (Standard)", value: "{username}'s Room" },
+            { label: "{username}'s Kanal",           value: "{username}'s Kanal" },
+            { label: "{username}'s Lounge",           value: "{username}'s Lounge" },
+            { label: "{username}'s Space",            value: "{username}'s Space" },
+            { label: "{displayName}'s Raum",          value: "{displayName}'s Room" },
+            { label: "{username}'s VC",               value: "{username}'s VC" },
+            { label: "{username}'s Musikraum",        value: "{username}'s Music Room" },
+            { label: "{username}'s Spielzimmer",      value: "{username}'s Gaming Room" },
+            { label: "{username}'s Chatraum",         value: "{username}'s Chat Room" },
+            { label: "{username}'s Privater Raum",    value: "{username}'s Private Room" },
         ];
 
         const currentTemplate = currentConfig.KanalConfig?.nameTemplate
@@ -412,7 +412,7 @@ async function handleNameTemplateModal(interaction, triggerKanal, currentConfig,
 
         if (!hasManageGuildBerechtigung(modalSubmission.Mitglied)) {
             await modalSubmission.reply({
-                content: '❌ You need **Manage Server** Berechtigung to modify these Einstellungen.',
+                content: '❌ Du benötigst die Berechtigung **Server verwalten**, um diese Einstellungen zu ändern.',
                 flags: MessageFlags.Ephemeral
             });
             return;
