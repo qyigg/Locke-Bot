@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { botConfig } from '../../config/bot.js';
@@ -13,7 +13,7 @@ const SUCCESS_CHANCE = 0.7;
 export default {
     data: new SlashCommandBuilder()
         .setName('beg')
-        .setDescription('Beg for a small amount of money'),
+        .setDescription('Bettele um einen kleinen Geldbetrag'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -41,12 +41,12 @@ export default {
                 const seconds = Math.floor((remainingTime % 60000) / 1000);
 
                 let timeMessage =
-                    minutes > 0 ? `${minutes} minute(s)` : `${seconds} second(s)`;
+                    minutes > 0 ? `${minutes} Minute(n)` : `${seconds} Sekunde(n)`;
 
                 throw createError(
                     "Beg cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You are tired from begging! Try again in **${timeMessage}**.`,
+                    `Du bist vom Betteln müde! Try again in **${timeMessage}**.`,
                     { remainingTime, minutes, seconds, cooldownType: 'beg' }
                 );
             }

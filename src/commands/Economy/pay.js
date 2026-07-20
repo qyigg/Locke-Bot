@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { getEconomyData, addMoney, removeMoney, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -9,17 +9,17 @@ import EconomyService from '../../services/economyService.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('pay')
-        .setDescription('Pay another user some of your cash')
+        .setDescription('Bezahle einen anderen Benutzer mit deinem Geld')
         .addUserOption(option =>
             option
                 .setName('user')
-                .setDescription('User to pay')
+                .setDescription('Benutzer zum Bezahlen')
                 .setRequired(true)
         )
         .addIntegerOption(option =>
             option
                 .setName('amount')
-                .setDescription('Amount to pay')
+                .setDescription('Zu zahlender Betrag')
                 .setRequired(true)
                 .setMinValue(1)
         ),
@@ -44,7 +44,7 @@ export default {
                 throw createError(
                     "Cannot pay bot",
                     ErrorTypes.VALIDATION,
-                    "You cannot pay a bot.",
+                    "Du kannst einen Bot nicht bezahlen\.",
                     { receiverId: receiver.id, isBot: true }
                 );
             }
@@ -53,7 +53,7 @@ export default {
                 throw createError(
                     "Cannot pay self",
                     ErrorTypes.VALIDATION,
-                    "You cannot pay yourself.",
+                    "Du kannst dich selbst nicht bezahlen\.",
                     { senderId, receiverId: receiver.id }
                 );
             }
@@ -62,7 +62,7 @@ export default {
                 throw createError(
                     "Invalid payment amount",
                     ErrorTypes.VALIDATION,
-                    "Amount must be greater than zero.",
+                    "Der Betrag muss größer als null sein\.",
                     { amount, senderId }
                 );
             }
@@ -76,7 +76,7 @@ export default {
                 throw createError(
                     "Failed to load sender economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "Fehler beim Laden deiner Wirtschaftsdaten\. Bitte versuche es später erneut\.",
                     { userId: senderId, guildId }
                 );
             }

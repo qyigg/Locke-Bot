@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
+﻿import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
@@ -9,17 +9,17 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('levelset')
-    .setDescription("Set a user's level to a specific value")
+    .setDescription("Setze das Level eines Benutzers auf einen bestimmten Wert")
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to set the level for')
+        .setDescription('Der Benutzer, dessen Level gesetzt werden soll')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('level')
-        .setDescription('The level to set')
+        .setDescription('Das zu setzende Level')
         .setRequired(true)
         .setMinValue(0)
     )
@@ -33,7 +33,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      'Du benötigst die Berechtigung **Server verwalten**, um diesen Befehl zu nutzen.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('Das Levelsystem ist auf diesem Server aktuell deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +58,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
         ErrorTypes.USER_INPUT,
-        'The specified user is not in this server.'
+        'Der angegebene Benutzer ist nicht auf diesem Server.'
       );
     }
 
@@ -67,8 +67,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'Level Set',
-          description: `Successfully set ${targetUser.tag}'s level to **${newLevel}**.\n**Total XP:** ${userData.totalXp}`,
+          title: 'Level gesetzt',
+          description: `Erfolgreich das Level von ${targetUser.tag} auf **${newLevel}** gesetzt.\n**Gesamt XP:** ${userData.totalXp}`,
           color: 'success'
         })
       ]
@@ -79,3 +79,6 @@ export default {
     );
   }
 };
+
+
+

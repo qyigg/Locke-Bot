@@ -9,17 +9,17 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('levelremove')
-    .setDescription('Remove levels from a user')
+    .setDescription('Entferne Levels von einem Benutzer')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to remove levels from')
+        .setDescription('Der Benutzer, von dem Levels entfernt werden sollen')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Number of levels to remove')
+        .setDescription('Anzahl der zu entfernenden Levels')
         .setRequired(true)
         .setMinValue(1)
     )
@@ -33,7 +33,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      'Du benötigst die Berechtigung **Server verwalten**, um diesen Befehl zu nutzen.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('Das Levelsystem ist auf diesem Server aktuell deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -67,7 +67,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} is already at minimum level`,
         ErrorTypes.VALIDATION,
-        `${targetUser.tag} is already at level 0 and cannot have levels removed.`
+        `${targetUser.tag} hat bereits Level 0 und kann keine Levels entfernt bekommen.`
       );
     }
 
@@ -76,8 +76,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'Levels Removed',
-          description: `Successfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${updatedData.level}`,
+          title: 'Levels entfernt',
+          description: `Erfolgreich ${levelsToRemove} Levels von ${targetUser.tag} entfernt.\n**Neues Level:** ${updatedData.level}`,
           color: 'success'
         })
       ]

@@ -9,17 +9,17 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('leveladd')
-    .setDescription('Add levels to a user')
+    .setDescription('Füge einem Benutzer Levels hinzu')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to add levels to')
+        .setDescription('Der Benutzer, dem Levels hinzugefügt werden sollen')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Number of levels to add')
+        .setDescription('Anzahl der hinzuzufügenden Levels')
         .setRequired(true)
         .setMinValue(1)
     )
@@ -33,7 +33,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      'Du benötigst die Berechtigung **Server verwalten**, um diesen Befehl zu nutzen.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('Das Levelsystem ist auf diesem Server aktuell deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +58,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
         ErrorTypes.USER_INPUT,
-        'The specified user is not in this server.'
+        'Der angegebene Benutzer ist nicht auf diesem Server.'
       );
     }
 
@@ -67,8 +67,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'Levels Added',
-          description: `Successfully added ${levelsToAdd} levels to ${targetUser.tag}.\n**New Level:** ${userData.level}`,
+          title: 'Levels hinzugefügt',
+          description: `Erfolgreich ${levelsToAdd} Levels zu ${targetUser.tag} hinzugefügt.\n**Neues Level:** ${userData.level}`,
           color: 'success'
         })
       ]

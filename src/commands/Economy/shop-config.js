@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import shopConfigSetrole from './modules/shop_config_setrole.js';
 
 export default {
@@ -26,3 +26,4 @@ export default {
         }
     },
 };
+

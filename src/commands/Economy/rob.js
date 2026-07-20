@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+﻿import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, warningEmbed, buildUserErrorEmbed } from '../../utils/embeds.js';
 import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -34,7 +34,7 @@ export default {
                 throw createError(
                     "Cannot rob self",
                     ErrorTypes.VALIDATION,
-                    "You cannot rob yourself.",
+                    "Du kannst dich selbst nicht berauben.",
                     { robberId, victimId: victimUser.id }
                 );
             }
@@ -43,7 +43,7 @@ export default {
                 throw createError(
                     "Cannot rob bot",
                     ErrorTypes.VALIDATION,
-                    "You cannot rob a bot.",
+                    "Du kannst einen Bot nicht berauben.",
                     { victimId: victimUser.id, isBot: true }
                 );
             }
