@@ -296,7 +296,7 @@ async function handleReview(interaction) {
         application.answers.forEach((item, index) => {
             appEmbed.addFields({
                 name: `Q${index + 1}: ${item.question}`,
-                value: item.answer || '*No answer provided*',
+                value: item.answer || '*Keine Antwort angegeben*',
                 inline: false
             });
         });
@@ -451,8 +451,8 @@ async function handleReview(interaction) {
             await reasonAbsenden.reply({
                 embeds: [
                     ErfolgEmbed(
-                        `Bewerbung ${Status}`,
-                        `Die Bewerbung wurde **${Status}**.`,
+                        `Bewerbung ${isApprove ? 'genehmigt' : 'abgelehnt'}`,
+                        `Die Bewerbung wurde **${isApprove ? 'genehmigt' : 'abgelehnt'}**.`,
                     ),
                 ],
                 flags: ["Ephemeral"],
@@ -558,19 +558,19 @@ async function handleList(interaction) {
 
     applications.forEach((app) => {
         const StatusView = getApplicationStatusPresentation(app?.Status);
-        const RolleName = app?.RolleName || 'Unknown Rolle';
-        const username = app?.username || 'Unknown User';
+        const RolleName = app?.RolleName || 'Unbekannte Rolle';
+        const username = app?.username || 'Unbekannter Nutzer';
         const ErstellendAt = app?.ErstellendAt ? new Date(app.ErstellendAt) : null;
         const ErstellendAtDisplay = ErstellendAt && !Number.isNaN(ErstellendAt.getTime())
             ? ErstellendAt.toLocaleString()
-            : 'Unknown date';
+            : 'Unbekanntes Datum';
 
         embed.addFields({
             name: `${StatusView.StatusEmoji} ${RolleName} - ${username}`,
             value:
                 `**ID:** \`${app.id}\`\n` +
                 `**Status:** ${StatusView.StatusEmoji} ${StatusView.StatusLabel}\n` +
-                `**Date:** ${ErstellendAtDisplay}`,
+                `**Datum:** ${ErstellendAtDisplay}`,
             inline: true,
         });
     });
