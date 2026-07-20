@@ -16,7 +16,7 @@ const defaultAccountAgeDays = autoVerifizierenDefaults.defaultAccountAgeDays ?? 
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("autoVerifizieren")
+        .setName("autoverify")
         .setDescription("Konfiguriere Einstellungen für automatische Verifizierung")
         .setDefaultMitgliedBerechtigungs(BerechtigungFlagsBits.ManageGuild)
         .addSubcommand(subcommand =>
@@ -25,7 +25,7 @@ export default {
                 .setDescription("Richte automatische Verifizierung ein")
                 .addRolleOption(option =>
                     option
-                        .setName("Rolle")
+                        .setName("role")
                         .setDescription("Rolle, die Benutzern zugewiesen wird, die die Auto-Verifizierungs-Kriterien erfüllen")
                         .setRequired(true)
                 )
@@ -81,7 +81,7 @@ export default {
 async function handleSetup(interaction, guild, client) {
     const criteria = interaction.options.getString("criteria");
     const accountAgeDays = interaction.options.getInteger("account_age_days") || defaultAccountAgeDays;
-    const targetRolle = interaction.options.getRolle("Rolle");
+    const targetRolle = interaction.options.getRolle("role");
 
     await InteractionHilfeer.safeDefer(interaction);
 

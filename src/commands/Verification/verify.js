@@ -6,7 +6,7 @@ import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('Verifizieren')
+        .setName('verify')
         .setDescription('Verifiziere dich selbst und erhalte Zugriff auf den Server'),
 
     async execute(interaction, config, client) {

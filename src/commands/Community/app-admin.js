@@ -62,7 +62,7 @@ export default {
             .setDescription("Zeige alle Bewerbungen")
             .addStringOption((option) =>
                 option
-                    .setName("Status")
+                    .setName("status")
                     .setDescription("Nach Status filtern")
                     .addChoices(
                         { name: "In Bearbeitung", value: "pending" },
@@ -71,7 +71,7 @@ export default {
                     ),
             )
             .addStringOption((option) =>
-                option.setName("Rolle").setDescription("Nach Rollen-ID filtern"),
+                option.setName("role").setDescription("Nach Rollen-ID filtern"),
             )
             .addUserOption((option) =>
                 option.setName("user").setDescription("Nach Benutzer filtern"),
@@ -481,7 +481,7 @@ async function handleReview(interaction) {
 }
 
 async function handleList(interaction) {
-    const Status = interaction.options.getString("Status");
+    const Status = interaction.options.getString("status");
     const user = interaction.options.getUser("user");
     const limit = interaction.options.getNumber("limit") || 10;
 
@@ -580,6 +580,8 @@ async function handleList(interaction) {
         flags: ["Ephemeral"],
     });
 }
+
+
 
 
 

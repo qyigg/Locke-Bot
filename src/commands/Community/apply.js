@@ -41,7 +41,7 @@ export default {
         .setDescription("Verwalte Rollenbewerbungen")
         .addSubcommand((subcommand) =>
             subcommand
-                .setName("Absenden")
+                .setName("submit")
                 .setDescription("Reiche eine Bewerbung für eine Rolle ein")
                 .addStringOption((option) =>
                     option
@@ -53,7 +53,7 @@ export default {
         )
         .addSubcommand((subcommand) =>
             subcommand
-                .setName("Status")
+                .setName("status")
                 .setDescription("Überprüfe den Status deiner Bewerbung")
                 .addStringOption((option) =>
                     option
@@ -78,7 +78,7 @@ export default {
         const { options, guild, Mitglied } = interaction;
         const subcommand = options.getSubcommand();
 
-        if (subcommand !== "Absenden") {
+        if (subcommand !== "submit") {
             const isListCommand = subcommand === "list";
             await InteractionHilfeer.safeDefer(interaction, { flags: isListCommand ? [] : ["Ephemeral"] });
         }
@@ -103,9 +103,9 @@ export default {
             );
         }
 
-        if (subcommand === "Absenden") {
+        if (subcommand === "submit") {
             await handleAbsenden(interaction, Einstellungen);
-        } else if (subcommand === "Status") {
+        } else if (subcommand === "status") {
             await handleStatus(interaction);
         } else if (subcommand === "list") {
             await handleList(interaction);
@@ -397,6 +397,9 @@ async function handleStatus(interaction) {
         return InteractionHilfeer.safeBearbeitenReply(interaction, { embeds: [embed], flags: ["Ephemeral"] });
     }
 }
+
+
+
 
 
 

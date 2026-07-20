@@ -407,7 +407,7 @@ async function handleRolle(selectInteraction, rootInteraction, guildConfig, guil
     });
 
     const RolleCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
-        componentType: ComponentType.Rollenelect,
+        componentType: ComponentType.RoleSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'autoVerifizieren_Rolle_select',
         time: 60_000,
@@ -502,6 +502,7 @@ async function handleAccountAge(selectInteraction, rootInteraction, guildConfig,
 
     await refreshDashboard(rootInteraction, guildConfig, guildId, client);
 }
+
 
 
 

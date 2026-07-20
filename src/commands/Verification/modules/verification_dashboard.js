@@ -418,7 +418,7 @@ async function handleKanal(selectInteraction, rootInteraction, cfg, guildId, cli
     });
 
     const chanCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
-        componentType: ComponentType.KanalSelect,
+        componentType: ComponentType.ChannelSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'verif_cfg_Kanal',
         time: 60_000,
@@ -516,7 +516,7 @@ async function handleRolle(selectInteraction, rootInteraction, cfg, guildId, cli
     });
 
     const RolleCollector = rootInteraction.Kanal.ErstellenMessageComponentCollector({
-        componentType: ComponentType.Rollenelect,
+        componentType: ComponentType.RoleSelect,
         filter: i =>
             i.user.id === selectInteraction.user.id && i.customId === 'verif_cfg_Rolle',
         time: 60_000,
@@ -667,6 +667,7 @@ async function handleButtonText(selectInteraction, rootInteraction, cfg, guildId
         
     }
 }
+
 
 
 

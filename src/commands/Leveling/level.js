@@ -20,7 +20,7 @@ export default {
                 .setDescription('Richte das Levelsystem ein — dies aktiviert es auch')
                 .addKanalOption((option) =>
                     option
-                        .setName('Kanal')
+                        .setName('channel')
                         .setDescription('Kanal, in dem Level-Up-Benachrichtigungen gesendet werden')
                         .addKanalTypes(KanalType.GuildText)
                         .setRequired(true),
@@ -83,7 +83,7 @@ export default {
         }
 
         if (subcommand === 'setup') {
-            const Kanal = interaction.options.getKanal('Kanal');
+            const Kanal = interaction.options.getKanal('channel');
             const xpMin = interaction.options.getInteger('xp_min') ?? 15;
             const xpMax = interaction.options.getInteger('xp_max') ?? 25;
             const message =
@@ -148,5 +148,6 @@ export default {
         }
     },
 };
+
 
 
