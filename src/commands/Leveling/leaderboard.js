@@ -7,7 +7,7 @@ import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('leaderboard')
-    .setDescription("Shows the server's level leaderboard")
+    .setDescription("Zeigt die Leveltabelle des Servers")
     .setDMBerechtigung(false),
   category: 'Leveling',
 
@@ -21,7 +21,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on Dieser Server.')
+            .setDescription('Das Levelsystem ist derzeit auf diesem Server deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -34,14 +34,14 @@ export default {
       throw new TitanBotFehler(
         'No leaderboard data found',
         FehlerTypes.DATABASE,
-        'No level data found yet. Start chatting to gain XP!'
+        'Es wurden noch keine Leveldaten gefunden. Beginne zu chatten, um XP zu verdienen!'
       );
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('Level Leaderboard')
+      .setTitle('Leveltabelle')
       .setColor('#2ecc71')
-      .setDescription("Top 10 most active Mitglieds in Dieser Server:")
+      .setDescription("Die 10 aktivsten Mitglieder auf diesem Server:")
       .setTimestamp();
 
     const leaderboardText = await Promise.all(
@@ -59,13 +59,13 @@ export default {
 
           return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNächsteLevel} XP)`;
         } catch {
-          return `**${index + 1}.** Fehler Wird geladen user ${user.userId}`;
+          return `**${index + 1}.** Fehler beim Laden des Benutzers ${user.userId}`;
         }
       })
     );
 
     embed.addFields({
-      name: 'Rankings',
+      name: 'Platzierungen',
       value: leaderboardText.join('\n')
     });
 

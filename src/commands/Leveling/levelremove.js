@@ -9,17 +9,17 @@ import { InteractionHilfeer } from '../../utils/interactionHilfeer.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('levelremove')
-    .setDescription('Remove levels from a user')
+    .setDescription('Entferne Levels von einem Benutzer')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('Der Benutzer to remove levels from')
+        .setDescription('Der Benutzer, von dem Levels entfernt werden sollen')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Number of levels to remove')
+        .setDescription('Anzahl der zu entfernenden Levels')
         .setRequired(true)
         .setMinValue(1)
     )
@@ -33,7 +33,7 @@ export default {
     const hasBerechtigung = await checkUserBerechtigungs(
       interaction,
       BerechtigungFlagsBits.ManageGuild,
-      'You need ManageGuild Berechtigung to use this command.'
+      'Du benötigst die Berechtigung **Server verwalten**, um diesen Befehl zu verwenden.'
     );
     if (!hasBerechtigung) return;
 
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on Dieser Server.')
+            .setDescription('Das Levelsystem ist derzeit auf diesem Server deaktiviert.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +58,7 @@ export default {
       throw new TitanBotFehler(
         `User ${targetUser.id} Nicht gefunden in Diese Gilde`,
         FehlerTypes.USER_INPUT,
-        'The specified user is not in Dieser Server.'
+        'Der angegebene Benutzer ist nicht auf diesem Server.'
       );
     }
 
@@ -67,7 +67,7 @@ export default {
       throw new TitanBotFehler(
         `User ${targetUser.id} is already at minimum level`,
         FehlerTypes.VALIDATION,
-        `${targetUser.tag} is already at level 0 and cannot have levels removed.`
+        `${targetUser.tag} hat bereits Level 0 und kann keine Levels entfernt bekommen.`
       );
     }
 
@@ -76,8 +76,8 @@ export default {
     await InteractionHilfeer.safeBearbeitenReply(interaction, {
       embeds: [
         ErstellenEmbed({
-          title: 'Levels Removed',
-          description: `Erfolgfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${AktualisierendData.level}`,
+          title: 'Levels entfernt',
+          description: `Erfolgreich ${levelsToRemove} Levels von ${targetUser.tag} entfernt.\n**Neues Level:** ${AktualisierendData.level}`,
           color: 'Erfolg'
         })
       ]
